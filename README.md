@@ -39,36 +39,59 @@ client/ (WinForms C#)
 
 ---
 
-## Tính năng
+## Tính năng theo vai trò
 
-### Bán hàng (POS)
+### Dùng chung (mọi vai trò)
 
-- Tạo và quản lý đơn hàng, cập nhật trạng thái realtime
-- Sơ đồ bàn trực quan (trống / đang phục vụ / đã đặt)
-- Thanh toán đa phương thức: tiền mặt, thẻ, QR (Momo, VNPay)
+- Đăng nhập / Quên mật khẩu (OTP qua email) / Xác thực email
+- Chat nội bộ thời gian thực (SignalR)
+- Trang cá nhân: xem/sửa thông tin, đổi ảnh đại diện, đổi mật khẩu
+- Đơn xin nghỉ phép
+- Lịch sử chấm công
+- Check-in / check-out chấm công
+- Trung tâm thông báo realtime qua SignalR (click → điều hướng đúng trang)
+- Nhật ký kiểm toán (audit log) cho thao tác nhạy cảm — bắt buộc nhập lý do
 
-### Thực đơn & Kho
+### Admin
 
-- Quản lý món (thêm, sửa, xóa theo danh mục)
-- Nhập kho & phiếu nhập (Manager: màn **Sản phẩm & Thực đơn** → **Quản lý kho**, phiếu nhập tay hoặc nhập chi tiết từ Excel/CSV)
-- Nguyên liệu / tồn kho / cảnh báo thấp — module UI trong `GUI/Warehouse/` vẫn dùng được khi gắn vào màn quản lý
-- Tự động gợi ý nhập hàng (Smart Restock) — theo thiết kế module kho
+- Quản lý nhân viên (thêm / sửa / khóa tài khoản)
+- Dashboard doanh thu / lợi nhuận / KPI
+- Quản lý Manager, bảng lương, feedback, thông báo, broadcast, điểm danh
+- Tiền chi chi tiết; kích hoạt quyền quản lý khi Manager nghỉ
+- Xuất báo cáo Excel / PDF + tự gửi email cuối ngày
+- Nhận audit log từ Manager
 
-### Nhân sự
+### Manager
 
-- Phân quyền RBAC: **Admin / Manager / Barista / OrderStaff / Security** — **không** còn tài khoản đăng nhập riêng “thủ kho”; tài khoản cũ `stockkeeper` được app xử lý như **Manager** để không mất menu (nên cập nhật `role` trong Firebase cho đồng bộ).
-- Chấm công, xin nghỉ, tính lương
-- Chat nội bộ giữa nhân viên
+- Quản lý món (CRUD theo danh mục)
+- Quản lý kho / phiếu nhập (nhập tay hoặc từ Excel·CSV)
+- Quản lý nhân viên trong ca
+- Tổng quan ca, đơn hàng & hóa đơn, thất thoát, feedback, thông báo
+- Duyệt đơn xin nghỉ; khóa món khi hết nguyên liệu; duyệt phiếu hủy nguyên liệu
+- Tự trừ nguyên liệu theo công thức (BOM) mỗi khi bán
+- Happy hour / combo / khuyến mãi theo khung giờ
+- Xếp lịch ca làm (scheduling) + cảnh báo thiếu người
 
-### Báo cáo
+### Order Staff (nhân viên order)
 
-- Dashboard doanh thu theo ngày/tháng
-- Thống kê món bán chạy, chi phí nguyên liệu
+- POS bán hàng
+- CRM khách hàng, quản lý tiền mặt đầu/cuối ca, tổng quan ca
+- Bill kèm QR feedback (độc nhất theo orderId)
+- POS nâng cao: gộp / tách / chuyển bàn, tách hóa đơn, voucher
+- Thanh toán VietQR động (Momo / VNPay / ngân hàng)
+- Loyalty: tích điểm theo SĐT, hạng thành viên, đổi quà
+- Đặt bàn trước (reservation) + nhắc qua email
+- Đặt món tại bàn bằng QR → đơn bay realtime vào POS
 
-### Khách hàng (CRM)
+### Barista (pha chế)
 
-- Quản lý hồ sơ khách hàng, tích điểm đổi quà
-- Ghi nhận và phản hồi feedback
+- Màn hình bếp (KDS), cẩm nang pha chế, báo động nguyên liệu
+- KDS nhận đơn realtime xuyên suốt (nối Self-Ordering qua SignalR), tick "xong" cập nhật ngay
+
+### Security (bảo vệ)
+
+- Quản lý bãi xe, SOS an ninh + log sự cố
+- Sơ đồ bãi xe realtime đồng bộ đa thiết bị (SignalR)
 
 ---
 
