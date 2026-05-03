@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             pnlSubTabs = new Panel();
+            btnReport = new Button();
             btnTabHistory = new Button();
             btnTabTables = new Button();
             btnTabOrder = new Button();
@@ -62,6 +63,7 @@
             pnlSubTabs.Controls.Add(btnTabOrder);
             pnlSubTabs.Controls.Add(btnTabHistory);
             pnlSubTabs.Controls.Add(btnTabTables);
+            pnlSubTabs.Controls.Add(btnReport);
             pnlSubTabs.Dock = DockStyle.Top;
             pnlSubTabs.Location = new Point(0, 0);
             pnlSubTabs.Name = "pnlSubTabs";
@@ -81,6 +83,19 @@
             btnTabHistory.Text = "📜 LỊCH SỬ";
             btnTabHistory.UseVisualStyleBackColor = true;
             btnTabHistory.Click += btnTabHistory_Click;
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(400, 5);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(90, 30);
+            btnReport.Text = "Báo cáo";
             // 
             // btnTabTables
             // 
@@ -288,5 +303,6 @@
         private Panel pnlStaffInfo;
         private Label lblCurrentStaff;
         private Button btnVoidOrder;
+        private Button btnReport;
     }
 }

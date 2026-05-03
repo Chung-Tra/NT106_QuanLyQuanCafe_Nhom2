@@ -15,6 +15,19 @@ namespace GUI
         public ucPOS_OrStaff()
         {
             InitializeComponent();
+            btnReport.Click += (s, e) =>
+            {
+                string report =
+                    $"BÁO CÁO BÁN HÀNG\n" +
+                    $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                    $"──────────────────\n" +
+                    $"• Tổng tiền hiện tại: {lblTotalAmount.Text}\n" +
+                    $"──────────────────\n" +
+                    $"Gửi báo cáo cho quản lý?";
+
+                if (MessageBox.Show(report, "Báo cáo POS", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                    MsgBox.Show("Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            };
         }
 
         private void SetActiveTab(Button activeBtn)

@@ -31,6 +31,12 @@ namespace GUI
 
             btnSend.Click += BtnSend_Click;
             btnOpenChatWindow.Click += (s, e) => MsgBox.Show("Đang mở cửa sổ Messenger...", "Thông báo", MsgBox.MessageBoxType.Info);
+            btnBroadcast.Click += BtnBroadcast_Click;
+
+            // Hiện nút Thông báo toàn bộ cho admin/manager
+            string role = GlobalSession.CurrentUser?.Role?.ToLower() ?? "";
+            if (role == "admin" || role == "manager")
+                btnBroadcast.Visible = true;
             txtMessage.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BtnSend_Click(s, e); } };
             // CHỈ 1 DÒNG ĐỂ ĐỔI PHÒNG
             cmbChatTarget.SelectedIndexChanged += async (s, e) => await _chatManager.SwitchChatRoom(GetIdFromCombo());
@@ -89,6 +95,31 @@ namespace GUI
 
             // Bóc tách [ID]
             return selectedItem.Split(']')[0].Trim('[');
+        }
+
+        private void BtnBroadcast_Click(object? sender, EventArgs e)
+        {
+            string msg = txtMessage.Text.Trim();
+            if (string.IsNullOrEmpty(msg))
+            {
+                MsgBox.Show("Vui lòng nhập nội dung thông báo!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Gửi thông báo sau cho TOÀN BỘ nhân viên?\n\n\"{msg}\"",
+                "Thông báo toàn bộ",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                string sender_name = GlobalSession.CurrentUser?.FullName ?? "Admin";
+                string timestamp = DateTime.Now.ToString("HH:mm");
+                lstChatHistory.Items.Add($"[{timestamp}] [THÔNG BÁO] {sender_name}: {msg}");
+                lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
+                txtMessage.Clear();
+                MsgBox.Show("Đã gửi thông báo cho toàn bộ nhân viên!", "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void lblChatTitle_Click(object sender, EventArgs e)

@@ -41,6 +41,8 @@
             // pnlChat
             // 
             pnlChat.BackColor = Color.FromArgb(30, 30, 30);
+            btnBroadcast = new Button();
+            pnlChat.Controls.Add(btnBroadcast);
             pnlChat.Controls.Add(btnOpenChatWindow);
             pnlChat.Controls.Add(cmbChatTarget);
             pnlChat.Controls.Add(btnSend);
@@ -133,7 +135,22 @@
             lblChatTitle.TabIndex = 4;
             lblChatTitle.Text = "CHAT NỘI BỘ";
             lblChatTitle.Click += lblChatTitle_Click;
-            // 
+            //
+            // btnBroadcast
+            //
+            btnBroadcast.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnBroadcast.BackColor = Color.Goldenrod;
+            btnBroadcast.Cursor = Cursors.Hand;
+            btnBroadcast.FlatAppearance.BorderSize = 0;
+            btnBroadcast.FlatStyle = FlatStyle.Flat;
+            btnBroadcast.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnBroadcast.ForeColor = Color.White;
+            btnBroadcast.Location = new Point(555, 15);
+            btnBroadcast.Name = "btnBroadcast";
+            btnBroadcast.Size = new Size(120, 30);
+            btnBroadcast.Text = "Thông báo toàn bộ";
+            btnBroadcast.Visible = false;
+            //
             // ucInternalChat
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -156,5 +173,6 @@
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.ComboBox cmbChatTarget;
         private System.Windows.Forms.Button btnOpenChatWindow;
+        private System.Windows.Forms.Button btnBroadcast;
     }
 }

@@ -23,6 +23,7 @@ namespace GUI
             lblTitle = new Label();
             btnSOS = new Button();
             lblSOSInfo = new Label();
+            btnReport = new Button();
             pnlEmergencyInfo = new Panel();
             lblContactTitle = new Label();
             lblPolice = new Label();
@@ -44,6 +45,7 @@ namespace GUI
             pnlSOS.Controls.Add(lblTitle);
             pnlSOS.Controls.Add(btnSOS);
             pnlSOS.Controls.Add(lblSOSInfo);
+            pnlSOS.Controls.Add(btnReport);
             pnlSOS.Location = new Point(20, 15);
             pnlSOS.Name = "pnlSOS";
             pnlSOS.Size = new Size(764, 180);
@@ -86,6 +88,21 @@ namespace GUI
             lblSOSInfo.Size = new Size(300, 19);
             lblSOSInfo.TabIndex = 2;
             lblSOSInfo.Text = "Nhấn nút để gửi cảnh báo khẩn cấp";
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(650, 12);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(95, 30);
+            btnReport.TabIndex = 3;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
             //
             // pnlEmergencyInfo
             //
@@ -231,5 +248,6 @@ namespace GUI
         private Panel pnlLog;
         private Label lblLogTitle;
         private DataGridView dgvIncidents;
+        private Button btnReport;
     }
 }

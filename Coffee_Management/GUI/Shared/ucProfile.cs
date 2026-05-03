@@ -13,6 +13,7 @@ namespace GUI
             this.Load += (s, e) => LoadProfileData();
             btnUpdateInfo.Click += btnUpdateInfo_Click;
             btnChangePass.Click += btnChangePass_Click;
+            btnChangeAvatar.Click += btnChangeAvatar_Click;
         }
 
         private void LoadProfileData()
@@ -58,6 +59,26 @@ namespace GUI
             MsgBox.Show("Đã đổi mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
             txtOldPass.Clear();
             txtNewPass.Clear();
+        }
+
+        private void btnChangeAvatar_Click(object? sender, EventArgs e)
+        {
+            using OpenFileDialog ofd = new();
+            ofd.Title = "Chọn ảnh đại diện";
+            ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    picAvatar.Image?.Dispose();
+                    picAvatar.Image = Image.FromFile(ofd.FileName);
+                    MsgBox.Show("Đã cập nhật ảnh đại diện!", "Thành công", MsgBox.MessageBoxType.Success);
+                }
+                catch
+                {
+                    MsgBox.Show("Không thể đọc file ảnh!", "Lỗi", MsgBox.MessageBoxType.Error);
+                }
+            }
         }
 
         private void grpSecurity_Enter(object sender, EventArgs e)

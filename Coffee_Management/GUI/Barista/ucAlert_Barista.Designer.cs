@@ -25,6 +25,7 @@ namespace GUI
             lblAlertType = new Label();
             txtMessage = new TextBox();
             btnSendAlert = new Button();
+            btnReport = new Button();
             pnlHistory = new Panel();
             lblHistoryTitle = new Label();
             dgvAlertHistory = new DataGridView();
@@ -41,6 +42,7 @@ namespace GUI
             pnlSend.Controls.Add(lblAlertType);
             pnlSend.Controls.Add(txtMessage);
             pnlSend.Controls.Add(btnSendAlert);
+            pnlSend.Controls.Add(btnReport);
             pnlSend.Location = new Point(20, 15);
             pnlSend.Name = "pnlSend";
             pnlSend.Size = new Size(764, 200);
@@ -109,6 +111,21 @@ namespace GUI
             btnSendAlert.Text = "GỬI CẢNH BÁO";
             btnSendAlert.UseVisualStyleBackColor = false;
             btnSendAlert.Click += btnSendAlert_Click;
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(350, 12);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(90, 28);
+            btnReport.TabIndex = 5;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
             //
             // pnlHistory
             //
@@ -179,5 +196,6 @@ namespace GUI
         private Panel pnlHistory;
         private Label lblHistoryTitle;
         private DataGridView dgvAlertHistory;
+        private Button btnReport;
     }
 }

@@ -39,9 +39,11 @@ namespace GUI
             // pnlHeader
             //
             pnlHeader.BackColor = Color.FromArgb(30, 30, 30);
+            btnReport = new Button();
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Controls.Add(btnApproveAll);
             pnlHeader.Controls.Add(btnApproveSelected);
+            pnlHeader.Controls.Add(btnReport);
             pnlHeader.Location = new Point(20, 15);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(764, 55);
@@ -89,6 +91,19 @@ namespace GUI
             btnApproveSelected.Text = "Duyệt đã chọn";
             btnApproveSelected.UseVisualStyleBackColor = false;
             btnApproveSelected.Click += btnApproveSelected_Click;
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(360, 14);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(90, 28);
+            btnReport.Text = "Báo cáo";
             //
             // pnlInfo
             //
@@ -208,5 +223,6 @@ namespace GUI
         private Label lblEstimatedCost;
         private Panel pnlGrid;
         private DataGridView dgvSuggestions;
+        private Button btnReport;
     }
 }

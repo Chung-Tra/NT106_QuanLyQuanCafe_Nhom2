@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class FoodDTO
+    public class MonAnDTO
     {
         [JsonIgnore]
         public string? Id { get; set; }
@@ -32,5 +32,9 @@ namespace DTO
 
         [JsonProperty("ten_mon")]
         public string? TenMon { get; set; }
+    }
+
+    public class FoodDTO : MonAnDTO
+    {
     }
 }

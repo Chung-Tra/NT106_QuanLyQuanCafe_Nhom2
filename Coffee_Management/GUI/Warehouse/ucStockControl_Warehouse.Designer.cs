@@ -34,6 +34,9 @@ namespace GUI
             lblLowStockTitle = new Label();
             lblLastUpdate = new Label();
             lblLastUpdateTitle = new Label();
+            lblEstCupsTitle = new Label();
+            lblEstCups = new Label();
+            btnReport = new Button();
             pnlHeader.SuspendLayout();
             pnlGrid.SuspendLayout();
             pnlSummary.SuspendLayout();
@@ -137,6 +140,9 @@ namespace GUI
             pnlSummary.Controls.Add(lblLowStockTitle);
             pnlSummary.Controls.Add(lblLastUpdate);
             pnlSummary.Controls.Add(lblLastUpdateTitle);
+            pnlSummary.Controls.Add(lblEstCupsTitle);
+            pnlSummary.Controls.Add(lblEstCups);
+            pnlSummary.Controls.Add(btnReport);
             pnlSummary.Location = new Point(20, 80);
             pnlSummary.Name = "pnlSummary";
             pnlSummary.Size = new Size(764, 65);
@@ -208,6 +214,38 @@ namespace GUI
             lblLastUpdate.TabIndex = 5;
             lblLastUpdate.Text = "02/05/2026";
             //
+            // lblEstCupsTitle
+            //
+            lblEstCupsTitle.AutoSize = true;
+            lblEstCupsTitle.Font = new Font("Segoe UI", 9.75F);
+            lblEstCupsTitle.ForeColor = Color.Gray;
+            lblEstCupsTitle.Location = new Point(650, 10);
+            lblEstCupsTitle.Name = "lblEstCupsTitle";
+            lblEstCupsTitle.Text = "Ly dự kiến";
+            //
+            // lblEstCups
+            //
+            lblEstCups.AutoSize = true;
+            lblEstCups.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblEstCups.ForeColor = Color.Orange;
+            lblEstCups.Location = new Point(650, 32);
+            lblEstCups.Name = "lblEstCups";
+            lblEstCups.Text = "~0 ly";
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(380, 22);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(100, 28);
+            btnReport.Text = "Báo cáo";
+            btnReport.Click += btnReport_Click;
+            //
             // pnlGrid
             //
             pnlGrid.BackColor = Color.FromArgb(30, 30, 30);
@@ -274,5 +312,8 @@ namespace GUI
         private Label lblLastUpdate;
         private Panel pnlGrid;
         private DataGridView dgvStock;
+        private Label lblEstCupsTitle;
+        private Label lblEstCups;
+        private Button btnReport;
     }
 }

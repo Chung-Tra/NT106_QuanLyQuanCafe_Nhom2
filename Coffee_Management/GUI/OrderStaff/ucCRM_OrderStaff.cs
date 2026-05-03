@@ -10,6 +10,7 @@ namespace GUI
         public ucCRM_OrderStaff()
         {
             InitializeComponent();
+            btnReport.Click += btnReport_Click;
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -59,6 +60,32 @@ namespace GUI
             txtEmail.Clear();
             lblPointsValue.Text = "0";
             txtName.Focus();
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            int totalCustomers = 0;
+            if (dgvCustomers.DataSource is DataTable dt)
+                totalCustomers = dt.DefaultView.Count;
+
+            string report =
+                $"BÁO CÁO KHÁCH HÀNG\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Tổng khách hàng: {totalCustomers}\n" +
+                $"• Từ khóa tìm kiếm: {(string.IsNullOrEmpty(txtSearch.Text) ? "(không)" : txtSearch.Text)}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo khách hàng",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void btnSaveCustomer_Click(object sender, EventArgs e)

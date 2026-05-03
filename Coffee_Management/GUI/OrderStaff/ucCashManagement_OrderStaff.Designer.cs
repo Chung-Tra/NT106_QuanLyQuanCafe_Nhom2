@@ -23,6 +23,7 @@ namespace GUI
             lblTitle = new Label();
             btnStartShift = new Button();
             btnEndShift = new Button();
+            btnReport = new Button();
             pnlSummary = new Panel();
             lblOpenCash = new Label();
             lblOpenCashTitle = new Label();
@@ -47,6 +48,7 @@ namespace GUI
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Controls.Add(btnStartShift);
             pnlHeader.Controls.Add(btnEndShift);
+            pnlHeader.Controls.Add(btnReport);
             pnlHeader.Location = new Point(20, 15);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(764, 55);
@@ -94,6 +96,21 @@ namespace GUI
             btnEndShift.Text = "Kết thúc ca";
             btnEndShift.UseVisualStyleBackColor = false;
             btnEndShift.Click += btnEndShift_Click;
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(330, 14);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(90, 28);
+            btnReport.TabIndex = 3;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
             //
             // pnlSummary
             //
@@ -280,5 +297,6 @@ namespace GUI
         private Panel pnlGrid;
         private Label lblLogTitle;
         private DataGridView dgvTransactions;
+        private Button btnReport;
     }
 }

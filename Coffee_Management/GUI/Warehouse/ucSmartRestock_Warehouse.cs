@@ -11,6 +11,7 @@ namespace GUI
         {
             InitializeComponent();
             this.Load += (s, e) => LoadMockData();
+            btnReport.Click += btnReport_Click;
         }
 
         private void LoadMockData()
@@ -98,6 +99,28 @@ namespace GUI
                 return;
             }
             MsgBox.Show($"Đã duyệt {count} đề xuất đã chọn!", "Thành công", MsgBox.MessageBoxType.Success);
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            string report =
+                $"BÁO CÁO ĐỀ XUẤT NHẬP KHO\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Số đề xuất: {lblSuggestionsCount.Text}\n" +
+                $"• Chi phí ước tính: {lblEstimatedCost.Text}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo nhập kho",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
     }
 }

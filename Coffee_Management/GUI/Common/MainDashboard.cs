@@ -18,6 +18,7 @@ namespace GUI
             ["admin"] = new()
             {
                 new("  Tổng quan",           "Tổng quan",              () => new ucDashboard_Admin()),
+                new("  Thông báo",           "Trung tâm Thông báo",    () => new ucNotification_Admin()),
                 new("  Quản lý Nhân viên",   "Quản lý Nhân viên",      () => new ucStaff_Manager()),
                 new("  Quản trị viên",       "Quản trị viên",           () => new ucAdmin_Managers()),
                 new("  Feedback",            "Kiểm soát Feedback",      () => new ucFeedback_Admin()),

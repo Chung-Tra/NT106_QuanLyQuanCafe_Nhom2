@@ -58,7 +58,9 @@
             // 
             // pnlLeft
             // 
+            btnChangeAvatar = new Button();
             pnlLeft.BackColor = Color.FromArgb(30, 30, 30);
+            pnlLeft.Controls.Add(btnChangeAvatar);
             pnlLeft.Controls.Add(lblUserRole);
             pnlLeft.Controls.Add(lblUserName);
             pnlLeft.Controls.Add(picAvatar);
@@ -98,7 +100,20 @@
             picAvatar.SizeMode = PictureBoxSizeMode.Zoom;
             picAvatar.TabIndex = 0;
             picAvatar.TabStop = false;
-            // 
+            //
+            // btnChangeAvatar
+            //
+            btnChangeAvatar.BackColor = Color.FromArgb(60, 60, 65);
+            btnChangeAvatar.Cursor = Cursors.Hand;
+            btnChangeAvatar.FlatAppearance.BorderSize = 0;
+            btnChangeAvatar.FlatStyle = FlatStyle.Flat;
+            btnChangeAvatar.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnChangeAvatar.ForeColor = Color.White;
+            btnChangeAvatar.Location = new Point(60, 270);
+            btnChangeAvatar.Name = "btnChangeAvatar";
+            btnChangeAvatar.Size = new Size(130, 30);
+            btnChangeAvatar.Text = "Đổi ảnh đại diện";
+            //
             // pnlRight
             // 
             pnlRight.BackColor = Color.FromArgb(30, 30, 30);
@@ -353,5 +368,6 @@
         private System.Windows.Forms.TextBox txtNewPass;
         private System.Windows.Forms.Button btnChangePass;
         private System.Windows.Forms.Button btnUpdateInfo;
+        private System.Windows.Forms.Button btnChangeAvatar;
     }
 }

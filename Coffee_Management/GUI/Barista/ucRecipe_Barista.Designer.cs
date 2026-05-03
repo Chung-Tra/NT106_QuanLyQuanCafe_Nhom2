@@ -41,7 +41,9 @@ namespace GUI
             // pnlLeft
             //
             pnlLeft.BackColor = Color.FromArgb(30, 30, 30);
+            btnReport = new Button();
             pnlLeft.Controls.Add(lblRecipeListTitle);
+            pnlLeft.Controls.Add(btnReport);
             pnlLeft.Controls.Add(txtSearchRecipe);
             pnlLeft.Controls.Add(lstRecipes);
             pnlLeft.Location = new Point(20, 15);
@@ -59,6 +61,19 @@ namespace GUI
             lblRecipeListTitle.Size = new Size(130, 25);
             lblRecipeListTitle.TabIndex = 0;
             lblRecipeListTitle.Text = "Công thức";
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(155, 14);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(80, 25);
+            btnReport.Text = "Báo cáo";
             //
             // txtSearchRecipe
             //
@@ -222,5 +237,6 @@ namespace GUI
         private Panel pnlSteps;
         private Label lblStepsTitle;
         private TextBox txtSteps;
+        private Button btnReport;
     }
 }

@@ -227,12 +227,12 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(45, 45, 48);
-            ClientSize = new Size(788, 491);
             Controls.Add(pnlNotif);
             Controls.Add(pnlDaysOff);
             Controls.Add(pnlWorkingDays);
             Controls.Add(pnlUnreadMsg);
             Name = "ucOverview_Staff";
+            Size = new Size(804, 530);
             pnlUnreadMsg.ResumeLayout(false);
             pnlUnreadMsg.PerformLayout();
             pnlWorkingDays.ResumeLayout(false);

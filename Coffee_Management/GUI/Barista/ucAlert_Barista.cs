@@ -10,6 +10,7 @@ namespace GUI
         public ucAlert_Barista()
         {
             InitializeComponent();
+            btnReport.Click += btnReport_Click;
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -33,6 +34,41 @@ namespace GUI
             dgvAlertHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvAlertHistory.RowHeadersVisible = false;
             dgvAlertHistory.Columns["Nội dung"].FillWeight = 35;
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            int totalAlerts = 0;
+            int pendingAlerts = 0;
+            if (dgvAlertHistory.DataSource is DataTable dt)
+            {
+                totalAlerts = dt.Rows.Count;
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (row["Trạng thái"]?.ToString() == "Chờ xử lý")
+                        pendingAlerts++;
+                }
+            }
+
+            string report =
+                $"BÁO CÁO CẢNH BÁO\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Tổng cảnh báo: {totalAlerts}\n" +
+                $"• Đang chờ xử lý: {pendingAlerts}\n" +
+                $"• Đã xử lý: {totalAlerts - pendingAlerts}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo cảnh báo",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void btnSendAlert_Click(object sender, EventArgs e)

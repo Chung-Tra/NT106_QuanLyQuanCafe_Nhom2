@@ -13,6 +13,7 @@ namespace GUI
         public ucParking_Security()
         {
             InitializeComponent();
+            btnReport.Click += btnReport_Click;
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -53,6 +54,42 @@ namespace GUI
         {
             lblSlotsValue.Text = $"{_currentSlots} / {_maxSlots}";
             lblSlotsValue.ForeColor = _currentSlots <= 5 ? Color.IndianRed : Color.MediumSeaGreen;
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            int parked = 0;
+            int exited = 0;
+            if (dgvParkingLog.DataSource is DataTable dt)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (row["Trạng thái"]?.ToString() == "Đang gửi")
+                        parked++;
+                    else
+                        exited++;
+                }
+            }
+
+            string report =
+                $"BÁO CÁO BÃI XE\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Chỗ trống: {lblSlotsValue.Text}\n" +
+                $"• Xe đang gửi: {parked}\n" +
+                $"• Xe đã ra: {exited}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo bãi xe",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void btnVehicleIn_Click(object sender, EventArgs e)

@@ -12,6 +12,7 @@ namespace GUI
         public ucCashManagement_OrderStaff()
         {
             InitializeComponent();
+            btnReport.Click += btnReport_Click;
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -44,6 +45,30 @@ namespace GUI
             dgvTransactions.Columns["Số tiền"].DefaultCellStyle.Format = "N0";
             dgvTransactions.Columns["Số tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgvTransactions.Columns["Ghi chú"].FillWeight = 35;
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            string report =
+                $"BÁO CÁO TIỀN MẶT\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Tiền đầu ca: {lblOpenCash.Text}\n" +
+                $"• Tiền hiện tại: {lblCurrentCash.Text}\n" +
+                $"• Doanh thu ca: {lblRevenue.Text}\n" +
+                $"• Chênh lệch: {lblDifference.Text}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo tiền mặt",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void btnStartShift_Click(object sender, EventArgs e)

@@ -12,6 +12,7 @@ namespace GUI
             InitializeComponent();
             this.Load += (s, e) => LoadMockData();
             btnSubmit.Click += btnSubmit_Click;
+            btnReport.Click += btnReport_Click;
         }
 
         private void LoadMockData()
@@ -79,6 +80,27 @@ namespace GUI
 
             MsgBox.Show($"Đã gửi đơn xin nghỉ {days} ngày!\nTừ: {dtpFromDate.Value:dd/MM/yyyy}\nĐến: {dtpToDate.Value:dd/MM/yyyy}", "Gửi thành công", MsgBox.MessageBoxType.Success);
             txtReason.Clear();
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            string report =
+                $"BÁO CÁO NGHỈ PHÉP\n" +
+                $"──────────────────\n" +
+                $"• Ngày phép còn lại: {lblRemainingValue.Text}\n" +
+                $"• Đang chờ duyệt: {lblPendingValue.Text}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo nghỉ phép",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
     }
 }

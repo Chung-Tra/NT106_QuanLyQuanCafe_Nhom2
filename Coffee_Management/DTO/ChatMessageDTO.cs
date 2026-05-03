@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class ChatMessageDTO
+    public class TinNhanChatDTO
     {
         [JsonPropertyName("nguoi_gui_id")] // Ánh xạ với tên trên Firebase
         public string? SenderId { get; set; }
@@ -20,6 +20,10 @@ namespace DTO
 
         [JsonPropertyName("loai_tin_nhan")]
         public string? MessageType { get; set; } = "text";
+    }
+
+    public class ChatMessageDTO : TinNhanChatDTO
+    {
     }
 }
     

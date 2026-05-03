@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class EmployeeDTO
+    public class NhanVienDTO
     {
         [JsonProperty("employeeId")]
         public string? EmployeeId { get; set; }
@@ -37,5 +37,9 @@ namespace DTO
 
         // Dùng để liên kết với Firebase Auth (giúp xóa/khóa tài khoản sau này)
         public string? AuthUid { get; set; }
+    }
+
+    public class EmployeeDTO : NhanVienDTO
+    {
     }
 }

@@ -10,6 +10,7 @@ namespace GUI
         public ucSOS_Security()
         {
             InitializeComponent();
+            btnReport.Click += btnReport_Click;
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -31,6 +32,41 @@ namespace GUI
             dgvIncidents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvIncidents.RowHeadersVisible = false;
             dgvIncidents.Columns["Mô tả"].FillWeight = 30;
+        }
+
+        private void btnReport_Click(object? sender, EventArgs e)
+        {
+            int totalIncidents = 0;
+            int activeIncidents = 0;
+            if (dgvIncidents.DataSource is DataTable dt)
+            {
+                totalIncidents = dt.Rows.Count;
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (row["Trạng thái"]?.ToString() == "Đang xử lý")
+                        activeIncidents++;
+                }
+            }
+
+            string report =
+                $"BÁO CÁO AN NINH\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                $"──────────────────\n" +
+                $"• Tổng sự cố: {totalIncidents}\n" +
+                $"• Đang xử lý: {activeIncidents}\n" +
+                $"• Đã xử lý: {totalIncidents - activeIncidents}\n" +
+                $"──────────────────\n" +
+                $"Gửi báo cáo cho quản lý qua Chat?";
+
+            var result = MessageBox.Show(report, "Báo cáo an ninh",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                MsgBox.Show(
+                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void btnSOS_Click(object sender, EventArgs e)

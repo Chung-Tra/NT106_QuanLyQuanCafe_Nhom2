@@ -12,7 +12,7 @@ namespace DTO
         public static string? Token { get; set; }
 
         //Lưu trữ toàn bộ thông tin của người đang đăng nhập (Tên, Email, Quyền...)
-        public static EmployeeDTO? CurrentUser { get; set; }
+        public static NhanVienDTO? CurrentUser { get; set; }
         // Lưu thời điểm "chết" của phiên làm việc
         public static DateTime ExpiryTime { get; set; }
 

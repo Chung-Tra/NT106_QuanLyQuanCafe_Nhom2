@@ -24,6 +24,7 @@ namespace GUI
             txtSearch = new TextBox();
             btnSearch = new Button();
             btnAddCustomer = new Button();
+            btnReport = new Button();
             pnlGrid = new Panel();
             dgvCustomers = new DataGridView();
             pnlDetail = new Panel();
@@ -50,6 +51,7 @@ namespace GUI
             pnlSearch.Controls.Add(txtSearch);
             pnlSearch.Controls.Add(btnSearch);
             pnlSearch.Controls.Add(btnAddCustomer);
+            pnlSearch.Controls.Add(btnReport);
             pnlSearch.Location = new Point(20, 15);
             pnlSearch.Name = "pnlSearch";
             pnlSearch.Size = new Size(764, 55);
@@ -109,6 +111,21 @@ namespace GUI
             btnAddCustomer.Text = "+ Thêm KH";
             btnAddCustomer.UseVisualStyleBackColor = false;
             btnAddCustomer.Click += btnAddCustomer_Click;
+            //
+            // btnReport
+            //
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(200, 14);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(90, 28);
+            btnReport.TabIndex = 4;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
             //
             // pnlGrid
             //
@@ -314,5 +331,6 @@ namespace GUI
         private Label lblPoints;
         private Label lblPointsValue;
         private Button btnSaveCustomer;
+        private Button btnReport;
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class WarningWaitModelDTO
+    public class MoHinhCanhBaoChoDTO
     {
         public string? TableName { get; set; }    
         public string? DrinkName { get; set; }     
@@ -22,5 +22,9 @@ namespace DTO
                 return $"⚠️ {TableName}: {DrinkName} (Đợi {WaitTimeMinutes} phút)";
             }
         }
+    }
+
+    public class WarningWaitModelDTO : MoHinhCanhBaoChoDTO
+    {
     }
 }

@@ -16,7 +16,7 @@ namespace BUS
             return await _nguyenLieuDal.GetAllNguyenLieuAsync();
         }
         // 1. Hàm lấy danh sách nhân viên cho ComboBox
-        public async Task<List<EmployeeDTO>> LấyDanhSachNhanVien()
+        public async Task<List<NhanVienDTO>> LấyDanhSachNhanVien()
         {
             // Giả sử dưới NhapKhoDAL bạn đã viết hàm GetAllNhanVienAsync() 
             // đọc từ node "nhan_vien" trên Firebase

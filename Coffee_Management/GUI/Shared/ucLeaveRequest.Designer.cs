@@ -55,10 +55,12 @@
             // pnlSummary
             // 
             this.pnlSummary.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.btnReport = new System.Windows.Forms.Button();
             this.pnlSummary.Controls.Add(this.lblRemainingValue);
             this.pnlSummary.Controls.Add(this.lblRemainingTitle);
             this.pnlSummary.Controls.Add(this.lblPendingValue);
             this.pnlSummary.Controls.Add(this.lblPendingTitle);
+            this.pnlSummary.Controls.Add(this.btnReport);
             this.pnlSummary.Location = new System.Drawing.Point(20, 20);
             this.pnlSummary.Name = "pnlSummary";
             this.pnlSummary.Size = new System.Drawing.Size(764, 80);
@@ -107,7 +109,20 @@
             this.lblPendingTitle.Size = new System.Drawing.Size(113, 17);
             this.lblPendingTitle.TabIndex = 3;
             this.lblPendingTitle.Text = "Đang chờ duyệt";
-            // 
+            //
+            // btnReport
+            //
+            this.btnReport.BackColor = System.Drawing.Color.FromArgb(70, 130, 180);
+            this.btnReport.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnReport.FlatAppearance.BorderSize = 0;
+            this.btnReport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnReport.ForeColor = System.Drawing.Color.White;
+            this.btnReport.Location = new System.Drawing.Point(620, 25);
+            this.btnReport.Name = "btnReport";
+            this.btnReport.Size = new System.Drawing.Size(120, 32);
+            this.btnReport.Text = "Báo cáo";
+            //
             // pnlNewRequest
             // 
             this.pnlNewRequest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
@@ -285,5 +300,6 @@
         private System.Windows.Forms.Panel pnlHistory;
         private System.Windows.Forms.Label lblHistoryTitle;
         private System.Windows.Forms.DataGridView dgvHistory;
+        private System.Windows.Forms.Button btnReport;
     }
 }

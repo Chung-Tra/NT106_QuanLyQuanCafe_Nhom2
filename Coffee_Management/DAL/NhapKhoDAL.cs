@@ -41,13 +41,13 @@ namespace DAL
             }
         }
 
-        public async Task<List<EmployeeDTO>> GetAllNhanVienAsync()
+        public async Task<List<NhanVienDTO>> GetAllNhanVienAsync()
         {
             try
             {
-                var nhanViens = await _client.Child("nhan_vien").OnceAsync<EmployeeDTO>();
+                var nhanViens = await _client.Child("nhan_vien").OnceAsync<NhanVienDTO>();
 
-                return nhanViens.Select(item => new EmployeeDTO
+                return nhanViens.Select(item => new NhanVienDTO
                 {
                     EmployeeId = item.Key,
                     FullName = item.Object.FullName

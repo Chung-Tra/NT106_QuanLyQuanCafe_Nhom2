@@ -11,6 +11,21 @@ namespace GUI
         {
             InitializeComponent();
             this.Load += (s, e) => LoadMockData();
+            btnReport.Click += (s, e) =>
+            {
+                string currentRecipe = lblRecipeName.Text;
+                string report =
+                    $"BÁO CÁO CÔNG THỨC\n" +
+                    $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                    $"──────────────────\n" +
+                    $"• Tổng công thức: {lstRecipes.Items.Count}\n" +
+                    $"• Đang xem: {currentRecipe}\n" +
+                    $"──────────────────\n" +
+                    $"Gửi báo cáo cho quản lý?";
+
+                if (MessageBox.Show(report, "Báo cáo công thức", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                    MsgBox.Show("Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            };
         }
 
         private void LoadMockData()

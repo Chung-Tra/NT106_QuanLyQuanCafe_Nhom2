@@ -10,6 +10,21 @@ namespace GUI
         {
             InitializeComponent();
             this.Load += (s, e) => LoadMockOrders();
+            btnReport.Click += (s, e) =>
+            {
+                string report =
+                    $"BÁO CÁO KDS\n" +
+                    $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                    $"──────────────────\n" +
+                    $"• {lblPending.Text}\n" +
+                    $"• {lblInProgress.Text}\n" +
+                    $"• {lblDone.Text}\n" +
+                    $"──────────────────\n" +
+                    $"Gửi báo cáo cho quản lý?";
+
+                if (MessageBox.Show(report, "Báo cáo KDS", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                    MsgBox.Show("Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            };
         }
 
         private void LoadMockOrders()

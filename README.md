@@ -62,3 +62,33 @@ Phần mềm Quản lý Quán Cà Phê
 - Thống kê các món bán chạy nhất (Best-sellers).
 - Báo cáo chi phí nguyên liệu, chênh lệch kho.
 - Xuất báo cáo ra file Excel/PDF.
+
+---
+
+## Kiến trúc hệ thống
+- `Coffee_Management`: Ứng dụng desktop WinForms cho POS và nghiệp vụ vận hành.
+- `Server/ChatServer`: ASP.NET Core SignalR server cho chat/realtime event.
+- `backend`: Firebase Cloud Functions cho API và các tác vụ backend.
+
+### Ranh giới trách nhiệm
+- **Desktop app**: giao diện, thao tác nghiệp vụ, gửi/nhận tín hiệu realtime.
+- **ChatServer**: nhận broadcast từ client qua `/chathub`.
+- **Firebase Functions**: xác thực, API quản lý dữ liệu, xử lý tác vụ nền.
+
+## Chạy local
+
+### 1) Desktop app
+- Mở `Coffee_Management/Coffee_Management.sln` bằng Visual Studio và chạy project `GUI`.
+
+### 2) Chat server
+- Mở terminal tại `Server/ChatServer` và chạy:
+  - `dotnet run`
+
+### 3) Firebase Functions
+- Mở terminal tại `backend` và chạy:
+  - `npm install`
+  - `npm run serve`
+
+## Cấu hình bảo mật
+- Không hardcode secret trong mã nguồn.
+- Lưu các key/Firebase credential bằng biến môi trường hoặc secret manager, không commit trực tiếp vào repo.
