@@ -1,24 +1,23 @@
-const admin = require("firebase-admin");
-const { defineString } = require('firebase-functions/params');
+const admin = require('firebase-admin');
 
-// Định nghĩa các biến môi trường (Environment Variables)
-// Những giá trị này được lấy từ file .env khi chạy locally hoặc từ Firebase Secrets khi deploy
-const apiKeyParam = defineString('API_KEY');
-const appSecretParam = defineString('APP_SECRET_KEY');
-const emailUserParam = defineString('EMAIL_USER');
-const emailPassParam = defineString('EMAIL_PASS');
-
-// Khởi tạo Admin SDK (Chỉ chạy 1 lần duy nhất)
 if (admin.apps.length === 0) {
-    admin.initializeApp();
+    if (process.env.NODE_ENV === 'production') {
+        // Cloud Run / Firebase Functions: dùng default credentials của GCP
+        admin.initializeApp({
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+    } else {
+        // Local: dùng serviceAccountKey.json
+        const serviceAccount = require('../../serviceAccountKey.json');
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+    }
 }
 
 module.exports = {
     admin,
     db: admin.database(),
-    auth: admin.auth(),
-    apiKeyParam,
-    appSecretParam,
-    emailUserParam,
-    emailPassParam
+    auth: admin.auth()
 };
