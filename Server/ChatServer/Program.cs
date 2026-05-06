@@ -1,85 +1,88 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Sockets;
+using QLCafe.ChatServer.Hubs;
 
 namespace QLCafe.ChatServer
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            //Khởi tạo và Cấu hình: Tạo một WebApplication mới, đăng ký dịch vụ SignalR và CORS để cho phép kết nối từ mọi nguồn.
             var builder = WebApplication.CreateBuilder(args);
 
-            // Đăng ký dịch vụ SignalR và CORS
-            builder.Services.AddSignalR();
-            // Cấu hình CORS để cho phép kết nối từ mọi nguồn, phương thức và header
+            // Cấu hình SignalR: tăng giới hạn tin nhắn và giữ kết nối ổn định
+            // HttpClient để ChatHub gọi Express backend lưu tin nhắn
+            builder.Services.AddHttpClient("ChatApi", client =>
+            {
+                string baseUrl = builder.Configuration["ChatApi:BaseUrl"] ?? "http://localhost:3000/api/";
+                string secret  = builder.Configuration["ChatApi:ServerSecret"] ?? "";
+                client.BaseAddress = new Uri(baseUrl);
+                client.DefaultRequestHeaders.Add("X-Server-Secret", secret);
+            });
+
+            builder.Services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+                options.MaximumReceiveMessageSize = 64 * 1024; // 64KB
+            });
+
+            // Cho phép mọi origin kết nối (client WinForms không có origin cố định)
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
                     policy.AllowAnyHeader()
                           .AllowAnyMethod()
-                          .SetIsOriginAllowed(_ => true) // Rất quan trọng cho SignalR
+                          .SetIsOriginAllowed(_ => true)
                           .AllowCredentials();
                 });
             });
 
             var app = builder.Build();
 
-            // Kích hoạt CORS và tạo đường dẫn Hub
             app.UseCors();
-            // Định nghĩa đường dẫn cho Hub, ở đây là "/chathub"
-            // Khi client kết nối tới "/chathub", họ sẽ được kết nối với ChatHub
             app.MapHub<ChatHub>("/chathub");
 
-            // Tự động tìm IP mạng LAN của máy chủ
-            string myIP = "localhost";
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) { myIP = ip.ToString(); break; }
-            }
-
-            // Mở cổng 8080
-            string serverUrl = $"http://{myIP}:8080";
+            // Lấy IP máy trong mạng LAN để client khác kết nối được
+            string serverIp = GetLocalIpAddress();
+            int port = 8080;
+            string serverUrl = $"http://{serverIp}:{port}";
             app.Urls.Add(serverUrl);
+            app.Urls.Add($"http://localhost:{port}"); // fallback cho máy chạy server
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Starting server...");
-            Console.WriteLine($"Server started at: {serverUrl}");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("╔═══════════════════════════════════════╗");
+            Console.WriteLine("║    QLCafe — Chat Server (SignalR)     ║");
+            Console.WriteLine("╚═══════════════════════════════════════╝");
             Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"  Hub endpoint : {serverUrl}/chathub");
+            Console.WriteLine($"  Local fallback: http://localhost:{port}/chathub");
+            Console.ResetColor();
+            Console.WriteLine("\nĐiền IP sau vào App.config của client:");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"  <add key=\"ChatServerIP\" value=\"{serverIp}\"/>");
+            Console.ResetColor();
+            Console.WriteLine("\nNhấn Ctrl+C để dừng.\n");
 
-            app.Run(); // Lệnh này giúp treo màn hình đen và chạy Server
-        }
-    }
-
-    // Lớp xử lý nhận và phát tin nhắn
-    public class ChatHub : Hub
-    {
-        // Phương thức này sẽ được gọi khi client gửi tin nhắn, nó nhận tên người gửi và nội dung tin nhắn
-        public async Task SendMessage(string senderName, string message)
-        {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {senderName}: {message}");
-            // Phát tin nhắn về tất cả máy trạm với sự kiện "ReceiveMessage"
-            await Clients.All.SendAsync("ReceiveMessage", senderName, message);
-        }
-        // Phương thức này sẽ được gọi khi client gửi tin nhắn kèm theo roomId, nó nhận tên người gửi, nội dung tin nhắn và roomId
-        public async Task SendMessageWithRoom(string senderName, string message, string roomId)
-        {
-            // In ra màn hình đen để bạn dễ debug
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] [Room: {roomId}] {senderName}: {message}");
-
-            // Phát tin nhắn này tới TẤT CẢ mọi người, kèm theo cái roomId để máy nhận biết đường mà lọc
-            await Clients.All.SendAsync("ReceiveMessageWithRoom", senderName, message, roomId);
+            app.Run();
         }
 
-        public override Task OnConnectedAsync()
+        private static string GetLocalIpAddress()
         {
-            Console.WriteLine($"Client connected: {Context.ConnectionId}");
-            return base.OnConnectedAsync();
+            try
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        return ip.ToString();
+                }
+            }
+            catch { }
+            return "localhost";
         }
     }
 }
