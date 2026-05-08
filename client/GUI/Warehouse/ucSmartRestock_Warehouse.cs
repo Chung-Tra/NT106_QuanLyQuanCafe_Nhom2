@@ -82,7 +82,7 @@ namespace GUI
                     row["Chọn"] = true;
                 UpdateSummary(dt);
             }
-            MsgBox.Show("Đã duyệt tất cả đề xuất nhập kho!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt tất cả đề xuất nhập kho!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnApproveSelected_Click(object sender, EventArgs e)
@@ -95,28 +95,29 @@ namespace GUI
 
             if (count == 0)
             {
-                MsgBox.Show("Vui lòng chọn ít nhất 1 đề xuất!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn ít nhất 1 đề xuất!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            MsgBox.Show($"Đã duyệt {count} đề xuất đã chọn!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã duyệt {count} đề xuất đã chọn!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnReport_Click(object? sender, EventArgs e)
         {
             string report =
-                $"BÁO CÁO ĐỀ XUẤT NHẬP KHO\n" +
+                "BÁO CÁO ĐỀ XUẤT NHẬP KHO\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Số đề xuất: {lblSuggestionsCount.Text}\n" +
                 $"• Chi phí ước tính: {lblEstimatedCost.Text}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo nhập kho", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo nhập kho", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }

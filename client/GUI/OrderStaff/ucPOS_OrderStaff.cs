@@ -18,15 +18,15 @@ namespace GUI
             btnReport.Click += (s, e) =>
             {
                 string report =
-                    $"BÁO CÁO BÁN HÀNG\n" +
+                    "BÁO CÁO BÁN HÀNG\n" +
                     $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                    $"──────────────────\n" +
+                    "──────────────────\n" +
                     $"• Tổng tiền hiện tại: {lblTotalAmount.Text}\n" +
-                    $"──────────────────\n" +
-                    $"Gửi báo cáo cho quản lý?";
+                    "──────────────────\n" +
+                    "Gửi báo cáo cho quản lý?";
 
-                if (MsgBox.Show(report, "Báo cáo POS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                    MsgBox.Show("Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo POS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
             };
         }
 
@@ -62,7 +62,7 @@ namespace GUI
                 btnTable.FlatAppearance.BorderSize = 0;
 
                 btnTable.Click += (s, ev) => {
-                    MsgBox.Show("Đã chọn " + btnTable.Text);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã chọn " + btnTable.Text, "Thông báo", MsgBox.MessageBoxType.Info);
                     btnTabOrder.PerformClick(); // Bấm vào bàn thì tự quay lại trang Order để gọi món
                 };
 

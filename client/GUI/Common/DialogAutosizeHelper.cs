@@ -15,7 +15,10 @@ namespace GUI
         internal static int MeasureWrappedHeight(string text, Font font, int contentWidthPx)
         {
             if (contentWidthPx <= 0) contentWidthPx = 200;
-            string sample = string.IsNullOrWhiteSpace(text) ? " " : text + "\n";
+            if (string.IsNullOrEmpty(text))
+                text = " ";
+
+            string sample = text + "\n";
             Size sz = TextRenderer.MeasureText(sample, font, new Size(contentWidthPx, int.MaxValue), WrapFlags);
             return Math.Max(sz.Height + 10, TextRenderer.MeasureText("Mg", font).Height + 8);
         }

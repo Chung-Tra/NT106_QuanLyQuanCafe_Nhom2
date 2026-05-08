@@ -46,6 +46,8 @@
 | Chat Server | ASP.NET Core + SignalR | Realtime messaging giữa nhân viên      |
 | Database    | Firebase Realtime DB   | Lưu trữ dữ liệu toàn bộ hệ thống       |
 
+**UI / thông báo modal:** dùng `MsgBox` tùy chỉnh, `MsgBox.OwnerWindow` cho owner từ UserControl, `ShowDialog` neo cùng owner — chi tiết trong [`docs/forms.md`](forms.md#msgbox-và-dialog-modal).
+
 
 ## Luồng xác thực
 

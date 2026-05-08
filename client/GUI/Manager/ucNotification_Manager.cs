@@ -78,7 +78,7 @@ namespace GUI
             string name = dgvPendingLeave.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
             dgvPendingLeave.CurrentRow.Cells["Trạng thái"].Value = "Đã duyệt";
             dgvPendingLeave.CurrentRow.DefaultCellStyle.ForeColor = Color.MediumSeaGreen;
-            MsgBox.Show($"Đã duyệt đơn nghỉ phép của {name}!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã duyệt đơn nghỉ phép của {name}!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnReject_Click(object sender, EventArgs e)
@@ -87,19 +87,19 @@ namespace GUI
             string name = dgvPendingLeave.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
             dgvPendingLeave.CurrentRow.Cells["Trạng thái"].Value = "Từ chối";
             dgvPendingLeave.CurrentRow.DefaultCellStyle.ForeColor = Color.IndianRed;
-            MsgBox.Show($"Đã từ chối đơn nghỉ phép của {name}!", "Thông báo", MsgBox.MessageBoxType.Warning);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã từ chối đơn nghỉ phép của {name}!", "Thông báo", MsgBox.MessageBoxType.Warning);
         }
 
         private void btnChatStaff_Click(object sender, EventArgs e)
         {
             if (dgvPendingLeave.CurrentRow == null) return;
             string name = dgvPendingLeave.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
-            MsgBox.Show($"Mở chat với {name}...", "Chat", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Mở chat với {name}...", "Chat", MsgBox.MessageBoxType.Info);
         }
 
         private void btnSaveSchedule_Click(object sender, EventArgs e)
         {
-            MsgBox.Show("Đã lưu lịch làm việc thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã lưu lịch làm việc thành công!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void dgvPendingLeave_SelectionChanged(object sender, EventArgs e)

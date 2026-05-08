@@ -46,7 +46,7 @@ namespace GUI
 
             if (result.IsSuccess)
             {
-                MsgBox.Show(result.Message, "Thành công", MsgBox.MessageBoxType.Info);
+                MsgBox.Show(this, result.Message, "Thành công", MsgBox.MessageBoxType.Info);
                 // QUAN TRỌNG: Mở Form 2 và truyền Mã code + Email sang đó
                 VerifyCode verifyForm = new (result.Code ?? "", email);
                 verifyForm.Show();
@@ -54,7 +54,7 @@ namespace GUI
             }
             else
             {
-                MsgBox.Show(result.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, result.Message, "Lỗi", MsgBox.MessageBoxType.Error);
                 btnSendCode.Enabled = true;
                 btnSendCode.Text = "Gửi Code";
             }

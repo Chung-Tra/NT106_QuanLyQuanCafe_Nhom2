@@ -99,7 +99,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Lỗi tải dữ liệu: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Lỗi tải dữ liệu: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
             finally
             {
@@ -110,12 +110,12 @@ namespace GUI
 
         private void BtnCheckIn_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("Tính năng Quét thẻ RFID / Vân tay / Nhập mã NV để điểm danh ca làm việc.", "Chấm Công", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Tính năng Quét thẻ RFID / Vân tay / Nhập mã NV để điểm danh ca làm việc.", "Chấm Công", MsgBox.MessageBoxType.Info);
         }
 
         private void BtnApproveLeave_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("Đã DUYỆT đơn xin nghỉ của [NV03 Lê Văn C]. Dữ liệu đã cập nhật vào tính lương cuối tháng.", "Duyệt Nghỉ Phép", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã DUYỆT đơn xin nghỉ của [NV03 Lê Văn C]. Dữ liệu đã cập nhật vào tính lương cuối tháng.", "Duyệt Nghỉ Phép", MsgBox.MessageBoxType.Success);
             lstLeaveq.Items.Clear();
             lstLeaveq.Items.Add("✔️ Không còn đơn xin nghỉ nào cần duyệt.");
             btnApproveLeave.Enabled = false;
@@ -125,12 +125,12 @@ namespace GUI
         {
             AddEmployee frmAdd = new();
             // Mở form lên dưới dạng hộp thoại (người dùng phải đóng form này mới thao tác tiếp được với nền bên dưới)
-            if (frmAdd.ShowDialog() == DialogResult.OK)
+            if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 // Đoạn code này sẽ chạy nếu bên form AddEmployee bạn lưu thành công 
                 // và đã gán: this.DialogResult = DialogResult.OK;
                 await LoadRealData();
-                MsgBox.Show("Danh sách nhân viên mới đã được cập nhật!", "Thông báo", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Danh sách nhân viên mới đã được cập nhật!", "Thông báo", MsgBox.MessageBoxType.Success);
 
                 // Gọi hàm load lại dữ liệu lên DataGridView ở đây (nếu có)
                 // Ví dụ: LoadStaffData();
@@ -149,7 +149,7 @@ namespace GUI
             // 1. Kiểm tra xem người dùng đã chọn dòng nào chưa
             if (dgvStaff.CurrentRow == null || dgvStaff.CurrentRow.Index < 0)
             {
-                MsgBox.Show("Vui lòng chọn một nhân viên từ danh sách để chỉnh sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một nhân viên từ danh sách để chỉnh sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
@@ -170,7 +170,7 @@ namespace GUI
 
             // 4. Mở Form Edit
             EditEmployee frmEdit = new(empToEdit);
-            if (frmEdit.ShowDialog() == DialogResult.OK)
+            if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 // Load lại danh sách nếu lưu thành công
                 _ = LoadRealData();
@@ -194,7 +194,7 @@ namespace GUI
             };
 
             using EmployeeDetail dlg = new(emp);
-            if (dlg.ShowDialog() == DialogResult.OK)
+            if (dlg.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
                 await LoadRealData();
         }
 

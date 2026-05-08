@@ -19,7 +19,7 @@ namespace GUI
         {
             if (string.IsNullOrWhiteSpace(txtReply.Text))
             {
-                MsgBox.Show("Vui lòng nhập nội dung trả lời!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(this, "Vui lòng nhập nội dung trả lời!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 

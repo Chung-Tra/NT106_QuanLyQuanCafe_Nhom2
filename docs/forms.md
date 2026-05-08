@@ -151,5 +151,19 @@ Chúng có thể được host trong form/tab khác của Manager — không có
 - **Theme**: Dark (`#252526` background, `#2D2D30` panel, `#1E1E1E` header).
 - **Accent**: SteelBlue cho action chính, MediumSeaGreen cho thành công, IndianRed cho cảnh báo/nguy hiểm.
 - **Font**: Segoe UI - title 13-16pt bold, body 9.5-10pt.
-- **MsgBox**: dùng `MsgBox.Show(...)` (không dùng `MessageBox.Show`) để giữ theme; nội dung dài có **thanh cuộn dọc**; form chi tiết dài có thể **cuộn toàn form** khi vượt chiều cao màn hình.
 - **Tooltip**: mỗi nút sidebar có tooltip giải thích chức năng (ví dụ "Đơn hàng và Hóa đơn" → "Đơn hàng và Hóa đơn").
+
+### MsgBox và dialog (modal)
+
+- **Luôn dùng** `MsgBox.Show` (custom `GUI/Common/MsgBox.cs`), **không** dùng `MessageBox.Show` của WinForms để giữ theme bo góc / màu theo loại (Info / Success / Error / Warning).
+- **Owner (neo cửa sổ cha)**  
+  - Trong **UserControl** (hầu hết `uc*.cs`): gọi  
+    `MsgBox.Show(MsgBox.OwnerWindow(this), "nội dung", "tiêu đề", loại)`  
+    hoặc `MsgBox.OwnerWindow(control)` khi có biến control (ví dụ `ChatManager` với control chat).  
+  - `OwnerWindow` = `FindForm()` **hoặc** `TopLevelControl` (fallback khi control nằm sâu trong `Panel` / layout).  
+  - Trong **Form** độc lập (`Login`, `VerifyCode`, …): có thể truyền thẳng `this` vì `Form` là `IWin32Window`.
+- **Nội dung nhiều dòng**: trong code gõ xuống dòng bằng `\n` trong chuỗi; `MsgBox` chuẩn hóa sang CRLF khi gán vào `TextBox` để hiển thị đúng trên Windows.
+- **Chiều cao & cuộn**: `LayoutForContent` dùng `DialogAutosizeHelper.SetWrappedTextBoxHeight` — nội dung dài thì ô tin nhắn có **thanh cuộn dọc**; một số form chi tiết dài có thể **cuộn cả form** (qua `DialogAutosizeHelper.CapFormHeightWithAutoScroll` nơi áp dụng).
+- **Dialog `ShowDialog`**: mở form con từ UC dùng cùng owner, ví dụ  
+  `someForm.ShowDialog(MsgBox.OwnerWindow(this))`  
+  để modal nằm đúng phía trên form dashboard.

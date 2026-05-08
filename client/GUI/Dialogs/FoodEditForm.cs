@@ -130,20 +130,20 @@ namespace GUI
 
                 if (result.Success)
                 {
-                    MsgBox.Show("Cập nhật thực đơn thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, "Cập nhật thực đơn thành công!", "Thành công", MsgBox.MessageBoxType.Success);
                     this.DialogResult = DialogResult.OK; // Trả về OK để ucProducts load lại bảng
                     this.Close();
                 }
                 else
                 {
-                    MsgBox.Show(result.Message, "Lỗi Server", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(this, result.Message, "Lỗi Server", MsgBox.MessageBoxType.Error);
                     btnUpdate.Enabled = true;
                     btnUpdate.Text = "Cập nhật";
                 }
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Lỗi hệ thống: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, $"Lỗi hệ thống: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
                 btnUpdate.Enabled = true;
                 btnUpdate.Text = "Cập nhật";
             }

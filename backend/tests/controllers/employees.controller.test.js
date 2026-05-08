@@ -30,11 +30,12 @@ describe('employees.controller - getAll', () => {
         expect(Object.keys(data)).toHaveLength(2);
     });
 
-    test('barista chỉ thấy manager', async () => {
+    test('barista chỉ thấy manager và admin (để chat / liên hệ lãnh đạo)', async () => {
         mockDb.once.mockResolvedValue({
             val: () => ({
                 nv_001: { vai_tro: 'barista', email: 'a@cafe.com' },
                 nv_002: { vai_tro: 'manager', email: 'mgr@cafe.com' },
+                nv_003: { vai_tro: 'admin', email: 'admin@cafe.com' },
             }),
         });
 
@@ -43,8 +44,9 @@ describe('employees.controller - getAll', () => {
         await employeesController.getAll(req, res, next);
 
         const data = res.json.mock.calls[0][0];
-        expect(Object.keys(data)).toHaveLength(1);
-        expect(Object.values(data)[0].vai_tro).toBe('manager');
+        expect(Object.keys(data)).toHaveLength(2);
+        const roles = Object.values(data).map((e) => e.vai_tro).sort();
+        expect(roles).toEqual(['admin', 'manager']);
     });
 });
 

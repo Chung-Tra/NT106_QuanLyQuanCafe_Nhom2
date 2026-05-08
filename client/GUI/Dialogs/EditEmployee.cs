@@ -150,21 +150,21 @@ namespace GUI
 
                 if (result.Success)
                 {
-                    MsgBox.Show("Cập nhật thông tin nhân viên thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, "Cập nhật thông tin nhân viên thành công!", "Thành công", MsgBox.MessageBoxType.Success);
                     this.DialogResult = DialogResult.OK; // Báo hiệu cho Form cha biết đã sửa xong
                     this.Close();
                 }
                 else
                 {
                     // Trả ra lỗi từ Validation hoặc từ Server
-                    MsgBox.Show(result.Message, "Lỗi xác thực", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, result.Message, "Lỗi xác thực", MsgBox.MessageBoxType.Warning);
                     btnSave.Enabled = true;
                     btnSave.Text = "LƯU THAY ĐỔI";
                 }
             }
             catch (Exception ex)
             {
-                MsgBox.Show(ex.Message, "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, ex.Message, "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
                 btnSave.Enabled = true;
                 btnSave.Text = "LƯU THAY ĐỔI";
             }

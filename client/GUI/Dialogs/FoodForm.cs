@@ -110,19 +110,19 @@ namespace GUI
                 // Xử lý kết quả
                 if (success)
                 {
-                    MsgBox.Show($"Thêm món [{food.TenMon}] thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, $"Thêm món [{food.TenMon}] thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
                     FoodAdded?.Invoke();
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
                 else
                 {
-                    MsgBox.Show(message, "Lỗi xác thực", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, message, "Lỗi xác thực", MsgBox.MessageBoxType.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MsgBox.Show(ex.Message, "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, ex.Message, "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
             finally
             {

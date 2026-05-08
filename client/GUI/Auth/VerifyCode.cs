@@ -47,21 +47,26 @@ namespace GUI
             {
                 if (!Validation.IsValidVerificationCode(userCode))
                 {
-                    MsgBox.Show("Mã xác nhận không hợp lệ!\nMã phải có đúng 8 ký tự, bao gồm cả chữ và số.", "Sai định dạng", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(
+                        this,
+                        "Mã xác nhận không hợp lệ!\nMã phải có đúng 8 ký tự, bao gồm cả chữ và số.",
+                        "Sai định dạng", MsgBox.MessageBoxType.Warning);
                     return;
                 }
             }
             else
             {
-                MsgBox.Show("Vui lòng nhập mã xác nhận!", "Cảnh báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(this, "Vui lòng nhập mã xác nhận!", "Cảnh báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             // KIỂM TRA THỜI GIAN HẾT HẠN
             if (DateTime.Now > _expiryTime)
             {
-                MsgBox.Show("Mã xác nhận đã hết hạn (60s).\nVui lòng nhấn 'Gửi lại mã' để nhận mã mới.",
-                                "Mã hết hạn", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(
+                    this,
+                    "Mã xác nhận đã hết hạn (60s).\nVui lòng nhấn 'Gửi lại mã' để nhận mã mới.",
+                    "Mã hết hạn", MsgBox.MessageBoxType.Warning);
 
                 // Có thể xóa mã hệ thống để đảm bảo người dùng không thể dùng lại mã cũ
                 _systemCode = "";
@@ -76,7 +81,11 @@ namespace GUI
             }
             else
             {
-                MsgBox.Show("Mã xác nhận không đúng.\nVui lòng thử lại!", "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(
+                    this,
+                    "Mã xác nhận không đúng.\nVui lòng thử lại!",
+                    "Lỗi",
+                    MsgBox.MessageBoxType.Error);
             }
         }
 
@@ -97,7 +106,7 @@ namespace GUI
                     // 3. QUAN TRỌNG: Cập nhật lại mã hệ thống mới vào biến cục bộ
                     _systemCode = result.Code ?? string.Empty;
 
-                    MsgBox.Show("Một mã mới đã được gửi đến email của bạn.", "Thành công",
+                    MsgBox.Show(this, "Một mã mới đã được gửi đến email của bạn.", "Thành công",
                                     MsgBox.MessageBoxType.Success);
 
                     // 4. Bắt đầu đếm ngược (Optional - xem hướng dẫn ở mục 2)
@@ -106,14 +115,14 @@ namespace GUI
                 }
                 else
                 {
-                    MsgBox.Show(result.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(this, result.Message, "Lỗi", MsgBox.MessageBoxType.Error);
                     lblResend.Enabled = true;
                     lblResend.Text = "Gửi lại mã";
                 }
             }
             catch (Exception ex)
             {
-                MsgBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi",
+                MsgBox.Show(this, "Đã xảy ra lỗi: " + ex.Message, "Lỗi",
                                 MsgBox.MessageBoxType.Error);
                 lblResend.Enabled = true;
                 lblResend.Text = "Gửi lại mã";

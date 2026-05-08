@@ -43,18 +43,6 @@ exports.generateOTP = async (req, res, next) => {
     }
 };
 
-exports.sendVerificationEmail = async (req, res, next) => {
-    try {
-        const { toEmail, code } = req.body;
-        if (!toEmail || !code) return res.status(400).json({ error: 'Missing info' });
-
-        await emailService.sendVerificationEmail(toEmail, code);
-        res.status(200).json({ message: 'Sent successfully!' });
-    } catch (err) {
-        next(err);
-    }
-};
-
 exports.updatePassword = async (req, res, next) => {
     try {
         const { email, newPassword, secretKey } = req.body;

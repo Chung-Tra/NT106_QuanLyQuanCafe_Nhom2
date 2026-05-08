@@ -57,14 +57,14 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Lỗi tải dữ liệu kho: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Lỗi tải dữ liệu kho: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 
         private void btnNewImport_Click(object sender, EventArgs e)
         {
             using AddInventoryImport frm = new();
-            if (frm.ShowDialog() == DialogResult.OK)
+            if (frm.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
                 _ = LoadDataAsync();
         }
 
@@ -73,27 +73,30 @@ namespace GUI
             using OpenFileDialog ofd = new();
             ofd.Filter = "Image files|*.jpg;*.jpeg;*.png;*.bmp";
             ofd.Title = "Chọn ảnh đính kèm";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
-                MsgBox.Show($"Đã đính kèm ảnh: {System.IO.Path.GetFileName(ofd.FileName)}", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã đính kèm ảnh: {System.IO.Path.GetFileName(ofd.FileName)}", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
 
         private void btnReport_Click(object sender, EventArgs e)
         {
             string report =
-                $"BÁO CÁO KHO HÀNG\n" +
+                "BÁO CÁO KHO HÀNG\n" +
                 $"Ngày: {DateTime.Now:dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tổng mặt hàng: {lblTotalItems.Text}\n" +
                 $"• Sắp hết: {lblLowStock.Text}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo kho", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo kho", MsgBox.MessageBoxType.Warning);
             if (result == DialogResult.Yes)
             {
-                MsgBox.Show("Đã gửi báo cáo kho cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    "Đã gửi báo cáo kho cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
     }

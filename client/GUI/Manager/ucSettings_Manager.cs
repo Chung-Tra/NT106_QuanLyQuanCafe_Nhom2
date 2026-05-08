@@ -1,4 +1,4 @@
-﻿using BUS;
+using BUS;
 using DTO;
 using System;
 using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Không thể tải danh sách nhân viên: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Không thể tải danh sách nhân viên: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
         }
 
@@ -78,17 +78,17 @@ namespace GUI
 
         private void BtnOpenChatWindow_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("This feature will open a standalone Messenger-style window.", "Floating Chat", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Tính năng này sẽ mở cửa sổ chat riêng (kiểu Messenger).", "Chat nổi", MsgBox.MessageBoxType.Info);
         }
 
         private void BtnChangePassword_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("Opening Password Reset form...", "Security");
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đang mở form đổi mật khẩu...", "Bảo mật", MsgBox.MessageBoxType.Info);
         }
 
         private void BtnUpdateProfile_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("Opening Profile Editor...", "Account Settings");
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đang mở form chỉnh sửa hồ sơ...", "Cài đặt tài khoản", MsgBox.MessageBoxType.Info);
         }
 
         private string GetIdFromCombo()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -49,10 +49,10 @@ namespace GUI
             string customer = dgvFeedback.CurrentRow.Cells["Khách hàng"].Value?.ToString() ?? "";
             string content = dgvFeedback.CurrentRow.Cells["Nội dung"].Value?.ToString() ?? "";
             ReplyFeedback frm = new(customer, content);
-            if (frm.ShowDialog() == DialogResult.OK)
+            if (frm.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 dgvFeedback.CurrentRow.Cells["Trạng thái"].Value = "Đã trả lời";
-                MsgBox.Show($"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
 
@@ -60,16 +60,16 @@ namespace GUI
         {
             if (dgvFeedback.CurrentRow == null) return;
             dgvFeedback.CurrentRow.Cells["Trạng thái"].Value = "Đã xử lý";
-            MsgBox.Show("Đã đánh dấu phản hồi là đã xử lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đánh dấu phản hồi là đã xử lý!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnDeleteFeedback_Click(object sender, EventArgs e)
         {
             if (dgvFeedback.CurrentRow == null) return;
-            var result = MsgBox.Show("Bạn có chắc muốn xóa phản hồi này?", "Xác nhận", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), "Bạn có chắc muốn xóa phản hồi này?", "Xác nhận", MsgBox.MessageBoxType.Warning);
             if (result == DialogResult.Yes)
             {
-                MsgBox.Show("Đã xóa phản hồi!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã xóa phản hồi!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
 

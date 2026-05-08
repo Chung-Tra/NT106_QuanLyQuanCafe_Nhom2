@@ -114,6 +114,7 @@ namespace GUI
         private async void BtnRemove_Click(object sender, EventArgs e)
         {
             DialogResult confirm = MsgBox.Show(
+                this,
                 $"Sếp có chắc chắn muốn XÓA VĨNH VIỄN nhân viên [{_currentEmp.FullName}] không?\nHành động này không thể hoàn tác!",
                 "Cảnh báo xóa",
                 MsgBox.MessageBoxType.Warning);
@@ -128,7 +129,7 @@ namespace GUI
                 if (Success)
                 {
                     // MsgBox Xanh Lá
-                    MsgBox.Show("Đã xóa nhân viên thành công khỏi hệ thống!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, "Đã xóa nhân viên thành công khỏi hệ thống!", "Thông báo", MsgBox.MessageBoxType.Success);
                     this.DialogResult = DialogResult.OK;
                     // Xóa xong thì tự động đóng cái Form này lại
                     this.Close();
@@ -136,7 +137,7 @@ namespace GUI
                 else
                 {
                     // MsgBox Đỏ
-                    MsgBox.Show(Message, "Lỗi khi xóa", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(this, Message, "Lỗi khi xóa", MsgBox.MessageBoxType.Error);
                 }
             }
         }

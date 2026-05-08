@@ -102,21 +102,22 @@ namespace GUI
         private void btnReport_Click(object? sender, EventArgs e)
         {
             string report =
-                $"BÁO CÁO CHẤM CÔNG\n" +
+                "BÁO CÁO CHẤM CÔNG\n" +
                 $"Tháng: {dtpFilterMonth.Value:MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tổng ca: {lblTotalShiftsValue.Text}\n" +
                 $"• Tổng giờ: {lblTotalHoursValue.Text}\n" +
                 $"• Đi muộn: {lblLateValue.Text}\n" +
                 $"• Nghỉ phép: {lblAbsentValue.Text}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo này cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo này cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo chấm công", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo chấm công", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }

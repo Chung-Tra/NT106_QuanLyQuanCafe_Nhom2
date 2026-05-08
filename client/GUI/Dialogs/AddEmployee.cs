@@ -160,7 +160,7 @@ namespace GUI
                 bool result = await EmployeeBUS.AddEmployeeAsync(newEmp);
                 if (result)
                 {
-                    MsgBox.Show($"Nhân viên {newEmp.FullName} đã được thêm thành công.", "Thông báo", MsgBox.MessageBoxType.Info);
+                    MsgBox.Show(this, $"Nhân viên {newEmp.FullName} đã được thêm thành công.", "Thông báo", MsgBox.MessageBoxType.Info);
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
@@ -168,7 +168,7 @@ namespace GUI
             catch (Exception ex)
             {
                 // Bất kỳ lỗi nào (Form rỗng, Email sai, Mật khẩu yếu...) từ Server Cloud Functions trả về sẽ hiển thị tại đây
-                MsgBox.Show(ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
             }
             finally
             {

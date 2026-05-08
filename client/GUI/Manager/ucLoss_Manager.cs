@@ -121,8 +121,9 @@ namespace GUI
             btnReport.Click += (s, e) =>
             {
                 var dlg = new ReportDialog("Thất thoát hao phí");
-                if (dlg.ShowDialog() == DialogResult.OK || dlg.ShowDialog() == DialogResult.Yes)
-                    MsgBox.Show("Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
+                var dr = dlg.ShowDialog(MsgBox.OwnerWindow(this));
+                if (dr == DialogResult.OK || dr == DialogResult.Yes)
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
             };
 
             Controls.AddRange([

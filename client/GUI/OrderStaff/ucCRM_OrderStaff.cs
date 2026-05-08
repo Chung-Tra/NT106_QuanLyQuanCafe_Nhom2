@@ -69,19 +69,20 @@ namespace GUI
                 totalCustomers = dt.DefaultView.Count;
 
             string report =
-                $"BÁO CÁO KHÁCH HÀNG\n" +
+                "BÁO CÁO KHÁCH HÀNG\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tổng khách hàng: {totalCustomers}\n" +
                 $"• Từ khóa tìm kiếm: {(string.IsNullOrEmpty(txtSearch.Text) ? "(không)" : txtSearch.Text)}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo khách hàng", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo khách hàng", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
@@ -91,10 +92,10 @@ namespace GUI
         {
             if (string.IsNullOrWhiteSpace(txtName.Text) || string.IsNullOrWhiteSpace(txtPhone.Text))
             {
-                MsgBox.Show("Vui lòng nhập tên và số điện thoại!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập tên và số điện thoại!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            MsgBox.Show($"Đã lưu thông tin khách hàng {txtName.Text}!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã lưu thông tin khách hàng {txtName.Text}!", "Thành công", MsgBox.MessageBoxType.Success);
         }
     }
 }

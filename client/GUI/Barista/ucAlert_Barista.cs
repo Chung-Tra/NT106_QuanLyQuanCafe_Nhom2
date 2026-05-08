@@ -51,20 +51,21 @@ namespace GUI
             }
 
             string report =
-                $"BÁO CÁO CẢNH BÁO\n" +
+                "BÁO CÁO CẢNH BÁO\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tổng cảnh báo: {totalAlerts}\n" +
                 $"• Đang chờ xử lý: {pendingAlerts}\n" +
                 $"• Đã xử lý: {totalAlerts - pendingAlerts}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo cảnh báo", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo cảnh báo", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
@@ -74,12 +75,15 @@ namespace GUI
         {
             if (string.IsNullOrWhiteSpace(txtMessage.Text))
             {
-                MsgBox.Show("Vui lòng nhập nội dung cảnh báo!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập nội dung cảnh báo!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             string alertType = cmbAlertType.SelectedItem?.ToString() ?? "Khác";
-            MsgBox.Show($"Đã gửi cảnh báo [{alertType}] đến quản lý!\nNội dung: {txtMessage.Text}", "Gửi thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(
+                MsgBox.OwnerWindow(this),
+                $"Đã gửi cảnh báo [{alertType}] đến quản lý!\nNội dung: {txtMessage.Text}",
+                "Gửi thành công", MsgBox.MessageBoxType.Success);
 
             // Add to grid
             if (dgvAlertHistory.DataSource is DataTable dt)

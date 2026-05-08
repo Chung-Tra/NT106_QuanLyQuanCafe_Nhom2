@@ -124,6 +124,7 @@ namespace GUI
         private void btnApplyBP_Click(object sender, EventArgs e)
         {
             MsgBox.Show(
+                MsgBox.OwnerWindow(this),
                 "Đã tính lương tự động cho tất cả nhân viên!\n\n" +
                 "• Lương cơ bản: Tự tính theo bộ phận\n" +
                 "• Thưởng feedback: Dựa trên số feedback tốt\n" +

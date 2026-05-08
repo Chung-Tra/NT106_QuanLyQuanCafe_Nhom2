@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -54,10 +54,10 @@ namespace GUI
             string customer = dgvFeedback.CurrentRow.Cells["Khách hàng"].Value?.ToString() ?? "";
             string content = dgvFeedback.CurrentRow.Cells["Nội dung"].Value?.ToString() ?? "";
             ReplyFeedback frm = new(customer, content);
-            if (frm.ShowDialog() == DialogResult.OK)
+            if (frm.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 dgvFeedback.CurrentRow.Cells["Trạng thái"].Value = "Đã trả lời";
-                MsgBox.Show($"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
     }

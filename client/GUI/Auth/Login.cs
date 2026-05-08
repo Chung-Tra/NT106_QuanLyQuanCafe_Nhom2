@@ -78,7 +78,7 @@ namespace GUI
         {
             ConfirmEmail frmConfirm = new();
             this.Hide();
-            frmConfirm.ShowDialog();
+            frmConfirm.ShowDialog(this);
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
@@ -132,8 +132,15 @@ namespace GUI
                     _             => "User"
                 };
 
+                string greeting = $"Xin chào {welcomePrefix} {GlobalSession.CurrentUser.FullName}!";
+                string detail = (result.Message ?? string.Empty).Trim();
+                string successBody = string.IsNullOrEmpty(detail)
+                    ? greeting
+                    : greeting + "\n\n" + detail;
+
                 MsgBox.Show(
-                    $"Xin chào {welcomePrefix} {GlobalSession.CurrentUser.FullName}!\n{result.Message}",
+                    this,
+                    successBody,
                     "Đăng nhập thành công",
                     MsgBox.MessageBoxType.Success
                 );
@@ -146,7 +153,7 @@ namespace GUI
             {
                 // Nếu IsSuccess == false (Sai pass, tài khoản bị khóa, rỗng...)
                 // Chỉ cần lấy đúng câu Message từ lớp BUS và in ra
-                MsgBox.Show(result.Message, "Đăng nhập thất bại", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, result.Message, "Đăng nhập thất bại", MsgBox.MessageBoxType.Error);
             }
 
             // 5. Mở lại nút bấm

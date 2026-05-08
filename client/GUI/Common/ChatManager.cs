@@ -139,12 +139,12 @@ namespace GUI
                 }
                 catch (Exception ex)
                 {
-                    MsgBox.Show("Không thể gửi tin nhắn: " + ex.Message, "Lỗi kết nối", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(MsgBox.OwnerWindow(uiControl), "Không thể gửi tin nhắn: " + ex.Message, "Lỗi kết nối", MsgBox.MessageBoxType.Error);
                 }
             }
             else
             {
-                MsgBox.Show("Mất kết nối server! Vui lòng thử lại sau.", "Lỗi mạng", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(uiControl), "Mất kết nối server! Vui lòng thử lại sau.", "Lỗi mạng", MsgBox.MessageBoxType.Warning);
             }
         }
     }

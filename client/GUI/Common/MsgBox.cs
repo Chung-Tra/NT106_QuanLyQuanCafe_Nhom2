@@ -8,7 +8,6 @@ namespace GUI
 {
     internal partial class MsgBox : Form
     {
-        private const int MaxMessageViewportPx = 280;
         private const int FormWidthPx = 400;
 
         [DllImport("user32.dll")]
@@ -27,7 +26,17 @@ namespace GUI
             DoubleBuffered = true;
         }
 
-        public static DialogResult Show(string message, string title = "Thông báo", MessageBoxType type = MessageBoxType.Info)
+        public static DialogResult Show(string message, string title = "Thông báo", MessageBoxType type = MessageBoxType.Info) =>
+            Show(null, message, title, type);
+
+        /// <summary>Form chứa control (FindForm hoặc TopLevelControl) — làm owner cho ShowDialog / MsgBox.</summary>
+        public static IWin32Window? OwnerWindow(Control? control)
+        {
+            if (control == null) return null;
+            return control.FindForm() ?? control.TopLevelControl as IWin32Window;
+        }
+
+        public static DialogResult Show(IWin32Window? owner, string message, string title = "Thông báo", MessageBoxType type = MessageBoxType.Info)
         {
             using MsgBox msg = new MsgBox();
             msg.lblTitle.Text = title;
@@ -35,8 +44,7 @@ namespace GUI
             msg.LayoutForContent(message ?? string.Empty, type);
             RefreshRoundedRegion(msg);
 
-            DialogResult dr = msg.ShowDialog();
-            return dr;
+            return owner == null ? msg.ShowDialog() : msg.ShowDialog(owner);
         }
 
         private static void RefreshRoundedRegion(MsgBox msg)
@@ -80,18 +88,39 @@ namespace GUI
             RefreshRoundedRegion(this);
         }
 
+        private static int GetMaxMessageViewportPx()
+        {
+            try
+            {
+                int h = Screen.PrimaryScreen?.WorkingArea.Height ?? 800;
+                return Math.Min(520, Math.Max(200, (int)(h * 0.45)));
+            }
+            catch
+            {
+                return 420;
+            }
+        }
+
         private void LayoutForContent(string message, MessageBoxType type)
         {
-            txtMessage.Text = message;
-
             int padX = 20;
             int innerW = FormWidthPx - padX * 2;
 
-            int textH = DialogAutosizeHelper.MeasureWrappedHeight(message, txtMessage.Font, innerW);
-            textH = Math.Min(Math.Max(textH + 12, 56), MaxMessageViewportPx);
+            // Có handle + kích thước thật trước khi MeasureText (tránh ClientSize.Width = 0 khi chưa layout)
+            if (!IsHandleCreated)
+                CreateControl();
+            txtMessage.CreateControl();
 
             txtMessage.Location = new Point(padX, 10);
-            txtMessage.Size = new Size(innerW, textH);
+            txtMessage.Width = innerW;
+            txtMessage.WordWrap = true;
+            // TextBox WinForms hiển thị/đo chiều cao đúng với CRLF; message ở call site vẫn có thể chỉ dùng \n.
+            string m = message ?? string.Empty;
+            m = m.Replace("\r\n", "\n").Replace('\r', '\n');
+            txtMessage.Text = m.Replace("\n", Environment.NewLine);
+
+            int maxViewport = GetMaxMessageViewportPx();
+            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtMessage, minHeight: 56, maxHeight: maxViewport);
 
             const int gapBeforeButtons = 14;
             const int bottomMargin = 16;

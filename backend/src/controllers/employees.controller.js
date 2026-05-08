@@ -11,13 +11,15 @@ exports.getAll = async (req, res, next) => {
             return res.status(200).json(allEmployees);
         }
 
-        const managersOnly = {};
+        // Nhân viên thường chỉ được xem nhóm lãnh đạo để nhắn chat (không có full danh sách đồng nghiệp).
+        const leadersOnly = {};
         Object.entries(allEmployees).forEach(([key, emp]) => {
-            if ((emp.vai_tro || '').toLowerCase() === 'manager') {
-                managersOnly[key] = emp;
+            const vt = (emp.vai_tro || '').toLowerCase();
+            if (vt === 'manager' || vt === 'admin') {
+                leadersOnly[key] = emp;
             }
         });
-        res.status(200).json(managersOnly);
+        res.status(200).json(leadersOnly);
     } catch (err) {
         next(err);
     }

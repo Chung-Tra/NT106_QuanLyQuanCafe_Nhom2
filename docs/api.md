@@ -73,21 +73,6 @@ Tạo mã OTP 8 số và gửi về email.
 
 ---
 
-### POST `/auth/verify-email`
-
-Gửi email chứa mã xác nhận có sẵn.
-
-**Body:**
-
-```json
-{
-  "toEmail": "user@example.com",
-  "code": "12345678"
-}
-```
-
----
-
 ### PUT `/auth/password`
 
 Đổi mật khẩu (yêu cầu `APP_SECRET_KEY`).

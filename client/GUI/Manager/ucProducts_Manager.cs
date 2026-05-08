@@ -89,7 +89,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Lỗi tải thực đơn: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Lỗi tải thực đơn: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
             finally
             {
@@ -100,10 +100,10 @@ namespace GUI
         private async void BtnAddMenu_Click(object sender, EventArgs e)
         {
             FoodForm frmAdd = new();
-            if (frmAdd.ShowDialog() == DialogResult.OK)
+            if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
-                MsgBox.Show("Món ăn mới đã được thêm vào thực đơn!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Món ăn mới đã được thêm vào thực đơn!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
 
@@ -111,7 +111,7 @@ namespace GUI
         {
             if (dgvMenu.CurrentRow == null || dgvMenu.CurrentRow.Index < 0)
             {
-                MsgBox.Show("Vui lòng chọn món ăn cần chỉnh sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn món ăn cần chỉnh sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
@@ -129,10 +129,10 @@ namespace GUI
             };
 
             FoodEditForm frmEdit = new(foodToEdit);
-            if (frmEdit.ShowDialog() == DialogResult.OK)
+            if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
-                MsgBox.Show("Đã cập nhật thông tin món ăn!", "Thông báo", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật thông tin món ăn!", "Thông báo", MsgBox.MessageBoxType.Success);
             }
         }
 
@@ -153,14 +153,14 @@ namespace GUI
             };
 
             using FoodDetail dlg = new(food);
-            if (dlg.ShowDialog() == DialogResult.Yes)
+            if (dlg.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.Yes)
                 await LoadRealData();
         }
 
         private void BtnImportMaterial_Click(object sender, EventArgs e)
         {
             using WarehouseManagerForm frm = new();
-            frm.ShowDialog(this.FindForm());
+            frm.ShowDialog(MsgBox.OwnerWindow(this));
         }
 
         private void btnFilter_Click(object sender, EventArgs e)
@@ -204,7 +204,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show("Lỗi khi áp dụng bộ lọc: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Lỗi khi áp dụng bộ lọc: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 
@@ -224,7 +224,7 @@ namespace GUI
         {
             if (dgvMenu.CurrentRow == null || dgvMenu.CurrentRow.Index < 0)
             {
-                MsgBox.Show("Vui lòng chọn món ăn cần xóa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn món ăn cần xóa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
@@ -232,6 +232,7 @@ namespace GUI
             string maMonId = dgvMenu.CurrentRow.Cells["Mã món"].Value?.ToString() ?? "";
 
             var result = MsgBox.Show(
+                MsgBox.OwnerWindow(this),
                 $"Bạn có chắc chắn muốn xóa món \"{tenMon}\"?",
                 "Xác nhận xóa",
                 MsgBox.MessageBoxType.Warning);
@@ -244,16 +245,16 @@ namespace GUI
                     if (deleted)
                     {
                         await LoadRealData();
-                        MsgBox.Show("Đã xóa món ăn thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+                        MsgBox.Show(MsgBox.OwnerWindow(this), "Đã xóa món ăn thành công!", "Thành công", MsgBox.MessageBoxType.Success);
                     }
                     else
                     {
-                        MsgBox.Show("Không thể xóa món ăn!", "Lỗi", MsgBox.MessageBoxType.Error);
+                        MsgBox.Show(MsgBox.OwnerWindow(this), "Không thể xóa món ăn!", "Lỗi", MsgBox.MessageBoxType.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MsgBox.Show($"Lỗi khi xóa: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), $"Lỗi khi xóa: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
                 }
             }
         }

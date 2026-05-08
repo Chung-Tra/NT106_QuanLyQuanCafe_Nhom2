@@ -35,14 +35,14 @@ namespace GUI
                 string ext = Path.GetExtension(ofd.FileName).ToLowerInvariant();
                 if (ext != ".csv" && ext != ".xlsx")
                 {
-                    MsgBox.Show("Chỉ hỗ trợ .xlsx hoặc .csv (Excel: có thể Lưu dưới dạng CSV UTF-8).", "Định dạng không hỗ trợ", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, "Chỉ hỗ trợ .xlsx hoặc .csv (Excel: có thể Lưu dưới dạng CSV UTF-8).", "Định dạng không hỗ trợ", MsgBox.MessageBoxType.Warning);
                     return;
                 }
 
                 IReadOnlyList<InventoryImportPrefillLine> lines = InventoryImportExcelReader.Read(ofd.FileName);
                 if (lines.Count == 0)
                 {
-                    MsgBox.Show("Không đọc được dòng chi tiết hợp lệ. Kiểm tra cột Mã NL và Số lượng.", "File trống", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, "Không đọc được dòng chi tiết hợp lệ. Kiểm tra cột Mã NL và Số lượng.", "File trống", MsgBox.MessageBoxType.Warning);
                     return;
                 }
 
@@ -51,7 +51,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Không đọc được file: {ex.Message}", "Lỗi nhập Excel/CSV", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, $"Không đọc được file: {ex.Message}", "Lỗi nhập Excel/CSV", MsgBox.MessageBoxType.Error);
             }
         }
     }

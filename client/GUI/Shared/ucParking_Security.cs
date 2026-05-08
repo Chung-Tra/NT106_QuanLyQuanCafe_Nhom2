@@ -72,20 +72,21 @@ namespace GUI
             }
 
             string report =
-                $"BÁO CÁO BÃI XE\n" +
+                "BÁO CÁO BÃI XE\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Chỗ trống: {lblSlotsValue.Text}\n" +
                 $"• Xe đang gửi: {parked}\n" +
                 $"• Xe đã ra: {exited}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo bãi xe", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo bãi xe", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
@@ -95,13 +96,13 @@ namespace GUI
         {
             if (string.IsNullOrWhiteSpace(txtPlate.Text))
             {
-                MsgBox.Show("Vui lòng nhập biển số xe!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập biển số xe!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             if (_currentSlots <= 0)
             {
-                MsgBox.Show("Bãi xe đã đầy!", "Thông báo", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Bãi xe đã đầy!", "Thông báo", MsgBox.MessageBoxType.Error);
                 return;
             }
 
@@ -120,7 +121,7 @@ namespace GUI
 
             _currentSlots--;
             UpdateSlots();
-            MsgBox.Show($"Xe {txtPlate.Text.Trim().ToUpper()} ({vehicleType}) đã vào bãi!", "Xe vào", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Xe {txtPlate.Text.Trim().ToUpper()} ({vehicleType}) đã vào bãi!", "Xe vào", MsgBox.MessageBoxType.Success);
             txtPlate.Clear();
         }
 
@@ -128,14 +129,14 @@ namespace GUI
         {
             if (dgvParkingLog.CurrentRow == null)
             {
-                MsgBox.Show("Vui lòng chọn xe cần ra!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn xe cần ra!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             var row = dgvParkingLog.CurrentRow;
             if (row.Cells["Trạng thái"].Value?.ToString() != "Đang gửi")
             {
-                MsgBox.Show("Xe này đã ra rồi!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Xe này đã ra rồi!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
@@ -146,7 +147,7 @@ namespace GUI
 
             _currentSlots++;
             UpdateSlots();
-            MsgBox.Show($"Xe {plate} đã ra khỏi bãi!", "Xe ra", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Xe {plate} đã ra khỏi bãi!", "Xe ra", MsgBox.MessageBoxType.Success);
         }
     }
 }

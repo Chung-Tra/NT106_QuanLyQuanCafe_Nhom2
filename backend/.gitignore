@@ -2,3 +2,11 @@ node_modules/
 *.local
 .env
 logs/*.log
+*.py
+*.pdf 
+*.docx
+*.xlsx
+*.xls
+*.pptx
+*.ppt
+*.zip 

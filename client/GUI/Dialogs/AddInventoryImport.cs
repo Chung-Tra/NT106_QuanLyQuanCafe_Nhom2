@@ -50,7 +50,7 @@ namespace GUI
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Không thể tải dữ liệu ban đầu: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, $"Không thể tải dữ liệu ban đầu: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
             finally
             {
@@ -122,6 +122,7 @@ namespace GUI
             if (boQua > 0)
             {
                 MsgBox.Show(
+                    this,
                     $"Đã bỏ qua {boQua} dòng không khớp mã nguyên liệu trên hệ thống.",
                     "Nhập từ Excel/CSV",
                     MsgBox.MessageBoxType.Warning);
@@ -185,14 +186,14 @@ namespace GUI
                 string nhanVienId = cboNhanVien.SelectedValue?.ToString() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(nhanVienId))
                 {
-                    MsgBox.Show("Vui lòng chọn nhân viên thực hiện nhập kho.", "Thiếu dữ liệu", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, "Vui lòng chọn nhân viên thực hiện nhập kho.", "Thiếu dữ liệu", MsgBox.MessageBoxType.Warning);
                     return;
                 }
 
                 var danhSachChiTiet = LayDanhSachChiTietNhap();
                 if (danhSachChiTiet.Count == 0)
                 {
-                    MsgBox.Show("Vui lòng nhập ít nhất một dòng nguyên liệu hợp lệ.", "Thiếu dữ liệu", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(this, "Vui lòng nhập ít nhất một dòng nguyên liệu hợp lệ.", "Thiếu dữ liệu", MsgBox.MessageBoxType.Warning);
                     return;
                 }
 
@@ -211,17 +212,17 @@ namespace GUI
 
                 if (success)
                 {
-                    MsgBox.Show("Tạo phiếu nhập kho thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, "Tạo phiếu nhập kho thành công!", "Thành công", MsgBox.MessageBoxType.Success);
                     DialogResult = DialogResult.OK;
                     Close();
                     return;
                 }
 
-                MsgBox.Show(message, "Không thể lưu", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, message, "Không thể lưu", MsgBox.MessageBoxType.Error);
             }
             catch (Exception ex)
             {
-                MsgBox.Show($"Lỗi khi tạo phiếu nhập: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, $"Lỗi khi tạo phiếu nhập: {ex.Message}", "Lỗi hệ thống", MsgBox.MessageBoxType.Error);
             }
             finally
             {

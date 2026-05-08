@@ -116,7 +116,8 @@ namespace GUI
         {
             // Hiển thị hộp thoại xác nhận "xịn" của sếp
             DialogResult confirm = MsgBox.Show(
-                $"Sếp có chắc chắn muốn XÓA VĨNH VIỄN món [{_currentFood.TenMon}] không?",
+                this,
+                $"Sếp có chắc chắn muốn XÓA VĨNH VIỄN món [{_currentFood.TenMon}] không?\nHành động này không thể hoàn tác!",
                 "Cảnh báo xóa món",
                 MsgBox.MessageBoxType.Warning);
 
@@ -130,7 +131,7 @@ namespace GUI
                 if (Success)
                 {
                     // Thông báo thành công màu Xanh
-                    MsgBox.Show("Đã xóa món ăn thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, "Đã xóa món ăn thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
 
                     // Gán kết quả để ucProducts_Manager biết mà load lại Grid
                     this.DialogResult = DialogResult.Yes;
@@ -139,7 +140,7 @@ namespace GUI
                 else
                 {
                     // Thông báo lỗi màu Đỏ
-                    MsgBox.Show(Message, "Lỗi khi xóa", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(this, Message, "Lỗi khi xóa", MsgBox.MessageBoxType.Error);
                 }
             }
         }

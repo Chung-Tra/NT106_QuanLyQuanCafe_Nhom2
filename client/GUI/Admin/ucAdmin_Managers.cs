@@ -94,9 +94,14 @@ namespace GUI
 
         private void btnSwitchRole_Click(object? sender, EventArgs e)
         {
+            string switchPrompt =
+                "Bạn muốn chuyển sang giao diện Quản lý?" + Environment.NewLine + Environment.NewLine +
+                "Tính năng này dùng khi Quản lý nghỉ," + Environment.NewLine +
+                "Admin cần trực tiếp xử lý công việc.";
+
             var result = MsgBox.Show(
-                "Bạn muốn chuyển sang giao diện Quản lý?\n\n" +
-                "Tính năng này dùng khi Quản lý nghỉ,\nAdmin cần trực tiếp xử lý công việc.",
+                this,
+                switchPrompt,
                 "Đóng vai Quản lý",
                 MsgBox.MessageBoxType.Warning);
 
@@ -108,12 +113,8 @@ namespace GUI
                 {
                     // Đóng dashboard hiện tại và mở lại với role manager
                     MsgBox.Show(
-                        "Đang chuyển sang giao diện Quản lý...\n\n" +
-                        "Bạn sẽ có quyền truy cập:\n" +
-                        "• Sản phẩm và Thực đơn\n" +
-                        "• Đơn hàng và Hóa đơn\n" +
-                        "• Quản lý Nhân viên\n" +
-                        "• Feedback khách hàng",
+                        mainDash,
+                        "Đang chuyển sang giao diện Quản lý...\n\nBạn sẽ có quyền truy cập:\n• Sản phẩm và Thực đơn\n• Đơn hàng và Hóa đơn\n• Quản lý Nhân viên\n• Feedback khách hàng",
                         "Chuyển vai trò", MsgBox.MessageBoxType.Success);
 
                     // Lưu role tạm thời
@@ -133,9 +134,9 @@ namespace GUI
         private void btnAddManager_Click(object? sender, EventArgs e)
         {
             AddEmployee frm = new();
-            if (frm.ShowDialog() == DialogResult.OK)
+            if (frm.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
-                MsgBox.Show("Đã thêm Quản lý mới!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm Quản lý mới!", "Thành công", MsgBox.MessageBoxType.Success);
                 LoadManagerList();
             }
         }
@@ -144,18 +145,19 @@ namespace GUI
         {
             if (dgvManagers.CurrentRow == null) return;
             string name = dgvManagers.CurrentRow.Cells["Họ tên"].Value?.ToString() ?? "";
-            MsgBox.Show($"Mở form chỉnh sửa thông tin Quản lý: {name}", "Sửa QL", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Mở form chỉnh sửa thông tin Quản lý: {name}", "Sửa QL", MsgBox.MessageBoxType.Info);
         }
 
         private void btnApproveLeave_Click(object? sender, EventArgs e)
         {
             if (lstLeaveReq.Items.Count == 0)
             {
-                MsgBox.Show("Không có đơn xin nghỉ nào!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Không có đơn xin nghỉ nào!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             var result = MsgBox.Show(
+                this,
                 "Duyệt đơn xin nghỉ của QL Phạm Thu Hà?\n05/05 - 06/05 (2 ngày)\nLý do: Việc gia đình",
                 "Duyệt đơn xin nghỉ",
                 MsgBox.MessageBoxType.Warning);
@@ -165,7 +167,7 @@ namespace GUI
                 lstLeaveReq.Items.Clear();
                 lstLeaveReq.Items.Add("[ĐÃ DUYỆT] Phạm Thu Hà - 05/05 → 06/05");
                 btnApproveLeave.Text = "Duyệt (0)";
-                MsgBox.Show("Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
     }

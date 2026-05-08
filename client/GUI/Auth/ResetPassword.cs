@@ -55,7 +55,7 @@ namespace GUI
 
             if (result.IsValid)
             {
-                MsgBox.Show("Cập nhật mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(this, "Cập nhật mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
                 Form? loginForm = Application.OpenForms["Login"];
                 if (loginForm != null)
                 {
@@ -70,7 +70,7 @@ namespace GUI
             }
             else
             {
-                MsgBox.Show("Lỗi: " + result.Message, "Thất bại", MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, "Lỗi: " + result.Message, "Thất bại", MsgBox.MessageBoxType.Error);
             }
 
             btnSave.Text = "Lưu";

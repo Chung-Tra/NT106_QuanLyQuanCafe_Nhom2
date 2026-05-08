@@ -7,7 +7,6 @@ jest.mock('../../src/services/firebase-auth.service', () => ({
 }));
 jest.mock('../../src/services/email.service', () => ({
     generateAndSendOTP: jest.fn(),
-    sendVerificationEmail: jest.fn(),
 }));
 
 const authController = require('../../src/controllers/auth.controller');

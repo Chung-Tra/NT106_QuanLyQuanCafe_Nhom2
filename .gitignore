@@ -12,6 +12,7 @@
 .env
 !.env.example
 
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -417,6 +418,9 @@ FodyWeavers.xsd
 
 # Gemini CLI agents
 .agents/
+
+# Claude Code
+.claude/
 
 # Backend Secrets
 .env.qlcafe-b621b

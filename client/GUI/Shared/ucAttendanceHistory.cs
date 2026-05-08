@@ -153,11 +153,11 @@ namespace GUI
             btnReport.Click += (s, e) =>
             {
                 var dlg = new ReportDialog("Lịch sử chấm công");
-                var result = dlg.ShowDialog();
+                var result = dlg.ShowDialog(MsgBox.OwnerWindow(this));
                 if (result == DialogResult.Yes)
-                    MsgBox.Show("Đã gửi báo cáo và mở chat với Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo và mở chat với Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
                 else if (result == DialogResult.OK)
-                    MsgBox.Show("Đã gửi báo cáo tới Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo tới Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
             };
 
             btnFilter.Click += (s, e) => LoadDummyData();

@@ -13,17 +13,17 @@ namespace GUI
             btnReport.Click += (s, e) =>
             {
                 string report =
-                    $"BÁO CÁO KDS\n" +
+                    "BÁO CÁO KDS\n" +
                     $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                    $"──────────────────\n" +
+                    "──────────────────\n" +
                     $"• {lblPending.Text}\n" +
                     $"• {lblInProgress.Text}\n" +
                     $"• {lblDone.Text}\n" +
-                    $"──────────────────\n" +
-                    $"Gửi báo cáo cho quản lý?";
+                    "──────────────────\n" +
+                    "Gửi báo cáo cho quản lý?";
 
-                if (MsgBox.Show(report, "Báo cáo KDS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                    MsgBox.Show("Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo KDS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
             };
         }
 
@@ -96,7 +96,7 @@ namespace GUI
             btnAction.FlatAppearance.BorderSize = 0;
             btnAction.Click += (s, e) =>
             {
-                MsgBox.Show($"Đã cập nhật trạng thái đơn {orderId}!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã cập nhật trạng thái đơn {orderId}!", "Thành công", MsgBox.MessageBoxType.Success);
             };
 
             card.Controls.AddRange(new Control[] { lblOrder, lblTime, lblItems, btnAction });

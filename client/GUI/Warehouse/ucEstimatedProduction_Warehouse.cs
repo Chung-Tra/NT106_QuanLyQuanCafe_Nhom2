@@ -100,7 +100,7 @@ namespace GUI
             btnAddImport.Click += (s, e) =>
             {
                 var dlg = new AddInventoryImport();
-                if (dlg.ShowDialog() == DialogResult.OK)
+                if (dlg.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
                     LoadDummyData();
             };
 

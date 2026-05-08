@@ -32,7 +32,7 @@ namespace GUI
             };
 
             btnSend.Click += BtnSend_Click;
-            btnOpenChatWindow.Click += (s, e) => MsgBox.Show("Đang mở cửa sổ Messenger...", "Thông báo", MsgBox.MessageBoxType.Info);
+            btnOpenChatWindow.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Đang mở cửa sổ Messenger...", "Thông báo", MsgBox.MessageBoxType.Info);
             btnBroadcast.Click += BtnBroadcast_Click;
 
             // Hiện nút Thông báo toàn bộ cho admin/manager
@@ -104,11 +104,12 @@ namespace GUI
             string msg = txtMessage.Text.Trim();
             if (string.IsNullOrEmpty(msg))
             {
-                MsgBox.Show("Vui lòng nhập nội dung thông báo!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập nội dung thông báo!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             var result = MsgBox.Show(
+                this,
                 $"Gửi thông báo sau cho TOÀN BỘ nhân viên?\n\n\"{msg}\"",
                 "Thông báo toàn bộ",
                 MsgBox.MessageBoxType.Warning);
@@ -120,7 +121,7 @@ namespace GUI
                 lstChatHistory.Items.Add($"[{timestamp}] [THÔNG BÁO] {sender_name}: {msg}");
                 lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
                 txtMessage.Clear();
-                MsgBox.Show("Đã gửi thông báo cho toàn bộ nhân viên!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi thông báo cho toàn bộ nhân viên!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
 

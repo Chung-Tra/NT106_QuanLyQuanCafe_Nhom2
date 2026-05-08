@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -55,13 +55,13 @@ namespace GUI
         {
             if (string.IsNullOrWhiteSpace(txtReason.Text))
             {
-                MsgBox.Show("Vui lòng nhập lý do nghỉ phép!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập lý do nghỉ phép!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
             if (dtpToDate.Value < dtpFromDate.Value)
             {
-                MsgBox.Show("Ngày kết thúc phải sau ngày bắt đầu!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Ngày kết thúc phải sau ngày bắt đầu!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
@@ -78,25 +78,30 @@ namespace GUI
                 dt.Rows.InsertAt(newRow, 0);
             }
 
-            MsgBox.Show($"Đã gửi đơn xin nghỉ {days} ngày!\nTừ: {dtpFromDate.Value:dd/MM/yyyy}\nĐến: {dtpToDate.Value:dd/MM/yyyy}", "Gửi thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(
+                MsgBox.OwnerWindow(this),
+                $"Đã gửi đơn xin nghỉ {days} ngày!\nTừ: {dtpFromDate.Value:dd/MM/yyyy}\nĐến: {dtpToDate.Value:dd/MM/yyyy}",
+                "Gửi thành công",
+                MsgBox.MessageBoxType.Success);
             txtReason.Clear();
         }
 
         private void btnReport_Click(object? sender, EventArgs e)
         {
             string report =
-                $"BÁO CÁO NGHỈ PHÉP\n" +
-                $"──────────────────\n" +
+                "BÁO CÁO NGHỈ PHÉP\n" +
+                "──────────────────\n" +
                 $"• Ngày phép còn lại: {lblRemainingValue.Text}\n" +
                 $"• Đang chờ duyệt: {lblPendingValue.Text}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo nghỉ phép", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo nghỉ phép", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }

@@ -15,16 +15,16 @@ namespace GUI
             {
                 string currentRecipe = lblRecipeName.Text;
                 string report =
-                    $"BÁO CÁO CÔNG THỨC\n" +
+                    "BÁO CÁO CÔNG THỨC\n" +
                     $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                    $"──────────────────\n" +
+                    "──────────────────\n" +
                     $"• Tổng công thức: {lstRecipes.Items.Count}\n" +
                     $"• Đang xem: {currentRecipe}\n" +
-                    $"──────────────────\n" +
-                    $"Gửi báo cáo cho quản lý?";
+                    "──────────────────\n" +
+                    "Gửi báo cáo cho quản lý?";
 
-                if (MsgBox.Show(report, "Báo cáo công thức", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                    MsgBox.Show("Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo công thức", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
             };
         }
 

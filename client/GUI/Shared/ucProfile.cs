@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using DTO;
@@ -41,22 +41,22 @@ namespace GUI
 
         private void btnUpdateInfo_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show("Đã cập nhật thông tin cá nhân!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật thông tin cá nhân!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnChangePass_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtOldPass.Text) || string.IsNullOrWhiteSpace(txtNewPass.Text))
             {
-                MsgBox.Show("Vui lòng nhập đầy đủ mật khẩu cũ và mới!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập đầy đủ mật khẩu cũ và mới!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
             if (txtNewPass.Text.Length < 6)
             {
-                MsgBox.Show("Mật khẩu mới phải có ít nhất 6 ký tự!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Mật khẩu mới phải có ít nhất 6 ký tự!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            MsgBox.Show("Đã đổi mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đổi mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
             txtOldPass.Clear();
             txtNewPass.Clear();
         }
@@ -66,17 +66,17 @@ namespace GUI
             using OpenFileDialog ofd = new();
             ofd.Title = "Chọn ảnh đại diện";
             ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            if (ofd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 try
                 {
                     picAvatar.Image?.Dispose();
                     picAvatar.Image = Image.FromFile(ofd.FileName);
-                    MsgBox.Show("Đã cập nhật ảnh đại diện!", "Thành công", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật ảnh đại diện!", "Thành công", MsgBox.MessageBoxType.Success);
                 }
                 catch
                 {
-                    MsgBox.Show("Không thể đọc file ảnh!", "Lỗi", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Không thể đọc file ảnh!", "Lỗi", MsgBox.MessageBoxType.Error);
                 }
             }
         }

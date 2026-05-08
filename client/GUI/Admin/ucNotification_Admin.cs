@@ -168,7 +168,10 @@ namespace GUI
 
             if (type == "Feedback xấu" && content.Contains("CHƯA XỬ LÝ"))
             {
-                MsgBox.Show("Feedback xấu chưa được quản lý xử lý!\nChuyển sang chat với quản lý...", "Cảnh báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    "Feedback xấu chưa được quản lý xử lý!\nChuyển sang chat với quản lý...",
+                    "Cảnh báo", MsgBox.MessageBoxType.Warning);
             }
             else
             {
@@ -181,7 +184,10 @@ namespace GUI
                     "attendance" => "Chấm công",
                     _ => "Trang chủ"
                 };
-                MsgBox.Show($"Đã đọc thông báo.\nĐi tới: {pageName}", "Thông báo", MsgBox.MessageBoxType.Info);
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    $"Đã đọc thông báo.\nĐi tới: {pageName}",
+                    "Thông báo", MsgBox.MessageBoxType.Info);
             }
         }
 
@@ -193,7 +199,7 @@ namespace GUI
             _dtNotif.Rows[idx]["Nội dung"] = _dtNotif.Rows[idx]["Nội dung"].ToString()?.Replace("Xin nghỉ", "[ĐÃ DUYỆT] Xin nghỉ") ?? "";
             ColorRows();
             UpdateUnreadCount();
-            MsgBox.Show("Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void btnReject_Click(object? sender, EventArgs e)
@@ -204,14 +210,14 @@ namespace GUI
             _dtNotif.Rows[idx]["Nội dung"] = _dtNotif.Rows[idx]["Nội dung"].ToString()?.Replace("Xin nghỉ", "[TỪ CHỐI] Xin nghỉ") ?? "";
             ColorRows();
             UpdateUnreadCount();
-            MsgBox.Show("Đã từ chối đơn xin nghỉ!", "Thông báo", MsgBox.MessageBoxType.Warning);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã từ chối đơn xin nghỉ!", "Thông báo", MsgBox.MessageBoxType.Warning);
         }
 
         private void btnGoToChat_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
             string from = dgvNotifications.CurrentRow.Cells["Từ"].Value?.ToString() ?? "";
-            MsgBox.Show($"Mở cửa sổ chat với {from}...", "Chat", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Mở cửa sổ chat với {from}...", "Chat", MsgBox.MessageBoxType.Info);
         }
 
         private void btnGoToPage_Click(object? sender, EventArgs e)
@@ -231,7 +237,7 @@ namespace GUI
                 "attendance" => "Chấm công",
                 _ => "Trang chủ"
             };
-            MsgBox.Show($"Chuyển tới trang: {pageName}", "Điều hướng", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Chuyển tới trang: {pageName}", "Điều hướng", MsgBox.MessageBoxType.Info);
         }
 
         private void btnMarkAllRead_Click(object? sender, EventArgs e)
@@ -240,7 +246,7 @@ namespace GUI
                 row["Đã đọc"] = true;
             ColorRows();
             UpdateUnreadCount();
-            MsgBox.Show("Đã đọc tất cả thông báo!", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đọc tất cả thông báo!", "Thành công", MsgBox.MessageBoxType.Success);
         }
     }
 }

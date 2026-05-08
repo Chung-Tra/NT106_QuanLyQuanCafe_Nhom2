@@ -149,7 +149,6 @@ Base URL: `http://localhost:3000/api`
 | POST   | `/auth/login`            | Đăng nhập              | Không        |
 | POST   | `/auth/check-email`      | Kiểm tra email tồn tại | Không        |
 | POST   | `/auth/otp/generate`     | Tạo và gửi OTP         | Không        |
-| POST   | `/auth/verify-email`     | Gửi email xác nhận     | Không        |
 | PUT    | `/auth/password`         | Đổi mật khẩu           | Không        |
 | GET    | `/employees`             | Danh sách nhân viên    | Bearer token |
 | POST   | `/employees`             | Thêm nhân viên         | Manager+     |

@@ -49,20 +49,21 @@ namespace GUI
             }
 
             string report =
-                $"BÁO CÁO AN NINH\n" +
+                "BÁO CÁO AN NINH\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tổng sự cố: {totalIncidents}\n" +
                 $"• Đang xử lý: {activeIncidents}\n" +
                 $"• Đã xử lý: {totalIncidents - activeIncidents}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo an ninh", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo an ninh", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
@@ -71,7 +72,12 @@ namespace GUI
         private void btnSOS_Click(object sender, EventArgs e)
         {
             var result = MsgBox.Show(
-                "BẠN CÓ CHẮC MUỐN GỬI TÍN HIỆU KHẨN CẤP?\n\nThao tác này sẽ thông báo ngay đến:\n- Quản lý\n- Tất cả nhân viên bảo vệ\n- Hệ thống giám sát",
+                MsgBox.OwnerWindow(this),
+                "BẠN CÓ CHẮC MUỐN GỬI TÍN HIỆU KHẨN CẤP?\n\n" +
+                "Thao tác này sẽ thông báo ngay đến:\n" +
+                "- Quản lý\n" +
+                "- Tất cả nhân viên bảo vệ\n" +
+                "- Hệ thống giám sát",
                 "XÁC NHẬN SOS",
                 MsgBox.MessageBoxType.Warning);
 
@@ -89,7 +95,10 @@ namespace GUI
                     dt.Rows.InsertAt(newRow, 0);
                 }
 
-                MsgBox.Show("ĐÃ GỬI TÍN HIỆU KHẨN CẤP!\n\nQuản lý và đội bảo vệ đã được thông báo.", "SOS", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    "ĐÃ GỬI TÍN HIỆU KHẨN CẤP!\n\nQuản lý và đội bảo vệ đã được thông báo.",
+                    "SOS", MsgBox.MessageBoxType.Warning);
             }
         }
     }

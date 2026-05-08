@@ -50,21 +50,22 @@ namespace GUI
         private void btnReport_Click(object? sender, EventArgs e)
         {
             string report =
-                $"BÁO CÁO TIỀN MẶT\n" +
+                "BÁO CÁO TIỀN MẶT\n" +
                 $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                $"──────────────────\n" +
+                "──────────────────\n" +
                 $"• Tiền đầu ca: {lblOpenCash.Text}\n" +
                 $"• Tiền hiện tại: {lblCurrentCash.Text}\n" +
                 $"• Doanh thu ca: {lblRevenue.Text}\n" +
                 $"• Chênh lệch: {lblDifference.Text}\n" +
-                $"──────────────────\n" +
-                $"Gửi báo cáo cho quản lý qua Chat?";
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(report, "Báo cáo tiền mặt", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo tiền mặt", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
@@ -74,27 +75,39 @@ namespace GUI
         {
             if (_shiftStarted)
             {
-                MsgBox.Show("Ca làm việc đã được bắt đầu rồi!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Ca làm việc đã được bắt đầu rồi!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
             _shiftStarted = true;
             btnStartShift.Enabled = false;
-            MsgBox.Show("Đã bắt đầu ca làm việc!\nTiền đầu ca: 2,000,000 đ", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(
+                MsgBox.OwnerWindow(this),
+                "Đã bắt đầu ca làm việc!\nTiền đầu ca: 2,000,000 đ",
+                "Thành công",
+                MsgBox.MessageBoxType.Success);
         }
 
         private void btnEndShift_Click(object sender, EventArgs e)
         {
             if (!_shiftStarted)
             {
-                MsgBox.Show("Chưa bắt đầu ca làm việc!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Chưa bắt đầu ca làm việc!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            var result = MsgBox.Show("Bạn có chắc muốn kết thúc ca?\nTiền cuối ca: 3,450,000 đ", "Xác nhận", MsgBox.MessageBoxType.Warning);
+            var result = MsgBox.Show(
+                MsgBox.OwnerWindow(this),
+                "Bạn có chắc muốn kết thúc ca?\nTiền cuối ca: 3,450,000 đ",
+                "Xác nhận",
+                MsgBox.MessageBoxType.Warning);
             if (result == DialogResult.Yes)
             {
                 _shiftStarted = false;
                 btnStartShift.Enabled = true;
-                MsgBox.Show("Đã kết thúc ca làm việc!\nDoanh thu ca: 1,450,000 đ\nChênh lệch: 0 đ", "Kết ca", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    "Đã kết thúc ca làm việc!\nDoanh thu ca: 1,450,000 đ\nChênh lệch: 0 đ",
+                    "Kết ca",
+                    MsgBox.MessageBoxType.Success);
             }
         }
     }

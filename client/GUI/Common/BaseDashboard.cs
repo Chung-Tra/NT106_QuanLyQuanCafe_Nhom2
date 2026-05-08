@@ -107,7 +107,11 @@ namespace GUI
                 GlobalSession.CurrentUser = null;
                 GlobalSession.ExpiryTime = DateTime.MinValue;
 
-                MsgBox.Show("Phiên làm việc của bạn đã hết hạn vì lý do bảo mật.\nVui lòng đăng nhập lại!", "Phiên hết hạn", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(
+                    _targetForm,
+                    "Phiên làm việc của bạn đã hết hạn vì lý do bảo mật.\nVui lòng đăng nhập lại!",
+                    "Phiên hết hạn",
+                    MsgBox.MessageBoxType.Warning);
 
                 bool isLoginFound = false;
                 foreach (Form frm in Application.OpenForms)

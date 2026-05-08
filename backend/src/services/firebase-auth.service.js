@@ -31,8 +31,16 @@ async function checkEmailExists(email) {
 }
 
 async function updatePassword(email, newPassword, secretKey) {
-    if (secretKey !== process.env.APP_SECRET_KEY) {
-        const err = new Error('Unauthorized');
+    const expected = process.env.APP_SECRET_KEY;
+    if (!expected) {
+        const err = new Error('Server chưa cấu hình APP_SECRET_KEY trong .env');
+        err.status = 500;
+        throw err;
+    }
+    if (secretKey !== expected) {
+        const err = new Error(
+            'secretKey không khớp APP_SECRET_KEY — đồng bộ App.config FirebaseSecretKey với backend .env và restart server',
+        );
         err.status = 403;
         throw err;
     }

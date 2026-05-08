@@ -132,9 +132,9 @@ namespace GUI
         private void BtnNew_Click(object? sender, EventArgs e)
         {
             using var dlg = new BroadcastMessage();
-            if (dlg.ShowDialog() == DialogResult.OK)
+            if (dlg.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
-                MsgBox.Show("Đã gửi thông báo!", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi thông báo!", "Thành công", MsgBox.MessageBoxType.Success);
                 LoadHistory();
             }
         }
