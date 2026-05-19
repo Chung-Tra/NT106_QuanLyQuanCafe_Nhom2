@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    [SupportedOSPlatform("windows")] 
+    [SupportedOSPlatform("windows")]
     public class ChatManager(Control uiControl, ListBox lstChatHistory)
     {
         private HubConnection? _connection;
@@ -26,24 +26,31 @@ namespace GUI
 
                 _connection = new HubConnectionBuilder()
                     .WithUrl(serverUrl)
-                    .WithAutomaticReconnect()
+                    .WithAutomaticReconnect([
+                        TimeSpan.Zero,
+                        TimeSpan.FromSeconds(2),
+                        TimeSpan.FromSeconds(5),
+                        TimeSpan.FromSeconds(10)
+                    ])
                     .Build();
 
-                _connection.On<string, string, string>("ReceiveMessageWithRoom", (senderId, message, roomId) =>
+                // Nhận 4 tham số: senderId, senderName, message, roomId
+                _connection.On<string, string, string, string>("ReceiveMessageWithRoom",
+                    (senderId, senderName, message, roomId) =>
                 {
-                    // Kiểm tra uiControl còn sống không trước khi Invoke
                     if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
                     {
-                        uiControl.Invoke(new Action(() => {
+                        uiControl.Invoke(new Action(() =>
+                        {
                             if (roomId == CurrentRoomId)
                             {
                                 string currentTime = DateTime.Now.ToString("dd/MM HH:mm");
-                                string myId = GlobalSession.CurrentUser?.EmployeeId ?? "Unknown";
+                                string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
 
                                 if (senderId == myId)
                                     lstChatHistory.Items.Add($"[{currentTime}] ▶ Tôi: {message}");
                                 else
-                                    lstChatHistory.Items.Add($"[{currentTime}] 👤 {senderId}: {message}");
+                                    lstChatHistory.Items.Add($"[{currentTime}] 👤 {senderName}: {message}");
 
                                 lstChatHistory.Items.Add("");
                                 lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
@@ -52,28 +59,44 @@ namespace GUI
                     }
                 });
 
+                // FIX: sau khi mạng bị ngắt rồi reconnect, client phải JoinRoom lại
+                // Vì SignalR Groups không được giữ sau khi mất kết nối
+                _connection.Reconnected += async _ =>
+                {
+                    try
+                    {
+                        await _connection.InvokeAsync("JoinRoom", CurrentRoomId);
+                        if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
+                            uiControl.Invoke(() => lstChatHistory.Items.Add("[Hệ thống]: Đã kết nối lại."));
+                    }
+                    catch { /* bỏ qua nếu JoinRoom lỗi khi reconnect */ }
+                };
+
+                _connection.Closed += _ =>
+                {
+                    if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
+                        uiControl.Invoke(() => lstChatHistory.Items.Add("[Hệ thống]: Mất kết nối. Đang thử lại..."));
+                    return Task.CompletedTask;
+                };
+
                 await _connection.StartAsync();
 
-                if (!uiControl.IsDisposed)
-                {
+                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
                     uiControl.Invoke(() => lstChatHistory.Items.Add($"[Hệ thống]: Đã kết nối tới máy chủ ({savedIP})."));
-                }
             }
             catch (Exception ex)
             {
-                if (!uiControl.IsDisposed)
-                {
+                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
                     uiControl.Invoke(() => lstChatHistory.Items.Add($"[Lỗi]: Mất kết nối server chat - {ex.Message}"));
-                }
             }
         }
 
         // --- HÀM 2: CHUYỂN PHÒNG & TẢI LỊCH SỬ ---
-        public async Task SwitchChatRoom(string targetId)
+        public async Task SwitchChatRoom(string targetId, string targetName)
         {
             if (GlobalSession.CurrentUser == null) return;
 
-            string myId = GlobalSession.CurrentUser.EmployeeId ?? "Unknown";
+            string myId = GlobalSession.CurrentUser.EmployeeId ?? "";
             string newRoomId = ChatBUS.GetRoomId(myId, targetId);
 
             // Rời room cũ, join room mới trên SignalR server
@@ -89,7 +112,7 @@ namespace GUI
             CurrentRoomId = newRoomId;
 
             lstChatHistory.Items.Clear();
-            lstChatHistory.Items.Add($"[Hệ thống]: Đang tải lịch sử với {targetId}...");
+            lstChatHistory.Items.Add($"[Hệ thống]: Đang tải lịch sử...");
 
             try
             {
@@ -100,14 +123,14 @@ namespace GUI
 
                 foreach (var msg in history)
                 {
-                    // Xử lý Nullable cho msg.Message
                     string content = msg.Message ?? "";
                     DateTime msgTime = DateTimeOffset.FromUnixTimeMilliseconds(msg.Timestamp).LocalDateTime;
 
+                    string displayName = msg.SenderName ?? msg.SenderId ?? "?";
                     if (msg.SenderId == myId)
                         lstChatHistory.Items.Add($"[{msgTime:dd/MM HH:mm}] ▶ Tôi: {content}");
                     else
-                        lstChatHistory.Items.Add($"[{msgTime:dd/MM HH:mm}] 👤 {msg.SenderId}: {content}");
+                        lstChatHistory.Items.Add($"[{msgTime:dd/MM HH:mm}] 👤 {displayName}: {content}");
 
                     lstChatHistory.Items.Add("");
                 }
@@ -134,8 +157,8 @@ namespace GUI
 
                 try
                 {
-                    // Gửi lên ChatServer — server tự lưu vào database
-                    await _connection.InvokeAsync("SendMessageWithRoom", myId, message, CurrentRoomId);
+                    string myName = GlobalSession.CurrentUser?.FullName ?? myId;
+                    await _connection.InvokeAsync("SendMessageWithRoom", myId, myName, message, CurrentRoomId);
                 }
                 catch (Exception ex)
                 {

@@ -34,8 +34,13 @@ namespace BUS
         public static async Task<List<EmployeeDTO>> GetAllEmployeesAsync()
         {
             var dict = await EmployeeDAL.GetAllAsync();
-            if (dict.Count == 0) return [];
-            return dict.Select(x => { x.Value.EmployeeId = x.Key; return x.Value; }).ToList();
+            var list = new List<EmployeeDTO>();
+            foreach (var kvp in dict)
+            {
+                kvp.Value.EmployeeId = kvp.Key;
+                list.Add(kvp.Value);
+            }
+            return list;
         }
 
         public static async Task<(bool Success, string Message)> UpdateEmployeeAsync(string empId, EmployeeDTO data)

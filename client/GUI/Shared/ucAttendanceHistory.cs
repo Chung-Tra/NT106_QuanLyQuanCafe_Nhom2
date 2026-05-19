@@ -1,3 +1,4 @@
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
@@ -5,216 +6,195 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Xem lịch sử chấm công (read-only).
-    /// Nếu phát hiện sai sót → nút "Báo cáo" mở ReportDialog + chat Manager.
-    /// </summary>
-    public class ucAttendanceHistory : UserControl
+    public partial class ucAttendanceHistory : UserControl
     {
-        private ComboBox cboEmployee = null!;
-        private DateTimePicker dtpFrom = null!;
-        private DateTimePicker dtpTo = null!;
-        private Button btnFilter = null!;
-        private DataGridView dgvAttendance = null!;
-        private Label lblSummary = null!;
-        private Label lblAbsent = null!;
-        private Label lblLate = null!;
-        private Button btnReport = null!;
-        private Label lblTitle = null!;
-
         public ucAttendanceHistory()
         {
-            BackColor = Color.FromArgb(37, 37, 38);
-            ForeColor = Color.White;
-            Font = new Font("Segoe UI", 9F);
-            Dock = DockStyle.Fill;
-
-            BuildUI();
-            LoadDummyData();
+            InitializeComponent();
         }
 
-        private void BuildUI()
+        private void ucAttendanceHistory_Load(object sender, EventArgs e) => InitFilter();
+        private void btnFilter_Click(object sender, EventArgs e)          => LoadData();
+
+        // ──────────────────────────────────────────────
+        // KHỞI TẠO BỘ LỌC
+        // ──────────────────────────────────────────────
+        private void InitFilter()
         {
-            int pad = 16;
+            var user = GlobalSession.CurrentUser;
+            bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
 
-            lblTitle = new Label
+            if (isPrivileged)
             {
-                Text = "Lịch sử chấm công",
-                Location = new Point(pad, 12),
-                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-                ForeColor = Color.White,
-                AutoSize = true
-            };
+                // Admin/Manager: hiện ComboBox, ẩn label tên
+                cboEmployee.Visible     = true;
+                lblEmployeeName.Visible = false;
+                btnFilter.Visible       = true;
 
-            // Bộ lọc
-            var lblEmp = new Label { Text = "Nhân viên:", Location = new Point(pad, 48), ForeColor = Color.Silver, AutoSize = true };
-            cboEmployee = new ComboBox
+                cboEmployee.Items.Clear();
+                cboEmployee.Items.Add("Tất cả");
+                cboEmployee.Items.Add("NV001 - Nguyễn Văn An");
+                cboEmployee.Items.Add("NV002 - Trần Thị Bích");
+                cboEmployee.Items.Add("NV003 - Lê Hoàng Nam");
+                cboEmployee.SelectedIndex = 0;
+            }
+            else
             {
-                Location = new Point(pad, 68),
-                Width = 200,
-                BackColor = Color.FromArgb(60, 60, 65),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            cboEmployee.Items.AddRange(["Tất cả", "NV001 - Nguyễn Văn An", "NV002 - Trần Thị Bích", "NV003 - Lê Hoàng Nam"]);
-            cboEmployee.SelectedIndex = 0;
+                // Nhân viên: ẩn ComboBox, hiện label tên + ẩn nút lọc
+                cboEmployee.Visible     = false;
+                btnFilter.Visible       = false;
+                lblEmployeeName.Visible = true;
 
-            var lblFrom = new Label { Text = "Từ ngày:", Location = new Point(pad + 220, 48), ForeColor = Color.Silver, AutoSize = true };
-            dtpFrom = new DateTimePicker
-            {
-                Location = new Point(pad + 220, 68),
-                Width = 140,
-                Format = DateTimePickerFormat.Short,
-                Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1),
-                CalendarForeColor = Color.White
-            };
-            var lblTo = new Label { Text = "Đến ngày:", Location = new Point(pad + 375, 48), ForeColor = Color.Silver, AutoSize = true };
-            dtpTo = new DateTimePicker
-            {
-                Location = new Point(pad + 375, 68),
-                Width = 140,
-                Format = DateTimePickerFormat.Short,
-                Value = DateTime.Now,
-                CalendarForeColor = Color.White
-            };
+                string display = string.IsNullOrWhiteSpace(user?.FullName)
+                    ? "Nhân viên"
+                    : $"{user!.EmployeeId} - {user.FullName}";
 
-            btnFilter = new Button
-            {
-                Text = "Lọc",
-                Location = new Point(pad + 530, 66),
-                Size = new Size(70, 26),
-                BackColor = Color.SteelBlue,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
+                lblEmployeeName.Text = display;
 
-            // Lưới dữ liệu
-            dgvAttendance = new DataGridView
-            {
-                Location = new Point(pad, 108),
-                Width = 740,
-                Height = 300,
-                BackgroundColor = Color.FromArgb(45, 45, 48),
-                ForeColor = Color.White,
-                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = Color.FromArgb(30, 30, 30),
-                    ForeColor = Color.White,
-                    Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-                },
-                DefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = Color.FromArgb(45, 45, 48),
-                    ForeColor = Color.White,
-                    SelectionBackColor = Color.SteelBlue
-                },
-                ReadOnly = true,
-                AllowUserToAddRows = false,
-                RowHeadersVisible = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect
-            };
+                cboEmployee.Items.Clear();
+                cboEmployee.Items.Add(display);
+                cboEmployee.SelectedIndex = 0;
+            }
 
-            // Tổng kết
-            lblSummary = new Label
-            {
-                Text = "Ngày công: 0",
-                Location = new Point(pad, 420),
-                ForeColor = Color.Silver,
-                AutoSize = true
-            };
-            lblAbsent = new Label
-            {
-                Text = "Nghỉ: 0 ngày",
-                Location = new Point(pad + 130, 420),
-                ForeColor = Color.IndianRed,
-                AutoSize = true
-            };
-            lblLate = new Label
-            {
-                Text = "Đi muộn: 0 lần",
-                Location = new Point(pad + 230, 420),
-                ForeColor = Color.Orange,
-                AutoSize = true
-            };
+            dtpFrom.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            dtpTo.Value   = DateTime.Now;
 
-            btnReport = new Button
-            {
-                Text = "Báo cáo sai sót",
-                Location = new Point(pad + 520, 416),
-                Size = new Size(138, 30),
-                BackColor = Color.FromArgb(160, 80, 80),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            btnReport.Click += (s, e) =>
-            {
-                var dlg = new ReportDialog("Lịch sử chấm công");
-                var result = dlg.ShowDialog(MsgBox.OwnerWindow(this));
-                if (result == DialogResult.Yes)
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo và mở chat với Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
-                else if (result == DialogResult.OK)
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo tới Manager!", "Thông báo", MsgBox.MessageBoxType.Success);
-            };
-
-            btnFilter.Click += (s, e) => LoadDummyData();
-
-            Controls.AddRange([
-                lblTitle, lblEmp, cboEmployee,
-                lblFrom, dtpFrom, lblTo, dtpTo, btnFilter,
-                dgvAttendance, lblSummary, lblAbsent, lblLate, btnReport
-            ]);
+            LoadData();
         }
 
-        private void LoadDummyData()
+        // ──────────────────────────────────────────────
+        // TẢI DỮ LIỆU
+        // ──────────────────────────────────────────────
+        private void LoadData()
         {
-            var dt = new DataTable();
+            if (dtpFrom.Value.Date > dtpTo.Value.Date)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    "Ngày bắt đầu phải trước ngày kết thúc!",
+                    "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+
+            DataTable dt = new();
             dt.Columns.Add("Ngày");
+            dt.Columns.Add("Thứ");
             dt.Columns.Add("Nhân viên");
-            dt.Columns.Add("Giờ vào");
-            dt.Columns.Add("Giờ ra");
+            dt.Columns.Add("Check-in");
+            dt.Columns.Add("Check-out");
             dt.Columns.Add("Số giờ", typeof(double));
             dt.Columns.Add("Trạng thái");
             dt.Columns.Add("Ghi chú");
 
-            dt.Rows.Add("01/05/2026", "NV001 - Nguyễn Văn An", "07:58", "17:02", 9.1, "Đúng giờ", "");
-            dt.Rows.Add("01/05/2026", "NV002 - Trần Thị Bích", "08:35", "17:00", 8.4, "Đi muộn", "Muộn 35 phút");
-            dt.Rows.Add("01/05/2026", "NV003 - Lê Hoàng Nam", "", "", 0, "Nghỉ phép", "Đã xin phép");
-            dt.Rows.Add("02/05/2026", "NV001 - Nguyễn Văn An", "07:55", "18:10", 10.3, "Đúng giờ", "Tăng ca");
-            dt.Rows.Add("02/05/2026", "NV002 - Trần Thị Bích", "08:00", "17:00", 9.0, "Đúng giờ", "");
-            dt.Rows.Add("02/05/2026", "NV003 - Lê Hoàng Nam", "08:10", "17:00", 8.8, "Đúng giờ", "");
-            dt.Rows.Add("03/05/2026", "NV001 - Nguyễn Văn An", "08:50", "17:00", 8.2, "Đi muộn", "Muộn 50 phút");
-            dt.Rows.Add("03/05/2026", "NV002 - Trần Thị Bích", "", "", 0, "Nghỉ không phép", "");
-            dt.Rows.Add("03/05/2026", "NV003 - Lê Hoàng Nam", "07:45", "17:30", 9.8, "Đúng giờ", "Đến sớm");
+            dt.Rows.Add("01/05/2026", "T6", "NV001 - Nguyễn Văn An", "07:58", "17:02",  9.1, "Đúng giờ",        "");
+            dt.Rows.Add("01/05/2026", "T6", "NV002 - Trần Thị Bích",  "08:35", "17:00",  8.4, "Đi muộn",        "Muộn 35 phút");
+            dt.Rows.Add("01/05/2026", "T6", "NV003 - Lê Hoàng Nam",   "",      "",        0.0, "Nghỉ phép",       "Đã xin phép");
+            dt.Rows.Add("02/05/2026", "T7", "NV001 - Nguyễn Văn An", "07:55", "18:10",  10.3, "Đúng giờ",        "Tăng ca");
+            dt.Rows.Add("02/05/2026", "T7", "NV002 - Trần Thị Bích",  "08:00", "17:00",   9.0, "Đúng giờ",       "");
+            dt.Rows.Add("02/05/2026", "T7", "NV003 - Lê Hoàng Nam",   "08:10", "17:00",   8.8, "Đúng giờ",       "");
+            dt.Rows.Add("03/05/2026", "CN", "NV001 - Nguyễn Văn An", "08:50", "17:00",   8.2, "Đi muộn",        "Muộn 50 phút");
+            dt.Rows.Add("03/05/2026", "CN", "NV002 - Trần Thị Bích",  "",      "",         0.0, "Nghỉ không phép", "");
+            dt.Rows.Add("03/05/2026", "CN", "NV003 - Lê Hoàng Nam",   "07:45", "17:30",   9.8, "Đúng giờ",       "Đến sớm");
+
+            // Lọc nhân viên
+            string filter = cboEmployee.SelectedItem?.ToString() ?? "Tất cả";
+            if (filter != "Tất cả")
+            {
+                DataTable filtered = dt.Clone();
+                foreach (DataRow row in dt.Rows)
+                    if (row["Nhân viên"].ToString() == filter)
+                        filtered.ImportRow(row);
+                dt = filtered;
+            }
 
             dgvAttendance.DataSource = dt;
+            dgvAttendance.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            if (dgvAttendance.Columns.Count == 0) return;
+
+            dgvAttendance.Columns["Ngày"].FillWeight        = 10;
+            dgvAttendance.Columns["Thứ"].FillWeight          = 6;
+            dgvAttendance.Columns["Nhân viên"].FillWeight   = 22;
+            dgvAttendance.Columns["Check-in"].FillWeight    = 9;
+            dgvAttendance.Columns["Check-out"].FillWeight   = 9;
+            dgvAttendance.Columns["Số giờ"].FillWeight      = 8;
+            dgvAttendance.Columns["Trạng thái"].FillWeight  = 14;
+            dgvAttendance.Columns["Ghi chú"].FillWeight     = 18;
+
+            dgvAttendance.Columns["Số giờ"].DefaultCellStyle.Format    = "F1";
+            dgvAttendance.Columns["Số giờ"].DefaultCellStyle.Alignment    = DataGridViewContentAlignment.MiddleCenter;
+            dgvAttendance.Columns["Thứ"].DefaultCellStyle.Alignment       = DataGridViewContentAlignment.MiddleCenter;
+            dgvAttendance.Columns["Check-in"].DefaultCellStyle.Alignment  = DataGridViewContentAlignment.MiddleCenter;
+            dgvAttendance.Columns["Check-out"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            // Tô màu + đếm thống kê
+            int shifts = 0, leaveApproved = 0, leaveUnauthorized = 0, late = 0;
 
             foreach (DataGridViewRow row in dgvAttendance.Rows)
             {
+                if (row.IsNewRow) continue; // bỏ qua hàng rỗng cuối DataGridView
+
                 string status = row.Cells["Trạng thái"].Value?.ToString() ?? "";
-                row.DefaultCellStyle.ForeColor = status switch
+                switch (status)
                 {
-                    "Nghỉ không phép" => Color.IndianRed,
-                    "Đi muộn" => Color.Orange,
-                    "Nghỉ phép" => Color.SkyBlue,
-                    _ => Color.White
-                };
+                    case "Đúng giờ":
+                        row.DefaultCellStyle.ForeColor = Color.FromArgb(34, 197, 94);
+                        shifts++;
+                        break;
+                    case "Đi muộn":
+                        row.DefaultCellStyle.ForeColor = Color.FromArgb(234, 179, 8);
+                        row.Cells["Ghi chú"].Style.ForeColor = Color.FromArgb(234, 179, 8);
+                        shifts++; 
+                        late++;
+                        break;
+                    case "Nghỉ phép":
+                        row.DefaultCellStyle.ForeColor = Color.FromArgb(56, 139, 204);
+                        leaveApproved++; 
+                        break;
+                    case "Nghỉ không phép":
+                        row.DefaultCellStyle.ForeColor = Color.FromArgb(239, 68, 68);
+                        leaveUnauthorized++; 
+                        break;
+                }
             }
 
-            int absent = 0, late = 0, present = 0;
-            foreach (DataRow row in dt.Rows)
+            int totalAbsent = leaveApproved + leaveUnauthorized;
+
+            lblShiftsValue.Text = $"{shifts} ngày";
+            lblAbsentValue.Text = $"{totalAbsent} ngày"; // tổng nghỉ (phép + không phép)
+            lblLateValue.Text   = $"{late} lần";
+
+            lblLateValue.ForeColor   = late             > 0 ? Color.FromArgb(239, 68, 68)  : Color.FromArgb(34, 197, 94);
+            lblAbsentValue.ForeColor = leaveUnauthorized > 0 ? Color.FromArgb(239, 68, 68)  // có nghỉ không phép → đỏ
+                                     : totalAbsent       > 0 ? Color.FromArgb(56, 139, 204) // chỉ nghỉ có phép → xanh
+                                                             : Color.FromArgb(34, 197, 94);  // không nghỉ → xanh lá
+        }
+
+        // ──────────────────────────────────────────────
+        // NÚT BÁO CÁO SAI SÓT
+        // ──────────────────────────────────────────────
+        private void BtnReport_Click(object? sender, EventArgs e)
+        {
+            string report =
+                "BÁO CÁO CHẤM CÔNG\n"                                          +
+                $"Từ: {dtpFrom.Value:dd/MM/yyyy}  →  Đến: {dtpTo.Value:dd/MM/yyyy}\n" +
+                "──────────────────\n"                                          +
+                $"• Ngày công : {lblShiftsValue.Text}\n"                        +
+                $"• Nghỉ phép : {lblAbsentValue.Text}\n"                        +
+                $"• Đi muộn  : {lblLateValue.Text}\n"                           +
+                "──────────────────\n"                                          +
+                "Gửi báo cáo này cho quản lý qua Chat?";
+
+            var result = MsgBox.Show(
+                MsgBox.OwnerWindow(this), report,
+                "Báo cáo chấm công", MsgBox.MessageBoxType.Warning);
+
+            if (result == DialogResult.Yes)
             {
-                string st = row["Trạng thái"].ToString() ?? "";
-                if (st.StartsWith("Nghỉ")) absent++;
-                else if (st == "Đi muộn") { late++; present++; }
-                else present++;
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
+                    "Thành công", MsgBox.MessageBoxType.Success);
             }
-            lblSummary.Text = $"Ngày công: {present}";
-            lblAbsent.Text  = $"Nghỉ: {absent} ngày";
-            lblLate.Text    = $"Đi muộn: {late} lần";
         }
     }
 }

@@ -1,13 +1,9 @@
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Drawing.Drawing2D;
-using System.Text.RegularExpressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using System;
+using System.Security.Cryptography;
+using System.Text;
+using System.Windows.Forms;
 using DTO;
 using BUS;
-
 
 namespace GUI
 {
@@ -16,150 +12,145 @@ namespace GUI
         public Login()
         {
             InitializeComponent();
-
-            //Khi nhập pass chuyển thành dấu chấm
+            FormCorners.Round(this);
+            AppFonts.ApplyTo(lblWelcome, lblSubtitle);
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.SavedEmail))
+            string savedEmail = Properties.Settings.Default.SavedEmail;
+            string savedPass  = Properties.Settings.Default.SavedPassword;
+
+            if (!Validation.IsAnyEmpty(savedEmail, savedPass))
             {
-                txtEmail.Text = Properties.Settings.Default.SavedEmail;
-                txtPassword.Text = Properties.Settings.Default.SavedPassword;
-                chkRememberMe.Checked = true;
+                string decrypted = Decrypt(savedPass);
+                if (!string.IsNullOrEmpty(decrypted))
+                {
+                    txtEmail.Text         = savedEmail;
+                    txtPassword.Text      = decrypted;
+                    chkRememberMe.Checked = true;
+                }
             }
             txtPassword.UseSystemPasswordChar = true;
+            btnShowPass.BringToFront();
         }
 
-        //Hàm tạo sự kiện cho UI
-        private void PictureBox1_Paint(object sender, PaintEventArgs e)
+        // ──────────────────────────────────────────────
+        // DPAPI — mã hóa/giải mã mật khẩu
+        // ──────────────────────────────────────────────
+        private static string Encrypt(string plainText)
         {
-            int fadeWidth = 60;
-            Rectangle fadeArea = new(pictureBox1.Width - fadeWidth, 0, fadeWidth, pictureBox1.Height);
-            Color pnlRightColor = Color.FromArgb(30, 30, 30);
-            using LinearGradientBrush brush = new(
-                fadeArea,
-                Color.Transparent,
-                pnlRightColor,
-                LinearGradientMode.Horizontal);
+            try
+            {
+                byte[] encrypted = ProtectedData.Protect(
+                    Encoding.UTF8.GetBytes(plainText),
+                    null,
+                    DataProtectionScope.CurrentUser);
+                return Convert.ToBase64String(encrypted);
+            }
+            catch { return ""; }
+        }
 
-            e.Graphics.FillRectangle(brush, fadeArea);
-        }
-        private void TxtPassword_Enter(object sender, EventArgs e)
+        private static string Decrypt(string encryptedText)
         {
-            txtPassword.UseSystemPasswordChar = true;
+            try
+            {
+                byte[] decrypted = ProtectedData.Unprotect(
+                    Convert.FromBase64String(encryptedText),
+                    null,
+                    DataProtectionScope.CurrentUser);
+                return Encoding.UTF8.GetString(decrypted);
+            }
+            catch { return ""; }
         }
+
+        // ──────────────────────────────────────────────
+        // Sự kiện hiện/ẩn mật khẩu
+        // ──────────────────────────────────────────────
         private void BtnShowPass_MouseDown(object sender, MouseEventArgs e)
         {
+            txtPassword.PasswordChar          = '\0';
             txtPassword.UseSystemPasswordChar = false;
+            btnShowPass.Text                  = "Ẩn";
         }
 
         private void BtnShowPass_MouseUp(object sender, MouseEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(txtPassword.Text))
-            {
-                txtPassword.UseSystemPasswordChar = true;
-            }
+            txtPassword.PasswordChar          = '●';
+            txtPassword.UseSystemPasswordChar = true;
+            btnShowPass.Text                  = "Hiện";
         }
 
-        private void PictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void LblSignUp_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        // ──────────────────────────────────────────────
+        // Sự kiện click "Quên mật khẩu"
+        // ──────────────────────────────────────────────
+        private void LblForgotPass_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ConfirmEmail frmConfirm = new();
             this.Hide();
             frmConfirm.ShowDialog(this);
         }
 
-        private void BtnClose_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
+        // ──────────────────────────────────────────────
+        // Sự kiện click "Đăng nhập"
+        // ──────────────────────────────────────────────
         private async void BtnSignIn_Click(object sender, EventArgs e)
         {
-            string email = txtEmail.Text;
+            string email    = txtEmail.Text;
             string password = txtPassword.Text;
 
-            //Khóa nút bấm trong lúc chờ mạng
             btnSignIn.Enabled = false;
-            btnSignIn.Text = "Đang xử lý...";
+            btnSignIn.Text    = "Đang xử lý...";
 
-            //Gọi BUS thực hiện đăng nhập
-            // Vì BUS trả về 1 Tuple (IsSuccess, Message, UserData), ta dùng 'var result' để hứng
             var result = await AuthBUS.LoginBUS(email, password);
 
-            // 4. Xử lý kết quả và Phân quyền
             if (result.IsSuccess == true)
             {
+                GlobalSession.CurrentUser = result.UserData!;
 
-                // Đăng nhập và qua các ải kiểm tra nghiệp vụ thành công
-                GlobalSession.CurrentUser = result.UserData!; // Lưu vào biến hệ thống
-                // BẮT ĐẦU THÊM ĐOẠN NÀ NÀY ĐỂ LƯU MẬT KHẨU
                 if (chkRememberMe.Checked)
                 {
-                    Properties.Settings.Default.SavedEmail = txtEmail.Text;
-                    Properties.Settings.Default.SavedPassword = txtPassword.Text;
+                    Properties.Settings.Default.SavedEmail    = txtEmail.Text;
+                    Properties.Settings.Default.SavedPassword = Encrypt(txtPassword.Text);
                 }
                 else
                 {
-                    Properties.Settings.Default.SavedEmail = "";
+                    Properties.Settings.Default.SavedEmail    = "";
                     Properties.Settings.Default.SavedPassword = "";
                 }
                 Properties.Settings.Default.Save();
-                // KẾT THÚC THÊM ĐOẠN LƯU MẬT KHẨU
-                // Điều hướng dựa vào Role - 1 MainDashboard duy nhất cho tất cả role
-                string r = GlobalSession.CurrentUser.Role?.ToLowerInvariant() ?? "";
-                if (r == "stockkeeper") r = "manager";
 
-                string welcomePrefix = r switch
+                string role = GlobalSession.CurrentUser.Role?.ToLowerInvariant() ?? "";
+
+                string welcomePrefix = role switch
                 {
-                    "admin"       => "Admin",
+                    "admin"       => "Quản trị viên",
                     "manager"     => "Quản lý",
                     "order staff" => "Nhân viên Order",
                     "barista"     => "Pha chế",
                     "security"    => "Bảo vệ",
-                    _             => "User"
+                    _             => "Người dùng"
                 };
 
                 string greeting = $"Xin chào {welcomePrefix} {GlobalSession.CurrentUser.FullName}!";
-                string detail = (result.Message ?? string.Empty).Trim();
-                string successBody = string.IsNullOrEmpty(detail)
-                    ? greeting
-                    : greeting + "\n\n" + detail;
 
-                MsgBox.Show(
-                    this,
-                    successBody,
-                    "Đăng nhập thành công",
-                    MsgBox.MessageBoxType.Success
-                );
+                MsgBox.Show(this, "\n" + greeting, "Đăng nhập thành công", MsgBox.MessageBoxType.Success);
 
-                MainDashboard dashboard = new();
-                dashboard.Show();
+                new MainDashboard().Show();
                 this.Hide();
-            }
-            else
-            {
-                // Nếu IsSuccess == false (Sai pass, tài khoản bị khóa, rỗng...)
-                // Chỉ cần lấy đúng câu Message từ lớp BUS và in ra
-                MsgBox.Show(this, result.Message, "Đăng nhập thất bại", MsgBox.MessageBoxType.Error);
+                return;
             }
 
-            // 5. Mở lại nút bấm
+            MsgBox.Show(this, "\n" + result.Message, "Đăng nhập thất bại", MsgBox.MessageBoxType.Error);
             btnSignIn.Enabled = true;
-            btnSignIn.Text = "Đăng nhập";
+            btnSignIn.Text    = "Đăng nhập";
+        }
 
+        private void BtnClose_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

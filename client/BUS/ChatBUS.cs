@@ -1,20 +1,12 @@
 ﻿using DAL;
 using DTO;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BUS
 {
     public class ChatBUS
     {
-        public static async Task SaveMessage(string roomId, ChatMessageDTO msg)
-        {
-            await ChatDAL.SaveMessageAsync(roomId, msg);
-        }
-
         public static async Task<List<ChatMessageDTO>> GetHistory(string roomId)
         {
             return await ChatDAL.GetHistoryAsync(roomId);

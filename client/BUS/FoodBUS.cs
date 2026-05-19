@@ -12,7 +12,13 @@ namespace BUS
         public static async Task<List<FoodDTO>> GetListFoods()
         {
             var dict = await FoodDAL.GetAllAsync();
-            return [.. dict.Select(x => { x.Value.Id = x.Key; return x.Value; })];
+            var list = new List<FoodDTO>();
+            foreach (var kvp in dict)
+            {
+                kvp.Value.Id = kvp.Key;
+                list.Add(kvp.Value);
+            }
+            return list;
         }
 
         public static async Task<(bool Success, string Message)> DeleteFood(string id)

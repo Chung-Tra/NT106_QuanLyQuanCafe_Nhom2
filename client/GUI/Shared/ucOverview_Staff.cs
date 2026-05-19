@@ -32,9 +32,19 @@ namespace GUI
 
         private void LoadMockData()
         {
-            lblUnreadMsgValue.Text = "5 tin";
-            lblWorkingDaysValue.Text = "23 ngày";
-            lblDaysOffValue.Text = "7 ngày";
+            lblUnreadMsgValue.Text    = "5 tin";
+            lblWorkingDaysValue.Text  = "23 ngày";
+            lblDaysOffValue.Text      = "7 ngày";
+
+            lstNotifications.Items.Clear();
+            lstNotifications.Items.AddRange(new object[]
+            {
+                "🔴  [08:30]  Nhân viên phục vụ Nguyễn Văn A xin phép nghỉ ốm ngày hôm nay.",
+                "⭐  [09:15]  Feedback Bàn số 5: \"Cà phê muối rất ngon, nhân viên nhiệt tình, 5 sao!\"",
+                "⚠️  [10:00]  Kho hàng cảnh báo: Hết nguyên liệu Sữa tươi, cần nhập gấp.",
+                "⭐  [11:20]  Feedback Bàn số 12: \"Quán decor đẹp, đồ uống lên nhanh.\"",
+                "🟢  [12:00]  Quản lý đã duyệt đơn xin nghỉ của Nguyễn Văn A."
+            });
         }
     }
 }

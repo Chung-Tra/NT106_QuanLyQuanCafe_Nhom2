@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics.Metrics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using BUS;
 
 namespace GUI
@@ -21,25 +10,45 @@ namespace GUI
         public ResetPassword(string email)
         {
             InitializeComponent();
+            FormCorners.Round(this);
+            AppFonts.ApplyTo(lblTitle, lblDescription);
             this.userEmail = email;
+            btnShowNewPass.BringToFront();
+            btnShowConfirmPass.BringToFront();
         }
 
-        private void TxtConfirmPass_Enter(object sender, EventArgs e)
+        // ──────────────────────────────────────────────
+        // Hiện/ẩn mật khẩu mới
+        // ──────────────────────────────────────────────
+        private void BtnShowNewPass_MouseDown(object sender, MouseEventArgs e)
         {
-            txtConfirmPass.UseSystemPasswordChar = true;
+            txtNewPass.PasswordChar          = '\0';
+            txtNewPass.UseSystemPasswordChar = false;
+            btnShowNewPass.Text              = "Ẩn";
         }
 
+        private void BtnShowNewPass_MouseUp(object sender, MouseEventArgs e)
+        {
+            txtNewPass.PasswordChar          = '●';
+            txtNewPass.UseSystemPasswordChar = true;
+            btnShowNewPass.Text              = "Hiện";
+        }
+
+        // ──────────────────────────────────────────────
+        // Hiện/ẩn xác nhận mật khẩu
+        // ──────────────────────────────────────────────
         private void BtnShowConfirmPass_MouseDown(object sender, MouseEventArgs e)
         {
+            txtConfirmPass.PasswordChar          = '\0';
             txtConfirmPass.UseSystemPasswordChar = false;
+            btnShowConfirmPass.Text              = "Ẩn";
         }
 
         private void BtnShowConfirmPass_MouseUp(object sender, MouseEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(txtConfirmPass.Text))
-            {
-                txtConfirmPass.UseSystemPasswordChar = true;
-            }
+            txtConfirmPass.PasswordChar          = '●';
+            txtConfirmPass.UseSystemPasswordChar = true;
+            btnShowConfirmPass.Text              = "Hiện";
         }
 
         private async void BtnSave_Click(object sender, EventArgs e)
@@ -73,11 +82,14 @@ namespace GUI
                 MsgBox.Show(this, "Lỗi: " + result.Message, "Thất bại", MsgBox.MessageBoxType.Error);
             }
 
-            btnSave.Text = "Lưu";
+            btnSave.Text = "Lưu mật khẩu mới";
             btnSave.Enabled = true;
 
         }
 
+        // ──────────────────────────────────────────────
+        // Quay lại form VerifyCode
+        // ──────────────────────────────────────────────
         private void LblBackToLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Form? VerifyForm = Application.OpenForms["VerifyCode"];

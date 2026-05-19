@@ -11,7 +11,7 @@ function verifyAny(req, res, next) {
     return verifyServerSecret(req, res, next);
 }
 
-router.get('/messages',  verifyAndGetUser, ctrl.getHistory);
-router.post('/messages', verifyAny,        ctrl.saveMessage);
+router.get('/messages',  verifyAny, ctrl.getHistory);
+router.post('/messages', verifyAny, ctrl.saveMessage);
 
 module.exports = router;

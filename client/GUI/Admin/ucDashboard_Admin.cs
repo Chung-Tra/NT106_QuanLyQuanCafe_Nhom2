@@ -19,6 +19,7 @@ namespace GUI
         {
             LoadSummary();
             LoadRevenueDetail();
+            AutoFadeScroll.Attach(dgvRevenueDetail);
             DrawRevenueChart();
             DrawFeedbackChart();
         }
@@ -96,11 +97,18 @@ namespace GUI
             DrawRevenueChart();
         }
 
-        private void HighlightChartBtn(Button active, Button b1, Button b2)
+        private void HighlightChartBtn(Guna.UI2.WinForms.Guna2Button active, Guna.UI2.WinForms.Guna2Button b1, Guna.UI2.WinForms.Guna2Button b2)
         {
-            active.BackColor = Color.SteelBlue;
-            b1.BackColor = Color.FromArgb(60, 60, 65);
-            b2.BackColor = Color.FromArgb(60, 60, 65);
+            active.FillColor = Color.FromArgb(31, 138, 154);
+            active.ForeColor = Color.White;
+            active.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+
+            foreach (var b in new[] { b1, b2 })
+            {
+                b.FillColor = Color.Transparent;
+                b.ForeColor = Color.FromArgb(160, 160, 166);
+                b.HoverState.FillColor = Color.FromArgb(45, 45, 50);
+            }
         }
 
         private void DrawRevenueChart()

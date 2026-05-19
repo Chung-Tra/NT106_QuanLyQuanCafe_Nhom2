@@ -44,9 +44,10 @@ exports.saveMessage = async (req, res, next) => {
         const serverTime = Date.now();
         const ts = Number(chatData.timestamp ?? chatData.thoi_gian) || serverTime;
         const payload = {
-            nguoi_gui_id: chatData.nguoi_gui_id ?? chatData.senderId ?? '',
-            noi_dung: chatData.noi_dung ?? chatData.message ?? '',
-            thoi_gian: ts,
+            nguoi_gui_id:  chatData.nguoi_gui_id  ?? chatData.senderId   ?? '',
+            ten_nguoi_gui: chatData.ten_nguoi_gui ?? chatData.senderName  ?? '',
+            noi_dung:      chatData.noi_dung      ?? chatData.message     ?? '',
+            thoi_gian:     ts,
             loai_tin_nhan: chatData.loai_tin_nhan || 'text',
         };
 

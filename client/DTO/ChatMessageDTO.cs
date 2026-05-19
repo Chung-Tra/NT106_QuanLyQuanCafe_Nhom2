@@ -5,8 +5,11 @@ namespace DTO
 {
     public class TinNhanChatDTO
     {
-        [JsonProperty("nguoi_gui_id")] // Newtonsoft (ChatDAL) + đúng schema Firebase
+        [JsonProperty("nguoi_gui_id")]
         public string? SenderId { get; set; }
+
+        [JsonProperty("ten_nguoi_gui")]
+        public string? SenderName { get; set; }
 
         [JsonProperty("noi_dung")]
         public string? Message { get; set; }

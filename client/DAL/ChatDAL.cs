@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
+
 namespace DAL
 {
     public static class ChatDAL
@@ -26,18 +27,5 @@ namespace DAL
             }
         }
 
-        public static async Task SaveMessageAsync(string roomId, ChatMessageDTO msg)
-        {
-            try
-            {
-                var response = await DalHelper.Client.SendAsync(
-                    DalHelper.Build(HttpMethod.Post, "chat/messages", new { roomId, chatData = msg }));
-                response.EnsureSuccessStatusCode();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Lỗi lưu tin nhắn: " + ex.Message);
-            }
-        }
     }
 }

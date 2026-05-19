@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
@@ -18,211 +19,201 @@ namespace GUI
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dgvStyle = new DataGridViewCellStyle();
-            pnlHeader = new Panel();
+            pnlHeader = new Guna2Panel();
             lblTitle = new Label();
-            cmbMonth = new ComboBox();
             lblMonth = new Label();
-            btnApplyBP = new Button();
-            pnlSummary = new Panel();
-            lblTotalSalary = new Label();
+            cmbMonth = new Guna2ComboBox();
+            btnApplyBP = new Guna2Button();
+            pnlSummary = new Guna2Panel();
+            pnlStatTotal = new Guna2Panel();
             lblTotalSalaryTitle = new Label();
-            lblEmployeeCount = new Label();
+            lblTotalSalary = new Label();
+            pnlStatCount = new Guna2Panel();
             lblEmployeeCountTitle = new Label();
-            pnlGrid = new Panel();
-            dgvPayroll = new DataGridView();
+            lblEmployeeCount = new Label();
+            pnlGrid = new Guna2Panel();
+            dgvPayroll = new Guna2DataGridView();
             pnlHeader.SuspendLayout();
             pnlSummary.SuspendLayout();
+            pnlStatTotal.SuspendLayout();
+            pnlStatCount.SuspendLayout();
             pnlGrid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPayroll).BeginInit();
             SuspendLayout();
-            //
-            // pnlHeader
-            //
-            pnlHeader.BackColor = Color.FromArgb(30, 30, 30);
+
+            // ====== pnlHeader ======
+            pnlHeader.BackColor = Color.FromArgb(31, 31, 34);
+            pnlHeader.BorderRadius = 14;
             pnlHeader.Controls.Add(lblTitle);
-            pnlHeader.Controls.Add(cmbMonth);
             pnlHeader.Controls.Add(lblMonth);
+            pnlHeader.Controls.Add(cmbMonth);
             pnlHeader.Controls.Add(btnApplyBP);
-            pnlHeader.Location = new Point(20, 15);
-            pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(764, 55);
-            pnlHeader.TabIndex = 0;
-            //
-            // lblTitle
-            //
+            pnlHeader.Location = new Point(20, 20);
+            pnlHeader.Size = new Size(920, 70);
+
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(15, 14);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(180, 25);
-            lblTitle.TabIndex = 0;
-            lblTitle.Text = "Bảng lương nhân viên";
-            //
-            // lblMonth
-            //
+            lblTitle.Location = new Point(18, 22);
+            lblTitle.Text = "💰  Bảng lương nhân viên";
+
             lblMonth.AutoSize = true;
-            lblMonth.Font = new Font("Segoe UI", 10F);
-            lblMonth.ForeColor = Color.Gray;
-            lblMonth.Location = new Point(350, 18);
-            lblMonth.Name = "lblMonth";
-            lblMonth.Size = new Size(50, 19);
-            lblMonth.TabIndex = 1;
+            lblMonth.Font = new Font("Segoe UI", 9.5F);
+            lblMonth.ForeColor = Color.FromArgb(160, 160, 166);
+            lblMonth.Location = new Point(450, 27);
             lblMonth.Text = "Tháng:";
-            //
-            // cmbMonth
-            //
-            cmbMonth.BackColor = Color.FromArgb(45, 45, 48);
+
+            cmbMonth.BackColor = Color.Transparent;
+            cmbMonth.BorderColor = Color.FromArgb(63, 63, 70);
+            cmbMonth.BorderRadius = 8;
+            cmbMonth.DrawMode = DrawMode.OwnerDrawFixed;
             cmbMonth.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbMonth.FlatStyle = FlatStyle.Flat;
-            cmbMonth.Font = new Font("Segoe UI", 10F);
+            cmbMonth.FillColor = Color.FromArgb(24, 24, 27);
+            cmbMonth.FocusedColor = Color.FromArgb(31, 138, 154);
+            cmbMonth.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            cmbMonth.Font = new Font("Segoe UI", 9.5F);
             cmbMonth.ForeColor = Color.White;
-            cmbMonth.Items.AddRange(new object[] { "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12" });
-            cmbMonth.Location = new Point(410, 15);
-            cmbMonth.Name = "cmbMonth";
-            cmbMonth.Size = new Size(130, 25);
-            cmbMonth.TabIndex = 2;
+            cmbMonth.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            cmbMonth.ItemHeight = 26;
+            cmbMonth.Items.AddRange(new object[] {
+                "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12" });
+            cmbMonth.Location = new Point(508, 21);
+            cmbMonth.Size = new Size(150, 28);
             cmbMonth.SelectedIndexChanged += cmbMonth_SelectedIndexChanged;
-            //
-            // btnApplyBP
-            //
-            btnApplyBP.BackColor = Color.MediumSeaGreen;
+
+            btnApplyBP.BorderRadius = 10;
             btnApplyBP.Cursor = Cursors.Hand;
-            btnApplyBP.FlatAppearance.BorderSize = 0;
-            btnApplyBP.FlatStyle = FlatStyle.Flat;
-            btnApplyBP.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+            btnApplyBP.FillColor = Color.FromArgb(31, 138, 154);
+            btnApplyBP.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnApplyBP.ForeColor = Color.White;
-            btnApplyBP.Location = new Point(570, 12);
-            btnApplyBP.Name = "btnApplyBP";
-            btnApplyBP.Size = new Size(175, 32);
-            btnApplyBP.TabIndex = 3;
-            btnApplyBP.Text = "Tính lương tự động";
-            btnApplyBP.UseVisualStyleBackColor = false;
+            btnApplyBP.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnApplyBP.Location = new Point(690, 18);
+            btnApplyBP.Size = new Size(210, 34);
+            btnApplyBP.Text = "⚡  Tính lương tự động";
             btnApplyBP.Click += btnApplyBP_Click;
-            //
-            // pnlSummary
-            //
-            pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
-            pnlSummary.Controls.Add(lblTotalSalary);
-            pnlSummary.Controls.Add(lblTotalSalaryTitle);
-            pnlSummary.Controls.Add(lblEmployeeCount);
-            pnlSummary.Controls.Add(lblEmployeeCountTitle);
-            pnlSummary.Location = new Point(20, 80);
-            pnlSummary.Name = "pnlSummary";
-            pnlSummary.Size = new Size(764, 65);
-            pnlSummary.TabIndex = 1;
-            //
-            // lblTotalSalaryTitle
-            //
+
+            // ====== pnlSummary ======
+            pnlSummary.BackColor = Color.Transparent;
+            pnlSummary.Controls.Add(pnlStatTotal);
+            pnlSummary.Controls.Add(pnlStatCount);
+            pnlSummary.Location = new Point(20, 105);
+            pnlSummary.Size = new Size(920, 90);
+
+            // -- pnlStatTotal --
+            pnlStatTotal.BackColor = Color.FromArgb(31, 31, 34);
+            pnlStatTotal.BorderRadius = 14;
+            pnlStatTotal.Controls.Add(lblTotalSalaryTitle);
+            pnlStatTotal.Controls.Add(lblTotalSalary);
+            pnlStatTotal.Location = new Point(0, 0);
+            pnlStatTotal.Size = new Size(455, 90);
             lblTotalSalaryTitle.AutoSize = true;
-            lblTotalSalaryTitle.Font = new Font("Segoe UI", 9.75F);
-            lblTotalSalaryTitle.ForeColor = Color.Gray;
-            lblTotalSalaryTitle.Location = new Point(20, 10);
-            lblTotalSalaryTitle.Name = "lblTotalSalaryTitle";
-            lblTotalSalaryTitle.Size = new Size(100, 17);
-            lblTotalSalaryTitle.TabIndex = 0;
+            lblTotalSalaryTitle.Font = new Font("Segoe UI", 9F);
+            lblTotalSalaryTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblTotalSalaryTitle.Location = new Point(18, 16);
             lblTotalSalaryTitle.Text = "Tổng quỹ lương";
-            //
-            // lblTotalSalary
-            //
             lblTotalSalary.AutoSize = true;
-            lblTotalSalary.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblTotalSalary.ForeColor = Color.MediumSeaGreen;
-            lblTotalSalary.Location = new Point(20, 30);
-            lblTotalSalary.Name = "lblTotalSalary";
-            lblTotalSalary.Size = new Size(160, 30);
-            lblTotalSalary.TabIndex = 1;
-            lblTotalSalary.Text = "125,000,000 đ";
-            //
-            // lblEmployeeCountTitle
-            //
+            lblTotalSalary.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblTotalSalary.ForeColor = Color.FromArgb(34, 197, 94);
+            lblTotalSalary.Location = new Point(18, 40);
+            lblTotalSalary.Text = "0 đ";
+
+            // -- pnlStatCount --
+            pnlStatCount.BackColor = Color.FromArgb(31, 31, 34);
+            pnlStatCount.BorderRadius = 14;
+            pnlStatCount.Controls.Add(lblEmployeeCountTitle);
+            pnlStatCount.Controls.Add(lblEmployeeCount);
+            pnlStatCount.Location = new Point(465, 0);
+            pnlStatCount.Size = new Size(455, 90);
             lblEmployeeCountTitle.AutoSize = true;
-            lblEmployeeCountTitle.Font = new Font("Segoe UI", 9.75F);
-            lblEmployeeCountTitle.ForeColor = Color.Gray;
-            lblEmployeeCountTitle.Location = new Point(400, 10);
-            lblEmployeeCountTitle.Name = "lblEmployeeCountTitle";
-            lblEmployeeCountTitle.Size = new Size(100, 17);
-            lblEmployeeCountTitle.TabIndex = 2;
+            lblEmployeeCountTitle.Font = new Font("Segoe UI", 9F);
+            lblEmployeeCountTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblEmployeeCountTitle.Location = new Point(18, 16);
             lblEmployeeCountTitle.Text = "Số nhân viên";
-            //
-            // lblEmployeeCount
-            //
             lblEmployeeCount.AutoSize = true;
-            lblEmployeeCount.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblEmployeeCount.ForeColor = Color.SteelBlue;
-            lblEmployeeCount.Location = new Point(400, 30);
-            lblEmployeeCount.Name = "lblEmployeeCount";
-            lblEmployeeCount.Size = new Size(80, 30);
-            lblEmployeeCount.TabIndex = 3;
-            lblEmployeeCount.Text = "12 người";
-            //
-            // pnlGrid
-            //
-            pnlGrid.BackColor = Color.FromArgb(30, 30, 30);
+            lblEmployeeCount.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblEmployeeCount.ForeColor = Color.FromArgb(31, 138, 154);
+            lblEmployeeCount.Location = new Point(18, 40);
+            lblEmployeeCount.Text = "0 người";
+
+            // ====== pnlGrid ======
+            pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
+            pnlGrid.BorderRadius = 14;
             pnlGrid.Controls.Add(dgvPayroll);
-            pnlGrid.Location = new Point(20, 155);
-            pnlGrid.Name = "pnlGrid";
-            pnlGrid.Size = new Size(764, 360);
-            pnlGrid.TabIndex = 2;
-            //
-            // dgvPayroll
-            //
-            dgvPayroll.AllowUserToAddRows = false;
-            dgvPayroll.AllowUserToDeleteRows = false;
-            dgvPayroll.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgvPayroll.BorderStyle = BorderStyle.None;
-            dgvPayroll.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvStyle.BackColor = Color.FromArgb(45, 45, 48);
-            dgvStyle.Font = new Font("Segoe UI", 9F);
-            dgvStyle.ForeColor = Color.White;
-            dgvStyle.SelectionBackColor = Color.Gray;
-            dgvStyle.SelectionForeColor = Color.White;
-            dgvStyle.WrapMode = DataGridViewTriState.False;
-            dgvPayroll.DefaultCellStyle = dgvStyle;
-            dgvPayroll.Location = new Point(15, 15);
-            dgvPayroll.Name = "dgvPayroll";
-            dgvPayroll.ReadOnly = true;
-            dgvPayroll.RowHeadersWidth = 51;
-            dgvPayroll.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvPayroll.Size = new Size(734, 330);
-            dgvPayroll.TabIndex = 0;
+            pnlGrid.Location = new Point(20, 210);
+            pnlGrid.Size = new Size(920, 430);
+
+            ConfigureGrid(dgvPayroll);
+            dgvPayroll.Location = new Point(18, 18);
+            dgvPayroll.Size = new Size(884, 394);
             dgvPayroll.SelectionChanged += dgvPayroll_SelectionChanged;
-            //
-            // ucPayroll_Admin
-            //
+
+            // ====== ucPayroll_Admin ======
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 48);
-            Controls.Add(pnlGrid);
-            Controls.Add(pnlSummary);
+            BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlHeader);
+            Controls.Add(pnlSummary);
+            Controls.Add(pnlGrid);
             Name = "ucPayroll_Admin";
-            Size = new Size(804, 530);
+            Size = new Size(960, 660);
             Load += ucPayroll_Admin_Load;
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlSummary.ResumeLayout(false);
-            pnlSummary.PerformLayout();
+            pnlStatTotal.ResumeLayout(false);
+            pnlStatTotal.PerformLayout();
+            pnlStatCount.ResumeLayout(false);
+            pnlStatCount.PerformLayout();
             pnlGrid.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvPayroll).EndInit();
             ResumeLayout(false);
         }
 
+        private static void ConfigureGrid(Guna2DataGridView dgv)
+        {
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersHeight = 32;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgv.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.GridColor = Color.FromArgb(45, 45, 48);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowTemplate.Height = 28;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        }
+
         #endregion
 
-        private Panel pnlHeader;
+        private Guna2Panel pnlHeader;
         private Label lblTitle;
-        private ComboBox cmbMonth;
+        private Guna2ComboBox cmbMonth;
         private Label lblMonth;
-        private Button btnApplyBP;
-        private Panel pnlSummary;
+        private Guna2Button btnApplyBP;
+        private Guna2Panel pnlSummary;
+        private Guna2Panel pnlStatTotal;
         private Label lblTotalSalaryTitle;
         private Label lblTotalSalary;
+        private Guna2Panel pnlStatCount;
         private Label lblEmployeeCountTitle;
         private Label lblEmployeeCount;
-        private Panel pnlGrid;
-        private DataGridView dgvPayroll;
+        private Guna2Panel pnlGrid;
+        private Guna2DataGridView dgvPayroll;
     }
 }

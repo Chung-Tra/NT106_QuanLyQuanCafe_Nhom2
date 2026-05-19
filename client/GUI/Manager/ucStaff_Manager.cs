@@ -1,12 +1,10 @@
 using BUS;
 using DTO;
+using Guna.UI2.WinForms;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,11 +15,23 @@ namespace GUI
         public ucStaff_Manager()
         {
             InitializeComponent();
-            this.Load += async (s, e) => await LoadRealData();
             btnApproveLeave.Click += BtnApproveLeave_Click;
+            dgvStaff.CellDoubleClick += DgvStaff_CellDoubleClick;
             InitFilterControls();
         }
 
+        // ──────────────────────────────────────────────
+        // SỰ KIỆN LOAD (wired in Designer)
+        // ──────────────────────────────────────────────
+        private async void ucStaff_Manager_Load(object sender, EventArgs e)
+        {
+            await LoadRealData();
+            LoadLeaveRequests();
+        }
+
+        // ──────────────────────────────────────────────
+        // TẢI DANH SÁCH NHÂN VIÊN
+        // ──────────────────────────────────────────────
         private async Task LoadRealData()
         {
             try
@@ -35,8 +45,8 @@ namespace GUI
 
                 if (fullList == null || fullList.Count == 0) return;
 
-                // 2. LỌC CHỈ LẤY NHÂN VIÊN "ACTIVE" VÀ KHÔNG PHẢI LÀ "ADMIN"
-                var List = fullList.Where(emp => emp.Role != "admin").ToList();
+                // 2. Lọc: không lấy admin
+                var staffList = fullList.Where(emp => emp.Role != "admin").ToList();
 
                 // 3. Tạo cấu trúc bảng
                 DataTable dt = new();
@@ -48,8 +58,7 @@ namespace GUI
                 dt.Columns.Add("AuthUid");
                 dt.Columns.Add("Email");
 
-                // 4. Đổ danh sách ĐÃ LỌC (activeList) vào bảng
-                foreach (var emp in List)
+                foreach (var emp in staffList)
                 {
                     dt.Rows.Add(
                         emp.EmployeeId,
@@ -63,39 +72,28 @@ namespace GUI
                 }
 
                 dgvStaff.DataSource = dt;
-                if (dgvStaff.Columns.Contains("AuthUid"))
-                {
-                    dgvStaff.Columns["AuthUid"].Visible = false;
-                }
-                if (dgvStaff.Columns.Contains("Số điện thoại"))
-                {
-                    dgvStaff.Columns["Số điện thoại"].Visible = false;
-                }
-                if (dgvStaff.Columns.Contains("Email"))
-                {
-                    dgvStaff.Columns["Email"].Visible = false;
-                }
-                dgvStaff.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-                // Tổng FillWeight thường là 100 (tương đương 100%), chia tỷ lệ cho các cột:
-                dgvStaff.Columns["Mã NV"].FillWeight = 15;
+                // Ẩn cột không cần hiển thị
+                foreach (string col in new[] { "AuthUid", "Số điện thoại", "Email" })
+                    if (dgvStaff.Columns.Contains(col))
+                        dgvStaff.Columns[col].Visible = false;
+
+                dgvStaff.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dgvStaff.Columns["Mã NV"].FillWeight     = 15;
                 dgvStaff.Columns["Họ và Tên"].FillWeight = 40;
-                dgvStaff.Columns["Vị Trí"].FillWeight = 25;
+                dgvStaff.Columns["Vị Trí"].FillWeight    = 25;
                 dgvStaff.Columns["Trạng Thái"].FillWeight = 20;
 
-                // Căn giữa cho các cột nhìn gọn gàng hơn
-                dgvStaff.Columns["Mã NV"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                dgvStaff.Columns["Vị Trí"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                dgvStaff.Columns["Mã NV"].DefaultCellStyle.Alignment      = DataGridViewContentAlignment.MiddleCenter;
+                dgvStaff.Columns["Vị Trí"].DefaultCellStyle.Alignment     = DataGridViewContentAlignment.MiddleCenter;
                 dgvStaff.Columns["Trạng Thái"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-                var activeList = fullList.Where(emp => emp.Status == "active" && emp.Role != "admin").ToList();
-                // Cập nhật label đếm số lượng nhân viên đang làm
-                lblPresentValue.Text = $"{activeList.Count} người";
-                dgvStaff.AllowUserToAddRows = false;
-
-                // Tắt cái cột tiêu đề mũi tên ngoài cùng bên trái cho đỡ tốn chỗ
-                dgvStaff.RowHeadersVisible = false;
-                dgvStaff.ReadOnly = true;
+                // Cập nhật stat card
+                var activeList = staffList.Where(emp => emp.Status == "active").ToList();
+                var leaveList  = staffList.Where(emp => emp.Status != "active").ToList();
+                lblTotalStaffValue.Text = $"{staffList.Count} người";
+                lblPresentValue.Text    = $"{activeList.Count} người";
+                lblLeaveValue.Text      = $"{leaveList.Count} người";
             }
             catch (Exception ex)
             {
@@ -103,94 +101,119 @@ namespace GUI
             }
             finally
             {
-                // Trả con trỏ chuột về bình thường
                 this.Cursor = Cursors.Default;
             }
         }
 
-        private void BtnCheckIn_Click(object? sender, EventArgs e)
+        // ──────────────────────────────────────────────
+        // TẢI DANH SÁCH ĐƠN XIN NGHỈ
+        // ──────────────────────────────────────────────
+        private void LoadLeaveRequests()
         {
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Tính năng Quét thẻ RFID / Vân tay / Nhập mã NV để điểm danh ca làm việc.", "Chấm Công", MsgBox.MessageBoxType.Info);
+            var dt = new DataTable();
+            dt.Columns.Add("Nhân viên");
+            dt.Columns.Add("Ngày nghỉ");
+            dt.Columns.Add("Lý do");
+
+            // Dữ liệu mẫu — thay bằng API call thực tế khi có endpoint
+            dt.Rows.Add("NV03 Lê Văn C",   "20/05/2026", "Việc gia đình");
+            dt.Rows.Add("NV07 Trần Thị B",  "21/05/2026", "Khám bệnh");
+
+            dgvLeaveReq.DataSource = dt;
+            dgvLeaveReq.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvLeaveReq.Columns["Nhân viên"].FillWeight = 35;
+            dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 30;
+            dgvLeaveReq.Columns["Lý do"].FillWeight     = 35;
         }
 
+        // ──────────────────────────────────────────────
+        // DUYỆT ĐƠN XIN NGHỈ
+        // ──────────────────────────────────────────────
         private void BtnApproveLeave_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã DUYỆT đơn xin nghỉ của [NV03 Lê Văn C]. Dữ liệu đã cập nhật vào tính lương cuối tháng.", "Duyệt Nghỉ Phép", MsgBox.MessageBoxType.Success);
-            lstLeaveq.Items.Clear();
-            lstLeaveq.Items.Add("✔️ Không còn đơn xin nghỉ nào cần duyệt.");
-            btnApproveLeave.Enabled = false;
+            if (dgvLeaveReq.CurrentRow == null || dgvLeaveReq.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một đơn xin nghỉ để duyệt!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+
+            string tenNV    = dgvLeaveReq.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
+            string ngayNghi = dgvLeaveReq.CurrentRow.Cells["Ngày nghỉ"].Value?.ToString() ?? "";
+
+            MsgBox.Show(
+                MsgBox.OwnerWindow(this),
+                $"Đã DUYỆT đơn xin nghỉ của [{tenNV}] ngày {ngayNghi}.\nDữ liệu đã cập nhật vào tính lương cuối tháng.",
+                "Duyệt Nghỉ Phép",
+                MsgBox.MessageBoxType.Success);
+
+            // Xóa dòng đã duyệt khỏi grid
+            if (dgvLeaveReq.DataSource is DataTable dt)
+            {
+                dt.Rows.RemoveAt(dgvLeaveReq.CurrentRow.Index);
+            }
+
+            if (dgvLeaveReq.Rows.Count == 0)
+                btnApproveLeave.Enabled = false;
         }
 
+        // ──────────────────────────────────────────────
+        // THÊM NHÂN VIÊN MỚI
+        // ──────────────────────────────────────────────
         private async void btnAddStaff_Click(object sender, EventArgs e)
         {
             AddEmployee frmAdd = new();
-            // Mở form lên dưới dạng hộp thoại (người dùng phải đóng form này mới thao tác tiếp được với nền bên dưới)
             if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
-                // Đoạn code này sẽ chạy nếu bên form AddEmployee bạn lưu thành công 
-                // và đã gán: this.DialogResult = DialogResult.OK;
                 await LoadRealData();
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Danh sách nhân viên mới đã được cập nhật!", "Thông báo", MsgBox.MessageBoxType.Success);
-
-                // Gọi hàm load lại dữ liệu lên DataGridView ở đây (nếu có)
-                // Ví dụ: LoadStaffData();
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Danh sách nhân viên đã được cập nhật!", "Thông báo", MsgBox.MessageBoxType.Success);
             }
         }
 
-
-
-        private void lblPresentValue_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        // ──────────────────────────────────────────────
+        // SỬA NHÂN VIÊN
+        // ──────────────────────────────────────────────
         private void btnEditStaff_Click(object sender, EventArgs e)
         {
-            // 1. Kiểm tra xem người dùng đã chọn dòng nào chưa
             if (dgvStaff.CurrentRow == null || dgvStaff.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một nhân viên từ danh sách để chỉnh sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
-            // 2. Lấy dữ liệu từ dòng đang chọn
             DataGridViewRow row = dgvStaff.CurrentRow;
-
-            // 3. Tạo đối tượng DTO chứa dữ liệu
             EmployeeDTO empToEdit = new()
             {
-                EmployeeId = row.Cells["Mã NV"].Value?.ToString(),
-                FullName = row.Cells["Họ và Tên"].Value?.ToString(),
-                Role = row.Cells["Vị Trí"].Value?.ToString(),
-                Status = row.Cells["Trạng Thái"].Value?.ToString(),
+                EmployeeId  = row.Cells["Mã NV"].Value?.ToString(),
+                FullName    = row.Cells["Họ và Tên"].Value?.ToString(),
+                Role        = row.Cells["Vị Trí"].Value?.ToString(),
+                Status      = row.Cells["Trạng Thái"].Value?.ToString(),
                 PhoneNumber = row.Cells["Số điện thoại"].Value?.ToString(),
-                AuthUid = row.Cells["AuthUid"].Value?.ToString(),
-                Email = row.Cells["Email"].Value?.ToString(),
+                AuthUid     = row.Cells["AuthUid"].Value?.ToString(),
+                Email       = row.Cells["Email"].Value?.ToString(),
             };
 
-            // 4. Mở Form Edit
             EditEmployee frmEdit = new(empToEdit);
             if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
-            {
-                // Load lại danh sách nếu lưu thành công
                 _ = LoadRealData();
-            }
         }
 
-        private async void dgvStaff_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        // ──────────────────────────────────────────────
+        // DOUBLE-CLICK XEM CHI TIẾT
+        // ──────────────────────────────────────────────
+        private async void DgvStaff_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
 
             DataGridViewRow row = dgvStaff.Rows[e.RowIndex];
             EmployeeDTO emp = new()
             {
-                EmployeeId = row.Cells["Mã NV"].Value?.ToString(),
-                FullName = row.Cells["Họ và Tên"].Value?.ToString(),
-                Role = row.Cells["Vị Trí"].Value?.ToString(),
-                Status = row.Cells["Trạng Thái"].Value?.ToString(),
+                EmployeeId  = row.Cells["Mã NV"].Value?.ToString(),
+                FullName    = row.Cells["Họ và Tên"].Value?.ToString(),
+                Role        = row.Cells["Vị Trí"].Value?.ToString(),
+                Status      = row.Cells["Trạng Thái"].Value?.ToString(),
                 PhoneNumber = row.Cells["Số điện thoại"].Value?.ToString(),
-                AuthUid = row.Cells["AuthUid"].Value?.ToString(),
-                Email = row.Cells["Email"].Value?.ToString(),
+                AuthUid     = row.Cells["AuthUid"].Value?.ToString(),
+                Email       = row.Cells["Email"].Value?.ToString(),
             };
 
             using EmployeeDetail dlg = new(emp);
@@ -198,78 +221,54 @@ namespace GUI
                 await LoadRealData();
         }
 
+        // ──────────────────────────────────────────────
+        // BỘ LỌC NHÂN VIÊN
+        // ──────────────────────────────────────────────
         private void InitFilterControls()
         {
-            // Nạp dữ liệu cho ComboBox Chức danh (Sử dụng ComboBox - sd cb box)
             cbRole.Items.Clear();
-            cbRole.Items.AddRange(new string[] { "-- Vị trí --", "manager", "barista", "order staff", "security" });
+            foreach (var r in new[] { "-- Vị trí --", "manager", "barista", "order staff", "security" })
+                cbRole.Items.Add(r);
             cbRole.SelectedIndex = 0;
 
-            // Nạp dữ liệu cho ComboBox Trạng thái
             cbStatus.Items.Clear();
-            cbStatus.Items.AddRange(new string[] { "-- Trạng thái --", "active", "inactive" });
+            foreach (var s in new[] { "-- Trạng thái --", "active", "inactive" })
+                cbStatus.Items.Add(s);
             cbStatus.SelectedIndex = 0;
 
-            // Gắn sự kiện Lọc Real-time (Gõ chữ hoặc Xổ ComboBox là lọc ngay lập tức)
-            txtSearch.TextChanged += (s, e) => ApplyStaffFilter();
-            cbRole.SelectedIndexChanged += (s, e) => ApplyStaffFilter();
+            txtSearch.TextChanged        += (s, e) => ApplyStaffFilter();
+            cbRole.SelectedIndexChanged  += (s, e) => ApplyStaffFilter();
             cbStatus.SelectedIndexChanged += (s, e) => ApplyStaffFilter();
         }
 
         private void ApplyStaffFilter()
         {
-            DataTable? dt = dgvStaff.DataSource as DataTable;
-            if (dt == null) return;
+            if (dgvStaff.DataSource is not DataTable dt) return;
 
-            List<string> filterParts = new();
+            List<string> parts = new();
 
-            //TÌM THEO TÊN HOẶC MÃ NV  ---
             string keyword = txtSearch.Text.Trim().Replace("'", "''");
             if (!string.IsNullOrEmpty(keyword))
-            {
-                // LIKE trong RowFilter mặc định là KHÔNG phân biệt hoa/thường
-                filterParts.Add($"([Họ và Tên] LIKE '%{keyword}%' OR [Mã NV] LIKE '%{keyword}%')");
-            }
+                parts.Add($"([Họ và Tên] LIKE '%{keyword}%' OR [Mã NV] LIKE '%{keyword}%')");
 
-            // --- LỌC THEO VỊ TRÍ (ComboBox cbRole) ---
-            if (cbRole.SelectedIndex > 0) // Lớn hơn 0 tức là đã chọn manager, staff... bỏ qua dòng "-- Vị trí --"
-            {
-                string role = cbRole.SelectedItem?.ToString() ?? string.Empty;
-                filterParts.Add($"[Vị Trí] = '{role}'");
-            }
+            if (cbRole.SelectedIndex > 0)
+                parts.Add($"[Vị Trí] = '{cbRole.SelectedItem}'");
 
-            // --- LỌC THEO TRẠNG THÁI (ComboBox cbStatus) ---
             if (cbStatus.SelectedIndex > 0)
-            {
-                string status = cbStatus.SelectedItem?.ToString() ?? string.Empty;
-                filterParts.Add($"[Trạng Thái] = '{status}'");
-            }
+                parts.Add($"[Trạng Thái] = '{cbStatus.SelectedItem}'");
 
-            // GHÉP CÁC ĐIỀU KIỆN LẠI VỚI NHAU
-            string finalFilter = string.Join(" AND ", filterParts);
-
-            try
-            {
-                dt.DefaultView.RowFilter = finalFilter;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Lỗi khi áp dụng bộ lọc: " + ex.Message);
-            }
+            try { dt.DefaultView.RowFilter = string.Join(" AND ", parts); }
+            catch (Exception ex) { Console.WriteLine("Lỗi bộ lọc: " + ex.Message); }
         }
 
         private void btnClearFilter_Click(object sender, EventArgs e)
         {
             txtSearch.Clear();
-            cbRole.SelectedIndex = 0;
+            cbRole.SelectedIndex   = 0;
             cbStatus.SelectedIndex = 0;
 
-            // 2. Hủy lệnh lọc, hiện lại Full danh sách
             if (dgvStaff.DataSource is DataTable dt)
-            {
                 dt.DefaultView.RowFilter = string.Empty;
-            }
         }
-
     }
 }

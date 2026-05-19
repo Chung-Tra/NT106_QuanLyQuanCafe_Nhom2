@@ -26,18 +26,19 @@ namespace QLCafe.ChatServer.Hubs
         /// Nhận tin nhắn → broadcast tới room → server tự lưu xuống database.
         /// Client KHÔNG cần gọi API lưu riêng.
         /// </summary>
-        public async Task SendMessageWithRoom(string senderId, string message, string roomId)
+        /// <param name="senderName">Tên hiển thị của người gửi (client tự truyền lên).</param>
+        public async Task SendMessageWithRoom(string senderId, string senderName, string message, string roomId)
         {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{roomId}] {senderId}: {message}");
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{roomId}] {senderName} ({senderId}): {message}");
 
-            // 1. Broadcast tới tất cả client trong room
-            await Clients.Group(roomId).SendAsync("ReceiveMessageWithRoom", senderId, message, roomId);
+            // 1. Broadcast kèm tên người gửi để client hiển thị luôn
+            await Clients.Group(roomId).SendAsync("ReceiveMessageWithRoom", senderId, senderName, message, roomId);
 
-            // 2. Lưu vào database qua Express backend (fire-and-forget ở server)
-            _ = SaveMessageAsync(roomId, senderId, message);
+            // 2. Lưu vào database (fire-and-forget)
+            _ = SaveMessageAsync(roomId, senderId, senderName, message);
         }
 
-        private async Task SaveMessageAsync(string roomId, string senderId, string message)
+        private async Task SaveMessageAsync(string roomId, string senderId, string senderName, string message)
         {
             try
             {
@@ -46,9 +47,11 @@ namespace QLCafe.ChatServer.Hubs
                     roomId,
                     chatData = new
                     {
-                        senderId,
-                        message,
-                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                        nguoi_gui_id  = senderId,
+                        ten_nguoi_gui = senderName,
+                        noi_dung      = message,
+                        thoi_gian     = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        loai_tin_nhan = "text"
                     }
                 };
 

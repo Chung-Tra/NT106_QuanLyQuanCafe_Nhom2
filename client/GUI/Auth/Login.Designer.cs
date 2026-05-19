@@ -1,4 +1,8 @@
-﻿namespace GUI
+using System.Drawing;
+using System.Windows.Forms;
+using Guna.UI2.WinForms;
+
+namespace GUI
 {
     partial class Login
     {
@@ -17,239 +21,317 @@
 
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
-            pnlRight = new Panel();
-            chkRememberMe = new CheckBox();
-            btnClose = new Button();
-            lblForgotPass = new LinkLabel();
-            btnSignIn = new Button();
-            pnlPassBg = new Panel();
-            btnShowPass = new Button();
-            txtPassword = new TextBox();
-            pnlEmailBg = new Panel();
-            txtEmail = new TextBox();
-            lblTitle = new Label();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            pnlLeft = new Guna2Panel();
             pictureBox1 = new PictureBox();
-            picLeft = new PictureBox();
-            pnlRight.SuspendLayout();
-            pnlPassBg.SuspendLayout();
-            pnlEmailBg.SuspendLayout();
+            pnlRight = new Panel();
+            pnlCard = new Guna2Panel();
+            lblWelcome = new Label();
+            lblSubtitle = new Label();
+            txtEmail = new Guna2TextBox();
+            txtPassword = new Guna2TextBox();
+            btnShowPass = new Guna2Button();
+            chkRememberMe = new Guna2CustomCheckBox();
+            lblRememberMe = new Label();
+            lblForgotPass = new LinkLabel();
+            btnSignIn = new Guna2Button();
+            btnClose = new Guna2Button();
+            shadow = new Guna2ShadowForm(components);
+            pnlLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)picLeft).BeginInit();
+            pnlRight.SuspendLayout();
+            pnlCard.SuspendLayout();
             SuspendLayout();
             // 
-            // pnlRight
+            // pnlLeft
             // 
-            pnlRight.BackColor = Color.FromArgb(30, 30, 30);
-            pnlRight.Controls.Add(chkRememberMe);
-            pnlRight.Controls.Add(btnClose);
-            pnlRight.Controls.Add(lblForgotPass);
-            pnlRight.Controls.Add(btnSignIn);
-            pnlRight.Controls.Add(pnlPassBg);
-            pnlRight.Controls.Add(pnlEmailBg);
-            pnlRight.Controls.Add(lblTitle);
-            pnlRight.Cursor = Cursors.Hand;
-            pnlRight.Dock = DockStyle.Fill;
-            pnlRight.ForeColor = Color.White;
-            pnlRight.Location = new Point(306, 0);
-            pnlRight.Margin = new Padding(3, 2, 3, 2);
-            pnlRight.Name = "pnlRight";
-            pnlRight.Size = new Size(639, 377);
-            pnlRight.TabIndex = 1;
-            // 
-            // chkRememberMe
-            // 
-            chkRememberMe.AutoSize = true;
-            chkRememberMe.Location = new Point(173, 242);
-            chkRememberMe.Margin = new Padding(3, 2, 3, 2);
-            chkRememberMe.Name = "chkRememberMe";
-            chkRememberMe.Size = new Size(106, 19);
-            chkRememberMe.TabIndex = 6;
-            chkRememberMe.Text = "Lưu đăng nhập";
-            chkRememberMe.UseVisualStyleBackColor = true;
-            // 
-            // btnClose
-            // 
-            btnClose.Dock = DockStyle.Right;
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
-            btnClose.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnClose.ForeColor = Color.White;
-            btnClose.Location = new Point(574, 0);
-            btnClose.Name = "btnClose";
-            btnClose.Size = new Size(65, 377);
-            btnClose.TabIndex = 5;
-            btnClose.Text = "X";
-            btnClose.Click += BtnClose_Click;
-            // 
-            // lblForgotPass
-            // 
-            lblForgotPass.AutoSize = true;
-            lblForgotPass.LinkColor = Color.White;
-            lblForgotPass.Location = new Point(405, 246);
-            lblForgotPass.Name = "lblForgotPass";
-            lblForgotPass.Size = new Size(100, 15);
-            lblForgotPass.TabIndex = 4;
-            lblForgotPass.TabStop = true;
-            lblForgotPass.Text = "Quên mật khẩu?";
-            lblForgotPass.LinkClicked += LinkLabel1_LinkClicked;
-            // 
-            // btnSignIn
-            // 
-            btnSignIn.BackColor = Color.White;
-            btnSignIn.Cursor = Cursors.Hand;
-            btnSignIn.FlatAppearance.BorderSize = 0;
-            btnSignIn.FlatStyle = FlatStyle.Flat;
-            btnSignIn.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnSignIn.ForeColor = Color.Black;
-            btnSignIn.Location = new Point(271, 287);
-            btnSignIn.Margin = new Padding(3, 2, 3, 2);
-            btnSignIn.Name = "btnSignIn";
-            btnSignIn.Size = new Size(131, 34);
-            btnSignIn.TabIndex = 3;
-            btnSignIn.Text = "Đăng nhập";
-            btnSignIn.UseVisualStyleBackColor = false;
-            btnSignIn.Click += BtnSignIn_Click;
-            // 
-            // pnlPassBg
-            // 
-            pnlPassBg.BackColor = Color.FromArgb(45, 45, 48);
-            pnlPassBg.Controls.Add(btnShowPass);
-            pnlPassBg.Controls.Add(txtPassword);
-            pnlPassBg.Location = new Point(173, 194);
-            pnlPassBg.Margin = new Padding(3, 2, 3, 2);
-            pnlPassBg.Name = "pnlPassBg";
-            pnlPassBg.Size = new Size(332, 34);
-            pnlPassBg.TabIndex = 2;
-            // 
-            // btnShowPass
-            // 
-            btnShowPass.BackColor = Color.Transparent;
-            btnShowPass.Cursor = Cursors.Hand;
-            btnShowPass.FlatAppearance.BorderSize = 0;
-            btnShowPass.FlatStyle = FlatStyle.Flat;
-            btnShowPass.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnShowPass.ForeColor = Color.Black;
-            btnShowPass.Location = new Point(270, 2);
-            btnShowPass.Margin = new Padding(3, 2, 3, 2);
-            btnShowPass.Name = "btnShowPass";
-            btnShowPass.Size = new Size(59, 27);
-            btnShowPass.TabIndex = 5;
-            btnShowPass.Text = "👁️";
-            btnShowPass.UseVisualStyleBackColor = false;
-            btnShowPass.MouseDown += BtnShowPass_MouseDown;
-            btnShowPass.MouseUp += BtnShowPass_MouseUp;
-            // 
-            // txtPassword
-            // 
-            txtPassword.BackColor = Color.FromArgb(45, 45, 48);
-            txtPassword.BorderStyle = BorderStyle.None;
-            txtPassword.Font = new Font("Segoe UI", 12F);
-            txtPassword.ForeColor = Color.White;
-            txtPassword.Location = new Point(13, 7);
-            txtPassword.Margin = new Padding(3, 2, 3, 2);
-            txtPassword.Name = "txtPassword";
-            txtPassword.PlaceholderText = "matkhau123";
-            txtPassword.Size = new Size(306, 22);
-            txtPassword.TabIndex = 0;
-            txtPassword.Enter += TxtPassword_Enter;
-            // 
-            // pnlEmailBg
-            // 
-            pnlEmailBg.BackColor = Color.FromArgb(45, 45, 48);
-            pnlEmailBg.Controls.Add(txtEmail);
-            pnlEmailBg.Location = new Point(173, 141);
-            pnlEmailBg.Margin = new Padding(3, 2, 3, 2);
-            pnlEmailBg.Name = "pnlEmailBg";
-            pnlEmailBg.Size = new Size(332, 34);
-            pnlEmailBg.TabIndex = 1;
-            // 
-            // txtEmail
-            // 
-            txtEmail.BackColor = Color.FromArgb(45, 45, 48);
-            txtEmail.BorderStyle = BorderStyle.None;
-            txtEmail.Font = new Font("Segoe UI", 12F);
-            txtEmail.ForeColor = Color.White;
-            txtEmail.Location = new Point(13, 7);
-            txtEmail.Margin = new Padding(3, 2, 3, 2);
-            txtEmail.Name = "txtEmail";
-            txtEmail.PlaceholderText = "nhanvien@gmail.com";
-            txtEmail.Size = new Size(306, 22);
-            txtEmail.TabIndex = 0;
-            // 
-            // lblTitle
-            // 
-            lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(170, 58);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(306, 60);
-            lblTitle.TabIndex = 0;
-            lblTitle.Text = "Chào mừng trở lại,\r\nVui lòng đăng nhập tài khoản";
+            pnlLeft.BackColor = Color.FromArgb(24, 24, 27);
+            pnlLeft.Controls.Add(pictureBox1);
+            pnlLeft.CustomizableEdges = customizableEdges1;
+            pnlLeft.Dock = DockStyle.Left;
+            pnlLeft.Location = new Point(0, 0);
+            pnlLeft.Name = "pnlLeft";
+            pnlLeft.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            pnlLeft.Size = new Size(380, 560);
+            pnlLeft.TabIndex = 0;
             // 
             // pictureBox1
             // 
-            pictureBox1.BackColor = Color.BurlyWood;
+            pictureBox1.BackColor = Color.FromArgb(40, 30, 25);
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Location = new Point(-221, -3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(364, 375);
+            pictureBox1.Size = new Size(610, 560);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 6;
+            pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-            pictureBox1.Click += PictureBox1_Click;
-            pictureBox1.Paint += PictureBox1_Paint;
             // 
-            // picLeft
+            // pnlRight
             // 
-            picLeft.BackColor = Color.BurlyWood;
-            picLeft.Dock = DockStyle.Left;
-            picLeft.Location = new Point(0, 0);
-            picLeft.Margin = new Padding(3, 2, 3, 2);
-            picLeft.Name = "picLeft";
-            picLeft.Size = new Size(306, 377);
-            picLeft.SizeMode = PictureBoxSizeMode.StretchImage;
-            picLeft.TabIndex = 0;
-            picLeft.TabStop = false;
+            pnlRight.BackColor = Color.FromArgb(24, 24, 27);
+            pnlRight.Controls.Add(pnlCard);
+            pnlRight.Controls.Add(btnClose);
+            pnlRight.Dock = DockStyle.Fill;
+            pnlRight.Location = new Point(380, 0);
+            pnlRight.Name = "pnlRight";
+            pnlRight.Size = new Size(580, 560);
+            pnlRight.TabIndex = 1;
+            // 
+            // pnlCard
+            // 
+            pnlCard.BackColor = Color.FromArgb(39, 39, 42);
+            pnlCard.BorderRadius = 18;
+            pnlCard.Controls.Add(btnShowPass);
+            pnlCard.Controls.Add(lblWelcome);
+            pnlCard.Controls.Add(lblSubtitle);
+            pnlCard.Controls.Add(txtEmail);
+            pnlCard.Controls.Add(txtPassword);
+            pnlCard.Controls.Add(chkRememberMe);
+            pnlCard.Controls.Add(lblRememberMe);
+            pnlCard.Controls.Add(lblForgotPass);
+            pnlCard.Controls.Add(btnSignIn);
+            pnlCard.CustomizableEdges = customizableEdges13;
+            pnlCard.ForeColor = SystemColors.WindowText;
+            pnlCard.Location = new Point(70, 70);
+            pnlCard.Name = "pnlCard";
+            pnlCard.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            pnlCard.Size = new Size(440, 430);
+            pnlCard.TabIndex = 1;
+            // 
+            // lblWelcome
+            // 
+            lblWelcome.AutoSize = true;
+            lblWelcome.Font = new Font("Segoe UI", 19F, FontStyle.Bold);
+            lblWelcome.ForeColor = Color.White;
+            lblWelcome.Location = new Point(40, 39);
+            lblWelcome.Name = "lblWelcome";
+            lblWelcome.Size = new Size(279, 36);
+            lblWelcome.TabIndex = 0;
+            lblWelcome.Text = "Chào mừng trở lại 👋";
+            // 
+            // lblSubtitle
+            // 
+            lblSubtitle.AutoSize = true;
+            lblSubtitle.Font = new Font("Segoe UI", 9.5F);
+            lblSubtitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblSubtitle.Location = new Point(40, 75);
+            lblSubtitle.Name = "lblSubtitle";
+            lblSubtitle.Size = new Size(242, 17);
+            lblSubtitle.TabIndex = 1;
+            lblSubtitle.Text = "Vui lòng đăng nhập tài khoản nhân viên.";
+            // 
+            // txtEmail
+            // 
+            txtEmail.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmail.BorderRadius = 10;
+            txtEmail.CustomizableEdges = customizableEdges5;
+            txtEmail.DefaultText = "";
+            txtEmail.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmail.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtEmail.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtEmail.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtEmail.FillColor = Color.FromArgb(30, 30, 33);
+            txtEmail.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtEmail.Font = new Font("Segoe UI", 10.5F);
+            txtEmail.ForeColor = Color.White;
+            txtEmail.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtEmail.Location = new Point(40, 130);
+            txtEmail.Name = "txtEmail";
+            txtEmail.PasswordChar = '\0';
+            txtEmail.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtEmail.PlaceholderText = "📧  Email nhân viên";
+            txtEmail.SelectedText = "";
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            txtEmail.Size = new Size(360, 46);
+            txtEmail.TabIndex = 0;
+            // 
+            // txtPassword
+            // 
+            txtPassword.BorderColor = Color.FromArgb(63, 63, 70);
+            txtPassword.BorderRadius = 10;
+            txtPassword.CustomizableEdges = customizableEdges7;
+            txtPassword.DefaultText = "";
+            txtPassword.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtPassword.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtPassword.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtPassword.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtPassword.FillColor = Color.FromArgb(30, 30, 33);
+            txtPassword.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtPassword.Font = new Font("Segoe UI", 10.5F);
+            txtPassword.ForeColor = Color.White;
+            txtPassword.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtPassword.Location = new Point(40, 195);
+            txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '●';
+            txtPassword.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtPassword.PlaceholderText = "🔒  Mật khẩu";
+            txtPassword.SelectedText = "";
+            txtPassword.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            txtPassword.Size = new Size(297, 46);
+            txtPassword.TabIndex = 1;
+            txtPassword.UseSystemPasswordChar = true;
+            // 
+            // btnShowPass
+            // 
+            btnShowPass.BorderRadius = 8;
+            btnShowPass.BorderColor = Color.FromArgb(63, 63, 70);
+            btnShowPass.BorderThickness = 1;
+            btnShowPass.Cursor = Cursors.Hand;
+            btnShowPass.CustomizableEdges = customizableEdges3;
+            btnShowPass.FillColor = Color.FromArgb(30, 30, 33);
+            btnShowPass.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnShowPass.ForeColor = Color.FromArgb(200, 200, 205);
+            btnShowPass.HoverState.FillColor = Color.FromArgb(55, 55, 60);
+            btnShowPass.HoverState.ForeColor = Color.White;
+            btnShowPass.Location = new Point(343, 195);
+            btnShowPass.Name = "btnShowPass";
+            btnShowPass.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            btnShowPass.Size = new Size(54, 46);
+            btnShowPass.TabIndex = 2;
+            btnShowPass.Text = "Hiện";
+            btnShowPass.MouseDown += BtnShowPass_MouseDown;
+            btnShowPass.MouseUp   += BtnShowPass_MouseUp;
+            // 
+            // chkRememberMe
+            // 
+            chkRememberMe.Animated = true;
+            chkRememberMe.CheckedState.BorderColor = Color.FromArgb(31, 138, 154);
+            chkRememberMe.CheckedState.BorderRadius = 4;
+            chkRememberMe.CheckedState.BorderThickness = 0;
+            chkRememberMe.CheckedState.FillColor = Color.FromArgb(31, 138, 154);
+            chkRememberMe.CustomizableEdges = customizableEdges9;
+            chkRememberMe.Location = new Point(40, 265);
+            chkRememberMe.Name = "chkRememberMe";
+            chkRememberMe.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            chkRememberMe.Size = new Size(20, 20);
+            chkRememberMe.TabIndex = 3;
+            chkRememberMe.UncheckedState.BorderColor = Color.FromArgb(100, 100, 110);
+            chkRememberMe.UncheckedState.BorderRadius = 4;
+            chkRememberMe.UncheckedState.BorderThickness = 1;
+            chkRememberMe.UncheckedState.FillColor = Color.Transparent;
+            // 
+            // lblRememberMe
+            // 
+            lblRememberMe.AutoSize = true;
+            lblRememberMe.Font = new Font("Segoe UI", 9.5F);
+            lblRememberMe.ForeColor = Color.FromArgb(180, 180, 185);
+            lblRememberMe.Location = new Point(66, 266);
+            lblRememberMe.Name = "lblRememberMe";
+            lblRememberMe.Size = new Size(120, 17);
+            lblRememberMe.TabIndex = 4;
+            lblRememberMe.Text = "Ghi nhớ đăng nhập";
+            // 
+            // lblForgotPass
+            // 
+            lblForgotPass.ActiveLinkColor = Color.FromArgb(45, 158, 174);
+            lblForgotPass.AutoSize = true;
+            lblForgotPass.Font = new Font("Segoe UI", 9.5F);
+            lblForgotPass.LinkBehavior = LinkBehavior.HoverUnderline;
+            lblForgotPass.LinkColor = Color.FromArgb(31, 138, 154);
+            lblForgotPass.Location = new Point(295, 266);
+            lblForgotPass.Name = "lblForgotPass";
+            lblForgotPass.Size = new Size(102, 17);
+            lblForgotPass.TabIndex = 5;
+            lblForgotPass.TabStop = true;
+            lblForgotPass.Text = "Quên mật khẩu?";
+            lblForgotPass.LinkClicked += LblForgotPass_LinkClicked;
+            // 
+            // btnSignIn
+            // 
+            btnSignIn.BorderRadius = 10;
+            btnSignIn.Cursor = Cursors.Hand;
+            btnSignIn.CustomizableEdges = customizableEdges11;
+            btnSignIn.DisabledState.BorderColor = Color.DarkGray;
+            btnSignIn.DisabledState.CustomBorderColor = Color.DarkGray;
+            btnSignIn.DisabledState.FillColor = Color.FromArgb(80, 80, 80);
+            btnSignIn.DisabledState.ForeColor = Color.FromArgb(190, 190, 190);
+            btnSignIn.FillColor = Color.FromArgb(31, 138, 154);
+            btnSignIn.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnSignIn.ForeColor = Color.White;
+            btnSignIn.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnSignIn.Location = new Point(40, 320);
+            btnSignIn.Name = "btnSignIn";
+            btnSignIn.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            btnSignIn.Size = new Size(360, 48);
+            btnSignIn.TabIndex = 4;
+            btnSignIn.Text = "Đăng nhập";
+            btnSignIn.Click += BtnSignIn_Click;
+            // 
+            // btnClose
+            // 
+            btnClose.BorderRadius = 8;
+            btnClose.Cursor = Cursors.Hand;
+            btnClose.CustomizableEdges = customizableEdges15;
+            btnClose.FillColor = Color.Transparent;
+            btnClose.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnClose.ForeColor = Color.FromArgb(220, 220, 225);
+            btnClose.HoverState.FillColor = Color.FromArgb(180, 60, 60);
+            btnClose.HoverState.ForeColor = Color.White;
+            btnClose.Location = new Point(536, 14);
+            btnClose.Name = "btnClose";
+            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            btnClose.Size = new Size(30, 32);
+            btnClose.TabIndex = 10;
+            btnClose.Text = "✕";
+            btnClose.Click += BtnClose_Click;
+            // 
+            // shadow
+            // 
+            shadow.TargetForm = this;
             // 
             // Login
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(945, 377);
-            Controls.Add(pictureBox1);
+            BackColor = Color.FromArgb(24, 24, 27);
+            ClientSize = new Size(960, 560);
             Controls.Add(pnlRight);
-            Controls.Add(picLeft);
+            Controls.Add(pnlLeft);
             FormBorderStyle = FormBorderStyle.None;
-            Margin = new Padding(3, 2, 3, 2);
             Name = "Login";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Đăng nhập - QLCafe";
-            pnlRight.ResumeLayout(false);
-            pnlRight.PerformLayout();
-            pnlPassBg.ResumeLayout(false);
-            pnlPassBg.PerformLayout();
-            pnlEmailBg.ResumeLayout(false);
-            pnlEmailBg.PerformLayout();
+            pnlLeft.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)picLeft).EndInit();
+            pnlRight.ResumeLayout(false);
+            pnlCard.ResumeLayout(false);
+            pnlCard.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
-        private System.Windows.Forms.Panel pnlRight;
-        private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.Panel pnlEmailBg;
-        private System.Windows.Forms.TextBox txtEmail;
-        private System.Windows.Forms.Panel pnlPassBg;
-        private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.Button btnSignIn;
+
+        private Guna2Panel pnlLeft;
         private PictureBox pictureBox1;
+        private Panel pnlRight;
+        private Guna2Panel pnlCard;
+        private Label lblWelcome;
+        private Label lblSubtitle;
+        private Guna2TextBox txtEmail;
+        private Guna2TextBox txtPassword;
+        private Guna2Button btnShowPass;
+        private Guna2CustomCheckBox chkRememberMe;
+        private Label lblRememberMe;
         private LinkLabel lblForgotPass;
-        private Button btnShowPass;
-        private Button btnClose;
-        private PictureBox picLeft;
-        private CheckBox chkRememberMe;
+        private Guna2Button btnSignIn;
+        private Guna2ShadowForm shadow;
+        private Guna2Button btnClose;
     }
 }

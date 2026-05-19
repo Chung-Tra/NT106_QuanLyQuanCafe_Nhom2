@@ -10,7 +10,6 @@ namespace GUI
         private readonly Form _targetForm;
         private readonly System.Windows.Forms.Timer _sessionTimer = new();
 
-        // Biến dùng để kéo thả
         private bool _isDragging = false;
         private Point _startCursorPoint;
         private Point _startFormPoint;
@@ -20,7 +19,6 @@ namespace GUI
             _targetForm = targetForm;
             if (System.ComponentModel.LicenseManager.UsageMode != System.ComponentModel.LicenseUsageMode.Designtime)
             {
-                _targetForm.Load += (s, e) => ApplyDragToAllControls(_targetForm);
                 SetupSessionTimer();
 
                 // Tự động tắt Timer khi Form đóng để dọn dẹp RAM
@@ -31,6 +29,9 @@ namespace GUI
                 };
             }
         }
+
+        /// <summary>Gắn drag vào tất cả control — gọi sau khi form Load xong.</summary>
+        public void ApplyDrag() => ApplyDragToAllControls(_targetForm);
 
         //HÀM KÉO THẢ FORM 
         private void HandleFormDrag_MouseDown(object? sender, MouseEventArgs e)
@@ -61,20 +62,30 @@ namespace GUI
             }
         }
 
+        private static bool IsInteractive(Control c)
+        {
+            // Bỏ qua tất cả control mà người dùng có thể tương tác — không gắn drag để tránh xung đột click.
+            string typeName = c.GetType().Name;
+            return c is Button || c is TextBox || c is ComboBox || c is CheckBox || c is LinkLabel
+                || c is DataGridView || c is ListBox || c is ListView || c is TreeView
+                || c is NumericUpDown || c is RadioButton || c is TrackBar || c is PictureBox
+                || typeName.StartsWith("Guna2");
+        }
+
         private void ApplyDragToAllControls(Control parent)
         {
             foreach (Control c in parent.Controls)
             {
-                if (!(c is Button || c is TextBox || c is ComboBox || c is CheckBox || c is LinkLabel))
+                if (!IsInteractive(c))
                 {
                     c.MouseDown += HandleFormDrag_MouseDown;
                     c.MouseMove += HandleFormDrag_MouseMove;
                     c.MouseUp += HandleFormDrag_MouseUp;
+                }
 
-                    if (c.HasChildren)
-                    {
-                        ApplyDragToAllControls(c);
-                    }
+                if (c.HasChildren)
+                {
+                    ApplyDragToAllControls(c);
                 }
             }
 
