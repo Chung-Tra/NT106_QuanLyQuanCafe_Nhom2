@@ -19,7 +19,7 @@ namespace DAL
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Dictionary<string, FoodDTO>>(json) ?? [];
         }
-
+        // --- HÀM 2: THÊM MÓN ĂN MỚI ---
         public static async Task<(bool Success, string Message)> AddAsync(FoodDTO food)
         {
             try
