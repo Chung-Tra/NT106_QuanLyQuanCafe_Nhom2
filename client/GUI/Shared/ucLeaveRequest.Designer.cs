@@ -28,256 +28,288 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.pnlSummary = new System.Windows.Forms.Panel();
-            this.lblRemainingValue = new System.Windows.Forms.Label();
-            this.lblRemainingTitle = new System.Windows.Forms.Label();
-            this.lblPendingValue = new System.Windows.Forms.Label();
-            this.lblPendingTitle = new System.Windows.Forms.Label();
-            this.pnlNewRequest = new System.Windows.Forms.Panel();
-            this.btnSubmit = new System.Windows.Forms.Button();
-            this.txtReason = new System.Windows.Forms.TextBox();
-            this.lblReason = new System.Windows.Forms.Label();
-            this.dtpToDate = new System.Windows.Forms.DateTimePicker();
-            this.lblToDate = new System.Windows.Forms.Label();
-            this.dtpFromDate = new System.Windows.Forms.DateTimePicker();
-            this.lblFromDate = new System.Windows.Forms.Label();
-            this.lblNewRequestTitle = new System.Windows.Forms.Label();
-            this.pnlHistory = new System.Windows.Forms.Panel();
-            this.dgvHistory = new System.Windows.Forms.DataGridView();
-            this.lblHistoryTitle = new System.Windows.Forms.Label();
-            this.pnlSummary.SuspendLayout();
-            this.pnlNewRequest.SuspendLayout();
-            this.pnlHistory.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).BeginInit();
-            this.SuspendLayout();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            pnlSummary = new Panel();
+            btnManager = new Button();
+            lblRemainingValue = new Label();
+            lblRemainingTitle = new Label();
+            lblPendingValue = new Label();
+            lblPendingTitle = new Label();
+            btnReport = new Button();
+            pnlNewRequest = new Panel();
+            btnSubmit = new Button();
+            txtReason = new TextBox();
+            lblReason = new Label();
+            dtpToDate = new DateTimePicker();
+            lblToDate = new Label();
+            dtpFromDate = new DateTimePicker();
+            lblFromDate = new Label();
+            lblNewRequestTitle = new Label();
+            pnlHistory = new Panel();
+            dgvHistory = new DataGridView();
+            lblHistoryTitle = new Label();
+            pnlSummary.SuspendLayout();
+            pnlNewRequest.SuspendLayout();
+            pnlHistory.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvHistory).BeginInit();
+            SuspendLayout();
             // 
             // pnlSummary
             // 
-            this.pnlSummary.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.btnReport = new System.Windows.Forms.Button();
-            this.pnlSummary.Controls.Add(this.lblRemainingValue);
-            this.pnlSummary.Controls.Add(this.lblRemainingTitle);
-            this.pnlSummary.Controls.Add(this.lblPendingValue);
-            this.pnlSummary.Controls.Add(this.lblPendingTitle);
-            this.pnlSummary.Controls.Add(this.btnReport);
-            this.pnlSummary.Location = new System.Drawing.Point(20, 20);
-            this.pnlSummary.Name = "pnlSummary";
-            this.pnlSummary.Size = new System.Drawing.Size(764, 80);
-            this.pnlSummary.TabIndex = 0;
+            pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
+            pnlSummary.Controls.Add(btnManager);
+            pnlSummary.Controls.Add(lblRemainingValue);
+            pnlSummary.Controls.Add(lblRemainingTitle);
+            pnlSummary.Controls.Add(lblPendingValue);
+            pnlSummary.Controls.Add(lblPendingTitle);
+            pnlSummary.Controls.Add(btnReport);
+            pnlSummary.Location = new Point(23, 27);
+            pnlSummary.Margin = new Padding(3, 4, 3, 4);
+            pnlSummary.Name = "pnlSummary";
+            pnlSummary.Size = new Size(873, 107);
+            pnlSummary.TabIndex = 0;
+            // 
+            // btnManager
+            // 
+            btnManager.BackColor = Color.SteelBlue;
+            btnManager.Cursor = Cursors.Hand;
+            btnManager.FlatAppearance.BorderSize = 0;
+            btnManager.FlatStyle = FlatStyle.Flat;
+            btnManager.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnManager.ForeColor = Color.White;
+            btnManager.Location = new Point(553, 33);
+            btnManager.Margin = new Padding(3, 4, 3, 4);
+            btnManager.Name = "btnManager";
+            btnManager.Size = new Size(137, 43);
+            btnManager.TabIndex = 4;
+            btnManager.Text = "Quản lý nghỉ";
+            btnManager.UseVisualStyleBackColor = false;
+            btnManager.Click += btnManager_Click;
             // 
             // lblRemainingValue
             // 
-            this.lblRemainingValue.AutoSize = true;
-            this.lblRemainingValue.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
-            this.lblRemainingValue.ForeColor = System.Drawing.Color.MediumSeaGreen;
-            this.lblRemainingValue.Location = new System.Drawing.Point(20, 35);
-            this.lblRemainingValue.Name = "lblRemainingValue";
-            this.lblRemainingValue.Size = new System.Drawing.Size(84, 30);
-            this.lblRemainingValue.TabIndex = 0;
-            this.lblRemainingValue.Text = "12 ngày";
+            lblRemainingValue.AutoSize = true;
+            lblRemainingValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
+            lblRemainingValue.ForeColor = Color.MediumSeaGreen;
+            lblRemainingValue.Location = new Point(23, 47);
+            lblRemainingValue.Name = "lblRemainingValue";
+            lblRemainingValue.Size = new Size(119, 37);
+            lblRemainingValue.TabIndex = 0;
+            lblRemainingValue.Text = "12 ngày";
             // 
             // lblRemainingTitle
             // 
-            this.lblRemainingTitle.AutoSize = true;
-            this.lblRemainingTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            this.lblRemainingTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblRemainingTitle.Location = new System.Drawing.Point(20, 15);
-            this.lblRemainingTitle.Name = "lblRemainingTitle";
-            this.lblRemainingTitle.Size = new System.Drawing.Size(121, 17);
-            this.lblRemainingTitle.TabIndex = 1;
-            this.lblRemainingTitle.Text = "Ngày phép còn lại";
+            lblRemainingTitle.AutoSize = true;
+            lblRemainingTitle.Font = new Font("Segoe UI", 9.75F);
+            lblRemainingTitle.ForeColor = Color.Gray;
+            lblRemainingTitle.Location = new Point(23, 20);
+            lblRemainingTitle.Name = "lblRemainingTitle";
+            lblRemainingTitle.Size = new Size(149, 23);
+            lblRemainingTitle.TabIndex = 1;
+            lblRemainingTitle.Text = "Ngày phép còn lại";
             // 
             // lblPendingValue
             // 
-            this.lblPendingValue.AutoSize = true;
-            this.lblPendingValue.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Bold);
-            this.lblPendingValue.ForeColor = System.Drawing.Color.Orange;
-            this.lblPendingValue.Location = new System.Drawing.Point(260, 35);
-            this.lblPendingValue.Name = "lblPendingValue";
-            this.lblPendingValue.Size = new System.Drawing.Size(68, 30);
-            this.lblPendingValue.TabIndex = 2;
-            this.lblPendingValue.Text = "2 đơn";
+            lblPendingValue.AutoSize = true;
+            lblPendingValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
+            lblPendingValue.ForeColor = Color.Orange;
+            lblPendingValue.Location = new Point(297, 47);
+            lblPendingValue.Name = "lblPendingValue";
+            lblPendingValue.Size = new Size(90, 37);
+            lblPendingValue.TabIndex = 2;
+            lblPendingValue.Text = "2 đơn";
             // 
             // lblPendingTitle
             // 
-            this.lblPendingTitle.AutoSize = true;
-            this.lblPendingTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            this.lblPendingTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblPendingTitle.Location = new System.Drawing.Point(260, 15);
-            this.lblPendingTitle.Name = "lblPendingTitle";
-            this.lblPendingTitle.Size = new System.Drawing.Size(113, 17);
-            this.lblPendingTitle.TabIndex = 3;
-            this.lblPendingTitle.Text = "Đang chờ duyệt";
-            //
+            lblPendingTitle.AutoSize = true;
+            lblPendingTitle.Font = new Font("Segoe UI", 9.75F);
+            lblPendingTitle.ForeColor = Color.Gray;
+            lblPendingTitle.Location = new Point(297, 20);
+            lblPendingTitle.Name = "lblPendingTitle";
+            lblPendingTitle.Size = new Size(132, 23);
+            lblPendingTitle.TabIndex = 3;
+            lblPendingTitle.Text = "Đang chờ duyệt";
+            // 
             // btnReport
-            //
-            this.btnReport.BackColor = System.Drawing.Color.FromArgb(70, 130, 180);
-            this.btnReport.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnReport.FlatAppearance.BorderSize = 0;
-            this.btnReport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReport.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.btnReport.ForeColor = System.Drawing.Color.White;
-            this.btnReport.Location = new System.Drawing.Point(620, 25);
-            this.btnReport.Name = "btnReport";
-            this.btnReport.Size = new System.Drawing.Size(120, 32);
-            this.btnReport.Text = "Báo cáo";
-            //
+            // 
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(709, 33);
+            btnReport.Margin = new Padding(3, 4, 3, 4);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(137, 43);
+            btnReport.TabIndex = 4;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
+            // 
             // pnlNewRequest
             // 
-            this.pnlNewRequest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.pnlNewRequest.Controls.Add(this.btnSubmit);
-            this.pnlNewRequest.Controls.Add(this.txtReason);
-            this.pnlNewRequest.Controls.Add(this.lblReason);
-            this.pnlNewRequest.Controls.Add(this.dtpToDate);
-            this.pnlNewRequest.Controls.Add(this.lblToDate);
-            this.pnlNewRequest.Controls.Add(this.dtpFromDate);
-            this.pnlNewRequest.Controls.Add(this.lblFromDate);
-            this.pnlNewRequest.Controls.Add(this.lblNewRequestTitle);
-            this.pnlNewRequest.Location = new System.Drawing.Point(20, 120);
-            this.pnlNewRequest.Name = "pnlNewRequest";
-            this.pnlNewRequest.Size = new System.Drawing.Size(300, 390);
-            this.pnlNewRequest.TabIndex = 1;
+            pnlNewRequest.BackColor = Color.FromArgb(30, 30, 30);
+            pnlNewRequest.Controls.Add(btnSubmit);
+            pnlNewRequest.Controls.Add(txtReason);
+            pnlNewRequest.Controls.Add(lblReason);
+            pnlNewRequest.Controls.Add(dtpToDate);
+            pnlNewRequest.Controls.Add(lblToDate);
+            pnlNewRequest.Controls.Add(dtpFromDate);
+            pnlNewRequest.Controls.Add(lblFromDate);
+            pnlNewRequest.Controls.Add(lblNewRequestTitle);
+            pnlNewRequest.Location = new Point(23, 160);
+            pnlNewRequest.Margin = new Padding(3, 4, 3, 4);
+            pnlNewRequest.Name = "pnlNewRequest";
+            pnlNewRequest.Size = new Size(343, 520);
+            pnlNewRequest.TabIndex = 1;
             // 
             // btnSubmit
             // 
-            this.btnSubmit.BackColor = System.Drawing.Color.MediumSeaGreen;
-            this.btnSubmit.FlatAppearance.BorderSize = 0;
-            this.btnSubmit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSubmit.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSubmit.ForeColor = System.Drawing.Color.White;
-            this.btnSubmit.Location = new System.Drawing.Point(20, 330);
-            this.btnSubmit.Name = "btnSubmit";
-            this.btnSubmit.Size = new System.Drawing.Size(260, 40);
-            this.btnSubmit.TabIndex = 7;
-            this.btnSubmit.Text = "GỬI YÊU CẦU";
-            this.btnSubmit.UseVisualStyleBackColor = false;
+            btnSubmit.BackColor = Color.MediumSeaGreen;
+            btnSubmit.FlatAppearance.BorderSize = 0;
+            btnSubmit.FlatStyle = FlatStyle.Flat;
+            btnSubmit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnSubmit.ForeColor = Color.White;
+            btnSubmit.Location = new Point(23, 440);
+            btnSubmit.Margin = new Padding(3, 4, 3, 4);
+            btnSubmit.Name = "btnSubmit";
+            btnSubmit.Size = new Size(297, 53);
+            btnSubmit.TabIndex = 7;
+            btnSubmit.Text = "GỬI YÊU CẦU";
+            btnSubmit.UseVisualStyleBackColor = false;
             // 
             // txtReason
             // 
-            this.txtReason.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.txtReason.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtReason.ForeColor = System.Drawing.Color.White;
-            this.txtReason.Location = new System.Drawing.Point(20, 190);
-            this.txtReason.Multiline = true;
-            this.txtReason.Name = "txtReason";
-            this.txtReason.Size = new System.Drawing.Size(260, 120);
-            this.txtReason.TabIndex = 6;
+            txtReason.BackColor = Color.FromArgb(45, 45, 48);
+            txtReason.BorderStyle = BorderStyle.None;
+            txtReason.ForeColor = Color.White;
+            txtReason.Location = new Point(23, 253);
+            txtReason.Margin = new Padding(3, 4, 3, 4);
+            txtReason.Multiline = true;
+            txtReason.Name = "txtReason";
+            txtReason.Size = new Size(297, 160);
+            txtReason.TabIndex = 6;
             // 
             // lblReason
             // 
-            this.lblReason.AutoSize = true;
-            this.lblReason.ForeColor = System.Drawing.Color.Gray;
-            this.lblReason.Location = new System.Drawing.Point(20, 170);
-            this.lblReason.Name = "lblReason";
-            this.lblReason.Size = new System.Drawing.Size(73, 15);
-            this.lblReason.TabIndex = 5;
-            this.lblReason.Text = "Lý do nghỉ:";
+            lblReason.AutoSize = true;
+            lblReason.ForeColor = Color.Gray;
+            lblReason.Location = new Point(23, 227);
+            lblReason.Name = "lblReason";
+            lblReason.Size = new Size(80, 20);
+            lblReason.TabIndex = 5;
+            lblReason.Text = "Lý do nghỉ:";
             // 
             // dtpToDate
             // 
-            this.dtpToDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpToDate.Location = new System.Drawing.Point(20, 130);
-            this.dtpToDate.Name = "dtpToDate";
-            this.dtpToDate.Size = new System.Drawing.Size(260, 23);
-            this.dtpToDate.TabIndex = 4;
+            dtpToDate.Format = DateTimePickerFormat.Short;
+            dtpToDate.Location = new Point(23, 173);
+            dtpToDate.Margin = new Padding(3, 4, 3, 4);
+            dtpToDate.Name = "dtpToDate";
+            dtpToDate.Size = new Size(297, 27);
+            dtpToDate.TabIndex = 4;
             // 
             // lblToDate
             // 
-            this.lblToDate.AutoSize = true;
-            this.lblToDate.ForeColor = System.Drawing.Color.Gray;
-            this.lblToDate.Location = new System.Drawing.Point(20, 110);
-            this.lblToDate.Name = "lblToDate";
-            this.lblToDate.Size = new System.Drawing.Size(60, 15);
-            this.lblToDate.TabIndex = 3;
-            this.lblToDate.Text = "Đến ngày:";
+            lblToDate.AutoSize = true;
+            lblToDate.ForeColor = Color.Gray;
+            lblToDate.Location = new Point(23, 147);
+            lblToDate.Name = "lblToDate";
+            lblToDate.Size = new Size(75, 20);
+            lblToDate.TabIndex = 3;
+            lblToDate.Text = "Đến ngày:";
             // 
             // dtpFromDate
             // 
-            this.dtpFromDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpFromDate.Location = new System.Drawing.Point(20, 75);
-            this.dtpFromDate.Name = "dtpFromDate";
-            this.dtpFromDate.Size = new System.Drawing.Size(260, 23);
-            this.dtpFromDate.TabIndex = 2;
+            dtpFromDate.Format = DateTimePickerFormat.Short;
+            dtpFromDate.Location = new Point(23, 100);
+            dtpFromDate.Margin = new Padding(3, 4, 3, 4);
+            dtpFromDate.Name = "dtpFromDate";
+            dtpFromDate.Size = new Size(297, 27);
+            dtpFromDate.TabIndex = 2;
             // 
             // lblFromDate
             // 
-            this.lblFromDate.AutoSize = true;
-            this.lblFromDate.ForeColor = System.Drawing.Color.Gray;
-            this.lblFromDate.Location = new System.Drawing.Point(20, 55);
-            this.lblFromDate.Name = "lblFromDate";
-            this.lblFromDate.Size = new System.Drawing.Size(52, 15);
-            this.lblFromDate.TabIndex = 1;
-            this.lblFromDate.Text = "Từ ngày:";
+            lblFromDate.AutoSize = true;
+            lblFromDate.ForeColor = Color.Gray;
+            lblFromDate.Location = new Point(23, 73);
+            lblFromDate.Name = "lblFromDate";
+            lblFromDate.Size = new Size(65, 20);
+            lblFromDate.TabIndex = 1;
+            lblFromDate.Text = "Từ ngày:";
             // 
             // lblNewRequestTitle
             // 
-            this.lblNewRequestTitle.AutoSize = true;
-            this.lblNewRequestTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblNewRequestTitle.ForeColor = System.Drawing.Color.White;
-            this.lblNewRequestTitle.Location = new System.Drawing.Point(15, 15);
-            this.lblNewRequestTitle.Name = "lblNewRequestTitle";
-            this.lblNewRequestTitle.Size = new System.Drawing.Size(155, 21);
-            this.lblNewRequestTitle.TabIndex = 0;
-            this.lblNewRequestTitle.Text = "Tạo yêu cầu nghỉ";
+            lblNewRequestTitle.AutoSize = true;
+            lblNewRequestTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblNewRequestTitle.ForeColor = Color.White;
+            lblNewRequestTitle.Location = new Point(17, 20);
+            lblNewRequestTitle.Name = "lblNewRequestTitle";
+            lblNewRequestTitle.Size = new Size(174, 28);
+            lblNewRequestTitle.TabIndex = 0;
+            lblNewRequestTitle.Text = "Tạo yêu cầu nghỉ";
             // 
             // pnlHistory
             // 
-            this.pnlHistory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.pnlHistory.Controls.Add(this.dgvHistory);
-            this.pnlHistory.Controls.Add(this.lblHistoryTitle);
-            this.pnlHistory.Location = new System.Drawing.Point(340, 120);
-            this.pnlHistory.Name = "pnlHistory";
-            this.pnlHistory.Size = new System.Drawing.Size(444, 390);
-            this.pnlHistory.TabIndex = 2;
+            pnlHistory.BackColor = Color.FromArgb(30, 30, 30);
+            pnlHistory.Controls.Add(dgvHistory);
+            pnlHistory.Controls.Add(lblHistoryTitle);
+            pnlHistory.Location = new Point(389, 160);
+            pnlHistory.Margin = new Padding(3, 4, 3, 4);
+            pnlHistory.Name = "pnlHistory";
+            pnlHistory.Size = new Size(507, 520);
+            pnlHistory.TabIndex = 2;
             // 
             // dgvHistory
             // 
-            this.dgvHistory.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.dgvHistory.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.Gray;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvHistory.DefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvHistory.Location = new System.Drawing.Point(15, 50);
-            this.dgvHistory.Name = "dgvHistory";
-            this.dgvHistory.Size = new System.Drawing.Size(414, 320);
-            this.dgvHistory.TabIndex = 1;
+            dgvHistory.BackgroundColor = Color.FromArgb(45, 45, 48);
+            dgvHistory.BorderStyle = BorderStyle.None;
+            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(45, 45, 48);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = Color.Gray;
+            dataGridViewCellStyle2.SelectionForeColor = Color.White;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dgvHistory.DefaultCellStyle = dataGridViewCellStyle2;
+            dgvHistory.Location = new Point(17, 67);
+            dgvHistory.Margin = new Padding(3, 4, 3, 4);
+            dgvHistory.Name = "dgvHistory";
+            dgvHistory.RowHeadersWidth = 51;
+            dgvHistory.Size = new Size(473, 427);
+            dgvHistory.TabIndex = 1;
             // 
             // lblHistoryTitle
             // 
-            this.lblHistoryTitle.AutoSize = true;
-            this.lblHistoryTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblHistoryTitle.ForeColor = System.Drawing.Color.White;
-            this.lblHistoryTitle.Location = new System.Drawing.Point(15, 15);
-            this.lblHistoryTitle.Name = "lblHistoryTitle";
-            this.lblHistoryTitle.Size = new System.Drawing.Size(133, 21);
-            this.lblHistoryTitle.TabIndex = 0;
-            this.lblHistoryTitle.Text = "Lịch sử yêu cầu";
+            lblHistoryTitle.AutoSize = true;
+            lblHistoryTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblHistoryTitle.ForeColor = Color.White;
+            lblHistoryTitle.Location = new Point(17, 20);
+            lblHistoryTitle.Name = "lblHistoryTitle";
+            lblHistoryTitle.Size = new Size(157, 28);
+            lblHistoryTitle.TabIndex = 0;
+            lblHistoryTitle.Text = "Lịch sử yêu cầu";
             // 
             // ucLeaveRequest
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.Controls.Add(this.pnlHistory);
-            this.Controls.Add(this.pnlNewRequest);
-            this.Controls.Add(this.pnlSummary);
-            this.Name = "ucLeaveRequest";
-            this.Size = new System.Drawing.Size(804, 530);
-            this.pnlSummary.ResumeLayout(false);
-            this.pnlSummary.PerformLayout();
-            this.pnlNewRequest.ResumeLayout(false);
-            this.pnlNewRequest.PerformLayout();
-            this.pnlHistory.ResumeLayout(false);
-            this.pnlHistory.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvHistory)).EndInit();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(45, 45, 48);
+            Controls.Add(pnlHistory);
+            Controls.Add(pnlNewRequest);
+            Controls.Add(pnlSummary);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "ucLeaveRequest";
+            Size = new Size(919, 707);
+            pnlSummary.ResumeLayout(false);
+            pnlSummary.PerformLayout();
+            pnlNewRequest.ResumeLayout(false);
+            pnlNewRequest.PerformLayout();
+            pnlHistory.ResumeLayout(false);
+            pnlHistory.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvHistory).EndInit();
+            ResumeLayout(false);
 
         }
 
@@ -301,5 +333,6 @@
         private System.Windows.Forms.Label lblHistoryTitle;
         private System.Windows.Forms.DataGridView dgvHistory;
         private System.Windows.Forms.Button btnReport;
+        private Button btnManager;
     }
 }

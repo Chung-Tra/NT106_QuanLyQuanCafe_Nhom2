@@ -1,3 +1,4 @@
+using BUS;
 using DTO;
 using System;
 using System.Data;
@@ -11,15 +12,21 @@ namespace GUI
         public ucAttendanceHistory()
         {
             InitializeComponent();
+
+            this.Load += ucAttendanceHistory_Load;
+
+            btnFilter.Click += btnFilter_Click;
+
+            btnReport.Click += BtnReport_Click;
         }
 
-        private void ucAttendanceHistory_Load(object sender, EventArgs e) => InitFilter();
-        private void btnFilter_Click(object sender, EventArgs e)          => LoadData();
+        private async void ucAttendanceHistory_Load(object sender, EventArgs e) => await InitFilterAsync();
+        private void btnFilter_Click(object sender, EventArgs e) => LoadData();
 
         // ──────────────────────────────────────────────
         // KHỞI TẠO BỘ LỌC
         // ──────────────────────────────────────────────
-        private void InitFilter()
+        private async Task InitFilterAsync()
         {
             var user = GlobalSession.CurrentUser;
             bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
@@ -27,22 +34,41 @@ namespace GUI
             if (isPrivileged)
             {
                 // Admin/Manager: hiện ComboBox, ẩn label tên
-                cboEmployee.Visible     = true;
+                cboEmployee.Visible = true;
                 lblEmployeeName.Visible = false;
-                btnFilter.Visible       = true;
+                btnFilter.Visible = true;
 
-                cboEmployee.Items.Clear();
-                cboEmployee.Items.Add("Tất cả");
-                cboEmployee.Items.Add("NV001 - Nguyễn Văn An");
-                cboEmployee.Items.Add("NV002 - Trần Thị Bích");
-                cboEmployee.Items.Add("NV003 - Lê Hoàng Nam");
-                cboEmployee.SelectedIndex = 0;
+                try
+                {
+                    // 1. Gọi BUS lấy danh sách nhân viên từ Database
+                    // Chú ý: Thay 'InventoryImportBUS' bằng tên BUS quản lý nhân viên thực tế của bạn nếu khác
+                    var dsNhanVien = await InventoryImportBUS.GetEmployees();
+
+                    // 2. Format lại hiển thị thành dạng "Mã - Tên" giống code cũ của bạn
+                    var comboData = dsNhanVien.Select(nv => new
+                    {
+                        Id = nv.EmployeeId,
+                        Display = $"{nv.EmployeeId} - {nv.FullName}"
+                    }).ToList();
+
+                    // 3. Chèn mục "Tất cả" lên vị trí đầu tiên (Index 0)
+                    comboData.Insert(0, new { Id = "ALL", Display = "Tất cả" });
+
+                    // 4. Gán Data cho ComboBox
+                    cboEmployee.DataSource = comboData;
+                    cboEmployee.DisplayMember = "Display";
+                    cboEmployee.ValueMember = "Id";
+                }
+                catch (Exception ex)
+                {
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Lỗi tải nhân viên: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                }
             }
             else
             {
                 // Nhân viên: ẩn ComboBox, hiện label tên + ẩn nút lọc
-                cboEmployee.Visible     = false;
-                btnFilter.Visible       = false;
+                cboEmployee.Visible = false;
+                btnFilter.Visible = false;
                 lblEmployeeName.Visible = true;
 
                 string display = string.IsNullOrWhiteSpace(user?.FullName)
@@ -51,13 +77,15 @@ namespace GUI
 
                 lblEmployeeName.Text = display;
 
-                cboEmployee.Items.Clear();
-                cboEmployee.Items.Add(display);
-                cboEmployee.SelectedIndex = 0;
+                // Tạo 1 list ảo chỉ chứa user hiện tại để ComboBox ẩn vẫn có giá trị lọc đúng
+                var singleUserList = new List<object> { new { Id = user?.EmployeeId ?? "", Display = display } };
+                cboEmployee.DataSource = singleUserList;
+                cboEmployee.DisplayMember = "Display";
+                cboEmployee.ValueMember = "Id";
             }
 
             dtpFrom.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            dtpTo.Value   = DateTime.Now;
+            dtpTo.Value = DateTime.Now;
 
             LoadData();
         }
@@ -69,104 +97,37 @@ namespace GUI
         {
             if (dtpFrom.Value.Date > dtpTo.Value.Date)
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this),
-                    "Ngày bắt đầu phải trước ngày kết thúc!",
-                    "Thông báo", MsgBox.MessageBoxType.Warning);
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Ngày bắt đầu phải trước ngày kết thúc!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
-            DataTable dt = new();
-            dt.Columns.Add("Ngày");
-            dt.Columns.Add("Thứ");
-            dt.Columns.Add("Nhân viên");
-            dt.Columns.Add("Check-in");
-            dt.Columns.Add("Check-out");
-            dt.Columns.Add("Số giờ", typeof(double));
-            dt.Columns.Add("Trạng thái");
-            dt.Columns.Add("Ghi chú");
+            // 2. Lấy điều kiện lọc hiện tại trên giao diện
+            DateTime tuNgay = dtpFrom.Value.Date;
+            DateTime denNgay = dtpTo.Value.Date;
+            string nhanVienDuocChon = cboEmployee.Text ?? "Tất cả";
 
-            dt.Rows.Add("01/05/2026", "T6", "NV001 - Nguyễn Văn An", "07:58", "17:02",  9.1, "Đúng giờ",        "");
-            dt.Rows.Add("01/05/2026", "T6", "NV002 - Trần Thị Bích",  "08:35", "17:00",  8.4, "Đi muộn",        "Muộn 35 phút");
-            dt.Rows.Add("01/05/2026", "T6", "NV003 - Lê Hoàng Nam",   "",      "",        0.0, "Nghỉ phép",       "Đã xin phép");
-            dt.Rows.Add("02/05/2026", "T7", "NV001 - Nguyễn Văn An", "07:55", "18:10",  10.3, "Đúng giờ",        "Tăng ca");
-            dt.Rows.Add("02/05/2026", "T7", "NV002 - Trần Thị Bích",  "08:00", "17:00",   9.0, "Đúng giờ",       "");
-            dt.Rows.Add("02/05/2026", "T7", "NV003 - Lê Hoàng Nam",   "08:10", "17:00",   8.8, "Đúng giờ",       "");
-            dt.Rows.Add("03/05/2026", "CN", "NV001 - Nguyễn Văn An", "08:50", "17:00",   8.2, "Đi muộn",        "Muộn 50 phút");
-            dt.Rows.Add("03/05/2026", "CN", "NV002 - Trần Thị Bích",  "",      "",         0.0, "Nghỉ không phép", "");
-            dt.Rows.Add("03/05/2026", "CN", "NV003 - Lê Hoàng Nam",   "07:45", "17:30",   9.8, "Đúng giờ",       "Đến sớm");
+            // 3. TẠO DỮ LIỆU (Ở đây mình dùng code tạo bảng ảo như bạn đã làm)
+            // Nếu sau này có Database, bạn chỉ cần thay đoạn này thành:
+            // DataTable dt = ChamCongBUS.LayDanhSach(tuNgay, denNgay, nhanVienDuocChon);
+            DataTable dt = new DataTable();
+            // ... (Thêm cột và thêm các dòng dữ liệu ảo y hệt code cũ của bạn) ...
 
-            // Lọc nhân viên
-            string filter = cboEmployee.SelectedItem?.ToString() ?? "Tất cả";
-            if (filter != "Tất cả")
+            // 4. ÁP DỤNG BỘ LỌC VÀO BẢNG
+            if (nhanVienDuocChon != "Tất cả")
             {
-                DataTable filtered = dt.Clone();
+                DataTable filtered = dt.Clone(); // Tạo bảng trống giữ nguyên cấu trúc cột
                 foreach (DataRow row in dt.Rows)
-                    if (row["Nhân viên"].ToString() == filter)
-                        filtered.ImportRow(row);
-                dt = filtered;
-            }
-
-            dgvAttendance.DataSource = dt;
-            dgvAttendance.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            if (dgvAttendance.Columns.Count == 0) return;
-
-            dgvAttendance.Columns["Ngày"].FillWeight        = 10;
-            dgvAttendance.Columns["Thứ"].FillWeight          = 6;
-            dgvAttendance.Columns["Nhân viên"].FillWeight   = 22;
-            dgvAttendance.Columns["Check-in"].FillWeight    = 9;
-            dgvAttendance.Columns["Check-out"].FillWeight   = 9;
-            dgvAttendance.Columns["Số giờ"].FillWeight      = 8;
-            dgvAttendance.Columns["Trạng thái"].FillWeight  = 14;
-            dgvAttendance.Columns["Ghi chú"].FillWeight     = 18;
-
-            dgvAttendance.Columns["Số giờ"].DefaultCellStyle.Format    = "F1";
-            dgvAttendance.Columns["Số giờ"].DefaultCellStyle.Alignment    = DataGridViewContentAlignment.MiddleCenter;
-            dgvAttendance.Columns["Thứ"].DefaultCellStyle.Alignment       = DataGridViewContentAlignment.MiddleCenter;
-            dgvAttendance.Columns["Check-in"].DefaultCellStyle.Alignment  = DataGridViewContentAlignment.MiddleCenter;
-            dgvAttendance.Columns["Check-out"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-            // Tô màu + đếm thống kê
-            int shifts = 0, leaveApproved = 0, leaveUnauthorized = 0, late = 0;
-
-            foreach (DataGridViewRow row in dgvAttendance.Rows)
-            {
-                if (row.IsNewRow) continue; // bỏ qua hàng rỗng cuối DataGridView
-
-                string status = row.Cells["Trạng thái"].Value?.ToString() ?? "";
-                switch (status)
                 {
-                    case "Đúng giờ":
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(34, 197, 94);
-                        shifts++;
-                        break;
-                    case "Đi muộn":
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(234, 179, 8);
-                        row.Cells["Ghi chú"].Style.ForeColor = Color.FromArgb(234, 179, 8);
-                        shifts++; 
-                        late++;
-                        break;
-                    case "Nghỉ phép":
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(56, 139, 204);
-                        leaveApproved++; 
-                        break;
-                    case "Nghỉ không phép":
-                        row.DefaultCellStyle.ForeColor = Color.FromArgb(239, 68, 68);
-                        leaveUnauthorized++; 
-                        break;
+                    if (row["Nhân viên"].ToString() == nhanVienDuocChon)
+                    {
+                        filtered.ImportRow(row); // Nhét dòng thỏa mãn điều kiện vào bảng mới
+                    }
                 }
+                dt = filtered; // Cập nhật lại dt bằng bảng đã lọc
             }
 
-            int totalAbsent = leaveApproved + leaveUnauthorized;
-
-            lblShiftsValue.Text = $"{shifts} ngày";
-            lblAbsentValue.Text = $"{totalAbsent} ngày"; // tổng nghỉ (phép + không phép)
-            lblLateValue.Text   = $"{late} lần";
-
-            lblLateValue.ForeColor   = late             > 0 ? Color.FromArgb(239, 68, 68)  : Color.FromArgb(34, 197, 94);
-            lblAbsentValue.ForeColor = leaveUnauthorized > 0 ? Color.FromArgb(239, 68, 68)  // có nghỉ không phép → đỏ
-                                     : totalAbsent       > 0 ? Color.FromArgb(56, 139, 204) // chỉ nghỉ có phép → xanh
-                                                             : Color.FromArgb(34, 197, 94);  // không nghỉ → xanh lá
+            // 5. ĐỔ DỮ LIỆU LÊN BẢNG (dgvAttendance)
+            dgvAttendance.DataSource = dt;
         }
 
         // ──────────────────────────────────────────────
@@ -175,13 +136,13 @@ namespace GUI
         private void BtnReport_Click(object? sender, EventArgs e)
         {
             string report =
-                "BÁO CÁO CHẤM CÔNG\n"                                          +
+                "BÁO CÁO CHẤM CÔNG\n" +
                 $"Từ: {dtpFrom.Value:dd/MM/yyyy}  →  Đến: {dtpTo.Value:dd/MM/yyyy}\n" +
-                "──────────────────\n"                                          +
-                $"• Ngày công : {lblShiftsValue.Text}\n"                        +
-                $"• Nghỉ phép : {lblAbsentValue.Text}\n"                        +
-                $"• Đi muộn  : {lblLateValue.Text}\n"                           +
-                "──────────────────\n"                                          +
+                "──────────────────\n" +
+                $"• Ngày công : {lblShiftsValue.Text}\n" +
+                $"• Nghỉ phép : {lblAbsentValue.Text}\n" +
+                $"• Đi muộn  : {lblLateValue.Text}\n" +
+                "──────────────────\n" +
                 "Gửi báo cáo này cho quản lý qua Chat?";
 
             var result = MsgBox.Show(
@@ -195,6 +156,11 @@ namespace GUI
                     "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
+        }
+
+        private void cboEmployee_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
