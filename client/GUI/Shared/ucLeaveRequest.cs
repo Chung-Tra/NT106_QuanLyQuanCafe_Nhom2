@@ -1,3 +1,4 @@
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
@@ -10,9 +11,22 @@ namespace GUI
         public ucLeaveRequest()
         {
             InitializeComponent();
-            this.Load += (s, e) => LoadMockData();
+            this.Load += ucLeaveRequest_Load;
             btnSubmit.Click += btnSubmit_Click;
             btnReport.Click += btnReport_Click;
+            btnManager.Click += btnManager_Click;
+        }
+
+        private void ucLeaveRequest_Load(object? sender, EventArgs e)
+        {
+            // 1. Phân quyền hiển thị nút "Quản lý nghỉ"
+            var user = GlobalSession.CurrentUser;
+            bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
+
+            btnManager.Visible = isPrivileged;
+
+            // 2. Tải dữ liệu bảng (Mock Data)
+            LoadMockData();
         }
 
         private void LoadMockData()
@@ -105,6 +119,28 @@ namespace GUI
                     "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
+        }
+
+        private void btnManager_Click(object sender, EventArgs e)
+        {
+            Form popupForm = new Form();
+            popupForm.Text = "Quản lý nghỉ / Lịch sử chấm công";
+            popupForm.Size = new Size(1000, 650); // Kích thước cửa sổ (bạn có thể tự chỉnh lại số này)
+            popupForm.StartPosition = FormStartPosition.CenterScreen; // Mở ra ở giữa màn hình
+
+            // Tùy chọn làm đẹp: tắt nút phóng to, để viền cố định
+            popupForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            popupForm.MaximizeBox = false;
+
+            // 2. Khởi tạo UserControl ucAttendanceHistory
+            ucAttendanceHistory ucHistory = new ucAttendanceHistory();
+            ucHistory.Dock = DockStyle.Fill; // Ép UserControl lấp đầy khoảng trống của Form
+
+            // 3. Thêm UserControl vào Form
+            popupForm.Controls.Add(ucHistory);
+
+            // 4. Hiển thị cửa sổ lên màn hình (ShowDialog sẽ bắt người dùng phải đóng cửa sổ này mới thao tác được ở form cũ)
+            popupForm.ShowDialog();
         }
     }
 }
