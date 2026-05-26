@@ -7,4 +7,7 @@ router.use('/chat',        require('./chat.routes'));
 router.use('/ingredients', require('./ingredients.routes'));
 router.use('/inventory',   require('./inventory.routes'));
 
+router.use('/attendance',   require('./attendance.routes'));
+
+
 module.exports = router;

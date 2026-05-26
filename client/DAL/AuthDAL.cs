@@ -19,7 +19,7 @@ namespace DAL
                 var response = await DalHelper.Client.SendAsync(
                     DalHelper.Build(HttpMethod.Post, "auth/login", new { email, password }));
 
-                if (!response.IsSuccessStatusCode) 
+                if (!response.IsSuccessStatusCode)
                     return (null, null);
 
                 var json = JObject.Parse(await response.Content.ReadAsStringAsync());

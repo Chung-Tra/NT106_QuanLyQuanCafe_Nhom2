@@ -15,202 +15,255 @@ namespace GUI
 
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.pnlSummary = new System.Windows.Forms.Panel();
-            this.lblTotalShiftsValue = new System.Windows.Forms.Label();
-            this.lblTotalShiftsTitle = new System.Windows.Forms.Label();
-            this.lblTotalHoursValue = new System.Windows.Forms.Label();
-            this.lblTotalHoursTitle = new System.Windows.Forms.Label();
-            this.lblLateValue = new System.Windows.Forms.Label();
-            this.lblLateTitle = new System.Windows.Forms.Label();
-            this.lblAbsentValue = new System.Windows.Forms.Label();
-            this.lblAbsentTitle = new System.Windows.Forms.Label();
-            this.lblFilterTitle = new System.Windows.Forms.Label();
-            this.dtpFilterMonth = new System.Windows.Forms.DateTimePicker();
-            this.pnlLog = new System.Windows.Forms.Panel();
-            this.dgvWorkTracking = new System.Windows.Forms.DataGridView();
-            this.lblLogTitle = new System.Windows.Forms.Label();
-            this.btnReport = new System.Windows.Forms.Button();
-            this.pnlSummary.SuspendLayout();
-            this.pnlLog.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvWorkTracking)).BeginInit();
-            this.SuspendLayout();
-            //
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            pnlSummary = new Panel();
+            btnManager = new Button();
+            lblTotalShiftsValue = new Label();
+            lblTotalShiftsTitle = new Label();
+            lblTotalHoursValue = new Label();
+            lblTotalHoursTitle = new Label();
+            lblLateValue = new Label();
+            lblLateTitle = new Label();
+            lblAbsentValue = new Label();
+            lblAbsentTitle = new Label();
+            lblFilterTitle = new Label();
+            dtpFilterMonth = new DateTimePicker();
+            btnReport = new Button();
+            pnlLog = new Panel();
+            dgvWorkTracking = new DataGridView();
+            lblLogTitle = new Label();
+            pnlSummary.SuspendLayout();
+            pnlLog.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvWorkTracking).BeginInit();
+            SuspendLayout();
+            // 
             // pnlSummary
-            //
-            this.pnlSummary.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            this.pnlSummary.Controls.Add(this.lblTotalShiftsValue);
-            this.pnlSummary.Controls.Add(this.lblTotalShiftsTitle);
-            this.pnlSummary.Controls.Add(this.lblTotalHoursValue);
-            this.pnlSummary.Controls.Add(this.lblTotalHoursTitle);
-            this.pnlSummary.Controls.Add(this.lblLateValue);
-            this.pnlSummary.Controls.Add(this.lblLateTitle);
-            this.pnlSummary.Controls.Add(this.lblAbsentValue);
-            this.pnlSummary.Controls.Add(this.lblAbsentTitle);
-            this.pnlSummary.Controls.Add(this.lblFilterTitle);
-            this.pnlSummary.Controls.Add(this.dtpFilterMonth);
-            this.pnlSummary.Controls.Add(this.btnReport);
-            this.pnlSummary.Location = new System.Drawing.Point(20, 15);
-            this.pnlSummary.Name = "pnlSummary";
-            this.pnlSummary.Size = new System.Drawing.Size(764, 100);
-            //
-            // lblTotalShiftsTitle
-            //
-            this.lblTotalShiftsTitle.AutoSize = true;
-            this.lblTotalShiftsTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblTotalShiftsTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblTotalShiftsTitle.Location = new System.Drawing.Point(15, 12);
-            this.lblTotalShiftsTitle.Name = "lblTotalShiftsTitle";
-            this.lblTotalShiftsTitle.Text = "Tổng ca";
-            //
+            // 
+            pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
+            pnlSummary.Controls.Add(btnManager);
+            pnlSummary.Controls.Add(lblTotalShiftsValue);
+            pnlSummary.Controls.Add(lblTotalShiftsTitle);
+            pnlSummary.Controls.Add(lblTotalHoursValue);
+            pnlSummary.Controls.Add(lblTotalHoursTitle);
+            pnlSummary.Controls.Add(lblLateValue);
+            pnlSummary.Controls.Add(lblLateTitle);
+            pnlSummary.Controls.Add(lblAbsentValue);
+            pnlSummary.Controls.Add(lblAbsentTitle);
+            pnlSummary.Controls.Add(lblFilterTitle);
+            pnlSummary.Controls.Add(dtpFilterMonth);
+            pnlSummary.Controls.Add(btnReport);
+            pnlSummary.Location = new Point(23, 20);
+            pnlSummary.Margin = new Padding(3, 4, 3, 4);
+            pnlSummary.Name = "pnlSummary";
+            pnlSummary.Size = new Size(873, 133);
+            pnlSummary.TabIndex = 1;
+            // 
+            // btnManager
+            // 
+            btnManager.BackColor = Color.FromArgb(70, 130, 180);
+            btnManager.Cursor = Cursors.Hand;
+            btnManager.FlatAppearance.BorderSize = 0;
+            btnManager.FlatStyle = FlatStyle.Flat;
+            btnManager.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnManager.ForeColor = Color.White;
+            btnManager.Location = new Point(696, 73);
+            btnManager.Margin = new Padding(3, 4, 3, 4);
+            btnManager.Name = "btnManager";
+            btnManager.Size = new Size(160, 47);
+            btnManager.TabIndex = 11;
+            btnManager.Text = "Quản lý";
+            btnManager.UseVisualStyleBackColor = false;
+            btnManager.Click += btnManager_Click;
+            // 
             // lblTotalShiftsValue
-            //
-            this.lblTotalShiftsValue.AutoSize = true;
-            this.lblTotalShiftsValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblTotalShiftsValue.ForeColor = System.Drawing.Color.MediumSeaGreen;
-            this.lblTotalShiftsValue.Location = new System.Drawing.Point(15, 35);
-            this.lblTotalShiftsValue.Name = "lblTotalShiftsValue";
-            this.lblTotalShiftsValue.Text = "22 ca";
-            //
-            // lblTotalHoursTitle
-            //
-            this.lblTotalHoursTitle.AutoSize = true;
-            this.lblTotalHoursTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblTotalHoursTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblTotalHoursTitle.Location = new System.Drawing.Point(150, 12);
-            this.lblTotalHoursTitle.Name = "lblTotalHoursTitle";
-            this.lblTotalHoursTitle.Text = "Tổng giờ";
-            //
+            // 
+            lblTotalShiftsValue.AutoSize = true;
+            lblTotalShiftsValue.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTotalShiftsValue.ForeColor = Color.MediumSeaGreen;
+            lblTotalShiftsValue.Location = new Point(17, 47);
+            lblTotalShiftsValue.Name = "lblTotalShiftsValue";
+            lblTotalShiftsValue.Size = new Size(90, 41);
+            lblTotalShiftsValue.TabIndex = 0;
+            lblTotalShiftsValue.Text = "22 ca";
+            // 
+            // lblTotalShiftsTitle
+            // 
+            lblTotalShiftsTitle.AutoSize = true;
+            lblTotalShiftsTitle.Font = new Font("Segoe UI", 9F);
+            lblTotalShiftsTitle.ForeColor = Color.Gray;
+            lblTotalShiftsTitle.Location = new Point(17, 16);
+            lblTotalShiftsTitle.Name = "lblTotalShiftsTitle";
+            lblTotalShiftsTitle.Size = new Size(62, 20);
+            lblTotalShiftsTitle.TabIndex = 1;
+            lblTotalShiftsTitle.Text = "Tổng ca";
+            // 
             // lblTotalHoursValue
-            //
-            this.lblTotalHoursValue.AutoSize = true;
-            this.lblTotalHoursValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblTotalHoursValue.ForeColor = System.Drawing.Color.Orange;
-            this.lblTotalHoursValue.Location = new System.Drawing.Point(150, 35);
-            this.lblTotalHoursValue.Name = "lblTotalHoursValue";
-            this.lblTotalHoursValue.Text = "176h";
-            //
-            // lblLateTitle
-            //
-            this.lblLateTitle.AutoSize = true;
-            this.lblLateTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblLateTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblLateTitle.Location = new System.Drawing.Point(290, 12);
-            this.lblLateTitle.Name = "lblLateTitle";
-            this.lblLateTitle.Text = "Đi muộn";
-            //
+            // 
+            lblTotalHoursValue.AutoSize = true;
+            lblTotalHoursValue.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblTotalHoursValue.ForeColor = Color.Orange;
+            lblTotalHoursValue.Location = new Point(171, 47);
+            lblTotalHoursValue.Name = "lblTotalHoursValue";
+            lblTotalHoursValue.Size = new Size(87, 41);
+            lblTotalHoursValue.TabIndex = 2;
+            lblTotalHoursValue.Text = "176h";
+            // 
+            // lblTotalHoursTitle
+            // 
+            lblTotalHoursTitle.AutoSize = true;
+            lblTotalHoursTitle.Font = new Font("Segoe UI", 9F);
+            lblTotalHoursTitle.ForeColor = Color.Gray;
+            lblTotalHoursTitle.Location = new Point(171, 16);
+            lblTotalHoursTitle.Name = "lblTotalHoursTitle";
+            lblTotalHoursTitle.Size = new Size(69, 20);
+            lblTotalHoursTitle.TabIndex = 3;
+            lblTotalHoursTitle.Text = "Tổng giờ";
+            // 
             // lblLateValue
-            //
-            this.lblLateValue.AutoSize = true;
-            this.lblLateValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblLateValue.ForeColor = System.Drawing.Color.IndianRed;
-            this.lblLateValue.Location = new System.Drawing.Point(290, 35);
-            this.lblLateValue.Name = "lblLateValue";
-            this.lblLateValue.Text = "2 lần";
-            //
-            // lblAbsentTitle
-            //
-            this.lblAbsentTitle.AutoSize = true;
-            this.lblAbsentTitle.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.lblAbsentTitle.ForeColor = System.Drawing.Color.Gray;
-            this.lblAbsentTitle.Location = new System.Drawing.Point(420, 12);
-            this.lblAbsentTitle.Name = "lblAbsentTitle";
-            this.lblAbsentTitle.Text = "Nghỉ phép";
-            //
+            // 
+            lblLateValue.AutoSize = true;
+            lblLateValue.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblLateValue.ForeColor = Color.IndianRed;
+            lblLateValue.Location = new Point(331, 47);
+            lblLateValue.Name = "lblLateValue";
+            lblLateValue.Size = new Size(86, 41);
+            lblLateValue.TabIndex = 4;
+            lblLateValue.Text = "2 lần";
+            // 
+            // lblLateTitle
+            // 
+            lblLateTitle.AutoSize = true;
+            lblLateTitle.Font = new Font("Segoe UI", 9F);
+            lblLateTitle.ForeColor = Color.Gray;
+            lblLateTitle.Location = new Point(331, 16);
+            lblLateTitle.Name = "lblLateTitle";
+            lblLateTitle.Size = new Size(66, 20);
+            lblLateTitle.TabIndex = 5;
+            lblLateTitle.Text = "Đi muộn";
+            // 
             // lblAbsentValue
-            //
-            this.lblAbsentValue.AutoSize = true;
-            this.lblAbsentValue.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
-            this.lblAbsentValue.ForeColor = System.Drawing.Color.SteelBlue;
-            this.lblAbsentValue.Location = new System.Drawing.Point(420, 35);
-            this.lblAbsentValue.Name = "lblAbsentValue";
-            this.lblAbsentValue.Text = "1 ngày";
-            //
+            // 
+            lblAbsentValue.AutoSize = true;
+            lblAbsentValue.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblAbsentValue.ForeColor = Color.SteelBlue;
+            lblAbsentValue.Location = new Point(480, 47);
+            lblAbsentValue.Name = "lblAbsentValue";
+            lblAbsentValue.Size = new Size(112, 41);
+            lblAbsentValue.TabIndex = 6;
+            lblAbsentValue.Text = "1 ngày";
+            // 
+            // lblAbsentTitle
+            // 
+            lblAbsentTitle.AutoSize = true;
+            lblAbsentTitle.Font = new Font("Segoe UI", 9F);
+            lblAbsentTitle.ForeColor = Color.Gray;
+            lblAbsentTitle.Location = new Point(480, 16);
+            lblAbsentTitle.Name = "lblAbsentTitle";
+            lblAbsentTitle.Size = new Size(79, 20);
+            lblAbsentTitle.TabIndex = 7;
+            lblAbsentTitle.Text = "Nghỉ phép";
+            // 
             // lblFilterTitle
-            //
-            this.lblFilterTitle.AutoSize = true;
-            this.lblFilterTitle.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.lblFilterTitle.ForeColor = System.Drawing.Color.White;
-            this.lblFilterTitle.Location = new System.Drawing.Point(15, 72);
-            this.lblFilterTitle.Name = "lblFilterTitle";
-            this.lblFilterTitle.Text = "Tháng:";
-            //
+            // 
+            lblFilterTitle.AutoSize = true;
+            lblFilterTitle.Font = new Font("Segoe UI", 9.5F);
+            lblFilterTitle.ForeColor = Color.White;
+            lblFilterTitle.Location = new Point(17, 96);
+            lblFilterTitle.Name = "lblFilterTitle";
+            lblFilterTitle.Size = new Size(56, 21);
+            lblFilterTitle.TabIndex = 8;
+            lblFilterTitle.Text = "Tháng:";
+            // 
             // dtpFilterMonth
-            //
-            this.dtpFilterMonth.CustomFormat = "MM/yyyy";
-            this.dtpFilterMonth.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            this.dtpFilterMonth.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpFilterMonth.Location = new System.Drawing.Point(65, 68);
-            this.dtpFilterMonth.Name = "dtpFilterMonth";
-            this.dtpFilterMonth.ShowUpDown = true;
-            this.dtpFilterMonth.Size = new System.Drawing.Size(130, 25);
-            //
+            // 
+            dtpFilterMonth.CustomFormat = "MM/yyyy";
+            dtpFilterMonth.Font = new Font("Segoe UI", 9.5F);
+            dtpFilterMonth.Format = DateTimePickerFormat.Custom;
+            dtpFilterMonth.Location = new Point(74, 91);
+            dtpFilterMonth.Margin = new Padding(3, 4, 3, 4);
+            dtpFilterMonth.Name = "dtpFilterMonth";
+            dtpFilterMonth.ShowUpDown = true;
+            dtpFilterMonth.Size = new Size(148, 29);
+            dtpFilterMonth.TabIndex = 9;
+            // 
             // btnReport
-            //
-            this.btnReport.BackColor = System.Drawing.Color.FromArgb(70, 130, 180);
-            this.btnReport.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnReport.FlatAppearance.BorderSize = 0;
-            this.btnReport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReport.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.btnReport.ForeColor = System.Drawing.Color.White;
-            this.btnReport.Location = new System.Drawing.Point(610, 15);
-            this.btnReport.Name = "btnReport";
-            this.btnReport.Size = new System.Drawing.Size(140, 35);
-            this.btnReport.Text = "Báo cáo";
-            //
+            // 
+            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FlatAppearance.BorderSize = 0;
+            btnReport.FlatStyle = FlatStyle.Flat;
+            btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.Location = new Point(696, 16);
+            btnReport.Margin = new Padding(3, 4, 3, 4);
+            btnReport.Name = "btnReport";
+            btnReport.Size = new Size(160, 47);
+            btnReport.TabIndex = 10;
+            btnReport.Text = "Báo cáo";
+            btnReport.UseVisualStyleBackColor = false;
+            // 
             // pnlLog
-            //
-            this.pnlLog.BackColor = System.Drawing.Color.FromArgb(30, 30, 30);
-            this.pnlLog.Controls.Add(this.dgvWorkTracking);
-            this.pnlLog.Controls.Add(this.lblLogTitle);
-            this.pnlLog.Location = new System.Drawing.Point(20, 125);
-            this.pnlLog.Name = "pnlLog";
-            this.pnlLog.Size = new System.Drawing.Size(764, 390);
-            //
-            // lblLogTitle
-            //
-            this.lblLogTitle.AutoSize = true;
-            this.lblLogTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.lblLogTitle.ForeColor = System.Drawing.Color.White;
-            this.lblLogTitle.Location = new System.Drawing.Point(15, 12);
-            this.lblLogTitle.Name = "lblLogTitle";
-            this.lblLogTitle.Text = "Lịch sử chấm công";
-            //
+            // 
+            pnlLog.BackColor = Color.FromArgb(30, 30, 30);
+            pnlLog.Controls.Add(dgvWorkTracking);
+            pnlLog.Controls.Add(lblLogTitle);
+            pnlLog.Location = new Point(23, 167);
+            pnlLog.Margin = new Padding(3, 4, 3, 4);
+            pnlLog.Name = "pnlLog";
+            pnlLog.Size = new Size(873, 520);
+            pnlLog.TabIndex = 0;
+            // 
             // dgvWorkTracking
-            //
-            this.dgvWorkTracking.BackgroundColor = System.Drawing.Color.FromArgb(45, 45, 48);
-            this.dgvWorkTracking.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgvWorkTracking.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(45, 45, 48);
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9.5F);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(60, 60, 65);
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.White;
-            this.dgvWorkTracking.DefaultCellStyle = dataGridViewCellStyle1;
-            this.dgvWorkTracking.Location = new System.Drawing.Point(15, 42);
-            this.dgvWorkTracking.Name = "dgvWorkTracking";
-            this.dgvWorkTracking.ReadOnly = true;
-            this.dgvWorkTracking.RowHeadersVisible = false;
-            this.dgvWorkTracking.AllowUserToAddRows = false;
-            this.dgvWorkTracking.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvWorkTracking.Size = new System.Drawing.Size(734, 335);
-            //
+            // 
+            dgvWorkTracking.AllowUserToAddRows = false;
+            dgvWorkTracking.BackgroundColor = Color.FromArgb(45, 45, 48);
+            dgvWorkTracking.BorderStyle = BorderStyle.None;
+            dgvWorkTracking.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(45, 45, 48);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9.5F);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(60, 60, 65);
+            dataGridViewCellStyle1.SelectionForeColor = Color.White;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            dgvWorkTracking.DefaultCellStyle = dataGridViewCellStyle1;
+            dgvWorkTracking.Location = new Point(17, 56);
+            dgvWorkTracking.Margin = new Padding(3, 4, 3, 4);
+            dgvWorkTracking.Name = "dgvWorkTracking";
+            dgvWorkTracking.ReadOnly = true;
+            dgvWorkTracking.RowHeadersVisible = false;
+            dgvWorkTracking.RowHeadersWidth = 51;
+            dgvWorkTracking.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvWorkTracking.Size = new Size(839, 447);
+            dgvWorkTracking.TabIndex = 0;
+            // 
+            // lblLogTitle
+            // 
+            lblLogTitle.AutoSize = true;
+            lblLogTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblLogTitle.ForeColor = Color.White;
+            lblLogTitle.Location = new Point(17, 16);
+            lblLogTitle.Name = "lblLogTitle";
+            lblLogTitle.Size = new Size(187, 28);
+            lblLogTitle.TabIndex = 1;
+            lblLogTitle.Text = "Lịch sử chấm công";
+            // 
             // ucWorkTracking
-            //
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(45, 45, 48);
-            this.Controls.Add(this.pnlLog);
-            this.Controls.Add(this.pnlSummary);
-            this.Name = "ucWorkTracking";
-            this.Size = new System.Drawing.Size(804, 530);
-            this.pnlSummary.ResumeLayout(false);
-            this.pnlSummary.PerformLayout();
-            this.pnlLog.ResumeLayout(false);
-            this.pnlLog.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvWorkTracking)).EndInit();
-            this.ResumeLayout(false);
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(45, 45, 48);
+            Controls.Add(pnlLog);
+            Controls.Add(pnlSummary);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "ucWorkTracking";
+            Size = new Size(919, 707);
+            pnlSummary.ResumeLayout(false);
+            pnlSummary.PerformLayout();
+            pnlLog.ResumeLayout(false);
+            pnlLog.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvWorkTracking).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
@@ -230,5 +283,6 @@ namespace GUI
         private System.Windows.Forms.Panel pnlLog;
         private System.Windows.Forms.Label lblLogTitle;
         private System.Windows.Forms.DataGridView dgvWorkTracking;
+        private Button btnManager;
     }
 }

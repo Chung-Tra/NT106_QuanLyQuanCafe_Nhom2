@@ -1,3 +1,4 @@
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
@@ -10,9 +11,19 @@ namespace GUI
         public ucWorkTracking()
         {
             InitializeComponent();
-            this.Load += (s, e) => LoadAttendanceHistory();
+            this.Load += ucWorkTracking_Load;
             btnReport.Click += btnReport_Click;
             dtpFilterMonth.ValueChanged += (s, e) => LoadAttendanceHistory();
+        }
+
+        private void ucWorkTracking_Load(object? sender, EventArgs e)
+        {
+            var user = GlobalSession.CurrentUser;
+            bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
+
+            btnManager.Visible = isPrivileged;
+
+            LoadAttendanceHistory();
         }
 
         private void LoadAttendanceHistory()
@@ -121,6 +132,20 @@ namespace GUI
                     "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
                     "Thành công", MsgBox.MessageBoxType.Success);
             }
+        }
+
+        private void btnManager_Click(object sender, EventArgs e)
+        {
+            Form popupForm = new Form();
+            popupForm.Text = "Quản lý nghỉ / Lịch sử chấm công";
+            popupForm.Size = new Size(1000, 650); 
+            popupForm.StartPosition = FormStartPosition.CenterScreen; 
+            popupForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            popupForm.MaximizeBox = false;
+            ucAttendanceHistory ucHistory = new ucAttendanceHistory();
+            ucHistory.Dock = DockStyle.Fill; 
+            popupForm.Controls.Add(ucHistory);
+            popupForm.ShowDialog();
         }
     }
 }

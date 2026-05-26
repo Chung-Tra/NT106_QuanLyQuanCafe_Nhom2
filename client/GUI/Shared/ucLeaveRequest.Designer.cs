@@ -28,9 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             pnlSummary = new Panel();
-            btnManager = new Button();
             lblRemainingValue = new Label();
             lblRemainingTitle = new Label();
             lblPendingValue = new Label();
@@ -57,7 +56,6 @@
             // pnlSummary
             // 
             pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
-            pnlSummary.Controls.Add(btnManager);
             pnlSummary.Controls.Add(lblRemainingValue);
             pnlSummary.Controls.Add(lblRemainingTitle);
             pnlSummary.Controls.Add(lblPendingValue);
@@ -68,23 +66,6 @@
             pnlSummary.Name = "pnlSummary";
             pnlSummary.Size = new Size(873, 107);
             pnlSummary.TabIndex = 0;
-            // 
-            // btnManager
-            // 
-            btnManager.BackColor = Color.SteelBlue;
-            btnManager.Cursor = Cursors.Hand;
-            btnManager.FlatAppearance.BorderSize = 0;
-            btnManager.FlatStyle = FlatStyle.Flat;
-            btnManager.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnManager.ForeColor = Color.White;
-            btnManager.Location = new Point(553, 33);
-            btnManager.Margin = new Padding(3, 4, 3, 4);
-            btnManager.Name = "btnManager";
-            btnManager.Size = new Size(137, 43);
-            btnManager.TabIndex = 4;
-            btnManager.Text = "Quản lý nghỉ";
-            btnManager.UseVisualStyleBackColor = false;
-            btnManager.Click += btnManager_Click;
             // 
             // lblRemainingValue
             // 
@@ -265,14 +246,14 @@
             dgvHistory.BackgroundColor = Color.FromArgb(45, 45, 48);
             dgvHistory.BorderStyle = BorderStyle.None;
             dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(45, 45, 48);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = Color.Gray;
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvHistory.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(45, 45, 48);
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = Color.Gray;
+            dataGridViewCellStyle1.SelectionForeColor = Color.White;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            dgvHistory.DefaultCellStyle = dataGridViewCellStyle1;
             dgvHistory.Location = new Point(17, 67);
             dgvHistory.Margin = new Padding(3, 4, 3, 4);
             dgvHistory.Name = "dgvHistory";
@@ -333,6 +314,5 @@
         private System.Windows.Forms.Label lblHistoryTitle;
         private System.Windows.Forms.DataGridView dgvHistory;
         private System.Windows.Forms.Button btnReport;
-        private Button btnManager;
     }
 }

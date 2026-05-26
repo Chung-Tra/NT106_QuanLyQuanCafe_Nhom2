@@ -40,9 +40,6 @@ namespace GUI
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             pnlHeader = new Guna2Panel();
             lblTitle = new Label();
             pnlFilter = new Guna2Panel();
@@ -66,8 +63,8 @@ namespace GUI
             lblLateValue = new Label();
             btnReport = new Guna2Button();
             pnlGrid = new Guna2Panel();
+            dgvAttendance = new DataGridView();
             lblGridTitle = new Label();
-            dgvAttendance = new Guna2DataGridView();
             pnlHeader.SuspendLayout();
             pnlFilter.SuspendLayout();
             pnlSummary.SuspendLayout();
@@ -384,14 +381,13 @@ namespace GUI
             btnReport.Size = new Size(240, 53);
             btnReport.TabIndex = 3;
             btnReport.Text = "⚠  Báo cáo sai sót";
-            btnReport.Click += BtnReport_Click;
             // 
             // pnlGrid
             // 
             pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
             pnlGrid.BorderRadius = 14;
-            pnlGrid.Controls.Add(lblGridTitle);
             pnlGrid.Controls.Add(dgvAttendance);
+            pnlGrid.Controls.Add(lblGridTitle);
             pnlGrid.CustomizableEdges = customizableEdges23;
             pnlGrid.Location = new Point(23, 355);
             pnlGrid.Margin = new Padding(3, 4, 3, 4);
@@ -399,6 +395,15 @@ namespace GUI
             pnlGrid.ShadowDecoration.CustomizableEdges = customizableEdges24;
             pnlGrid.Size = new Size(1051, 483);
             pnlGrid.TabIndex = 3;
+            // 
+            // dgvAttendance
+            // 
+            dgvAttendance.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvAttendance.Location = new Point(21, 61);
+            dgvAttendance.Name = "dgvAttendance";
+            dgvAttendance.RowHeadersWidth = 51;
+            dgvAttendance.Size = new Size(990, 372);
+            dgvAttendance.TabIndex = 1;
             // 
             // lblGridTitle
             // 
@@ -410,57 +415,6 @@ namespace GUI
             lblGridTitle.Size = new Size(204, 25);
             lblGridTitle.TabIndex = 0;
             lblGridTitle.Text = "📋  Chi tiết chấm công";
-            // 
-            // dgvAttendance
-            // 
-            dataGridViewCellStyle1.BackColor = Color.White;
-            dgvAttendance.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(100, 88, 255);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dgvAttendance.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            dgvAttendance.ColumnHeadersHeight = 29;
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.White;
-            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(71, 69, 94);
-            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(231, 229, 255);
-            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(71, 69, 94);
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
-            dgvAttendance.DefaultCellStyle = dataGridViewCellStyle3;
-            dgvAttendance.GridColor = Color.FromArgb(231, 229, 255);
-            dgvAttendance.Location = new Point(21, 61);
-            dgvAttendance.Margin = new Padding(3, 4, 3, 4);
-            dgvAttendance.Name = "dgvAttendance";
-            dgvAttendance.RowHeadersVisible = false;
-            dgvAttendance.RowHeadersWidth = 51;
-            dgvAttendance.Size = new Size(1010, 400);
-            dgvAttendance.TabIndex = 1;
-            dgvAttendance.ThemeStyle.AlternatingRowsStyle.BackColor = Color.White;
-            dgvAttendance.ThemeStyle.AlternatingRowsStyle.Font = null;
-            dgvAttendance.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.Empty;
-            dgvAttendance.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
-            dgvAttendance.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
-            dgvAttendance.ThemeStyle.BackColor = Color.White;
-            dgvAttendance.ThemeStyle.GridColor = Color.FromArgb(231, 229, 255);
-            dgvAttendance.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(100, 88, 255);
-            dgvAttendance.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
-            dgvAttendance.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
-            dgvAttendance.ThemeStyle.HeaderStyle.ForeColor = Color.White;
-            dgvAttendance.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvAttendance.ThemeStyle.HeaderStyle.Height = 29;
-            dgvAttendance.ThemeStyle.ReadOnly = false;
-            dgvAttendance.ThemeStyle.RowsStyle.BackColor = Color.White;
-            dgvAttendance.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgvAttendance.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
-            dgvAttendance.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(71, 69, 94);
-            dgvAttendance.ThemeStyle.RowsStyle.Height = 29;
-            dgvAttendance.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
-            dgvAttendance.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
             // 
             // ucAttendanceHistory
             // 
@@ -544,6 +498,6 @@ namespace GUI
         private Guna2Button       btnReport;
         private Guna2Panel        pnlGrid;
         private Label             lblGridTitle;
-        private Guna2DataGridView dgvAttendance;
+        private DataGridView dgvAttendance;
     }
 }
