@@ -50,13 +50,13 @@ namespace GUI
                 {
                     dt.Rows.Add(
                         food.Id,
-                        food.TenMon,
-                        food.Gia,
-                        food.Loai,
-                        food.ConHang ? "Đang kinh doanh" : "Ngừng bán",
-                        food.MoTa,
-                        food.HinhAnhUrl,
-                        food.ConHang
+                        food.Name,
+                        food.Price,
+                        food.Category,
+                        food.InStock ? "Đang kinh doanh" : "Ngừng bán",
+                        food.Description,
+                        food.ImageUrl,
+                        food.InStock
                     );
                 }
 
@@ -99,7 +99,7 @@ namespace GUI
 
         private async void BtnAddMenu_Click(object sender, EventArgs e)
         {
-            FoodForm frmAdd = new();
+            AddFood frmAdd = new();
             if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
@@ -120,15 +120,15 @@ namespace GUI
             FoodDTO foodToEdit = new()
             {
                 Id = row.Cells["Mã món"].Value?.ToString() ?? string.Empty,
-                TenMon = row.Cells["Tên món ăn"].Value?.ToString() ?? string.Empty,
-                Gia = Convert.ToDecimal(row.Cells["Giá bán"].Value),
-                Loai = row.Cells["Loại"].Value?.ToString() ?? string.Empty,
-                MoTa = row.Cells["MoTa"].Value?.ToString() ?? string.Empty,
-                HinhAnhUrl = row.Cells["HinhAnhUrl"].Value?.ToString() ?? string.Empty,
-                ConHang = Convert.ToBoolean(row.Cells["ConHang"].Value)
+                Name = row.Cells["Tên món ăn"].Value?.ToString() ?? string.Empty,
+                Price = Convert.ToDecimal(row.Cells["Giá bán"].Value),
+                Category = row.Cells["Loại"].Value?.ToString() ?? string.Empty,
+                Description = row.Cells["MoTa"].Value?.ToString() ?? string.Empty,
+                ImageUrl = row.Cells["HinhAnhUrl"].Value?.ToString() ?? string.Empty,
+                InStock = Convert.ToBoolean(row.Cells["ConHang"].Value)
             };
 
-            FoodEditForm frmEdit = new(foodToEdit);
+            EditFood frmEdit = new(foodToEdit);
             if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
@@ -145,11 +145,11 @@ namespace GUI
             FoodDTO food = new()
             {
                 Id = row.Cells["Mã món"].Value?.ToString() ?? string.Empty,
-                TenMon = row.Cells["Tên món ăn"].Value?.ToString(),
-                Gia = Convert.ToDecimal(row.Cells["Giá bán"].Value),
-                Loai = row.Cells["Loại"].Value?.ToString(),
-                MoTa = row.Cells["MoTa"].Value?.ToString(),
-                ConHang = Convert.ToBoolean(row.Cells["ConHang"].Value),
+                Name = row.Cells["Tên món ăn"].Value?.ToString(),
+                Price = Convert.ToDecimal(row.Cells["Giá bán"].Value),
+                Category = row.Cells["Loại"].Value?.ToString(),
+                Description = row.Cells["MoTa"].Value?.ToString(),
+                InStock = Convert.ToBoolean(row.Cells["ConHang"].Value),
             };
 
             using FoodDetail dlg = new(food);
@@ -159,7 +159,7 @@ namespace GUI
 
         private void BtnImportMaterial_Click(object sender, EventArgs e)
         {
-            using WarehouseManagerForm frm = new();
+            using WarehouseManager frm = new();
             frm.ShowDialog(MsgBox.OwnerWindow(this));
         }
 

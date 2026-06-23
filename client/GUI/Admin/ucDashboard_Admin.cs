@@ -9,10 +9,12 @@ namespace GUI
     {
         private string _chartMode = "day";   // day | month | year
         private string _fbMode = "month";    // month | quarter | year
+        private string _viewMode = "income"; // income | expense | loss
 
         public ucDashboard_Admin()
         {
             InitializeComponent();
+            cboTimeRange.SelectedIndex = 2; // "Tháng này"
         }
 
         private void ucDashboard_Admin_Load(object sender, EventArgs e)
@@ -34,45 +36,204 @@ namespace GUI
         }
 
         // =================== REVENUE DETAIL GRID ===================
+        // Màu sắc dùng cho từng nhóm
+        private static readonly Color CIncome   = Color.FromArgb(34, 197, 94);
+        private static readonly Color CExpense  = Color.FromArgb(220, 80, 80);
+        private static readonly Color CLoss     = Color.FromArgb(245, 158, 11);
+        private static readonly Color CMuted    = Color.FromArgb(160, 160, 166);
+        private static readonly Color CGroupBg  = Color.FromArgb(38, 38, 42);
+
         private void LoadRevenueDetail()
         {
-            DataTable dt = new();
-            dt.Columns.Add("Khoản mục");
-            dt.Columns.Add("Số tiền", typeof(decimal));
-            dt.Columns.Add("Ghi chú");
+            dgvRevenueDetail.DataSource = null;
+            dgvRevenueDetail.Rows.Clear();
+            dgvRevenueDetail.Columns.Clear();
 
-            // Thu
-            dt.Rows.Add("Bán đồ uống", 38500000m, "782 đơn");
-            dt.Rows.Add("Bán bánh/snack", 5200000m, "156 đơn");
-            dt.Rows.Add("Phí gửi xe", 2100000m, "1,400 lượt");
+            dgvRevenueDetail.Columns.Add("KhoanMuc", "Khoản mục");
+            dgvRevenueDetail.Columns.Add("SoTien",   "Số tiền");
+            dgvRevenueDetail.Columns.Add("PhanTram", "%");
+            dgvRevenueDetail.Columns.Add("SoSanh",   "vs Kỳ trước");
 
-            // Chi
-            dt.Rows.Add("Nguyên liệu", -15200000m, "12 nhà cung cấp");
-            dt.Rows.Add("Lương nhân viên", -7800000m, "7 nhân viên");
-            dt.Rows.Add("Điện nước", -1200000m, "");
-            dt.Rows.Add("Thuê mặt bằng", -900000m, "");
-
-            // Thất thoát
-            dt.Rows.Add("Hao phí NL", -1800000m, "Đổ/hết hạn");
-            dt.Rows.Add("Chênh lệch tiền", -700000m, "Kiểm quỹ");
-
-            dgvRevenueDetail.DataSource = dt;
             dgvRevenueDetail.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvRevenueDetail.Columns["Khoản mục"].FillWeight = 30;
-            dgvRevenueDetail.Columns["Số tiền"].FillWeight = 30;
-            dgvRevenueDetail.Columns["Ghi chú"].FillWeight = 25;
-            dgvRevenueDetail.Columns["Số tiền"].DefaultCellStyle.Format = "N0";
-            dgvRevenueDetail.Columns["Số tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvRevenueDetail.Columns["KhoanMuc"].FillWeight = 42;
+            dgvRevenueDetail.Columns["SoTien"].FillWeight   = 23;
+            dgvRevenueDetail.Columns["PhanTram"].FillWeight = 13;
+            dgvRevenueDetail.Columns["SoSanh"].FillWeight   = 22;
 
-            // Color positive/negative
-            foreach (DataGridViewRow row in dgvRevenueDetail.Rows)
+            dgvRevenueDetail.Columns["SoTien"].DefaultCellStyle.Alignment   = DataGridViewContentAlignment.MiddleRight;
+            dgvRevenueDetail.Columns["PhanTram"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvRevenueDetail.Columns["SoSanh"].DefaultCellStyle.Alignment   = DataGridViewContentAlignment.MiddleCenter;
+
+            int itemCount = 0;
+            string groupLabel;
+
+            switch (_viewMode)
             {
-                if (row.Cells["Số tiền"].Value is decimal val)
+                case "income":
+                    AddGroupHeader("━━ Thu ━━━━━━━━━━━━━━━━━━");
+                    AddDataRow("Bán đồ uống",      "+38,500,000", "84%",  "+12% ↑", CIncome, CIncome);
+                    AddDataRow("Bán bánh / snack", "+5,200,000",  "11%",  "-3% ↓",  CIncome, CExpense);
+                    AddDataRow("Phí gửi xe",       "+2,100,000",  "5%",   "+8% ↑",  CIncome, CIncome);
+                    AddSubtotal("Tổng Thu",        "+45,800,000", "100%", "+9% ↑",  CIncome);
+                    itemCount = 3; groupLabel = "Thu";
+                    break;
+
+                case "expense":
+                    AddGroupHeader("━━ Chi ━━━━━━━━━━━━━━━━━━");
+                    AddDataRow("Nguyên liệu",     "-15,200,000", "61%",  "+5% ↑",  CExpense, CExpense);
+                    AddDataRow("Lương nhân viên", "-7,800,000",  "31%",  "0% —",   CExpense, CMuted);
+                    AddDataRow("Điện nước",       "-1,200,000",  "5%",   "+2% ↑",  CExpense, CExpense);
+                    AddDataRow("Thuê mặt bằng",   "-900,000",    "3%",   "0% —",   CExpense, CMuted);
+                    AddSubtotal("Tổng Chi",       "-25,100,000", "100%", "+4% ↑",  CExpense);
+                    itemCount = 4; groupLabel = "Chi";
+                    break;
+
+                case "loss":
+                default:
+                    AddGroupHeader("━━ Thất thoát ━━━━━━━━━━━━");
+                    AddDataRow("Hao phí nguyên liệu", "-1,800,000", "72%",  "+18% ↑", CLoss, CExpense);
+                    AddDataRow("Chênh lệch tiền",     "-700,000",   "28%",  "-5% ↓",  CLoss, CIncome);
+                    AddSubtotal("Tổng Thất thoát",    "-2,500,000", "100%", "+13% ↑", CLoss);
+                    itemCount = 2; groupLabel = "Thất thoát";
+                    break;
+            }
+
+            string range = cboTimeRange.SelectedItem?.ToString() ?? "Tháng 5/2026";
+            lblRevenueSubtitle.Text = $"{range} · Nhóm {groupLabel} · {itemCount} khoản mục";
+        }
+
+        private void AddGroupHeader(string text)
+        {
+            int idx = dgvRevenueDetail.Rows.Add(text, "", "", "");
+            var row = dgvRevenueDetail.Rows[idx];
+            row.DefaultCellStyle.BackColor = CGroupBg;
+            row.DefaultCellStyle.SelectionBackColor = CGroupBg;
+            row.DefaultCellStyle.ForeColor = CMuted;
+            row.DefaultCellStyle.SelectionForeColor = CMuted;
+            row.DefaultCellStyle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            row.Height = 22;
+            row.ReadOnly = true;
+        }
+
+        private void AddDataRow(string label, string amount, string percent, string compare,
+                                 Color amountColor, Color compareColor)
+        {
+            int idx = dgvRevenueDetail.Rows.Add(label, amount, percent, compare);
+            var row = dgvRevenueDetail.Rows[idx];
+            row.Cells["SoTien"].Style.ForeColor   = amountColor;
+            row.Cells["SoTien"].Style.SelectionForeColor = amountColor;
+            row.Cells["SoSanh"].Style.ForeColor   = compareColor;
+            row.Cells["SoSanh"].Style.SelectionForeColor = compareColor;
+            row.Cells["PhanTram"].Style.ForeColor = CMuted;
+            row.Cells["PhanTram"].Style.SelectionForeColor = CMuted;
+        }
+
+        private void AddSubtotal(string label, string amount, string percent, string compare, Color color)
+        {
+            int idx = dgvRevenueDetail.Rows.Add(label, amount, percent, compare);
+            var row = dgvRevenueDetail.Rows[idx];
+            row.DefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            row.DefaultCellStyle.BackColor = Color.FromArgb(28, 28, 31);
+            row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(28, 28, 31);
+            row.Cells["KhoanMuc"].Style.ForeColor = CMuted;
+            row.Cells["KhoanMuc"].Style.SelectionForeColor = CMuted;
+            row.Cells["SoTien"].Style.ForeColor = color;
+            row.Cells["SoTien"].Style.SelectionForeColor = color;
+            row.Cells["SoSanh"].Style.ForeColor = color;
+            row.Cells["SoSanh"].Style.SelectionForeColor = color;
+        }
+
+        // =================== ACTION BUTTONS (UI ONLY) ===================
+        private void CboTimeRange_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            // Chỉ cập nhật subtitle — chưa có logic load lại data theo khoảng thời gian
+            string range = cboTimeRange.SelectedItem?.ToString() ?? "Tháng này";
+            lblRevenueSubtitle.Text = $"{range} · 9 khoản mục · 3 nhóm";
+        }
+
+        private void BtnExportExcel_Click(object? sender, EventArgs e)
+        {
+            using SaveFileDialog sfd = new()
+            {
+                Title         = "Xuất báo cáo doanh thu chi tiết",
+                Filter        = "Excel Workbook (*.xlsx)|*.xlsx|CSV UTF-8 (*.csv)|*.csv|Tất cả (*.*)|*.*",
+                FileName      = $"BaoCao_DoanhThu_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                DefaultExt    = "xlsx",
+                AddExtension  = true,
+                OverwritePrompt = true,
+            };
+
+            if (sfd.ShowDialog(this) == DialogResult.OK)
+            {
+                MsgBox.Show(this,
+                    $"Đã chọn vị trí lưu:\n{sfd.FileName}\n\n(Chức năng xuất file đang được phát triển)",
+                    "Xuất báo cáo", MsgBox.MessageBoxType.Info);
+            }
+        }
+
+        private void BtnPrintReport_Click(object? sender, EventArgs e)
+        {
+            using PrintDialog pd = new()
+            {
+                AllowSomePages = true,
+                AllowSelection = true,
+                UseEXDialog = true,
+            };
+
+            if (pd.ShowDialog(this) == DialogResult.OK)
+            {
+                MsgBox.Show(this,
+                    $"Đã chọn máy in: {pd.PrinterSettings.PrinterName}\nSố bản: {pd.PrinterSettings.Copies}\n\n(Chức năng in đang được phát triển)",
+                    "In báo cáo", MsgBox.MessageBoxType.Info);
+            }
+        }
+
+        private void BtnImportExcel_Click(object? sender, EventArgs e)
+        {
+            using OpenFileDialog ofd = new()
+            {
+                Title  = "Nhập dữ liệu từ Excel / CSV",
+                Filter = "Excel Workbook (*.xlsx)|*.xlsx|CSV UTF-8 (*.csv)|*.csv|Tất cả (*.*)|*.*",
+                CheckFileExists = true,
+                Multiselect = false,
+            };
+
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                MsgBox.Show(this,
+                    $"Đã chọn tệp:\n{ofd.FileName}\n\n(Chức năng đọc và nhập dữ liệu đang được phát triển)",
+                    "Nhập từ Excel", MsgBox.MessageBoxType.Info);
+            }
+        }
+
+        // ───────── View tabs (Mức 2 - chọn nhóm) ─────────
+        private void BtnViewIncome_Click(object? sender, EventArgs e)  => SwitchView("income",  btnViewIncome);
+        private void BtnViewExpense_Click(object? sender, EventArgs e) => SwitchView("expense", btnViewExpense);
+        private void BtnViewLoss_Click(object? sender, EventArgs e)    => SwitchView("loss",    btnViewLoss);
+
+        private void SwitchView(string mode, Guna.UI2.WinForms.Guna2Button activeTab)
+        {
+            _viewMode = mode;
+            HighlightTab(activeTab, btnViewIncome, btnViewExpense, btnViewLoss);
+            LoadRevenueDetail();
+        }
+
+        private void HighlightTab(Guna.UI2.WinForms.Guna2Button active,
+                                   params Guna.UI2.WinForms.Guna2Button[] all)
+        {
+            foreach (var b in all)
+            {
+                if (b == active)
                 {
-                    if (val >= 0)
-                        row.Cells["Số tiền"].Style.ForeColor = Color.MediumSeaGreen;
-                    else
-                        row.Cells["Số tiền"].Style.ForeColor = Color.IndianRed;
+                    b.FillColor = Color.FromArgb(31, 138, 154);
+                    b.ForeColor = Color.White;
+                    b.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+                }
+                else
+                {
+                    b.FillColor = Color.Transparent;
+                    b.ForeColor = Color.FromArgb(160, 160, 166);
+                    b.HoverState.FillColor = Color.FromArgb(45, 45, 50);
                 }
             }
         }

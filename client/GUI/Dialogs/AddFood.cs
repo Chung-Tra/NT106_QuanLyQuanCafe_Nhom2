@@ -8,52 +8,15 @@ using System.Threading.Tasks;
 
 namespace GUI
 {
-    public partial class FoodForm : Form
+    public partial class AddFood : Form
     {
         public event Action? FoodAdded;
         private readonly string _currentFoodId = string.Empty;
 
-        private const int ColLeftFood = 49;
-        private const int FoodFieldWidth = 228;
-        private const int GapY = 8;
-
-        public FoodForm()
+        public AddFood()
         {
             InitializeComponent();
             LoadCategories();
-            txtTenMon.TextChanged += (_, _) => RecalcFoodAddLayout();
-            txtMoTa.TextChanged += (_, _) => RecalcFoodAddLayout();
-            RecalcFoodAddLayout();
-        }
-
-        /// <summary>Đặt lại chiều cao các ô và form theo độ dài chữ.</summary>
-        private void RecalcFoodAddLayout()
-        {
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtTenMon, 32, 100);
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtMoTa, 52, 220);
-
-            int y = txtTenMon.Location.Y;
-            txtTenMon.Location = new Point(ColLeftFood, y);
-            y = txtTenMon.Bottom + GapY;
-
-            txtGia.Location = new Point(ColLeftFood, y);
-            y = txtGia.Bottom + GapY;
-
-            cmLoai.Location = new Point(ColLeftFood, y);
-            y = cmLoai.Bottom + GapY;
-
-            txtMoTa.Location = new Point(ColLeftFood, y);
-            y = txtMoTa.Bottom + GapY + 4;
-
-            btnAdd.Location = new Point(ColLeftFood, y);
-            bttnClose.Location = new Point(172, y);
-
-            int needH = y + btnAdd.Height + 36;
-            if (needH != ClientSize.Height || ClientSize.Width < 323)
-                ClientSize = new Size(Math.Max(ClientSize.Width, 323), needH);
-
-            lblTitle.Location = new Point(
-                Math.Max(12, (ClientSize.Width - lblTitle.Width) / 2), lblTitle.Location.Y);
         }
 
         // Hàm nạp danh sách Loại món uống
@@ -93,13 +56,13 @@ namespace GUI
                 FoodDTO food = new()
                 {
                     Id = _currentFoodId, // Nếu thêm mới thì cái này sẽ trống
-                    TenMon = txtTenMon.Text.Trim(),
-                    Gia = giaThuc,
-                    MoTa = txtMoTa.Text.Trim(),
-                    Loai = cmLoai.SelectedValue?.ToString() ?? "other",
-                    HienThi = true,
-                    ConHang = true,
-                    HinhAnhUrl = ""
+                    Name = txtTenMon.Text.Trim(),
+                    Price = giaThuc,
+                    Description = txtMoTa.Text.Trim(),
+                    Category = cmLoai.SelectedValue?.ToString() ?? "other",
+                    IsVisible = true,
+                    InStock = true,
+                    ImageUrl = ""
                 };
 
                 // Quyết định Thêm hay Sửa dựa trên ID
@@ -110,7 +73,7 @@ namespace GUI
                 // Xử lý kết quả
                 if (success)
                 {
-                    MsgBox.Show(this, $"Thêm món [{food.TenMon}] thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
+                    MsgBox.Show(this, $"Thêm món [{food.Name}] thành công!", "Thông báo", MsgBox.MessageBoxType.Success);
                     FoodAdded?.Invoke();
                     this.DialogResult = DialogResult.OK;
                     this.Close();

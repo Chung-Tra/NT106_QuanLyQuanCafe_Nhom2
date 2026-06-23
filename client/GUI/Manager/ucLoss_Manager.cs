@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
@@ -9,145 +10,53 @@ namespace GUI
     /// Trang xem thất thoát / hao phí của quán cho Manager.
     /// Hiển thị theo ngày / tháng / năm, bảng chi tiết từng khoản.
     /// </summary>
-    public class ucLoss_Manager : UserControl
+    public partial class ucLoss_Manager : UserControl
     {
         private string _mode = "month";
 
-        private Button btnDay = null!;
-        private Button btnMonth = null!;
-        private Button btnYear = null!;
-        private Panel pnlChart = null!;
-        private DataGridView dgvLossDetail = null!;
-        private Label lblTotalLoss = null!;
-        private Label lblTitle = null!;
-        private Button btnReport = null!;
-
         public ucLoss_Manager()
         {
-            BackColor = Color.FromArgb(37, 37, 38);
-            ForeColor = Color.White;
-            Font = new Font("Segoe UI", 9F);
-            Dock = DockStyle.Fill;
-
-            BuildUI();
+            InitializeComponent();
             LoadData();
         }
 
-        private void BuildUI()
+        private void BtnDay_Click(object? sender, EventArgs e)
         {
-            int pad = 16;
-
-            lblTitle = new Label
-            {
-                Text = "Thất thoát & Hao phí",
-                Location = new Point(pad, 12),
-                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-                ForeColor = Color.White,
-                AutoSize = true
-            };
-
-            // Period buttons
-            btnDay = MakePeriodBtn("Ngày", pad, 46, true);
-            btnMonth = MakePeriodBtn("Tháng", pad + 78, 46, false);
-            btnYear = MakePeriodBtn("Năm", pad + 156, 46, false);
-
-            btnDay.Click   += (s, e) => { _mode = "day";   HighlightBtn(btnDay, btnMonth, btnYear); LoadData(); };
-            btnMonth.Click += (s, e) => { _mode = "month"; HighlightBtn(btnMonth, btnDay, btnYear); LoadData(); };
-            btnYear.Click  += (s, e) => { _mode = "year";  HighlightBtn(btnYear, btnDay, btnMonth); LoadData(); };
-
-            // Summary cards
-            lblTotalLoss = new Label
-            {
-                Text = "Tổng thất thoát: 0 đ",
-                Location = new Point(pad + 260, 52),
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                ForeColor = Color.IndianRed,
-                AutoSize = true
-            };
-
-            // Chart area
-            pnlChart = new Panel
-            {
-                Location = new Point(pad, 86),
-                Size = new Size(760, 170),
-                BackColor = Color.FromArgb(45, 45, 48)
-            };
-            pnlChart.Paint += PnlChart_Paint;
-
-            // Detail grid
-            var lblDetail = new Label
-            {
-                Text = "Chi tiết từng khoản thất thoát:",
-                Location = new Point(pad, 268),
-                ForeColor = Color.Silver,
-                AutoSize = true
-            };
-
-            dgvLossDetail = new DataGridView
-            {
-                Location = new Point(pad, 288),
-                Size = new Size(760, 190),
-                BackgroundColor = Color.FromArgb(45, 45, 48),
-                ForeColor = Color.White,
-                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = Color.FromArgb(30, 30, 30),
-                    ForeColor = Color.White,
-                    Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-                },
-                DefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = Color.FromArgb(45, 45, 48),
-                    ForeColor = Color.White,
-                    SelectionBackColor = Color.DimGray
-                },
-                ReadOnly = true,
-                AllowUserToAddRows = false,
-                RowHeadersVisible = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect
-            };
-
-            btnReport = new Button
-            {
-                Text = "Báo cáo sự cố",
-                Location = new Point(pad + 640, 488),
-                Size = new Size(138, 30),
-                BackColor = Color.FromArgb(160, 80, 80),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            btnReport.Click += (s, e) =>
-            {
-                var dlg = new ReportDialog("Thất thoát hao phí");
-                var dr = dlg.ShowDialog(MsgBox.OwnerWindow(this));
-                if (dr == DialogResult.OK || dr == DialogResult.Yes)
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
-            };
-
-            Controls.AddRange([
-                lblTitle, btnDay, btnMonth, btnYear, lblTotalLoss,
-                pnlChart, lblDetail, dgvLossDetail, btnReport
-            ]);
+            _mode = "day";
+            HighlightBtn(btnDay, btnMonth, btnYear);
+            LoadData();
         }
 
-        private Button MakePeriodBtn(string text, int x, int y, bool active) => new()
+        private void BtnMonth_Click(object? sender, EventArgs e)
         {
-            Text = text,
-            Location = new Point(x, y),
-            Size = new Size(72, 26),
-            BackColor = active ? Color.SteelBlue : Color.FromArgb(60, 60, 65),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand
-        };
+            _mode = "month";
+            HighlightBtn(btnMonth, btnDay, btnYear);
+            LoadData();
+        }
 
-        private void HighlightBtn(Button active, Button b1, Button b2)
+        private void BtnYear_Click(object? sender, EventArgs e)
         {
-            active.BackColor = Color.SteelBlue;
-            b1.BackColor = Color.FromArgb(60, 60, 65);
-            b2.BackColor = Color.FromArgb(60, 60, 65);
+            _mode = "year";
+            HighlightBtn(btnYear, btnDay, btnMonth);
+            LoadData();
+        }
+
+        private void BtnReport_Click(object? sender, EventArgs e)
+        {
+            var dlg = new ReportIncident("Thất thoát hao phí");
+            var dr = dlg.ShowDialog(MsgBox.OwnerWindow(this));
+            if (dr == DialogResult.OK || dr == DialogResult.Yes)
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
+        }
+
+        private static void HighlightBtn(Guna2Button active, Guna2Button b1, Guna2Button b2)
+        {
+            active.FillColor = Color.FromArgb(31, 138, 154);
+            active.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            b1.FillColor = Color.FromArgb(45, 45, 48);
+            b1.HoverState.FillColor = Color.FromArgb(60, 60, 65);
+            b2.FillColor = Color.FromArgb(45, 45, 48);
+            b2.HoverState.FillColor = Color.FromArgb(60, 60, 65);
         }
 
         private void LoadData()
@@ -189,7 +98,7 @@ namespace GUI
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Format = "N0";
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             foreach (DataGridViewRow row in dgvLossDetail.Rows)
-                row.DefaultCellStyle.ForeColor = Color.IndianRed;
+                row.DefaultCellStyle.ForeColor = Color.FromArgb(220, 80, 80);
 
             pnlChart.Invalidate();
         }
@@ -197,7 +106,7 @@ namespace GUI
         private void PnlChart_Paint(object? sender, PaintEventArgs e)
         {
             var g = e.Graphics;
-            g.Clear(Color.FromArgb(45, 45, 48));
+            g.Clear(Color.FromArgb(31, 31, 34));
 
             int[] values = _mode switch
             {
@@ -222,18 +131,17 @@ namespace GUI
             foreach (var v in values) maxVal = Math.Max(maxVal, v);
             maxVal = (int)(maxVal * 1.2);
 
-            int chartH = 120, chartY = 28, barW = 34, gap = 18;
+            int chartH = 140, chartY = 36, barW = 46, gap = 24;
             int totalW = values.Length * barW + (values.Length - 1) * gap;
             int startX = (pnlChart.Width - totalW) / 2;
 
-            using var fontS  = new Font("Segoe UI", 7.5F);
-            using var titleF = new Font("Segoe UI", 8F, FontStyle.Italic);
-            using var red    = new SolidBrush(Color.IndianRed);
-            using var gray   = new SolidBrush(Color.Gray);
-            using var white  = new SolidBrush(Color.White);
-            using var line   = new Pen(Color.FromArgb(60, 60, 65), 1);
+            using var fontS  = new Font("Segoe UI", 8F);
+            using var titleF = new Font("Segoe UI", 9F, FontStyle.Italic);
+            using var red    = new SolidBrush(Color.FromArgb(220, 80, 80));
+            using var gray   = new SolidBrush(Color.FromArgb(160, 160, 166));
+            using var line   = new Pen(Color.FromArgb(63, 63, 70), 1);
 
-            g.DrawString(title, titleF, gray, 6, 6);
+            g.DrawString(title, titleF, gray, 18, 12);
             for (int i = 0; i <= 4; i++)
             {
                 int y = chartY + (int)(chartH * i / 4.0);
@@ -245,7 +153,7 @@ namespace GUI
                 int x = startX + i * (barW + gap);
                 int h = maxVal > 0 ? (int)((double)values[i] / maxVal * chartH) : 0;
                 g.FillRectangle(red, x, chartY + chartH - h, barW, h);
-                g.DrawString(labels[i], fontS, gray, x + 8, chartY + chartH + 4);
+                g.DrawString(labels[i], fontS, gray, x + 12, chartY + chartH + 6);
             }
         }
     }

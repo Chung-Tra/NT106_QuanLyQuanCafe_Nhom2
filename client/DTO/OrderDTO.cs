@@ -9,25 +9,25 @@ namespace DTO
     public class OrderDTO
     {
         [JsonIgnore]
-        public string? DonHangId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("ban_id")]
-        public string? BanId { get; set; }
+        public string? TableId { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("thoi_gian_tao")]
-        public long ThoiGianTao { get; set; }
+        public long CreatedAt { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "pending", "dang_phuc_vu", "hoan_thanh", "huy"
+        public string? Status { get; set; }  // "pending", "dang_phuc_vu", "hoan_thanh", "huy"
 
         [JsonProperty("ghi_chu")]
-        public string? GhiChu { get; set; }
+        public string? Note { get; set; }
 
         [JsonProperty("chi_tiet_don")]
-        public Dictionary<string, OrderItemDTO>? ChiTietDon { get; set; }
+        public Dictionary<string, OrderItemDTO>? Items { get; set; }
     }
 
     /// <summary>
@@ -36,21 +36,21 @@ namespace DTO
     public class OrderItemDTO
     {
         [JsonIgnore]
-        public string? ChiTietId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("mon_id")]
-        public string? MonId { get; set; }
+        public string? FoodId { get; set; }
 
         [JsonProperty("so_luong")]
-        public int SoLuong { get; set; }
+        public int Quantity { get; set; }
 
         [JsonProperty("don_gia")]
-        public decimal DonGia { get; set; }
+        public decimal UnitPrice { get; set; }
 
         [JsonProperty("ghi_chu_mon")]
-        public string? GhiChuMon { get; set; }
+        public string? Note { get; set; }
 
         [JsonProperty("trang_thai_che_bien")]
-        public string? TrangThaiCheBien { get; set; }  // "cho", "dang_lam", "hoan_thanh"
+        public string? CookingStatus { get; set; }  // "cho", "dang_lam", "hoan_thanh"
     }
 }

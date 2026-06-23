@@ -6,14 +6,14 @@ using DTO;
 
 namespace GUI
 {
-    public partial class ucAdmin_Managers : UserControl
+    public partial class ucManagers_Admin : UserControl
     {
-        public ucAdmin_Managers()
+        public ucManagers_Admin()
         {
             InitializeComponent();
         }
 
-        private void ucAdmin_Managers_Load(object sender, EventArgs e)
+        private void ucManagers_Admin_Load(object sender, EventArgs e)
         {
             LoadManagerList();
             LoadLeaveRequests();
@@ -91,10 +91,20 @@ namespace GUI
 
         private void LoadLeaveRequests()
         {
-            lstLeaveReq.Items.Clear();
-            lstLeaveReq.Items.Add("Phạm Thu Hà - Nghỉ 05/05 → 06/05");
-            lstLeaveReq.Items.Add("  Lý do: Việc gia đình cần giải quyết gấp");
-            btnApproveLeave.Text = "Duyệt (1)";
+            DataTable dt = new();
+            dt.Columns.Add("Nhân viên");
+            dt.Columns.Add("Ngày nghỉ");
+            dt.Columns.Add("Lý do");
+
+            dt.Rows.Add("Phạm Thu Hà", "05/05 → 06/05", "Việc gia đình cần giải quyết gấp");
+
+            dgvLeaveReq.DataSource = dt;
+            dgvLeaveReq.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvLeaveReq.Columns["Nhân viên"].FillWeight = 30;
+            dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 28;
+            dgvLeaveReq.Columns["Lý do"].FillWeight     = 42;
+
+            btnApproveLeave.Text = $"Duyệt ({dt.Rows.Count})";
         }
 
         private void LoadAuditLog()
@@ -181,7 +191,7 @@ namespace GUI
 
         private void btnApproveLeave_Click(object? sender, EventArgs e)
         {
-            if (lstLeaveReq.Items.Count == 0)
+            if (dgvLeaveReq.Rows.Count == 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Không có đơn xin nghỉ nào!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
@@ -195,8 +205,13 @@ namespace GUI
 
             if (result == DialogResult.Yes)
             {
-                lstLeaveReq.Items.Clear();
-                lstLeaveReq.Items.Add("[ĐÃ DUYỆT] Phạm Thu Hà - 05/05 → 06/05");
+                DataTable dt = new();
+                dt.Columns.Add("Nhân viên");
+                dt.Columns.Add("Ngày nghỉ");
+                dt.Columns.Add("Lý do");
+                dt.Rows.Add("✓ Phạm Thu Hà (đã duyệt)", "05/05 → 06/05", "Việc gia đình");
+
+                dgvLeaveReq.DataSource = dt;
                 btnApproveLeave.Text = "Duyệt (0)";
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
             }

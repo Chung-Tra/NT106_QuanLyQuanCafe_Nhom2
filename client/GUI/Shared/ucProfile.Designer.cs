@@ -403,7 +403,7 @@ namespace GUI
             btnUpdateInfo.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btnUpdateInfo.Size = new Size(192, 44);
             btnUpdateInfo.TabIndex = 2;
-            btnUpdateInfo.Text = "LƯU THAY ĐỔI";
+            btnUpdateInfo.Text = "Lưu thay đổi";
             // 
             // pnlSecurity
             // 

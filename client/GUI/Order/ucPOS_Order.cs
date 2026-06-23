@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class ucPOS_OrderStaff : UserControl
+    public partial class ucPOS_Order : UserControl
     {
-        public ucPOS_OrderStaff()
+        public ucPOS_Order()
         {
             InitializeComponent();
             btnReport.Click += (s, e) =>
@@ -30,7 +30,7 @@ namespace GUI
             };
         }
 
-        private void SetActiveTab(Button activeBtn)
+        private void SetActiveTab(Control activeBtn)
         {
             // 1. Reset màu tất cả các nút về màu trắng (không hoạt động)
             btnTabOrder.ForeColor = Color.White;

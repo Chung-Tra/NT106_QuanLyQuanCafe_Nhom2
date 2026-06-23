@@ -35,7 +35,7 @@ namespace GUI
             ["admin"] = new()
             {
                 new("CHÍNH",      "📊  Tổng quan",          "Tổng quan toàn quán",  () => new ucDashboard_Admin()),
-                new("CHÍNH",      "👥  Quản trị viên",      "Quản lý các Manager",  () => new ucAdmin_Managers()),
+                new("CHÍNH",      "👥  Quản trị viên",      "Quản lý các Manager",  () => new ucManagers_Admin()),
                 new("CHÍNH",      "👤  Nhân viên",          "Danh sách nhân viên",  () => new ucStaff_Manager()),
                 new("CHÍNH",      "💰  Tiền lương",         "Tiền lương tự động",   () => new ucPayroll_Admin()),
                 new("KHÁCH HÀNG", "💬  Feedback",           "Kiểm soát Feedback",   () => new ucFeedback_Admin()),
@@ -63,9 +63,9 @@ namespace GUI
             ["order staff"] = new()
             {
                 new("CHÍNH",      "📊  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
-                new("CHÍNH",      "🛒  Lên đơn / POS",      "Lên đơn / POS",          () => new ucPOS_OrderStaff()),
-                new("CHÍNH",      "👥  Khách hàng (CRM)",   "Quản lý Khách hàng",     () => new ucCRM_OrderStaff()),
-                new("CHÍNH",      "💵  Tiền mặt",           "Quản lý Tiền mặt",       () => new ucCashManagement_OrderStaff()),
+                new("CHÍNH",      "🛒  Lên đơn / POS",      "Lên đơn / POS",          () => new ucPOS_Order()),
+                new("CHÍNH",      "👥  Khách hàng (CRM)",   "Quản lý Khách hàng",     () => new ucCRM_Order()),
+                new("CHÍNH",      "💵  Tiền mặt",           "Quản lý Tiền mặt",       () => new ucCashManagement_Order()),
                 new("CÁ NHÂN",    "📅  Lịch sử chấm công",  "Xem lịch sử + báo cáo",  () => new ucAttendanceHistory()),
                 new("CÁ NHÂN",    "🏖  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
                 new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
@@ -272,6 +272,9 @@ namespace GUI
 
             pnlContentHost.Controls.Add(uc);
             uc.BringToFront();
+
+            // Tự động gắn AutoFadeScroll (thanh teal) cho mọi DGV bên trong UC
+            AutoFadeScroll.AttachAll(uc);
         }
 
         private void HighlightActiveButton(Guna2Button activeBtn)
@@ -315,6 +318,11 @@ namespace GUI
                     f?.Close();
                 }
             }
+        }
+
+        private void BtnMinimize_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
         }
 
         private void BtnClose_Click(object sender, EventArgs e)

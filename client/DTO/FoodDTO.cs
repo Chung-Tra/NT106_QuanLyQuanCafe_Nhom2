@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,34 +7,30 @@ using System.Threading.Tasks;
 
 namespace DTO
 {
-    public class MonAnDTO
+    public class FoodDTO
     {
         [JsonIgnore]
         public string? Id { get; set; }
 
         [JsonProperty("con_hang")]
-        public bool ConHang { get; set; }
+        public bool InStock { get; set; }
 
         [JsonProperty("gia")]
-        public decimal Gia { get; set; }
+        public decimal Price { get; set; }
 
         [JsonProperty("hien_thi")]
-        public bool? HienThi { get; set; }
+        public bool? IsVisible { get; set; }
 
         [JsonProperty("hinh_anh_url")]
-        public string? HinhAnhUrl { get; set; }
+        public string? ImageUrl { get; set; }
 
         [JsonProperty("loai")]
-        public string? Loai { get; set; }
+        public string? Category { get; set; }
 
         [JsonProperty("mo_ta")]
-        public string? MoTa { get; set; }
+        public string? Description { get; set; }
 
         [JsonProperty("ten_mon")]
-        public string? TenMon { get; set; }
-    }
-
-    public class FoodDTO : MonAnDTO
-    {
+        public string? Name { get; set; }
     }
 }

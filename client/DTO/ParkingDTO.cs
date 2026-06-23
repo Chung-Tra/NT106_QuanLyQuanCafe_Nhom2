@@ -9,27 +9,27 @@ namespace DTO
     public class ParkingDTO
     {
         [JsonIgnore]
-        public string? BaiXeId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("bien_so")]
-        public string? BienSo { get; set; }
+        public string? LicensePlate { get; set; }
 
         [JsonProperty("loai_xe")]
-        public string? LoaiXe { get; set; }  // "xe_may", "o_to", "xe_dap"
+        public string? VehicleType { get; set; }  // "xe_may", "o_to", "xe_dap"
 
         [JsonProperty("gio_vao")]
-        public long GioVao { get; set; }
+        public long EntryTime { get; set; }
 
         [JsonProperty("gio_ra")]
-        public long GioRa { get; set; }  // 0 = chưa ra
+        public long ExitTime { get; set; }  // 0 = chưa ra
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "dang_gui", "da_ra"
+        public string? Status { get; set; }  // "dang_gui", "da_ra"
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }  // Bảo vệ ghi nhận
+        public string? EmployeeId { get; set; }  // Bảo vệ ghi nhận
 
         [JsonProperty("phi_gui")]
-        public decimal PhiGui { get; set; }
+        public decimal Fee { get; set; }
     }
 }

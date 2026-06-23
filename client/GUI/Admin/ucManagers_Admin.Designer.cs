@@ -4,7 +4,7 @@ using Guna.UI2.WinForms;
 
 namespace GUI
 {
-    partial class ucAdmin_Managers
+    partial class ucManagers_Admin
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -68,7 +68,7 @@ namespace GUI
             pnlLeaveRequests = new Guna2Panel();
             lblLeaveReqTitle = new Label();
             btnApproveLeave = new Guna2Button();
-            lstLeaveReq = new ListBox();
+            dgvLeaveReq = new Guna2DataGridView();
             pnlAuditLog = new Guna2Panel();
             lblAuditTitle = new Label();
             dgvAuditLog = new Guna2DataGridView();
@@ -79,6 +79,7 @@ namespace GUI
             pnlManagerList.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvManagers).BeginInit();
             pnlLeaveRequests.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvLeaveReq).BeginInit();
             pnlAuditLog.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvAuditLog).BeginInit();
             SuspendLayout();
@@ -280,54 +281,58 @@ namespace GUI
             // 
             // dgvManagers
             // 
-            dataGridViewCellStyle1.BackColor = Color.FromArgb(34, 44, 47);
-            dataGridViewCellStyle1.ForeColor = Color.FromArgb(220, 230, 232);
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(24, 24, 27);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(220, 220, 225);
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvManagers.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            dgvManagers.BackgroundColor = Color.FromArgb(28, 36, 38);
+            dgvManagers.BackgroundColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(34, 44, 47);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.FromArgb(31, 138, 154);
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(34, 44, 47);
-            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(160, 160, 166);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(160, 160, 166);
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             dgvManagers.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvManagers.ColumnHeadersHeight = 32;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(28, 36, 38);
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(220, 230, 232);
-            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(231, 229, 255);
-            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(71, 69, 94);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(220, 220, 225);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             dgvManagers.DefaultCellStyle = dataGridViewCellStyle3;
-            dgvManagers.GridColor = Color.FromArgb(45, 60, 64);
+            dgvManagers.EnableHeadersVisualStyles = false;
+            dgvManagers.GridColor = Color.FromArgb(45, 45, 48);
             dgvManagers.Location = new Point(18, 56);
             dgvManagers.MultiSelect = false;
             dgvManagers.Name = "dgvManagers";
             dgvManagers.RowHeadersVisible = false;
             dgvManagers.Size = new Size(528, 170);
             dgvManagers.TabIndex = 1;
-            dgvManagers.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(34, 44, 47);
+            dgvManagers.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvManagers.ThemeStyle.AlternatingRowsStyle.Font = null;
-            dgvManagers.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.FromArgb(220, 230, 232);
+            dgvManagers.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvManagers.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
             dgvManagers.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
-            dgvManagers.ThemeStyle.BackColor = Color.FromArgb(28, 36, 38);
-            dgvManagers.ThemeStyle.GridColor = Color.FromArgb(45, 60, 64);
-            dgvManagers.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(34, 44, 47);
+            dgvManagers.ThemeStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvManagers.ThemeStyle.GridColor = Color.FromArgb(45, 45, 48);
+            dgvManagers.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(31, 31, 34);
             dgvManagers.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
-            dgvManagers.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
-            dgvManagers.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(31, 138, 154);
+            dgvManagers.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvManagers.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(160, 160, 166);
             dgvManagers.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvManagers.ThemeStyle.HeaderStyle.Height = 23;
-            dgvManagers.ThemeStyle.ReadOnly = false;
-            dgvManagers.ThemeStyle.RowsStyle.BackColor = Color.FromArgb(28, 36, 38);
+            dgvManagers.ThemeStyle.HeaderStyle.Height = 32;
+            dgvManagers.ThemeStyle.ReadOnly = true;
+            dgvManagers.ThemeStyle.RowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvManagers.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgvManagers.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
-            dgvManagers.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(220, 230, 232);
-            dgvManagers.ThemeStyle.RowsStyle.Height = 25;
-            dgvManagers.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
-            dgvManagers.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
+            dgvManagers.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvManagers.ThemeStyle.RowsStyle.Height = 28;
+            dgvManagers.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvManagers.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             // 
             // pnlLeaveRequests
             // 
@@ -335,7 +340,7 @@ namespace GUI
             pnlLeaveRequests.BorderRadius = 14;
             pnlLeaveRequests.Controls.Add(lblLeaveReqTitle);
             pnlLeaveRequests.Controls.Add(btnApproveLeave);
-            pnlLeaveRequests.Controls.Add(lstLeaveReq);
+            pnlLeaveRequests.Controls.Add(dgvLeaveReq);
             pnlLeaveRequests.CustomizableEdges = customizableEdges19;
             pnlLeaveRequests.Location = new Point(600, 140);
             pnlLeaveRequests.Name = "pnlLeaveRequests";
@@ -369,20 +374,41 @@ namespace GUI
             btnApproveLeave.Size = new Size(82, 28);
             btnApproveLeave.TabIndex = 0;
             btnApproveLeave.Text = "Duyệt (0)";
-            // 
-            // lstLeaveReq
-            // 
-            lstLeaveReq.BackColor = Color.FromArgb(24, 24, 27);
-            lstLeaveReq.BorderStyle = BorderStyle.None;
-            lstLeaveReq.Font = new Font("Segoe UI", 9.5F);
-            lstLeaveReq.ForeColor = Color.FromArgb(220, 220, 225);
-            lstLeaveReq.FormattingEnabled = true;
-            lstLeaveReq.IntegralHeight = false;
-            lstLeaveReq.ItemHeight = 17;
-            lstLeaveReq.Location = new Point(18, 56);
-            lstLeaveReq.Name = "lstLeaveReq";
-            lstLeaveReq.Size = new Size(304, 170);
-            lstLeaveReq.TabIndex = 1;
+            //
+            // dgvLeaveReq
+            //
+            dgvLeaveReq.AllowUserToAddRows = false;
+            dgvLeaveReq.AllowUserToResizeRows = false;
+            dgvLeaveReq.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.BorderStyle = BorderStyle.None;
+            dgvLeaveReq.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvLeaveReq.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvLeaveReq.ColumnHeadersHeight = 32;
+            dgvLeaveReq.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvLeaveReq.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgvLeaveReq.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvLeaveReq.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvLeaveReq.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvLeaveReq.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvLeaveReq.EnableHeadersVisualStyles = false;
+            dgvLeaveReq.GridColor = Color.FromArgb(45, 45, 48);
+            dgvLeaveReq.Location = new Point(18, 56);
+            dgvLeaveReq.MultiSelect = false;
+            dgvLeaveReq.Name = "dgvLeaveReq";
+            dgvLeaveReq.ReadOnly = true;
+            dgvLeaveReq.RowHeadersVisible = false;
+            dgvLeaveReq.RowTemplate.Height = 28;
+            dgvLeaveReq.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvLeaveReq.Size = new Size(304, 170);
+            dgvLeaveReq.TabIndex = 1;
+            DgvDarkScroll.Apply(dgvLeaveReq);
             // 
             // pnlAuditLog
             // 
@@ -410,58 +436,62 @@ namespace GUI
             // 
             // dgvAuditLog
             // 
-            dataGridViewCellStyle4.BackColor = Color.FromArgb(58, 34, 34);
-            dataGridViewCellStyle4.ForeColor = Color.FromArgb(230, 200, 200);
+            dataGridViewCellStyle4.BackColor = Color.FromArgb(24, 24, 27);
+            dataGridViewCellStyle4.ForeColor = Color.FromArgb(220, 220, 225);
+            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvAuditLog.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
-            dgvAuditLog.BackgroundColor = Color.FromArgb(48, 28, 28);
+            dgvAuditLog.BackgroundColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = Color.FromArgb(58, 34, 34);
-            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle5.ForeColor = Color.FromArgb(245, 158, 11);
-            dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(58, 34, 34);
-            dataGridViewCellStyle5.SelectionForeColor = Color.FromArgb(245, 158, 11);
+            dataGridViewCellStyle5.BackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle5.ForeColor = Color.FromArgb(160, 160, 166);
+            dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle5.SelectionForeColor = Color.FromArgb(160, 160, 166);
             dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
             dgvAuditLog.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dgvAuditLog.ColumnHeadersHeight = 32;
             dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = Color.FromArgb(48, 28, 28);
+            dataGridViewCellStyle6.BackColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle6.ForeColor = Color.FromArgb(230, 200, 200);
-            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(180, 60, 60);
-            dataGridViewCellStyle6.SelectionForeColor = Color.White;
+            dataGridViewCellStyle6.ForeColor = Color.FromArgb(220, 220, 225);
+            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle6.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
             dgvAuditLog.DefaultCellStyle = dataGridViewCellStyle6;
-            dgvAuditLog.GridColor = Color.FromArgb(70, 40, 40);
+            dgvAuditLog.EnableHeadersVisualStyles = false;
+            dgvAuditLog.GridColor = Color.FromArgb(45, 45, 48);
             dgvAuditLog.Location = new Point(18, 50);
             dgvAuditLog.MultiSelect = false;
             dgvAuditLog.Name = "dgvAuditLog";
             dgvAuditLog.RowHeadersVisible = false;
-            dgvAuditLog.RowTemplate.DefaultCellStyle.SelectionBackColor = Color.FromArgb(180, 60, 60);
-            dgvAuditLog.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgvAuditLog.RowTemplate.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvAuditLog.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvAuditLog.Size = new Size(884, 175);
             dgvAuditLog.TabIndex = 3;
-            dgvAuditLog.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(58, 34, 34);
+            dgvAuditLog.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvAuditLog.ThemeStyle.AlternatingRowsStyle.Font = null;
-            dgvAuditLog.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.FromArgb(230, 200, 200);
+            dgvAuditLog.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvAuditLog.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
             dgvAuditLog.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
-            dgvAuditLog.ThemeStyle.BackColor = Color.FromArgb(48, 28, 28);
-            dgvAuditLog.ThemeStyle.GridColor = Color.FromArgb(70, 40, 40);
-            dgvAuditLog.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(58, 34, 34);
+            dgvAuditLog.ThemeStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvAuditLog.ThemeStyle.GridColor = Color.FromArgb(45, 45, 48);
+            dgvAuditLog.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(31, 31, 34);
             dgvAuditLog.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
-            dgvAuditLog.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
-            dgvAuditLog.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(245, 158, 11);
+            dgvAuditLog.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvAuditLog.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(160, 160, 166);
             dgvAuditLog.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvAuditLog.ThemeStyle.HeaderStyle.Height = 23;
-            dgvAuditLog.ThemeStyle.ReadOnly = false;
-            dgvAuditLog.ThemeStyle.RowsStyle.BackColor = Color.FromArgb(48, 28, 28);
+            dgvAuditLog.ThemeStyle.HeaderStyle.Height = 32;
+            dgvAuditLog.ThemeStyle.ReadOnly = true;
+            dgvAuditLog.ThemeStyle.RowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvAuditLog.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgvAuditLog.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
-            dgvAuditLog.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(230, 200, 200);
-            dgvAuditLog.ThemeStyle.RowsStyle.Height = 25;
+            dgvAuditLog.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvAuditLog.ThemeStyle.RowsStyle.Height = 28;
             dgvAuditLog.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(180, 60, 60);
-            dgvAuditLog.ThemeStyle.RowsStyle.SelectionForeColor = Color.White;
+            dgvAuditLog.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             // 
-            // ucAdmin_Managers
+            // ucManagers_Admin
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -470,9 +500,9 @@ namespace GUI
             Controls.Add(pnlManagerList);
             Controls.Add(pnlLeaveRequests);
             Controls.Add(pnlAuditLog);
-            Name = "ucAdmin_Managers";
+            Name = "ucManagers_Admin";
             Size = new Size(960, 660);
-            Load += ucAdmin_Managers_Load;
+            Load += ucManagers_Admin_Load;
             pnlSummary.ResumeLayout(false);
             pnlStatTotal.ResumeLayout(false);
             pnlStatTotal.PerformLayout();
@@ -483,6 +513,7 @@ namespace GUI
             pnlManagerList.ResumeLayout(false);
             pnlManagerList.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvManagers).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvLeaveReq).EndInit();
             pnlLeaveRequests.ResumeLayout(false);
             pnlLeaveRequests.PerformLayout();
             pnlAuditLog.ResumeLayout(false);
@@ -510,15 +541,20 @@ namespace GUI
             dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
             dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.EnableHeadersVisualStyles = false;
             dgv.GridColor = Color.FromArgb(45, 45, 48);
             dgv.ReadOnly = true;
             dgv.RowHeadersVisible = false;
             dgv.RowTemplate.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.RowTemplate.Height = 28;
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion
@@ -544,7 +580,7 @@ namespace GUI
         private Guna2Panel pnlLeaveRequests;
         private Label lblLeaveReqTitle;
         private Guna2Button btnApproveLeave;
-        private ListBox lstLeaveReq;
+        private Guna2DataGridView dgvLeaveReq;
 
         private Guna2Panel pnlAuditLog;
         private Label lblAuditTitle;

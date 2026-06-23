@@ -33,7 +33,7 @@ namespace GUI
             pnlLeft = new Guna2Panel();
             lblChatTitle = new Label();
             lblContactsHint = new Label();
-            cmbChatTarget = new ComboBox();
+            cmbChatTarget = new Guna2ComboBox();
             btnBroadcast = new Guna2Button();
             pnlRight = new Panel();
             pnlChatHeader = new Guna2Panel();
@@ -89,16 +89,21 @@ namespace GUI
             // cmbChatTarget
             // 
             cmbChatTarget.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            cmbChatTarget.BackColor = Color.FromArgb(38, 38, 42);
+            cmbChatTarget.BackColor = Color.Transparent;
+            cmbChatTarget.BorderColor = Color.FromArgb(63, 63, 70);
+            cmbChatTarget.BorderRadius = 8;
+            cmbChatTarget.DrawMode = DrawMode.OwnerDrawFixed;
             cmbChatTarget.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbChatTarget.FlatStyle = FlatStyle.Flat;
+            cmbChatTarget.FillColor = Color.FromArgb(38, 38, 42);
+            cmbChatTarget.FocusedColor = Color.FromArgb(31, 138, 154);
+            cmbChatTarget.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
             cmbChatTarget.Font = new Font("Segoe UI", 9.5F);
             cmbChatTarget.ForeColor = Color.White;
-            cmbChatTarget.IntegralHeight = false;
+            cmbChatTarget.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            cmbChatTarget.ItemHeight = 26;
             cmbChatTarget.Location = new Point(12, 82);
-            cmbChatTarget.MaxDropDownItems = 12;
             cmbChatTarget.Name = "cmbChatTarget";
-            cmbChatTarget.Size = new Size(206, 25);
+            cmbChatTarget.Size = new Size(206, 32);
             cmbChatTarget.TabIndex = 2;
             cmbChatTarget.SelectedIndexChanged += cmbChatTarget_SelectedIndexChanged;
             // 
@@ -262,7 +267,7 @@ namespace GUI
         private Guna2Panel   pnlLeft;
         private Label        lblChatTitle;
         private Label        lblContactsHint;
-        private ComboBox     cmbChatTarget;
+        private Guna2ComboBox cmbChatTarget;
         private Panel        pnlRight;
         private Guna2Panel   pnlChatHeader;
         private Label        lblCurrentChat;

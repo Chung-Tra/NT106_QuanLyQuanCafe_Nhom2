@@ -5,11 +5,11 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class ucCashManagement_OrderStaff : UserControl
+    public partial class ucCashManagement_Order : UserControl
     {
         private bool _shiftStarted = false;
 
-        public ucCashManagement_OrderStaff()
+        public ucCashManagement_Order()
         {
             InitializeComponent();
             btnReport.Click += btnReport_Click;
