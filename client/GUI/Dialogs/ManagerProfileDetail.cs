@@ -1,6 +1,9 @@
+using BUS;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -17,7 +20,7 @@ namespace GUI
             AutoFadeScroll.Attach(dgvManagers);
         }
 
-        private void LoadData()
+        private async void LoadData()
         {
             var dt = new DataTable();
             dt.Columns.Add("Mã QL");
@@ -28,9 +31,21 @@ namespace GUI
             dt.Columns.Add("Trạng thái");
             dt.Columns.Add("Đơn tháng này", typeof(int));
 
-            dt.Rows.Add("QL001", "Nguyễn Văn An", "an.nguyen@cafe.com",  "0901 234 567", "01/01/2023", "Đang làm", 142);
-            dt.Rows.Add("QL002", "Trần Minh",      "minh.tran@cafe.com",  "0912 345 678", "15/03/2022", "Đang làm", 98);
-            dt.Rows.Add("QL003", "Phạm Thu Hà",    "ha.pham@cafe.com",    "0923 456 789", "10/06/2023", "Xin nghỉ", 74);
+            try
+            {
+                var emps   = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
+                var orders = await OrderBUS.GetAll();
+                var now = DateTime.Now;
+                long monthStart = new DateTimeOffset(new DateTime(now.Year, now.Month, 1)).ToUnixTimeMilliseconds();
+
+                foreach (var m in emps.Where(x => (x.Role ?? "").ToLower() == "manager"))
+                {
+                    int cnt = orders.Values.Count(o => o.EmployeeId == m.EmployeeId && o.CreatedAt >= monthStart);
+                    dt.Rows.Add(m.EmployeeId, m.FullName, m.Email, m.PhoneNumber,
+                                m.HireDate ?? "", m.Status == "active" ? "Đang làm" : "Nghỉ", cnt);
+                }
+            }
+            catch { /* offline → bảng trống */ }
 
             dgvManagers.DataSource = dt;
             dgvManagers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;

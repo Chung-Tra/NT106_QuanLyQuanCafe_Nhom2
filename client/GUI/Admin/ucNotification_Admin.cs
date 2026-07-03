@@ -1,6 +1,11 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -14,15 +19,26 @@ namespace GUI
         public ucNotification_Admin()
         {
             InitializeComponent();
-            DgvRefresh.Attach(dgvNotifications, LoadMockNotifications);
+            DgvRefresh.Attach(dgvNotifications, () => _ = LoadRealNotifications());
         }
 
-        private void UcNotification_Admin_Load(object? sender, EventArgs e) => LoadMockNotifications();
+        private void UcNotification_Admin_Load(object? sender, EventArgs e) => _ = LoadRealNotifications();
 
-        private void LoadMockNotifications()
+        private static string TypeDisplay(string? t) => t switch
+        {
+            "xin_nghi" => "Xin nghỉ",
+            "feedback_xau" => "Feedback xấu",
+            "cham_cong" => "Chấm công",
+            "sua_nguyen_lieu" => "Sửa nguyên liệu",
+            "don_moi" => "Đơn mới",
+            "sos" => "SOS",
+            _ => t ?? "Khác"
+        };
+
+        private async Task LoadRealNotifications()
         {
             _dtNotif = new DataTable();
-            _dtNotif.Columns.Add("ID", typeof(int));
+            _dtNotif.Columns.Add("ID");
             _dtNotif.Columns.Add("Loại");
             _dtNotif.Columns.Add("Từ");
             _dtNotif.Columns.Add("Nội dung");
@@ -30,20 +46,33 @@ namespace GUI
             _dtNotif.Columns.Add("Đã đọc", typeof(bool));
             _dtNotif.Columns.Add("Trang liên quan");
 
-            _dtNotif.Rows.Add(1, "Xin nghỉ", "QL Nguyễn Văn An", "Xin nghỉ ngày 05/05/2026 - Lý do: Việc gia đình cần giải quyết gấp", "02/05 10:30", false, "leave");
-            _dtNotif.Rows.Add(2, "Sửa nguyên liệu", "QL Trần Minh", "Đã sửa giá nguyên liệu 'Cà phê Arabica' từ 250,000đ → 280,000đ. Lý do: Nhà cung cấp tăng giá", "02/05 09:15", false, "stock");
-            _dtNotif.Rows.Add(3, "Feedback xấu", "Hệ thống", "Khách hàng Lê Phúc đánh giá 1★: 'Ly bị vỡ, nhân viên thái độ'. Quản lý CHƯA XỬ LÝ.", "02/05 08:45", false, "feedback");
-            _dtNotif.Rows.Add(4, "Xóa nguyên liệu", "QL Nguyễn Văn An", "Đã xóa nguyên liệu 'Syrup dâu' khỏi kho. Lý do: Ngừng kinh doanh dòng sản phẩm dâu", "01/05 16:20", false, "stock");
-            _dtNotif.Rows.Add(5, "Chấm công", "QL Trần Minh", "Đã sửa giờ check-in của NV Đỗ Hương từ 08:30 → 07:55. Lý do: Hệ thống ghi nhận sai", "01/05 14:00", false, "attendance");
-            _dtNotif.Rows.Add(6, "Thêm nguyên liệu", "QL Nguyễn Văn An", "Đã thêm nguyên liệu mới 'Bột matcha Nhật'. Lý do: Bổ sung menu mới", "01/05 10:30", true, "stock");
-            _dtNotif.Rows.Add(7, "Feedback xấu", "Hệ thống", "Khách hàng Trần Minh đánh giá 2★: 'Đồ uống ngọt quá'. QL đã trả lời xin lỗi và hứa cải thiện.", "30/04 15:00", true, "feedback");
-            _dtNotif.Rows.Add(8, "Xin nghỉ", "QL Trần Minh", "Xin nghỉ ngày 28/04/2026. Lý do: Khám sức khỏe định kỳ", "27/04 09:00", true, "leave");
+            string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+            try
+            {
+                var notifs = await NotificationBUS.GetAll();
+                var emps = (await EmployeeBUS.GetAllEmployeesAsync())
+                    .Where(x => x.EmployeeId != null)
+                    .ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+
+                foreach (var kv in notifs.Where(n => n.Value.ReceiverId == myId)
+                                         .OrderByDescending(n => n.Value.Timestamp))
+                {
+                    var n = kv.Value;
+                    string from = n.SenderId == "system" ? "Hệ thống"
+                        : (n.SenderId != null && emps.TryGetValue(n.SenderId, out var name) ? name : (n.SenderId ?? ""));
+                    string time = n.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(n.Timestamp).LocalDateTime.ToString("dd/MM HH:mm")
+                        : "";
+                    _dtNotif.Rows.Add(kv.Key, TypeDisplay(n.Type), from, n.Content, time, n.IsRead, n.RelatedPage);
+                }
+            }
+            catch { /* offline */ }
 
             dgvNotifications.DataSource = _dtNotif;
             dgvNotifications.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvNotifications.Columns["ID"].Visible = false;
-            dgvNotifications.Columns["Trang liên quan"].Visible = false;
-            dgvNotifications.Columns["Đã đọc"].Visible = false;
+            if (dgvNotifications.Columns.Contains("ID")) dgvNotifications.Columns["ID"].Visible = false;
+            if (dgvNotifications.Columns.Contains("Trang liên quan")) dgvNotifications.Columns["Trang liên quan"].Visible = false;
+            if (dgvNotifications.Columns.Contains("Đã đọc")) dgvNotifications.Columns["Đã đọc"].Visible = false;
             dgvNotifications.Columns["Nội dung"].FillWeight = 40;
             dgvNotifications.Columns["Loại"].FillWeight = 12;
             dgvNotifications.Columns["Từ"].FillWeight = 18;
@@ -105,11 +134,9 @@ namespace GUI
             string type = dgvNotifications.CurrentRow.Cells["Loại"].Value?.ToString() ?? "";
             string content = txtNotifContent.Text;
 
-            // Xin nghỉ → Duyệt / Từ chối + Chat
             btnAccept.Visible = type == "Xin nghỉ";
             btnReject.Visible = type == "Xin nghỉ";
 
-            // Feedback xấu chưa xử lý → Chat QL (đỏ)
             if (type == "Feedback xấu" && content.Contains("CHƯA XỬ LÝ"))
             {
                 btnGoToChat.Visible = true;
@@ -134,7 +161,6 @@ namespace GUI
             lblNotifTime.Text = row.Cells["Thời gian"].Value?.ToString() ?? "";
             txtNotifContent.Text = row.Cells["Nội dung"].Value?.ToString() ?? "";
 
-            // Feedback xấu đã xử lý → hiện feedback + hướng giải quyết
             string type = row.Cells["Loại"].Value?.ToString() ?? "";
             string content = row.Cells["Nội dung"].Value?.ToString() ?? "";
             if (type == "Feedback xấu" && !content.Contains("CHƯA XỬ LÝ"))
@@ -143,36 +169,39 @@ namespace GUI
                 lblNotifType.Text = "Loại: Feedback xấu (ĐÃ XỬ LÝ)";
             }
             else if (type == "Feedback xấu")
-            {
                 lblNotifType.ForeColor = Color.IndianRed;
-            }
             else
-            {
                 lblNotifType.ForeColor = Color.Orange;
-            }
 
             UpdateDetailButtons();
         }
 
-        private void DgvNotifications_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        private async Task MarkRead(int rowIndex)
         {
-            if (e.RowIndex < 0) return;
-
-            // Mark as read
-            var dataRow = _dtNotif.Rows[e.RowIndex];
+            if (rowIndex < 0 || rowIndex >= _dtNotif.Rows.Count) return;
+            var dataRow = _dtNotif.Rows[rowIndex];
+            if ((bool)dataRow["Đã đọc"]) return;
+            string id = dataRow["ID"].ToString() ?? "";
             dataRow["Đã đọc"] = true;
             ColorRows();
             UpdateUnreadCount();
+            if (!string.IsNullOrEmpty(id))
+                await NotificationBUS.Update(id, new { da_doc = true });
+        }
 
-            // Check type for auto-navigation
+        private async void DgvNotifications_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            await MarkRead(e.RowIndex);
+
+            var dataRow = _dtNotif.Rows[e.RowIndex];
             string type = dataRow["Loại"].ToString() ?? "";
             string content = dataRow["Nội dung"].ToString() ?? "";
 
             if (type == "Feedback xấu" && content.Contains("CHƯA XỬ LÝ"))
             {
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Feedback xấu chưa được quản lý xử lý!\nChuyển sang chat với quản lý...",
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    "Feedback xấu chưa được quản lý xử lý!\nHãy mở mục Feedback để phản hồi khách hàng.",
                     "Cảnh báo", MsgBox.MessageBoxType.Warning);
             }
             else
@@ -184,50 +213,49 @@ namespace GUI
                     "stock" => "Kiểm soát kho",
                     "feedback" => "Feedback khách hàng",
                     "attendance" => "Chấm công",
+                    "order" => "Đơn hàng",
+                    "security" => "An ninh",
                     _ => "Trang chủ"
                 };
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    $"Đã đọc thông báo.\nĐi tới: {pageName}",
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Đã đọc thông báo.\nLiên quan: {pageName}",
                     "Thông báo", MsgBox.MessageBoxType.Info);
             }
         }
 
-        private void BtnAccept_Click(object? sender, EventArgs e)
+        private async void BtnAccept_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
-            int idx = dgvNotifications.CurrentRow.Index;
-            _dtNotif.Rows[idx]["Đã đọc"] = true;
-            _dtNotif.Rows[idx]["Nội dung"] = _dtNotif.Rows[idx]["Nội dung"].ToString()?.Replace("Xin nghỉ", "[ĐÃ DUYỆT] Xin nghỉ") ?? "";
-            ColorRows();
-            UpdateUnreadCount();
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
+            await MarkRead(dgvNotifications.CurrentRow.Index);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã ghi nhận. Vui lòng vào mục Nhân sự để duyệt đơn nghỉ chính thức.", "Thông báo", MsgBox.MessageBoxType.Info);
         }
 
-        private void BtnReject_Click(object? sender, EventArgs e)
+        private async void BtnReject_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
-            int idx = dgvNotifications.CurrentRow.Index;
-            _dtNotif.Rows[idx]["Đã đọc"] = true;
-            _dtNotif.Rows[idx]["Nội dung"] = _dtNotif.Rows[idx]["Nội dung"].ToString()?.Replace("Xin nghỉ", "[TỪ CHỐI] Xin nghỉ") ?? "";
-            ColorRows();
-            UpdateUnreadCount();
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã từ chối đơn xin nghỉ!", "Thông báo", MsgBox.MessageBoxType.Warning);
+            await MarkRead(dgvNotifications.CurrentRow.Index);
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã ghi nhận. Vui lòng vào mục Nhân sự để xử lý đơn nghỉ.", "Thông báo", MsgBox.MessageBoxType.Warning);
         }
 
-        private void BtnGoToChat_Click(object? sender, EventArgs e)
+        private async void BtnGoToChat_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
+            await MarkRead(dgvNotifications.CurrentRow.Index);
             string from = dgvNotifications.CurrentRow.Cells["Từ"].Value?.ToString() ?? "";
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Mở cửa sổ chat với {from}...", "Chat", MsgBox.MessageBoxType.Info);
+            MsgBox.Show(MsgBox.OwnerWindow(this), $"Hãy mở mục Chat nội bộ để trao đổi với {from}.", "Chat", MsgBox.MessageBoxType.Info);
         }
 
-        private void BtnMarkAllRead_Click(object? sender, EventArgs e)
+        private async void BtnMarkAllRead_Click(object? sender, EventArgs e)
         {
+            var ids = new List<string>();
             foreach (DataRow row in _dtNotif.Rows)
-                row["Đã đọc"] = true;
+                if (!(bool)row["Đã đọc"]) { ids.Add(row["ID"].ToString() ?? ""); row["Đã đọc"] = true; }
+
             ColorRows();
             UpdateUnreadCount();
+            foreach (var id in ids.Where(x => !string.IsNullOrEmpty(x)))
+                await NotificationBUS.Update(id, new { da_doc = true });
+
             MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đọc tất cả thông báo!", "Thành công", MsgBox.MessageBoxType.Success);
         }
     }

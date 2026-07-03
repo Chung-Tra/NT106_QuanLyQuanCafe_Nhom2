@@ -22,51 +22,101 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvTableStatus);
-            DgvRefresh.Attach(dgvTableStatus, LoadDummyData);
-            LoadDummyData();
-        }
+            DgvRefresh.Attach(dgvTableStatus, () => _ = LoadRealData());
 
-        private void LoadDummyData()
-        {
-            // Thêm các trạng thái vào ComboBox
             cboTableStatus.Items.Clear();
             cboTableStatus.Items.AddRange(TableStatusOptions);
             cboTableStatus.SelectedIndex = 0;
-            // Tạo dữ liệu mẫu cho DataGridView
-            _originalTableData = new()
+
+            _ = LoadRealData();
+        }
+
+        // Tải tình trạng bàn/bếp thật từ Firebase: các đơn đang xử lý (pending/đang phục vụ).
+        private async Task LoadRealData()
+        {
+            Dictionary<string, DTO.TableDTO> tables;
+            Dictionary<string, DTO.OrderDTO> orders;
+            Dictionary<string, string> foodNames;
+            List<FoodDTO> foods;
+            try
             {
-                new TableModelDTO { TableId = 1, TableName = "Bàn 01", Status = "Đang phục vụ", Progress = "Đã lên đủ", TotalAmount = "150,000 đ" },
-                new TableModelDTO { TableId = 2, TableName = "Bàn 02", Status = "Chờ lên món", Progress = "Thiếu 2 món", TotalAmount = "85,000 đ" },
-                new TableModelDTO { TableId = 5, TableName = "Bàn 05", Status = "Chờ lên món", Progress = "Thiếu 1 món", TotalAmount = "45,000 đ" },
-                new TableModelDTO { TableId = 8, TableName = "Bàn 08", Status = "Đang phục vụ", Progress = "Đã lên đủ", TotalAmount = "210,000 đ" },
-                new TableModelDTO { TableId = 12, TableName = "Bàn 12", Status = "Chờ thanh toán", Progress = "Đã xong", TotalAmount = "320,000 đ" }
-            };
+                tables = await TableBUS.GetAll();
+                orders = await OrderBUS.GetAll();
+                foods = await FoodBUS.GetListFoods();
+                foodNames = foods.Where(f => f.Id != null).ToDictionary(f => f.Id!, f => f.Name ?? f.Id!);
+            }
+            catch
+            {
+                _originalTableData = new();
+                dgvTableStatus.DataSource = _originalTableData;
+                return;
+            }
 
+            string FoodName(string? id) => (id != null && foodNames.TryGetValue(id, out var n)) ? n : (id ?? "Món");
+            long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            var list = new List<TableModelDTO>();
+            _kitchenWarnings = new();
+            int idx = 0;
+
+            foreach (var kv in orders.Where(o => o.Value.Status == "pending" || o.Value.Status == "dang_phuc_vu")
+                                     .OrderBy(o => o.Value.CreatedAt))
+            {
+                var ord = kv.Value;
+                string tableName = (ord.TableId != null && tables.TryGetValue(ord.TableId, out var tb))
+                    ? (tb.Name ?? ord.TableId) : "Mang đi";
+
+                var itemList = ord.Items?.Values ?? Enumerable.Empty<OrderItemDTO>();
+                long total = itemList.Sum(it => (long)it.UnitPrice * it.Quantity);
+                int pendingItems = itemList.Count(it => it.CookingStatus != "hoan_thanh");
+
+                string status = (ord.Status == "pending" || pendingItems > 0) ? "Chờ lên món" : "Đang phục vụ";
+                string progress = pendingItems > 0 ? $"Thiếu {pendingItems} món" : "Đã lên đủ";
+
+                list.Add(new TableModelDTO
+                {
+                    TableId = ++idx,
+                    TableName = tableName,
+                    Status = status,
+                    Progress = progress,
+                    TotalAmount = total.ToString("N0") + " đ"
+                });
+
+                // Cảnh báo món chờ lâu
+                int waitMin = ord.CreatedAt > 0 ? (int)((now - ord.CreatedAt) / 60000) : 0;
+                foreach (var it in itemList.Where(it => it.CookingStatus != "hoan_thanh"))
+                    _kitchenWarnings.Add(new WarningWaitModelDTO
+                    {
+                        TableName = tableName,
+                        DrinkName = FoodName(it.FoodId),
+                        WaitTimeMinutes = waitMin
+                    });
+            }
+
+            _originalTableData = list;
+            dgvTableStatus.DataSource = null;
             dgvTableStatus.DataSource = _originalTableData;
-            dgvTableStatus.Columns["TableId"].Visible = false;
-            dgvTableStatus.Columns["TableName"].HeaderText = "Bàn";
-            dgvTableStatus.Columns["Status"].HeaderText = "Trạng Thái";
-            dgvTableStatus.Columns["Progress"].HeaderText = "Tiến độ món";
-            dgvTableStatus.Columns["TotalAmount"].HeaderText = "Tạm Tính";
-
+            if (dgvTableStatus.Columns["TableId"] != null)
+            {
+                dgvTableStatus.Columns["TableId"].Visible = false;
+                dgvTableStatus.Columns["TableName"].HeaderText = "Bàn";
+                dgvTableStatus.Columns["Status"].HeaderText = "Trạng Thái";
+                dgvTableStatus.Columns["Progress"].HeaderText = "Tiến độ món";
+                dgvTableStatus.Columns["TotalAmount"].HeaderText = "Tạm Tính";
+            }
             dgvTableStatus.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvTableStatus.RowHeadersVisible = false;
 
-            _kitchenWarnings = new()
-            {
-                new WarningWaitModelDTO { TableName = "Bàn 02", DrinkName = "Cà phê sữa đá", WaitTimeMinutes = 18 },
-                new WarningWaitModelDTO { TableName = "Bàn 05", DrinkName = "Trà đào cam sả", WaitTimeMinutes = 15 },
-                new WarningWaitModelDTO { TableName = "Bàn 15", DrinkName = "Sinh tố dâu", WaitTimeMinutes = 25 },
-                new WarningWaitModelDTO { TableName = "Bàn VIP 1", DrinkName = "Bò bít tết", WaitTimeMinutes = 30 }
-            };
             lstKitchenWarning.DataSource = null;
             lstKitchenWarning.DataSource = _kitchenWarnings;
             lstKitchenWarning.DisplayMember = "DisplayText";
 
-            // Khớp với thẻ "Món Đã Hết (Sold Out): 2 món"
+            // Món hết hàng (con_hang = false)
             lstSoldOut.Items.Clear();
-            lstSoldOut.Items.Add("Trà đào cam sả — hết nguyên liệu");
-            lstSoldOut.Items.Add("Bánh croissant — hết hàng trong ngày");
+            foreach (var f in foods.Where(f => !f.InStock))
+                lstSoldOut.Items.Add($"{f.Name} — tạm hết");
+            if (lstSoldOut.Items.Count == 0)
+                lstSoldOut.Items.Add("(Không có món nào hết hàng)");
         }
 
         // Double-click 1 bàn -> form chi tiết read-only đủ field (kể cả TableId ẩn)

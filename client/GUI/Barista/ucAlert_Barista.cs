@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -13,9 +17,8 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvAlertHistory);
-            DgvRefresh.Attach(dgvAlertHistory, LoadMockData);
+            DgvRefresh.Attach(dgvAlertHistory, () => _ = LoadRealData());
 
-            // Double-click 1 cảnh báo -> form chi tiết read-only
             dgvAlertHistory.CellDoubleClick += (s, e) =>
             {
                 if (e.RowIndex < 0) return;
@@ -24,11 +27,27 @@ namespace GUI
             };
         }
 
-        private void UcAlert_Barista_Load(object? sender, EventArgs e) => LoadMockData();
+        private void UcAlert_Barista_Load(object? sender, EventArgs e) => _ = LoadRealData();
 
-        private void LoadMockData()
+        private static string TypeVi(string? t) => t switch
         {
-            cmbAlertType.SelectedIndex = 0;
+            "het_nguyen_lieu" => "Hết nguyên liệu",
+            "sap_het" => "Sắp hết nguyên liệu",
+            "thiet_bi_hong" => "Thiết bị hỏng",
+            _ => "Khác"
+        };
+        private static string TypeCode(string display) => display switch
+        {
+            "Hết nguyên liệu" => "het_nguyen_lieu",
+            "Sắp hết nguyên liệu" => "sap_het",
+            "Thiết bị hỏng" => "thiet_bi_hong",
+            _ => "khac"
+        };
+
+        private async Task LoadRealData()
+        {
+            if (cmbAlertType.Items.Count > 0 && cmbAlertType.SelectedIndex < 0)
+                cmbAlertType.SelectedIndex = 0;
 
             DataTable dt = new();
             dt.Columns.Add("Thời gian");
@@ -36,17 +55,22 @@ namespace GUI
             dt.Columns.Add("Nội dung");
             dt.Columns.Add("Trạng thái");
 
-            dt.Rows.Add("02/05/2026 10:30", "Hết nguyên liệu", "Sữa tươi đã hết, cần bổ sung gấp", "Đã xử lý");
-            dt.Rows.Add("02/05/2026 09:15", "Thiết bị hỏng", "Máy xay sinh tố #2 bị kẹt", "Chờ xử lý");
-            dt.Rows.Add("01/05/2026 14:20", "Sắp hết nguyên liệu", "Bột cacao còn dưới 500g", "Đã xử lý");
-            dt.Rows.Add("01/05/2026 08:00", "Hết nguyên liệu", "Đá viên đã hết", "Đã xử lý");
-            dt.Rows.Add("30/04/2026 16:45", "Khác", "Cần vệ sinh máy pha cà phê", "Đã xử lý");
+            try
+            {
+                var all = await WarningBUS.GetAll();
+                foreach (var kv in all.OrderByDescending(w => w.Value.Timestamp))
+                {
+                    var w = kv.Value;
+                    string time = w.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(w.Timestamp).LocalDateTime.ToString("dd/MM/yyyy HH:mm") : "";
+                    dt.Rows.Add(time, TypeVi(w.Type), w.Content, w.Status == "da_xu_ly" ? "Đã xử lý" : "Chờ xử lý");
+                }
+            }
+            catch { /* offline */ }
 
             dgvAlertHistory.DataSource = dt;
             dgvAlertHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvAlertHistory.RowHeadersVisible = false;
-            // "Nội dung" là cột dài nhất → phải RỘNG nhất. Set cho mọi cột, vì nếu chỉ set
-            // riêng "Nội dung"=35 thì 3 cột kia giữ mặc định 100 → Nội dung hoá hẹp nhất, cắt chữ.
             dgvAlertHistory.Columns["Thời gian"].FillWeight  = 20;
             dgvAlertHistory.Columns["Loại"].FillWeight       = 22;
             dgvAlertHistory.Columns["Nội dung"].FillWeight   = 42;
@@ -55,16 +79,12 @@ namespace GUI
 
         private void BtnReport_Click(object? sender, EventArgs e)
         {
-            int totalAlerts = 0;
-            int pendingAlerts = 0;
+            int totalAlerts = 0, pendingAlerts = 0;
             if (dgvAlertHistory.DataSource is DataTable dt)
             {
                 totalAlerts = dt.Rows.Count;
                 foreach (DataRow row in dt.Rows)
-                {
-                    if (row["Trạng thái"]?.ToString() == "Chờ xử lý")
-                        pendingAlerts++;
-                }
+                    if (row["Trạng thái"]?.ToString() == "Chờ xử lý") pendingAlerts++;
             }
 
             string report =
@@ -77,18 +97,11 @@ namespace GUI
                 "──────────────────\n" +
                 "Gửi báo cáo cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo cảnh báo", MsgBox.MessageBoxType.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
-                    "Thành công", MsgBox.MessageBoxType.Success);
-            }
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo cảnh báo", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
-        private void BtnSendAlert_Click(object sender, EventArgs e)
+        private async void BtnSendAlert_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMessage.Text))
             {
@@ -97,23 +110,48 @@ namespace GUI
             }
 
             string alertType = cmbAlertType.SelectedItem?.ToString() ?? "Khác";
-            MsgBox.Show(
-                MsgBox.OwnerWindow(this),
-                $"Đã gửi cảnh báo [{alertType}] đến quản lý!\nNội dung: {txtMessage.Text}",
-                "Gửi thành công", MsgBox.MessageBoxType.Success);
+            string content = txtMessage.Text.Trim();
+            var me = GlobalSession.CurrentUser;
 
-            // Add to grid
-            if (dgvAlertHistory.DataSource is DataTable dt)
+            var dto = new WarningDTO
             {
-                DataRow newRow = dt.NewRow();
-                newRow["Thời gian"] = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-                newRow["Loại"] = alertType;
-                newRow["Nội dung"] = txtMessage.Text;
-                newRow["Trạng thái"] = "Chờ xử lý";
-                dt.Rows.InsertAt(newRow, 0);
+                Type = TypeCode(alertType),
+                Content = content,
+                SenderId = me?.EmployeeId,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                Status = "cho_xu_ly",
+                IngredientId = ""
+            };
+            var (ok, msg, _) = await WarningBUS.Add(dto);
+            if (!ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
             }
 
+            // Thông báo cho quản lý (best-effort)
+            try
+            {
+                var managers = (await EmployeeBUS.GetAllEmployeesAsync())
+                    .Where(x => (x.Role ?? "").ToLower() is "manager" or "admin");
+                foreach (var m in managers)
+                    await NotificationBUS.Add(new NotificationDTO
+                    {
+                        Type = "sua_nguyen_lieu",
+                        Content = $"Cảnh báo [{alertType}] từ {me?.FullName ?? me?.EmployeeId}: {content}",
+                        ReceiverId = m.EmployeeId,
+                        SenderId = me?.EmployeeId,
+                        Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        IsRead = false,
+                        RelatedPage = "stock"
+                    });
+            }
+            catch { }
+
+            MsgBox.Show(MsgBox.OwnerWindow(this),
+                $"Đã gửi cảnh báo [{alertType}] đến quản lý!", "Gửi thành công", MsgBox.MessageBoxType.Success);
             txtMessage.Clear();
+            await LoadRealData();
         }
     }
 }

@@ -1,3 +1,5 @@
+using BUS;
+using DTO;
 using System;
 using System.Windows.Forms;
 
@@ -21,9 +23,32 @@ namespace GUI
 
             cboType.SelectedIndex = 0;
 
-            btnSubmit.Click        += (s, e) => DialogResult = DialogResult.OK;
-            btnSubmitAndChat.Click += (s, e) => DialogResult = DialogResult.Yes;
+            btnSubmit.Click        += async (s, e) => { if (await Save()) DialogResult = DialogResult.OK; };
+            btnSubmitAndChat.Click += async (s, e) => { if (await Save()) DialogResult = DialogResult.Yes; };
             btnCancel.Click        += (s, e) => DialogResult = DialogResult.Cancel;
+        }
+
+        private async System.Threading.Tasks.Task<bool> Save()
+        {
+            if (string.IsNullOrWhiteSpace(txtSubject.Text) || string.IsNullOrWhiteSpace(rtxDescription.Text))
+            {
+                MsgBox.Show(this, "Vui lòng nhập tiêu đề và mô tả sự cố!", "Thiếu thông tin", MsgBox.MessageBoxType.Warning);
+                return false;
+            }
+            var dto = new BugReportDTO
+            {
+                TieuDe = txtSubject.Text.Trim(),
+                MoTa = rtxDescription.Text.Trim() + (string.IsNullOrWhiteSpace(txtLocation.Text) ? "" : $"\nVị trí: {txtLocation.Text.Trim()}"),
+                Loai = cboType.SelectedItem?.ToString() ?? "Sự cố",
+                MucDo = "Sự cố",
+                ManHinh = _sourcePage,
+                SenderId = GlobalSession.CurrentUser?.EmployeeId,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                TrangThai = "moi"
+            };
+            var (ok, msg, _) = await BugReportBUS.Add(dto);
+            if (!ok) MsgBox.Show(this, msg, "Lỗi", MsgBox.MessageBoxType.Error);
+            return ok;
         }
     }
 }

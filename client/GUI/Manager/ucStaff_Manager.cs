@@ -19,7 +19,7 @@ namespace GUI
 
             // Nút làm mới từng bảng: chỉ tải lại dữ liệu của bảng đó
             DgvRefresh.Attach(dgvStaff, LoadRealData);
-            DgvRefresh.Attach(dgvLeaveReq, LoadLeaveRequests);
+            DgvRefresh.Attach(dgvLeaveReq, LoadLeaveRequestsAsync);
 
             // Đơn xin nghỉ hiện dạng thẻ giống màn "Quản lý" của Admin: bấm tiêu đề
             // hoặc double-click dòng để mở dialog LeaveRequestDetail (tái dùng, không dựng lại).
@@ -51,7 +51,7 @@ namespace GUI
         private async void ucStaff_Manager_Load(object sender, EventArgs e)
         {
             await LoadRealData();
-            LoadLeaveRequests();
+            await LoadLeaveRequestsAsync();
         }
 
         // Tải danh sách nhân viên
@@ -143,28 +143,47 @@ namespace GUI
             }
         }
 
-        // Tải danh sách đơn xin nghỉ
-        private void LoadLeaveRequests()
+        // Tải danh sách đơn xin nghỉ ĐANG CHỜ DUYỆT (thật, từ Firebase)
+        private async Task LoadLeaveRequestsAsync()
         {
             var dt = new DataTable();
+            dt.Columns.Add("Mã đơn");
             dt.Columns.Add("Nhân viên");
             dt.Columns.Add("Ngày nghỉ");
             dt.Columns.Add("Lý do");
 
-            // Dữ liệu mẫu — thay bằng API call thực tế khi có endpoint
-            dt.Rows.Add("NV03 Lê Văn C",   "20/05/2026", "Việc gia đình");
-            dt.Rows.Add("NV07 Trần Thị B",  "21/05/2026", "Khám bệnh");
+            try
+            {
+                var all = await LeaveRequestBUS.GetAll();
+                var emps = (await Task.Run(EmployeeBUS.GetAllEmployeesAsync))
+                    .Where(x => x.EmployeeId != null)
+                    .ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+
+                foreach (var kv in all.Where(l => l.Value.Status == "cho_duyet")
+                                      .OrderBy(l => l.Value.SentAt))
+                {
+                    var l = kv.Value;
+                    string nv = (l.EmployeeId != null && emps.TryGetValue(l.EmployeeId, out var n))
+                        ? $"{l.EmployeeId} {n}" : (l.EmployeeId ?? "");
+                    string ngay = l.FromDate == l.ToDate ? (l.FromDate ?? "") : $"{l.FromDate} → {l.ToDate}";
+                    dt.Rows.Add(kv.Key, nv, ngay, l.Reason);
+                }
+            }
+            catch { /* offline */ }
 
             dgvLeaveReq.DataSource = dt;
             GridColumnGuard.SyncColumnNames(dgvLeaveReq);
             dgvLeaveReq.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvLeaveReq.Columns.Contains("Mã đơn")) dgvLeaveReq.Columns["Mã đơn"].Visible = false;
             dgvLeaveReq.Columns["Nhân viên"].FillWeight = 35;
             dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 30;
             dgvLeaveReq.Columns["Lý do"].FillWeight     = 35;
+
+            btnApproveLeave.Enabled = dt.Rows.Count > 0;
         }
 
-        // Duyệt đơn xin nghỉ
-        private void BtnApproveLeave_Click(object? sender, EventArgs e)
+        // Duyệt đơn xin nghỉ (lưu thật)
+        private async void BtnApproveLeave_Click(object? sender, EventArgs e)
         {
             if (dgvLeaveReq.CurrentRow == null || dgvLeaveReq.CurrentRow.Index < 0)
             {
@@ -172,23 +191,27 @@ namespace GUI
                 return;
             }
 
-            string tenNV    = dgvLeaveReq.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
-            string ngayNghi = dgvLeaveReq.CurrentRow.Cells["Ngày nghỉ"].Value?.ToString() ?? "";
+            var rv = dgvLeaveReq.CurrentRow?.DataBoundItem as DataRowView;
+            string id       = rv?["Mã đơn"]?.ToString() ?? "";
+            string tenNV    = rv?["Nhân viên"]?.ToString() ?? dgvLeaveReq.CurrentRow.Cells["Nhân viên"].Value?.ToString() ?? "";
+            string ngayNghi = rv?["Ngày nghỉ"]?.ToString() ?? dgvLeaveReq.CurrentRow.Cells["Ngày nghỉ"].Value?.ToString() ?? "";
 
-            MsgBox.Show(
-                MsgBox.OwnerWindow(this),
-                $"Đã DUYỆT đơn xin nghỉ của [{tenNV}] ngày {ngayNghi}.\nDữ liệu đã cập nhật vào tính lương cuối tháng.",
-                "Duyệt Nghỉ Phép",
-                MsgBox.MessageBoxType.Success);
-
-            // Xóa dòng đã duyệt khỏi grid
-            if (dgvLeaveReq.DataSource is DataTable dt)
+            var (ok, msg) = await LeaveRequestBUS.Update(id, new
             {
-                dt.Rows.RemoveAt(dgvLeaveReq.CurrentRow.Index);
-            }
+                trang_thai = "da_duyet",
+                nguoi_duyet_id = GlobalSession.CurrentUser?.EmployeeId ?? "",
+                thoi_gian_duyet = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            });
 
-            if (dgvLeaveReq.Rows.Count == 0)
-                btnApproveLeave.Enabled = false;
+            if (ok)
+            {
+                MsgBox.Show(
+                    MsgBox.OwnerWindow(this),
+                    $"Đã DUYỆT đơn xin nghỉ của [{tenNV}] ngày {ngayNghi}.",
+                    "Duyệt Nghỉ Phép", MsgBox.MessageBoxType.Success);
+                await LoadLeaveRequestsAsync();
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
 
         // Thêm nhân viên mới

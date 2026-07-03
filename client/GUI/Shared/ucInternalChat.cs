@@ -46,7 +46,11 @@ namespace GUI
                 }
             };
 
-            btnOpenChatWindow.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Đang mở cửa sổ Messenger...", "Thông báo", MsgBox.MessageBoxType.Info);
+            btnOpenChatWindow.Click += (s, e) =>
+            {
+                // Mở cửa sổ chat nổi (pop-out) dùng lại chính UserControl này — theo theme app.
+                WindowChrome.ShowUc(new ucInternalChat(), "QLCafe Chat", new Size(920, 640), modal: false);
+            };
 
             // Hiện nút Thông báo toàn bộ cho admin/manager
             string role = GlobalSession.CurrentUser?.Role?.ToLower() ?? "";
@@ -131,7 +135,7 @@ namespace GUI
             return em;
         }
 
-        private void BtnBroadcast_Click(object? sender, EventArgs e)
+        private async void BtnBroadcast_Click(object? sender, EventArgs e)
         {
             string msg = txtMessage.Text.Trim();
             if (string.IsNullOrEmpty(msg))
@@ -142,18 +146,28 @@ namespace GUI
 
             var result = MsgBox.Show(
                 this,
-                $"Gửi thông báo sau cho TOÀN BỘ nhân viên?\n\n\"{msg}\"",
+                $"Gửi thông báo sau cho TOÀN BỘ nhân viên (phòng chat chung)?\n\n\"{msg}\"",
                 "Thông báo toàn bộ",
                 MsgBox.MessageBoxType.Warning);
 
-            if (result == DialogResult.Yes)
+            if (result != DialogResult.Yes) return;
+
+            try
             {
-                string sender_name = GlobalSession.CurrentUser?.FullName ?? "Admin";
-                string timestamp = DateTime.Now.ToString("HH:mm");
-                lstChatHistory.Items.Add($"[{timestamp}] [THÔNG BÁO] {sender_name}: {msg}");
-                lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
+                // Chuyển về phòng chung rồi gửi -> mọi nhân viên online đều nhận + lưu Firebase
+                cmbChatTarget.SelectedIndexChanged -= OnChatTargetChanged;
+                if (cmbChatTarget.Items.Count > 0) cmbChatTarget.SelectedIndex = 0;
+                await _chatManager.SwitchChatRoom("", "Chat nhóm");
+                cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
+                UpdateChatHeader();
+
+                await _chatManager.SendMessageAsync("📢 [THÔNG BÁO] " + msg);
                 txtMessage.Clear();
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi thông báo cho toàn bộ nhân viên!", "Thành công", MsgBox.MessageBoxType.Success);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Lỗi gửi thông báo: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 

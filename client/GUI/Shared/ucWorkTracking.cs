@@ -1,6 +1,11 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -11,11 +16,10 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvWorkTracking);
-            DgvRefresh.Attach(dgvWorkTracking, LoadAttendanceHistory);
-            this.Load += (s, e) => LoadAttendanceHistory();
-            dtpFilterMonth.ValueChanged += (s, e) => LoadAttendanceHistory();
+            DgvRefresh.Attach(dgvWorkTracking, LoadAttendanceHistoryAsync);
+            this.Load += (s, e) => _ = LoadAttendanceHistoryAsync();
+            dtpFilterMonth.ValueChanged += (s, e) => _ = LoadAttendanceHistoryAsync();
 
-            // Double-click 1 dòng -> form chi tiết read-only đủ field
             dgvWorkTracking.CellDoubleClick += (s, e) =>
             {
                 if (e.RowIndex < 0) return;
@@ -24,7 +28,28 @@ namespace GUI
             };
         }
 
-        private void LoadAttendanceHistory()
+        private static string DowVi(DateTime d) => d.DayOfWeek switch
+        {
+            DayOfWeek.Monday => "T2",
+            DayOfWeek.Tuesday => "T3",
+            DayOfWeek.Wednesday => "T4",
+            DayOfWeek.Thursday => "T5",
+            DayOfWeek.Friday => "T6",
+            DayOfWeek.Saturday => "T7",
+            _ => "CN"
+        };
+        private static string StatusVi(string? s) => s switch
+        {
+            "du_gio" => "Đủ giờ",
+            "di_muon" => "Đi muộn",
+            "nghi_phep" => "Nghỉ phép",
+            "nua_ca" => "Nửa ca",
+            _ => s ?? ""
+        };
+        private static string HourMin(long ms) => ms > 0
+            ? DateTimeOffset.FromUnixTimeMilliseconds(ms).LocalDateTime.ToString("HH:mm") : "--";
+
+        private async Task LoadAttendanceHistoryAsync()
         {
             DataTable dt = new();
             dt.Columns.Add("Ngày");
@@ -35,24 +60,23 @@ namespace GUI
             dt.Columns.Add("Trạng thái");
             dt.Columns.Add("Ghi chú");
 
-            dt.Rows.Add("02/05/2026", "T7", "07:55", "16:05", 8.2, "Đủ giờ", "");
-            dt.Rows.Add("01/05/2026", "T6", "08:10", "16:00", 7.8, "Đủ giờ", "");
-            dt.Rows.Add("30/04/2026", "T5", "07:50", "12:00", 4.2, "Nửa ca", "Xin về sớm");
-            dt.Rows.Add("29/04/2026", "T4", "08:00", "16:15", 8.3, "Đủ giờ", "");
-            dt.Rows.Add("28/04/2026", "T3", "08:35", "16:00", 7.4, "Đi muộn", "Muộn 35 phút");
-            dt.Rows.Add("27/04/2026", "T2", "--", "--", 0.0, "Nghỉ phép", "Đã duyệt");
-            dt.Rows.Add("26/04/2026", "CN", "07:45", "16:10", 8.4, "Đủ giờ", "Tăng ca CN");
-            dt.Rows.Add("25/04/2026", "T7", "07:50", "16:00", 8.2, "Đủ giờ", "");
-            dt.Rows.Add("24/04/2026", "T6", "08:20", "16:05", 7.8, "Đi muộn", "Muộn 20 phút");
-            dt.Rows.Add("23/04/2026", "T5", "07:55", "16:00", 8.1, "Đủ giờ", "");
-            dt.Rows.Add("22/04/2026", "T4", "08:00", "16:10", 8.2, "Đủ giờ", "");
-            dt.Rows.Add("21/04/2026", "T3", "07:50", "16:00", 8.2, "Đủ giờ", "");
-            dt.Rows.Add("20/04/2026", "T2", "07:55", "16:05", 8.2, "Đủ giờ", "");
+            string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+            int month = dtpFilterMonth.Value.Month, year = dtpFilterMonth.Value.Year;
+            try
+            {
+                var all = await AttendanceBUS.GetAll();
+                foreach (var cc in all.Values
+                    .Where(a => a.EmployeeId == myId)
+                    .OrderByDescending(a => a.Date))
+                {
+                    if (!DateTime.TryParse(cc.Date, out DateTime d)) continue;
+                    if (d.Month != month || d.Year != year) continue;
+                    dt.Rows.Add(d.ToString("dd/MM/yyyy"), DowVi(d), HourMin(cc.CheckIn), HourMin(cc.CheckOut),
+                                cc.WorkHours, StatusVi(cc.Status), cc.Note);
+                }
+            }
+            catch { /* offline */ }
 
-            // Lưới khai sẵn 4 cột "log" cũ trong Designer (Thời gian/Loại/Nội dung/Trạng thái)
-            // + AutoGenerateColumns=false → bind DataTable 7 cột chấm công sẽ KHÔNG sinh cột mới,
-            // nên Columns["Ngày"] = null → NullReferenceException. Bật auto-gen + xoá cột cũ để
-            // cột sinh theo DataTable (Name == tên cột nghiệp vụ), mọi lookup theo tên hoạt động.
             dgvWorkTracking.AutoGenerateColumns = true;
             dgvWorkTracking.Columns.Clear();
             dgvWorkTracking.DataSource = dt;
@@ -70,47 +94,28 @@ namespace GUI
             dgvWorkTracking.Columns["Số giờ"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dgvWorkTracking.Columns["Thứ"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            // Color by status
             int totalShifts = 0, lateCount = 0, absentCount = 0;
             double totalHours = 0;
-
             foreach (DataGridViewRow row in dgvWorkTracking.Rows)
             {
                 string status = row.Cells["Trạng thái"].Value?.ToString() ?? "";
                 double hours = row.Cells["Số giờ"].Value is double h ? h : 0;
-
                 switch (status)
                 {
-                    case "Đủ giờ":
-                        row.DefaultCellStyle.ForeColor = Color.MediumSeaGreen;
-                        totalShifts++;
-                        totalHours += hours;
-                        break;
-                    case "Nửa ca":
-                        row.DefaultCellStyle.ForeColor = Color.Orange;
-                        totalShifts++;
-                        totalHours += hours;
-                        break;
+                    case "Đủ giờ": row.DefaultCellStyle.ForeColor = Color.MediumSeaGreen; totalShifts++; totalHours += hours; break;
+                    case "Nửa ca": row.DefaultCellStyle.ForeColor = Color.Orange; totalShifts++; totalHours += hours; break;
                     case "Đi muộn":
                         row.DefaultCellStyle.ForeColor = Color.IndianRed;
                         row.Cells["Ghi chú"].Style.ForeColor = Color.IndianRed;
-                        totalShifts++;
-                        lateCount++;
-                        totalHours += hours;
-                        break;
-                    case "Nghỉ phép":
-                        row.DefaultCellStyle.ForeColor = Color.SteelBlue;
-                        absentCount++;
-                        break;
+                        totalShifts++; lateCount++; totalHours += hours; break;
+                    case "Nghỉ phép": row.DefaultCellStyle.ForeColor = Color.SteelBlue; absentCount++; break;
                 }
             }
 
-            // Update summary
             lblTotalShiftsValue.Text = $"{totalShifts} ca";
             lblTotalHoursValue.Text = $"{totalHours:F0}h";
             lblLateValue.Text = $"{lateCount} lần";
             lblAbsentValue.Text = $"{absentCount} ngày";
-
             lblLateValue.ForeColor = lateCount > 0 ? Color.IndianRed : Color.MediumSeaGreen;
         }
 
@@ -127,15 +132,8 @@ namespace GUI
                 "──────────────────\n" +
                 "Gửi báo cáo này cho quản lý qua Chat?";
 
-            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo chấm công", MsgBox.MessageBoxType.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
-                    "Thành công", MsgBox.MessageBoxType.Success);
-            }
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo chấm công", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo chấm công cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
         }
     }
 }

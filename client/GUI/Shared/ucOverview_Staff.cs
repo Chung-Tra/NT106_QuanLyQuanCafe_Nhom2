@@ -1,5 +1,11 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -7,66 +13,94 @@ namespace GUI
     public partial class ucOverview_Staff : UserControl
     {
         private readonly NotificationFeed _feed;
-        private bool _simulatedIncoming;
+        private int _unread, _workingDays, _lateCount, _daysOffRemaining, _pendingLeave, _usedLeave;
 
         public ucOverview_Staff()
         {
             InitializeComponent();
-
-            // Bảng tin: chưa đọc xếp trước + click để đánh dấu đã đọc (helper dùng chung)
             _feed = new NotificationFeed(lstNotifications, lblNotifTitle);
-            btnRefreshFeed.Click += (s, e) => RefreshFeed();
-
-            this.Load += (s, e) => LoadMockData();
+            btnRefreshFeed.Click += (s, e) => _ = LoadRealData();
+            this.Load += (s, e) => _ = LoadRealData();
 
             btnDetailMsg.Click += (s, e) =>
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Bạn có 5 tin nhắn chưa đọc trong Chat nội bộ.\nHãy mở Chat để xem chi tiết.",
-                    "Tin nhắn", MsgBox.MessageBoxType.Info);
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Bạn có {_unread} thông báo chưa đọc.\nHãy mở Chat / Thông báo để xem chi tiết.",
+                    "Thông báo", MsgBox.MessageBoxType.Info);
 
             btnDetailWorkingDays.Click += (s, e) =>
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Tháng này bạn đã đi làm 23/26 ngày.\n• Đủ giờ: 21 ngày\n• Đi muộn: 2 lần\n• Tăng ca: 1 ngày",
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Tháng này bạn đã đi làm {_workingDays} ngày.\n• Đi muộn: {_lateCount} lần",
                     "Ngày công", MsgBox.MessageBoxType.Info);
 
             btnDetailDaysOff.Click += (s, e) =>
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Nghỉ phép còn lại: 7 ngày\n• Đã dùng: 5 ngày\n• Chờ duyệt: 1 đơn",
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Nghỉ phép còn lại: {_daysOffRemaining} ngày\n• Đã dùng: {_usedLeave} ngày\n• Chờ duyệt: {_pendingLeave} đơn",
                     "Ngày nghỉ", MsgBox.MessageBoxType.Info);
         }
 
-        private void LoadMockData()
+        private static string IconFor(string? type) => type switch
         {
-            lblUnreadMsgValue.Text    = "5 tin";
-            lblWorkingDaysValue.Text  = "23 ngày";
-            lblDaysOffValue.Text      = "7 ngày";
+            "sos" => "🚨",
+            "feedback_xau" => "⚠️",
+            "xin_nghi" => "📩",
+            "don_moi" => "🛎️",
+            "cham_cong" => "🕐",
+            "sua_nguyen_lieu" => "📦",
+            _ => "🔔"
+        };
 
-            _feed.SetItems(new[]
-            {
-                new NotificationFeed.Item { Icon = "🔴", Time = "08:30", Text = "Nhân viên phục vụ Nguyễn Văn A xin phép nghỉ ốm ngày hôm nay." },
-                new NotificationFeed.Item { Icon = "⭐", Time = "09:15", Text = "Feedback Bàn số 5: \"Cà phê muối rất ngon, nhân viên nhiệt tình, 5 sao!\"" },
-                new NotificationFeed.Item { Icon = "⚠️", Time = "10:00", Text = "Kho hàng cảnh báo: Hết nguyên liệu Sữa tươi, cần nhập gấp." },
-                new NotificationFeed.Item { Icon = "⭐", Time = "11:20", Text = "Feedback Bàn số 12: \"Quán decor đẹp, đồ uống lên nhanh.\"", IsRead = true },
-                new NotificationFeed.Item { Icon = "🟢", Time = "12:00", Text = "Quản lý đã duyệt đơn xin nghỉ của Nguyễn Văn A.", IsRead = true },
-            });
-        }
-
-        // Làm mới bảng tin: khi có API thật thì fetch tại đây; mock mô phỏng nhận 1 tin mới
-        private void RefreshFeed()
+        private async Task LoadRealData()
         {
-            if (!_simulatedIncoming)
+            string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+            var items = new List<NotificationFeed.Item>();
+            _unread = _workingDays = _lateCount = _pendingLeave = _usedLeave = 0;
+
+            try
             {
-                _simulatedIncoming = true;
-                _feed.AddIncoming(new NotificationFeed.Item
+                var notifs = await NotificationBUS.GetAll();
+                foreach (var n in notifs.Values.Where(x => x.ReceiverId == myId)
+                                               .OrderByDescending(x => x.Timestamp).Take(30))
                 {
-                    Icon = "📩",
-                    Time = DateTime.Now.ToString("HH:mm"),
-                    Text = "Lịch ca tuần sau đã được xếp — kiểm tra mục Chọn ca / Đổi ca.",
-                });
+                    if (!n.IsRead) _unread++;
+                    items.Add(new NotificationFeed.Item
+                    {
+                        Icon = IconFor(n.Type),
+                        Time = n.Timestamp > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(n.Timestamp).LocalDateTime.ToString("HH:mm") : "",
+                        Text = n.Content ?? "",
+                        IsRead = n.IsRead
+                    });
+                }
+
+                var att = await AttendanceBUS.GetAll();
+                foreach (var a in att.Values.Where(x => x.EmployeeId == myId))
+                {
+                    if (!DateTime.TryParse(a.Date, out var d)) continue;
+                    if (d.Month != DateTime.Now.Month || d.Year != DateTime.Now.Year) continue;
+                    if (a.Status != "nghi_phep") _workingDays++;
+                    if (a.Status == "di_muon") _lateCount++;
+                }
+
+                var leaves = await LeaveRequestBUS.GetAll();
+                foreach (var l in leaves.Values.Where(x => x.EmployeeId == myId))
+                {
+                    if (l.Status == "cho_duyet") _pendingLeave++;
+                    if (l.Status == "da_duyet" &&
+                        DateTime.TryParseExact(l.FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fd)
+                        && fd.Year == DateTime.Now.Year)
+                        _usedLeave += l.DayCount;
+                }
             }
+            catch { /* offline */ }
+
+            _daysOffRemaining = Math.Max(0, 12 - _usedLeave);
+
+            lblUnreadMsgValue.Text   = $"{_unread} tin";
+            lblWorkingDaysValue.Text = $"{_workingDays} ngày";
+            lblDaysOffValue.Text     = $"{_daysOffRemaining} ngày";
+
+            if (items.Count == 0)
+                items.Add(new NotificationFeed.Item { Icon = "🔔", Time = "", Text = "Chưa có thông báo mới." });
+            _feed.SetItems(items);
         }
     }
 }

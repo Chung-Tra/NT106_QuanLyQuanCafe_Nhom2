@@ -75,5 +75,20 @@ namespace BUS
                 // Kèm reset-token (đã xác thực OTP ở server) để được phép đổi mật khẩu
                 return await AuthDAL.UpdatePasswordAsync(email, newPass, resetToken);
         }
+
+        // Đổi mật khẩu khi đang đăng nhập (cần mật khẩu cũ).
+        public static async Task<(bool IsValid, string Message)> ChangePasswordBUS(string email, string oldPass, string newPass, string confirmPass)
+        {
+            if (Validation.IsAnyEmpty(email))
+                return (false, "Không xác định được tài khoản đang đăng nhập.");
+            if (Validation.IsAnyEmpty(oldPass, newPass, confirmPass))
+                return (false, "Vui lòng nhập đầy đủ mật khẩu cũ, mật khẩu mới và xác nhận.");
+            if (!Validation.IsValidPassword(newPass))
+                return (false, "Mật khẩu mới phải dài ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và một ký tự đặc biệt.");
+            if (newPass != confirmPass)
+                return (false, "Mật khẩu xác nhận không khớp.");
+
+            return await AuthDAL.ChangePasswordAsync(email, oldPass, newPass);
+        }
     }
 }

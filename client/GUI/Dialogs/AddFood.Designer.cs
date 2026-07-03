@@ -40,6 +40,7 @@ namespace GUI
             txtMoTa = new Guna2TextBox();
             btnAdd = new Guna2Button();
             bttnClose = new Guna2Button();
+            btnChooseImage = new Guna2Button();
             shadow = new Guna2ShadowForm(components);
             panel1.SuspendLayout();
             SuspendLayout();
@@ -55,11 +56,12 @@ namespace GUI
             panel1.Controls.Add(txtMoTa);
             panel1.Controls.Add(btnAdd);
             panel1.Controls.Add(bttnClose);
+            panel1.Controls.Add(btnChooseImage);
             panel1.CustomizableEdges = customizableEdges1;
             panel1.Location = new Point(16, 16);
             panel1.Name = "panel1";
             panel1.ShadowDecoration.CustomizableEdges = customizableEdges2;
-            panel1.Size = new Size(388, 460);
+            panel1.Size = new Size(388, 470);
             panel1.TabIndex = 0;
             //
             // lblTitle
@@ -186,10 +188,10 @@ namespace GUI
             btnAdd.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             btnAdd.ForeColor = Color.White;
             btnAdd.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnAdd.Location = new Point(36, 360);
+            btnAdd.Location = new Point(36, 395);
             btnAdd.Name = "btnAdd";
             btnAdd.Size = new Size(140, 46);
-            btnAdd.TabIndex = 5;
+            btnAdd.TabIndex = 6;
             btnAdd.Text = "Thêm";
             btnAdd.Click += BtnAdd_Click;
             //
@@ -205,12 +207,29 @@ namespace GUI
             bttnClose.ForeColor = Color.FromArgb(220, 80, 80);
             bttnClose.HoverState.FillColor = Color.FromArgb(180, 60, 60);
             bttnClose.HoverState.ForeColor = Color.White;
-            bttnClose.Location = new Point(212, 360);
+            bttnClose.Location = new Point(212, 395);
             bttnClose.Name = "bttnClose";
             bttnClose.Size = new Size(140, 46);
-            bttnClose.TabIndex = 6;
+            bttnClose.TabIndex = 7;
             bttnClose.Text = "Hủy";
             bttnClose.Click += BtnClose_Click;
+            //
+            // btnChooseImage
+            //
+            btnChooseImage.BorderColor = Color.FromArgb(63, 63, 70);
+            btnChooseImage.BorderRadius = 10;
+            btnChooseImage.BorderThickness = 1;
+            btnChooseImage.Cursor = Cursors.Hand;
+            btnChooseImage.FillColor = Color.FromArgb(30, 30, 33);
+            btnChooseImage.Font = new Font("Segoe UI", 10F);
+            btnChooseImage.ForeColor = Color.FromArgb(200, 200, 205);
+            btnChooseImage.HoverState.FillColor = Color.FromArgb(45, 45, 48);
+            btnChooseImage.Location = new Point(36, 335);
+            btnChooseImage.Name = "btnChooseImage";
+            btnChooseImage.Size = new Size(316, 40);
+            btnChooseImage.TabIndex = 5;
+            btnChooseImage.Text = "Chọn ảnh món...";
+            btnChooseImage.Click += BtnChooseImage_Click;
             //
             // shadow
             //
@@ -221,7 +240,7 @@ namespace GUI
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(24, 24, 27);
-            ClientSize = new Size(420, 492);
+            ClientSize = new Size(420, 502);
             Controls.Add(panel1);
             Font = new Font("Segoe UI", 10F);
             FormBorderStyle = FormBorderStyle.None;
@@ -243,6 +262,7 @@ namespace GUI
         private Guna2TextBox txtMoTa;
         private Guna2Button btnAdd;
         private Guna2Button bttnClose;
+        private Guna2Button btnChooseImage;
         private Guna2ShadowForm shadow;
     }
 }

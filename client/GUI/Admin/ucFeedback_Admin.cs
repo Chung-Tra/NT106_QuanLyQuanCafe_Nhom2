@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -12,16 +16,26 @@ namespace GUI
             InitializeComponent();
             dgvFeedback.AutoGenerateColumns = false; // cột khai trong Designer; tắt auto-gen ở .cs cho an toàn round-trip
             GridColumnGuard.SyncColumnNames(dgvFeedback);
-            DgvRefresh.Attach(dgvFeedback, LoadMockData);
-            this.Load += (s, e) => LoadMockData();
-        }
+            DgvRefresh.Attach(dgvFeedback, () => _ = LoadRealData());
 
-        private void LoadMockData()
-        {
             cmbFilterStatus.Items.Clear();
             cmbFilterStatus.Items.AddRange(new object[] { "Tất cả", "Chờ xử lý", "Đã trả lời", "Đã xử lý" });
             cmbFilterStatus.SelectedIndex = 0;
 
+            this.Load += (s, e) => _ = LoadRealData();
+        }
+
+        private static string StarString(int rating)
+        {
+            rating = Math.Max(0, Math.Min(5, rating));
+            return new string('★', rating) + new string('☆', 5 - rating);
+        }
+
+        private static string StatusOf(FeedbackDTO f)
+            => f.IsHandled ? "Đã xử lý" : (!string.IsNullOrWhiteSpace(f.Reply) ? "Đã trả lời" : "Chờ xử lý");
+
+        private async Task LoadRealData()
+        {
             DataTable dt = new();
             dt.Columns.Add("Mã");
             dt.Columns.Add("Khách hàng");
@@ -30,11 +44,19 @@ namespace GUI
             dt.Columns.Add("Nội dung");
             dt.Columns.Add("Trạng thái");
 
-            dt.Rows.Add("FB001", "Nguyễn Thị Lan", "01/05/2026", "★★★★★", "Cà phê rất ngon, phục vụ tận tình!", "Đã xử lý");
-            dt.Rows.Add("FB002", "Trần Văn Minh", "01/05/2026", "★★★☆☆", "Đồ uống hơi ngọt, cần giảm đường", "Chờ xử lý");
-            dt.Rows.Add("FB003", "Lê Hồng Phúc", "30/04/2026", "★★☆☆☆", "Chờ quá lâu, nhân viên không nhiệt tình", "Đã trả lời");
-            dt.Rows.Add("FB004", "Phạm Thanh Hà", "29/04/2026", "★★★★☆", "Không gian đẹp, wifi mạnh", "Đã xử lý");
-            dt.Rows.Add("FB005", "Đỗ Minh Quân", "28/04/2026", "★☆☆☆☆", "Ly bị vỡ, cần cải thiện chất lượng", "Chờ xử lý");
+            try
+            {
+                var fbs = await FeedbackBUS.GetAll();
+                foreach (var kv in fbs.OrderByDescending(f => f.Value.Timestamp))
+                {
+                    var f = kv.Value;
+                    string date = f.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(f.Timestamp).LocalDateTime.ToString("dd/MM/yyyy")
+                        : "";
+                    dt.Rows.Add(kv.Key, f.CustomerName, date, StarString(f.Rating), f.Content, StatusOf(f));
+                }
+            }
+            catch { /* offline */ }
 
             dgvFeedback.DataSource = dt;
             dgvFeedback.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -51,6 +73,17 @@ namespace GUI
             dgvFeedback.Columns["Ngày"].DefaultCellStyle.Alignment       = DataGridViewContentAlignment.MiddleCenter;
             dgvFeedback.Columns["Đánh giá"].DefaultCellStyle.Alignment   = DataGridViewContentAlignment.MiddleCenter;
             dgvFeedback.Columns["Trạng thái"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            if (dgvFeedback.DataSource is DataTable dt)
+            {
+                string selected = cmbFilterStatus.SelectedItem?.ToString() ?? "Tất cả";
+                dt.DefaultView.RowFilter = selected == "Tất cả" ? "" : $"[Trạng thái] = '{selected}'";
+            }
         }
 
         // Double-click 1 dòng -> form chi tiết read-only đủ field
@@ -61,56 +94,82 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa dòng đang chọn (khoá cột Mã)
-        private void BtnEditFeedbackAdmin_Click(object? sender, EventArgs e)
+        // Sửa nội dung phản hồi đang chọn (khoá cột Mã) — lưu thật
+        private async void BtnEditFeedbackAdmin_Click(object? sender, EventArgs e)
         {
             if (dgvFeedback.CurrentRow == null || dgvFeedback.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một phản hồi để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
+            string id = dgvFeedback.CurrentRow.Cells["Mã"].Value?.ToString() ?? "";
             if (RecordEdit.EditRow(dgvFeedback.CurrentRow, "Sửa phản hồi", MsgBox.OwnerWindow(this)))
-                dgvFeedback_SelectionChanged(dgvFeedback, EventArgs.Empty);
+            {
+                string content = dgvFeedback.CurrentRow.Cells["Nội dung"].Value?.ToString() ?? "";
+                await FeedbackBUS.Update(id, new { noi_dung = content });
+                await LoadRealData();
+            }
         }
 
-        private void btnReply_Click(object sender, EventArgs e)
+        private async void btnReply_Click(object sender, EventArgs e)
         {
             if (dgvFeedback.CurrentRow == null) return;
+            string id = dgvFeedback.CurrentRow.Cells["Mã"].Value?.ToString() ?? "";
             string customer = dgvFeedback.CurrentRow.Cells["Khách hàng"].Value?.ToString() ?? "";
             string content = dgvFeedback.CurrentRow.Cells["Nội dung"].Value?.ToString() ?? "";
             ReplyFeedback frm = new(customer, content);
             if (frm.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
-                dgvFeedback.CurrentRow.Cells["Trạng thái"].Value = "Đã trả lời";
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
+                var (ok, msg) = await FeedbackBUS.Update(id, new
+                {
+                    phan_hoi = frm.ReplyText,
+                    thoi_gian_phan_hoi = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    nguoi_xu_ly_id = GlobalSession.CurrentUser?.EmployeeId ?? ""
+                });
+                if (ok)
+                {
+                    MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi phản hồi đến khách hàng {customer}!", "Thành công", MsgBox.MessageBoxType.Success);
+                    await LoadRealData();
+                }
+                else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 
-        private void btnMarkResolved_Click(object sender, EventArgs e)
+        private async void btnMarkResolved_Click(object sender, EventArgs e)
         {
             if (dgvFeedback.CurrentRow == null) return;
-            dgvFeedback.CurrentRow.Cells["Trạng thái"].Value = "Đã xử lý";
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đánh dấu phản hồi là đã xử lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            string id = dgvFeedback.CurrentRow.Cells["Mã"].Value?.ToString() ?? "";
+            var (ok, msg) = await FeedbackBUS.Update(id, new
+            {
+                da_xu_ly = true,
+                nguoi_xu_ly_id = GlobalSession.CurrentUser?.EmployeeId ?? ""
+            });
+            if (ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đánh dấu phản hồi là đã xử lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                await LoadRealData();
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
 
-        private void btnDeleteFeedback_Click(object sender, EventArgs e)
+        private async void btnDeleteFeedback_Click(object sender, EventArgs e)
         {
             if (dgvFeedback.CurrentRow == null) return;
+            string id = dgvFeedback.CurrentRow.Cells["Mã"].Value?.ToString() ?? "";
             var result = MsgBox.Show(MsgBox.OwnerWindow(this), "Bạn có chắc muốn xóa phản hồi này?", "Xác nhận", MsgBox.MessageBoxType.Warning);
             if (result == DialogResult.Yes)
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã xóa phản hồi!", "Thành công", MsgBox.MessageBoxType.Success);
+                var (ok, msg) = await FeedbackBUS.Delete(id);
+                if (ok)
+                {
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã xóa phản hồi!", "Thành công", MsgBox.MessageBoxType.Success);
+                    await LoadRealData();
+                }
+                else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 
-        private void cmbFilterStatus_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (dgvFeedback.DataSource is DataTable dt)
-            {
-                string selected = cmbFilterStatus.SelectedItem?.ToString() ?? "Tất cả";
-                dt.DefaultView.RowFilter = selected == "Tất cả" ? "" : $"[Trạng thái] = '{selected}'";
-            }
-        }
+        private void cmbFilterStatus_SelectedIndexChanged(object sender, EventArgs e) => ApplyFilter();
 
         private void dgvFeedback_SelectionChanged(object sender, EventArgs e)
         {

@@ -1,6 +1,7 @@
+using BUS;
+using DTO;
 using System;
 using System.Windows.Forms;
-using DTO;
 
 namespace GUI
 {
@@ -25,7 +26,7 @@ namespace GUI
             btnCancel.Click += (s, e) => Close();
         }
 
-        private void BtnSubmit_Click(object? sender, EventArgs e)
+        private async void BtnSubmit_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtSubject.Text) ||
                 string.IsNullOrWhiteSpace(rtxDescription.Text))
@@ -36,18 +37,36 @@ namespace GUI
                 return;
             }
 
-            string ticket   = $"BUG-{DateTime.Now:yyyyMMdd-HHmmss}";
             string severity = chkUrgent.Checked ? "NGHIÊM TRỌNG" : "Bình thường";
+            btnSubmit.Enabled = false;
 
-            MsgBox.Show(MsgBox.OwnerWindow(this),
-                $"Đã gửi báo cáo lỗi đến Admin (Quản trị viên)!\n\n" +
-                $"Mã phiếu: {ticket}\n" +
-                $"Loại: {cboType.SelectedItem}\n" +
-                $"Mức độ: {severity}",
-                "Gửi báo cáo thành công", MsgBox.MessageBoxType.Success);
+            var dto = new BugReportDTO
+            {
+                TieuDe = txtSubject.Text.Trim(),
+                MoTa = rtxDescription.Text.Trim(),
+                Loai = cboType.SelectedItem?.ToString() ?? "",
+                MucDo = severity,
+                ManHinh = txtScreen.Text.Trim(),
+                SenderId = GlobalSession.CurrentUser?.EmployeeId,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                TrangThai = "moi"
+            };
+            var (ok, msg, id) = await BugReportBUS.Add(dto);
+            btnSubmit.Enabled = true;
 
-            DialogResult = DialogResult.OK;
-            Close();
+            if (ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Đã gửi báo cáo lỗi đến Admin (Quản trị viên)!\n\n" +
+                    $"Mã phiếu: {id ?? "BUG"}\nLoại: {cboType.SelectedItem}\nMức độ: {severity}",
+                    "Gửi báo cáo thành công", MsgBox.MessageBoxType.Success);
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            else
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi gửi báo cáo", MsgBox.MessageBoxType.Error);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using BUS;
 using DTO;
 
 namespace GUI
@@ -23,8 +24,10 @@ namespace GUI
                 txtEmployeeId.Text = user.EmployeeId ?? "";
                 txtFullName.Text = user.FullName ?? "";
                 txtEmail.Text = user.Email ?? "";
-                txtPhone.Text = "";
+                txtPhone.Text = user.PhoneNumber ?? "";
                 txtAddress.Text = "";
+                if (!string.IsNullOrWhiteSpace(user.AvatarUrl))
+                    ImageLoader.SetImageAsync(picAvatar, user.AvatarUrl);
             }
             else
             {
@@ -45,55 +48,111 @@ namespace GUI
             _ => "Barista / Staff"
         };
 
-        private void BtnUpdateInfo_Click(object? sender, EventArgs e)
+        private async void BtnUpdateInfo_Click(object? sender, EventArgs e)
         {
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật thông tin cá nhân!", "Thành công", MsgBox.MessageBoxType.Success);
-        }
+            var user = GlobalSession.CurrentUser;
+            if (user?.EmployeeId == null)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Không xác định được tài khoản đang đăng nhập.", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
 
-        private void BtnChangePass_Click(object? sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtOldPass.Text) ||
-                string.IsNullOrWhiteSpace(txtNewPass.Text) ||
-                string.IsNullOrWhiteSpace(txtConfirmPass.Text))
+            var owner = MsgBox.OwnerWindow(this);
+            btnUpdateInfo.Enabled = false;
+            try
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập đầy đủ các trường mật khẩu!", "Thông báo", MsgBox.MessageBoxType.Warning);
-                return;
-            }
-            if (txtNewPass.Text.Length < 6)
-            {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Mật khẩu mới phải có ít nhất 6 ký tự!", "Thông báo", MsgBox.MessageBoxType.Warning);
-                return;
-            }
-            if (txtNewPass.Text != txtConfirmPass.Text)
-            {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Mật khẩu xác nhận không khớp!", "Thông báo", MsgBox.MessageBoxType.Warning);
-                return;
-            }
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đổi mật khẩu thành công!", "Thành công", MsgBox.MessageBoxType.Success);
-            txtOldPass.Clear();
-            txtNewPass.Clear();
-            txtConfirmPass.Clear();
-        }
-
-        private void BtnChangeAvatar_Click(object? sender, EventArgs e)
-        {
-            using OpenFileDialog ofd = new();
-            ofd.Title = "Chọn ảnh đại diện";
-            ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
-            if (ofd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
-            {
-                try
+                var data = new EmployeeDTO
                 {
-                    picAvatar.Image?.Dispose();
-                    picAvatar.Image = Image.FromFile(ofd.FileName);
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật ảnh đại diện!", "Thành công", MsgBox.MessageBoxType.Success);
+                    FullName = txtFullName.Text.Trim(),
+                    PhoneNumber = txtPhone.Text.Trim(),
+                    Role = user.Role,
+                    Status = user.Status
+                };
+                var (ok, msg) = await EmployeeBUS.UpdateEmployeeAsync(user.EmployeeId, data);
+                if (ok)
+                {
+                    user.FullName = data.FullName;
+                    user.PhoneNumber = data.PhoneNumber;
+                    lblUserName.Text = (user.FullName ?? "Nhân viên").ToUpper();
+                    MsgBox.Show(owner, "Đã cập nhật thông tin cá nhân!", "Thành công", MsgBox.MessageBoxType.Success);
                 }
-                catch
+                else
                 {
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Không thể đọc file ảnh!", "Lỗi", MsgBox.MessageBoxType.Error);
+                    MsgBox.Show(owner, msg, "Không thể cập nhật", MsgBox.MessageBoxType.Warning);
                 }
             }
+            catch (Exception ex)
+            {
+                MsgBox.Show(owner, ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnUpdateInfo.Enabled = true; }
         }
 
+        private async void BtnChangePass_Click(object? sender, EventArgs e)
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            string email = GlobalSession.CurrentUser?.Email ?? "";
+
+            btnChangePass.Enabled = false;
+            try
+            {
+                var (ok, msg) = await AuthBUS.ChangePasswordBUS(email, txtOldPass.Text, txtNewPass.Text, txtConfirmPass.Text);
+                MsgBox.Show(owner, msg, ok ? "Thành công" : "Thông báo",
+                    ok ? MsgBox.MessageBoxType.Success : MsgBox.MessageBoxType.Warning);
+                if (ok)
+                {
+                    txtOldPass.Clear();
+                    txtNewPass.Clear();
+                    txtConfirmPass.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(owner, ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnChangePass.Enabled = true; }
+        }
+
+        private async void BtnChangeAvatar_Click(object? sender, EventArgs e)
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            using OpenFileDialog ofd = new()
+            {
+                Title = "Chọn ảnh đại diện",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (ofd.ShowDialog(owner) != DialogResult.OK) return;
+
+            var user = GlobalSession.CurrentUser;
+            btnChangeAvatar.Enabled = false;
+            try
+            {
+                // Xem trước ngay
+                try { picAvatar.Image?.Dispose(); picAvatar.Image = Image.FromFile(ofd.FileName); } catch { }
+
+                // Tải lên Firebase Storage
+                var (ok, msg, url) = await UploadBUS.UploadImage(ofd.FileName, "avatar");
+                if (!ok || string.IsNullOrEmpty(url))
+                {
+                    MsgBox.Show(owner, msg, "Lỗi tải ảnh", MsgBox.MessageBoxType.Error);
+                    return;
+                }
+
+                // Lưu URL vào hồ sơ nhân viên
+                if (user?.EmployeeId != null)
+                {
+                    var (uok, umsg) = await EmployeeBUS.UpdateAvatarAsync(user.EmployeeId, url);
+                    if (uok) user.AvatarUrl = url;
+                    else { MsgBox.Show(owner, umsg, "Lỗi lưu ảnh", MsgBox.MessageBoxType.Warning); return; }
+                }
+
+                MsgBox.Show(owner, "Đã cập nhật ảnh đại diện!", "Thành công", MsgBox.MessageBoxType.Success);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(owner, "Không thể cập nhật ảnh: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnChangeAvatar.Enabled = true; }
+        }
     }
 }

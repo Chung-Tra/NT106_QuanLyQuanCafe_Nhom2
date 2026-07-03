@@ -32,15 +32,15 @@ namespace GUI
 
             // Nút làm mới từng bảng: chỉ tải lại dữ liệu của bảng đó
             DgvRefresh.Attach(dgvManagers, LoadManagerList);
-            DgvRefresh.Attach(dgvLeaveReq, LoadLeaveRequests);
+            DgvRefresh.Attach(dgvLeaveReq, LoadLeaveRequestsAsync);
             DgvRefresh.Attach(dgvAuditLog, LoadAuditLog);
         }
 
         private async void UcManagers_Admin_Load(object sender, EventArgs e)
         {
             await LoadManagerList();
-            LoadLeaveRequests();
-            LoadAuditLog();
+            await LoadLeaveRequestsAsync();
+            await LoadAuditLog();
 
             dgvManagers.ClearSelection();
             dgvAuditLog.ClearSelection();
@@ -53,27 +53,64 @@ namespace GUI
         private void LblManagerTitle_Click(object? sender, EventArgs e)
             => new ManagerProfileDetail().ShowDialog(MsgBox.OwnerWindow(this));
 
-        private void LblLeaveReqTitle_Click(object? sender, EventArgs e)
+        private static string LeaveStatusVi(string? s) => s switch
         {
-            var items = new[]
+            "cho_duyet" => "Chờ duyệt",
+            "da_duyet"  => "Đã duyệt",
+            "tu_choi"   => "Từ chối",
+            _           => s ?? ""
+        };
+
+        // Đơn xin nghỉ THẬT của các Quản lý (mọi trạng thái) từ node leave-requests.
+        private async void LblLeaveReqTitle_Click(object? sender, EventArgs e)
+        {
+            var items = new List<LeaveItem>();
+            try
             {
-                new LeaveItem("Phạm Thu Hà",   "05/05/2026", "06/05/2026", "Việc gia đình cần giải quyết gấp", "Chờ duyệt"),
-                new LeaveItem("Trần Minh",     "12/04/2026", "12/04/2026", "Khám sức khỏe định kỳ",            "Đã duyệt"),
-                new LeaveItem("Nguyễn Văn An", "20/03/2026", "21/03/2026", "Đám cưới người thân",              "Đã duyệt"),
-            };
+                var all  = await LeaveRequestBUS.GetAll();
+                var emps = (await Task.Run(EmployeeBUS.GetAllEmployeesAsync))
+                           .Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x);
+
+                foreach (var l in all.Values.OrderByDescending(x => x.SentAt))
+                {
+                    emps.TryGetValue(l.EmployeeId ?? "", out var emp);
+                    if ((emp?.Role ?? "").ToLower() != "manager") continue;   // màn này chỉ đơn của Quản lý
+                    string name = emp?.FullName ?? l.EmployeeId ?? "";
+                    items.Add(new LeaveItem(name, l.FromDate ?? "", l.ToDate ?? "", l.Reason ?? "", LeaveStatusVi(l.Status)));
+                }
+            }
+            catch { /* offline → danh sách trống */ }
+
             new LeaveRequestDetail(items, "Đơn xin nghỉ của Quản lý").ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        private void LblAuditTitle_Click(object? sender, EventArgs e)
+        private async void LblAuditTitle_Click(object? sender, EventArgs e)
+            => new AuditLogDetail(await BuildAuditTableAsync(), "Lịch sử thao tác của Quản lý")
+                   .ShowDialog(MsgBox.OwnerWindow(this));
+
+        // Bảng nhật ký thao tác THẬT (node audit-logs) — dùng chung cho lưới tóm tắt và popup chi tiết.
+        private static async Task<DataTable> BuildAuditTableAsync()
         {
-            var dt = new System.Data.DataTable();
-            dt.Columns.Add("Thời gian"); dt.Columns.Add("Quản lý"); dt.Columns.Add("Hành động"); dt.Columns.Add("Lý do");
-            dt.Rows.Add("02/05 09:15", "QL Trần Minh",     "Sửa giá NL 'Cà phê Arabica' 250K→280K",  "Nhà cung cấp tăng giá");
-            dt.Rows.Add("01/05 16:20", "QL Nguyễn Văn An", "Xóa NL 'Syrup dâu'",                     "Ngừng kinh doanh dòng dâu");
-            dt.Rows.Add("01/05 14:00", "QL Trần Minh",     "Sửa check-in NV Đỗ Hương 08:30→07:55",   "Hệ thống ghi nhận sai");
-            dt.Rows.Add("01/05 10:30", "QL Nguyễn Văn An", "Thêm NL 'Bột matcha Nhật'",              "Bổ sung menu mới");
-            dt.Rows.Add("30/04 11:00", "QL Trần Minh",     "Sửa giá NL 'Sữa tươi' 35K→38K",         "Giá thị trường tăng");
-            new AuditLogDetail(dt, "Lịch sử thao tác của Quản lý").ShowDialog(MsgBox.OwnerWindow(this));
+            var dt = new DataTable();
+            dt.Columns.Add("Thời gian");
+            dt.Columns.Add("Quản lý");
+            dt.Columns.Add("Hành động");
+            dt.Columns.Add("Lý do");
+            try
+            {
+                var logs = await AuditLogBUS.GetAll();
+                foreach (var l in logs.Values.OrderByDescending(x => x.Timestamp))
+                {
+                    string time = l.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime.ToString("dd/MM HH:mm")
+                        : "";
+                    string who    = string.IsNullOrWhiteSpace(l.Ten) ? (l.EmployeeId ?? "") : l.Ten!;
+                    string action = string.IsNullOrWhiteSpace(l.DoiTuong) ? (l.ThaoTac ?? "") : $"{l.ThaoTac}: {l.DoiTuong}";
+                    dt.Rows.Add(time, who, action, l.LyDo);
+                }
+            }
+            catch { /* offline */ }
+            return dt;
         }
 
         // Tải danh sách Quản lý (lọc Role == "manager" từ dữ liệu thật)
@@ -148,48 +185,57 @@ namespace GUI
             }
         }
 
-        private void LoadLeaveRequests()
+        // Đơn xin nghỉ ĐANG CHỜ DUYỆT của các Quản lý (thật, từ Firebase)
+        private async Task LoadLeaveRequestsAsync()
         {
             DataTable dt = new();
+            dt.Columns.Add("Mã đơn");   // cột dữ liệu ẩn (grid không có cột này)
             dt.Columns.Add("Nhân viên");
             dt.Columns.Add("Ngày nghỉ");
             dt.Columns.Add("Lý do");
 
-            dt.Rows.Add("Phạm Thu Hà", "05/05 → 06/05", "Việc gia đình cần giải quyết gấp");
+            int count = 0;
+            try
+            {
+                var all = await LeaveRequestBUS.GetAll();
+                var emps = (await Task.Run(EmployeeBUS.GetAllEmployeesAsync))
+                    .Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x);
+
+                foreach (var kv in all.Where(l => l.Value.Status == "cho_duyet").OrderBy(l => l.Value.SentAt))
+                {
+                    var l = kv.Value;
+                    emps.TryGetValue(l.EmployeeId ?? "", out var emp);
+                    // Màn này chỉ hiển thị đơn của Quản lý
+                    if ((emp?.Role ?? "").ToLower() != "manager") continue;
+                    string name = emp?.FullName ?? l.EmployeeId ?? "";
+                    string ngay = l.FromDate == l.ToDate ? (l.FromDate ?? "") : $"{l.FromDate} → {l.ToDate}";
+                    dt.Rows.Add(kv.Key, name, ngay, l.Reason);
+                    count++;
+                }
+            }
+            catch { /* offline */ }
 
             dgvLeaveReq.DataSource = dt;
             dgvLeaveReq.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvLeaveReq.Columns["Nhân viên"].FillWeight = 30;
-            dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 28;
-            dgvLeaveReq.Columns["Lý do"].FillWeight     = 42;
+            if (dgvLeaveReq.Columns.Contains("Nhân viên")) dgvLeaveReq.Columns["Nhân viên"].FillWeight = 30;
+            if (dgvLeaveReq.Columns.Contains("Ngày nghỉ")) dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 28;
+            if (dgvLeaveReq.Columns.Contains("Lý do")) dgvLeaveReq.Columns["Lý do"].FillWeight = 42;
 
-            btnApproveLeave.Text = $"Duyệt ({dt.Rows.Count})";
+            btnApproveLeave.Text = $"Duyệt ({count})";
         }
 
-        private void LoadAuditLog()
+        private async Task LoadAuditLog()
         {
-            DataTable dt = new();
-            dt.Columns.Add("Thời gian");
-            dt.Columns.Add("Quản lý");
-            dt.Columns.Add("Hành động");
-            dt.Columns.Add("Lý do");
-
-            dt.Rows.Add("02/05 09:15", "QL Trần Minh", "Sửa giá NL 'Cà phê Arabica' 250K→280K", "Nhà cung cấp tăng giá");
-            dt.Rows.Add("01/05 16:20", "QL Nguyễn Văn An", "Xóa NL 'Syrup dâu'", "Ngừng kinh doanh dòng dâu");
-            dt.Rows.Add("01/05 14:00", "QL Trần Minh", "Sửa check-in NV Đỗ Hương 08:30→07:55", "Hệ thống ghi nhận sai");
-            dt.Rows.Add("01/05 10:30", "QL Nguyễn Văn An", "Thêm NL 'Bột matcha Nhật'", "Bổ sung menu mới");
-            dt.Rows.Add("30/04 11:00", "QL Trần Minh", "Sửa giá NL 'Sữa tươi' 35K→38K", "Giá thị trường tăng");
-
-            dgvAuditLog.DataSource = dt;
+            dgvAuditLog.DataSource = await BuildAuditTableAsync();
             dgvAuditLog.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvAuditLog.RowHeadersVisible = false;
             dgvAuditLog.ReadOnly = true;
             dgvAuditLog.AllowUserToAddRows = false;
 
-            dgvAuditLog.Columns["Thời gian"].FillWeight = 12;
-            dgvAuditLog.Columns["Quản lý"].FillWeight = 18;
-            dgvAuditLog.Columns["Hành động"].FillWeight = 40;
-            dgvAuditLog.Columns["Lý do"].FillWeight = 30;
+            if (dgvAuditLog.Columns.Contains("Thời gian")) dgvAuditLog.Columns["Thời gian"].FillWeight = 12;
+            if (dgvAuditLog.Columns.Contains("Quản lý"))   dgvAuditLog.Columns["Quản lý"].FillWeight   = 18;
+            if (dgvAuditLog.Columns.Contains("Hành động")) dgvAuditLog.Columns["Hành động"].FillWeight = 40;
+            if (dgvAuditLog.Columns.Contains("Lý do"))     dgvAuditLog.Columns["Lý do"].FillWeight     = 30;
         }
 
         // Double-click 1 dòng Quản lý -> form chi tiết read-only đủ field
@@ -308,31 +354,38 @@ namespace GUI
                 await LoadManagerList();
         }
 
-        private void BtnApproveLeave_Click(object? sender, EventArgs e)
+        private async void BtnApproveLeave_Click(object? sender, EventArgs e)
         {
-            if (dgvLeaveReq.Rows.Count == 0)
+            var rowView = (dgvLeaveReq.CurrentRow?.DataBoundItem as DataRowView)
+                          ?? (dgvLeaveReq.Rows.Count > 0 ? dgvLeaveReq.Rows[0].DataBoundItem as DataRowView : null);
+            if (rowView == null)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Không có đơn xin nghỉ nào!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
-            var result = MsgBox.Show(
-                this,
-                "Duyệt đơn xin nghỉ của QL Phạm Thu Hà?\n05/05 - 06/05 (2 ngày)\nLý do: Việc gia đình",
-                "Duyệt đơn xin nghỉ",
-                MsgBox.MessageBoxType.Warning);
+            string id   = rowView["Mã đơn"]?.ToString() ?? "";
+            string name = rowView["Nhân viên"]?.ToString() ?? "";
+            string ngay = rowView["Ngày nghỉ"]?.ToString() ?? "";
+
+            var result = MsgBox.Show(this,
+                $"Duyệt đơn xin nghỉ của {name}?\n{ngay}",
+                "Duyệt đơn xin nghỉ", MsgBox.MessageBoxType.Warning);
 
             if (result == DialogResult.Yes)
             {
-                DataTable dt = new();
-                dt.Columns.Add("Nhân viên");
-                dt.Columns.Add("Ngày nghỉ");
-                dt.Columns.Add("Lý do");
-                dt.Rows.Add("✓ Phạm Thu Hà (đã duyệt)", "05/05 → 06/05", "Việc gia đình");
-
-                dgvLeaveReq.DataSource = dt;
-                btnApproveLeave.Text = "Duyệt (0)";
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
+                var (ok, msg) = await LeaveRequestBUS.Update(id, new
+                {
+                    trang_thai = "da_duyet",
+                    nguoi_duyet_id = GlobalSession.CurrentUser?.EmployeeId ?? "",
+                    thoi_gian_duyet = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                });
+                if (ok)
+                {
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
+                    await LoadLeaveRequestsAsync();
+                }
+                else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
     }

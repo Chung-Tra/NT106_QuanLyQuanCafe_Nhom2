@@ -63,6 +63,29 @@ exports.verifyOTP = async (req, res, next) => {
     }
 };
 
+exports.changePassword = async (req, res, next) => {
+    try {
+        const { email, oldPassword, newPassword } = req.body;
+        if (!email || !oldPassword || !newPassword) {
+            return res.status(400).json({ error: 'Missing email, oldPassword or newPassword' });
+        }
+        if (!STRONG_PASSWORD.test(newPassword)) {
+            return res.status(400).json({
+                error: 'Mật khẩu phải dài ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và một ký tự đặc biệt.',
+            });
+        }
+        try {
+            await authService.changePassword(email, oldPassword, newPassword);
+        } catch (e) {
+            return res.status(401).json({ error: 'Mật khẩu hiện tại không đúng.' });
+        }
+        info('Password changed', { email });
+        res.status(200).json({ message: 'Success' });
+    } catch (err) {
+        next(err);
+    }
+};
+
 exports.updatePassword = async (req, res, next) => {
     try {
         const { email, newPassword, resetToken } = req.body;

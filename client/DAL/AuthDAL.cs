@@ -77,6 +77,26 @@ namespace DAL
             }
         }
 
+        // Đổi mật khẩu khi ĐANG đăng nhập: cần mật khẩu cũ để xác thực.
+        public static async Task<(bool Success, string Message)> ChangePasswordAsync(string email, string oldPassword, string newPassword)
+        {
+            try
+            {
+                var response = await DalHelper.Client.SendAsync(
+                    DalHelper.Build(HttpMethod.Put, "auth/change-password",
+                        new { email, oldPassword, newPassword }));
+
+                string body = await response.Content.ReadAsStringAsync();
+                return response.IsSuccessStatusCode
+                    ? (true, "Đổi mật khẩu thành công!")
+                    : (false, DalHelper.ParseErrorMessage(body));
+            }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi kết nối: " + ex.Message);
+            }
+        }
+
         // Đổi mật khẩu: bắt buộc kèm reset-token (server đã xác thực OTP). Không còn dùng secretKey tĩnh.
         public static async Task<(bool Success, string Message)> UpdatePasswordAsync(string email, string newPassword, string resetToken)
         {

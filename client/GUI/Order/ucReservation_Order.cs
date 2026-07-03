@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -13,22 +17,18 @@ namespace GUI
         public ucReservation_Order()
         {
             InitializeComponent();
-
-            // Runtime styling for the grid (declared in Designer)
             Theme.StyleGrid(dgv);
 
-            // Default selection + dynamic event subscriptions
             cmbStatus.SelectedIndex = 0;
             txtSearch.TextChanged += (s, e) => ApplyFilter();
             cmbStatus.SelectedIndexChanged += (s, e) => ApplyFilter();
-            btnSendReminder.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi email nhắc đến 3 khách có đặt bàn hôm nay!", "Gửi nhắc thành công", MsgBox.MessageBoxType.Success);
+            btnSendReminder.Click += (s, e) => SendReminder();
 
-            DgvRefresh.Attach(dgv, LoadData);
-
-            Load += (s, e) => LoadData();
+            DgvRefresh.Attach(dgv, () => _ = LoadData());
+            Load += (s, e) => _ = LoadData();
         }
 
-        private void LoadData()
+        private async Task LoadData()
         {
             _dt = new DataTable();
             _dt.Columns.Add("Mã đặt");
@@ -40,13 +40,16 @@ namespace GUI
             _dt.Columns.Add("Ghi chú");
             _dt.Columns.Add("Trạng thái");
 
-            _dt.Rows.Add("RES-001", "Nguyễn Thị Lan",  "0912345678", "24/06/2026 18:00", "Bàn 05 (4 chỗ)", 3, "Cần ghế cao cho bé",    "Đã xác nhận");
-            _dt.Rows.Add("RES-002", "Trần Văn Bảo",    "0987654321", "24/06/2026 19:30", "Bàn 08 (6 chỗ)", 5, "Kỷ niệm ngày cưới",     "Chờ xác nhận");
-            _dt.Rows.Add("RES-003", "Lê Quốc Hùng",    "0901111222", "25/06/2026 12:00", "Bàn 02 (2 chỗ)", 2, "",                       "Đã xác nhận");
-            _dt.Rows.Add("RES-004", "Phạm Thị Ngọc",   "0933445566", "25/06/2026 15:00", "Bàn 10 (8 chỗ)", 7, "Tiệc sinh nhật — bánh", "Chờ xác nhận");
-            _dt.Rows.Add("RES-005", "Đinh Minh Quân",  "0977889900", "26/06/2026 11:30", "Bàn 03 (4 chỗ)", 4, "",                       "Đã xác nhận");
-            _dt.Rows.Add("RES-006", "Hoàng Thu Trang",  "0905551234", "23/06/2026 17:00", "Bàn 06 (4 chỗ)", 3, "Ăn trưa làm việc",      "Đã đến");
-            _dt.Rows.Add("RES-007", "Vũ Thế Anh",       "0966778899", "22/06/2026 19:00", "Bàn 01 (2 chỗ)", 2, "",                       "Hủy");
+            try
+            {
+                var all = await ReservationBUS.GetAll();
+                foreach (var kv in all.OrderByDescending(x => x.Value.Timestamp))
+                {
+                    var r = kv.Value;
+                    _dt.Rows.Add(kv.Key, r.HoTen, r.SoDienThoai, r.NgayGio, r.Ban, r.SoKhach, r.GhiChu, r.TrangThai);
+                }
+            }
+            catch { /* offline */ }
 
             ApplyFilter();
         }
@@ -57,12 +60,9 @@ namespace GUI
             string status = cmbStatus.SelectedIndex > 0 ? cmbStatus.SelectedItem?.ToString() ?? "" : "";
 
             var parts = new System.Collections.Generic.List<string>();
-            // Từ khóa quét mọi cột: mã đặt, họ tên, SĐT, ngày giờ, bàn, số khách, ghi chú, trạng thái
             string kwFilter = SearchFilter.AllColumnsFilter(_dt, txtSearch.Text);
-            if (!string.IsNullOrEmpty(kwFilter))
-                parts.Add(kwFilter);
-            if (!string.IsNullOrEmpty(status))
-                parts.Add($"[Trạng thái] = '{status}'");
+            if (!string.IsNullOrEmpty(kwFilter)) parts.Add(kwFilter);
+            if (!string.IsNullOrEmpty(status)) parts.Add($"[Trạng thái] = '{status}'");
 
             try { _dt.DefaultView.RowFilter = string.Join(" AND ", parts); }
             catch { _dt.DefaultView.RowFilter = ""; }
@@ -80,7 +80,6 @@ namespace GUI
                 if (dgv.Columns.Contains("Số khách"))    dgv.Columns["Số khách"].FillWeight    = 7;
                 if (dgv.Columns.Contains("Ghi chú"))     dgv.Columns["Ghi chú"].FillWeight     = 20;
                 if (dgv.Columns.Contains("Trạng thái"))  dgv.Columns["Trạng thái"].FillWeight  = 12;
-
                 ColorStatusColumn();
             }
 
@@ -103,7 +102,6 @@ namespace GUI
             }
         }
 
-        // Double-click 1 dòng -> form chi tiết read-only đủ field
         private void DgvRes_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -111,8 +109,7 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa đặt bàn đang chọn (khoá Mã đặt). Ghi ngược về nguồn _dt rồi lọc lại.
-        private void BtnEditRes_Click(object? sender, EventArgs e)
+        private async void BtnEditRes_Click(object? sender, EventArgs e)
         {
             if (dgv.CurrentRow == null || dgv.CurrentRow.Index < 0)
             {
@@ -123,30 +120,64 @@ namespace GUI
             string code = dgv.CurrentRow.Cells["Mã đặt"].Value?.ToString() ?? "";
             if (!RecordEdit.EditRow(dgv.CurrentRow, "Sửa đặt bàn", MsgBox.OwnerWindow(this))) return;
 
-            // Bảng đang bind là bản sao (ToTable) -> đồng bộ giá trị đã sửa về _dt theo Mã đặt
-            foreach (DataRow r in _dt.Rows)
+            var row = dgv.CurrentRow;
+            int.TryParse(row.Cells["Số khách"].Value?.ToString(), out int sk);
+            await ReservationBUS.Update(code, new
             {
-                if ((r["Mã đặt"]?.ToString() ?? "") != code) continue;
-                foreach (DataColumn c in _dt.Columns)
-                {
-                    if (c.ColumnName == "Mã đặt") continue;
-                    if (!dgv.Columns.Contains(c.ColumnName)) continue;
-                    try { r[c.ColumnName] = dgv.CurrentRow.Cells[c.ColumnName].Value ?? DBNull.Value; }
-                    catch { /* bỏ qua nếu sai kiểu */ }
-                }
-                break;
-            }
-            ApplyFilter();
+                ho_ten = row.Cells["Họ tên"].Value?.ToString() ?? "",
+                so_dien_thoai = row.Cells["SĐT"].Value?.ToString() ?? "",
+                ngay_gio = row.Cells["Ngày & Giờ"].Value?.ToString() ?? "",
+                ban = row.Cells["Bàn"].Value?.ToString() ?? "",
+                so_khach = sk,
+                ghi_chu = row.Cells["Ghi chú"].Value?.ToString() ?? "",
+                trang_thai = row.Cells["Trạng thái"].Value?.ToString() ?? ""
+            });
+            await LoadData();
         }
 
-        private void BtnAdd_Click(object? sender, EventArgs e)
+        private async void BtnAdd_Click(object? sender, EventArgs e)
         {
             string? name = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Họ tên khách hàng", "VD: Nguyễn Văn A");
             if (string.IsNullOrEmpty(name)) return;
-            string id = "RES-" + (_dt.Rows.Count + 1).ToString("000");
-            _dt.Rows.Add(id, name, "---", DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm"), "Chọn bàn", 2, "", "Chờ xác nhận");
-            ApplyFilter();
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo đặt bàn {id} cho {name}. Vui lòng bổ sung SĐT và giờ trong bảng.", "Thành công", MsgBox.MessageBoxType.Success);
+            string? phone = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Số điện thoại", "VD: 09xxxxxxxx");
+            string? when = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Ngày & giờ (dd/MM/yyyy HH:mm)", DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm"));
+            string? ban = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Bàn", "VD: Bàn 05");
+            string? skStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Số khách", "2");
+            int.TryParse(skStr, out int sk);
+
+            var dto = new ReservationDTO
+            {
+                HoTen = name,
+                SoDienThoai = phone ?? "",
+                NgayGio = string.IsNullOrWhiteSpace(when) ? DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm") : when,
+                Ban = ban ?? "",
+                SoKhach = sk <= 0 ? 2 : sk,
+                GhiChu = "",
+                TrangThai = "Chờ xác nhận",
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+            var (ok, msg, _) = await ReservationBUS.Add(dto);
+            if (ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo đặt bàn cho {name}!", "Thành công", MsgBox.MessageBoxType.Success);
+                await LoadData();
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+        }
+
+        private void SendReminder()
+        {
+            string today = DateTime.Today.ToString("dd/MM/yyyy");
+            int cnt = 0;
+            if (_dt != null)
+                foreach (DataRow r in _dt.Rows)
+                    if ((r["Ngày & Giờ"]?.ToString() ?? "").Contains(today) &&
+                        (r["Trạng thái"]?.ToString() ?? "") != "Hủy") cnt++;
+
+            MsgBox.Show(MsgBox.OwnerWindow(this),
+                cnt > 0 ? $"Đã gửi nhắc đến {cnt} khách có đặt bàn hôm nay ({today})!"
+                        : "Hôm nay không có lượt đặt bàn nào cần nhắc.",
+                "Gửi nhắc", MsgBox.MessageBoxType.Info);
         }
     }
 }

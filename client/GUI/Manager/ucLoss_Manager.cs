@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 using Guna.Charts.WinForms;
@@ -17,37 +21,58 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvLossDetail);
-            DgvRefresh.Attach(dgvLossDetail, LoadData);
-            LoadData();
+            DgvRefresh.Attach(dgvLossDetail, () => _ = LoadData());
+            _ = LoadData();
         }
 
         private void BtnDay_Click(object? sender, EventArgs e)
         {
             _mode = "day";
             HighlightBtn(btnDay, btnMonth, btnYear);
-            LoadData();
+            _ = LoadData();
         }
 
         private void BtnMonth_Click(object? sender, EventArgs e)
         {
             _mode = "month";
             HighlightBtn(btnMonth, btnDay, btnYear);
-            LoadData();
+            _ = LoadData();
         }
 
         private void BtnYear_Click(object? sender, EventArgs e)
         {
             _mode = "year";
             HighlightBtn(btnYear, btnDay, btnMonth);
-            LoadData();
+            _ = LoadData();
         }
 
-        private void BtnReport_Click(object? sender, EventArgs e)
+        // "Báo cáo" = ghi nhận một khoản thất thoát mới (lưu thật vào node that_thoat)
+        private async void BtnReport_Click(object? sender, EventArgs e)
         {
-            var dlg = new ReportIncident("Thất thoát hao phí");
-            var dr = dlg.ShowDialog(MsgBox.OwnerWindow(this));
-            if (dr == DialogResult.OK || dr == DialogResult.Yes)
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
+            string? khoan = InputDialog.Show(MsgBox.OwnerWindow(this), "Ghi nhận thất thoát", "Khoản mục", "VD: Nguyên liệu hỏng");
+            if (string.IsNullOrWhiteSpace(khoan)) return;
+            string? sl = InputDialog.Show(MsgBox.OwnerWindow(this), "Ghi nhận thất thoát", "Số lượng", "VD: 0.5 kg");
+            string? gtStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Ghi nhận thất thoát", "Giá trị (đồng)", "VD: 80000");
+            decimal.TryParse((gtStr ?? "").Replace(",", "").Replace(".", ""), out decimal gt);
+            string? ndo = InputDialog.Show(MsgBox.OwnerWindow(this), "Ghi nhận thất thoát", "Nguyên nhân", "VD: Hết hạn");
+
+            var dto = new LossDTO
+            {
+                KhoanMuc = khoan,
+                SoLuong = sl ?? "",
+                GiaTri = gt,
+                NguyenNhan = ndo ?? "",
+                NguoiPhatHien = GlobalSession.CurrentUser?.EmployeeId ?? "",
+                Ngay = DateTime.Now.ToString("dd/MM/yyyy"),
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+            var (ok, msg, _) = await LossBUS.Add(dto);
+            if (ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã ghi nhận khoản thất thoát!", "Thành công", MsgBox.MessageBoxType.Success);
+                await LoadData();
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
 
         // Double-click 1 dòng -> form chi tiết read-only đủ field
@@ -58,15 +83,29 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa dòng đang chọn (khoá cột mã/ID)
-        private void BtnEditLoss_Click(object? sender, EventArgs e)
+        // Sửa dòng đang chọn (lưu thật)
+        private async void BtnEditLoss_Click(object? sender, EventArgs e)
         {
             if (dgvLossDetail.CurrentRow == null || dgvLossDetail.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một khoản để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            RecordEdit.EditRow(dgvLossDetail.CurrentRow, "Sửa khoản thất thoát", MsgBox.OwnerWindow(this));
+            string id = (dgvLossDetail.CurrentRow.DataBoundItem as DataRowView)?["Mã"]?.ToString() ?? "";
+            if (RecordEdit.EditRow(dgvLossDetail.CurrentRow, "Sửa khoản thất thoát", MsgBox.OwnerWindow(this)))
+            {
+                var row = dgvLossDetail.CurrentRow;
+                decimal.TryParse(row.Cells["Giá trị"].Value?.ToString(), out decimal gt);
+                if (!string.IsNullOrEmpty(id))
+                    await LossBUS.Update(id, new
+                    {
+                        khoan_muc = row.Cells["Khoản mục"].Value?.ToString() ?? "",
+                        so_luong = row.Cells["Số lượng"].Value?.ToString() ?? "",
+                        gia_tri = gt,
+                        nguyen_nhan = row.Cells["Nguyên nhân"].Value?.ToString() ?? ""
+                    });
+                await LoadData();
+            }
         }
 
         private static void HighlightBtn(Guna2Button active, Guna2Button b1, Guna2Button b2)
@@ -79,42 +118,50 @@ namespace GUI
             b2.HoverState.FillColor = Color.FromArgb(60, 60, 65);
         }
 
-        private void LoadData()
+        private async Task LoadData()
         {
             var dt = new DataTable();
+            dt.Columns.Add("Mã");   // ẩn (đọc qua DataRowView)
             dt.Columns.Add("Khoản mục");
             dt.Columns.Add("Số lượng");
             dt.Columns.Add("Giá trị", typeof(decimal));
             dt.Columns.Add("Nguyên nhân");
             dt.Columns.Add("Người phát hiện");
 
-            switch (_mode)
+            decimal total = 0;
+            DateTime now = DateTime.Now;
+            try
             {
-                case "day":
-                    lblTotalLoss.Text = "Tổng thất thoát: 320,000 đ";
-                    dt.Rows.Add("Nguyên liệu hỏng",    "0.5 kg sữa",   80000m,  "Hết hạn",         "Kho A");
-                    dt.Rows.Add("Chênh lệch quỹ",       "—",            120000m, "Kiểm quỹ cuối ca","Thu ngân");
-                    dt.Rows.Add("Dụng cụ bị vỡ",        "1 ly thủy tinh", 45000m,"Nhân viên đánh vỡ","Quầy bar");
-                    dt.Rows.Add("Hao hụt nguyên liệu",  "100g bột cacao",75000m, "Pha sai công thức","Pha chế");
-                    break;
-                case "year":
-                    lblTotalLoss.Text = "Tổng thất thoát: 28,500,000 đ";
-                    dt.Rows.Add("Nguyên liệu hết hạn",  "85 kg",        12500000m,"Quản lý kho kém","Kho");
-                    dt.Rows.Add("Dụng cụ hỏng / vỡ",   "42 món",       4200000m, "Sử dụng",        "Barista");
-                    dt.Rows.Add("Chênh lệch tiền quỹ",  "—",            6800000m, "Kiểm quỹ",       "Thu ngân");
-                    dt.Rows.Add("Pha sai công thức",    "~350 ly",      5000000m, "Thiếu đào tạo",  "Barista");
-                    break;
-                default: // month
-                    lblTotalLoss.Text = "Tổng thất thoát: 2,500,000 đ";
-                    dt.Rows.Add("Nguyên liệu hỏng",    "3.2 kg",       800000m,  "Hết hạn",         "Kho A");
-                    dt.Rows.Add("Chênh lệch quỹ",       "—",            700000m,  "Kiểm quỹ cuối ca","Thu ngân");
-                    dt.Rows.Add("Dụng cụ bị vỡ",        "5 ly + 2 đĩa", 450000m, "Nhân viên",       "Quầy bar");
-                    dt.Rows.Add("Hao hụt nguyên liệu",  "1.2 kg bột",   350000m, "Pha sai CT",      "Pha chế");
-                    dt.Rows.Add("Mất tài sản nhỏ",      "3 muỗng cafe", 200000m,  "Không rõ",        "—");
-                    break;
+                var all = await LossBUS.GetAll();
+                var emps = (await EmployeeBUS.GetAllEmployeesAsync())
+                    .Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+
+                foreach (var kv in all.OrderByDescending(x => x.Value.Timestamp))
+                {
+                    var l = kv.Value;
+                    if (l.Timestamp > 0)
+                    {
+                        var d = DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime;
+                        bool keep = _mode switch
+                        {
+                            "day" => d.Date == now.Date,
+                            "year" => d.Year == now.Year,
+                            _ => d.Year == now.Year && d.Month == now.Month
+                        };
+                        if (!keep) continue;
+                    }
+                    string finder = l.NguoiPhatHien ?? "";
+                    if (finder != null && emps.TryGetValue(finder, out var n)) finder = n;
+                    dt.Rows.Add(kv.Key, l.KhoanMuc, l.SoLuong, l.GiaTri, l.NguyenNhan, finder);
+                    total += l.GiaTri;
+                }
             }
+            catch { /* offline */ }
+
+            lblTotalLoss.Text = "Tổng thất thoát: " + Theme.Vnd((long)total);
 
             dgvLossDetail.DataSource = dt;
+            if (dgvLossDetail.Columns.Contains("Mã")) dgvLossDetail.Columns["Mã"].Visible = false;
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Format = "N0";
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgvLossDetail.Columns["Khoản mục"].FillWeight        = 22;

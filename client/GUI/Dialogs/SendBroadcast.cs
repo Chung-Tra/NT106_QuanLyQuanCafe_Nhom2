@@ -7,6 +7,13 @@ namespace GUI
     // Dialog gửi thông báo hàng loạt hoặc nhắn riêng cho một nhân viên.
     public partial class SendBroadcast : Form
     {
+        public string Title => txtTitle.Text.Trim();
+        public string Content => rtxContent.Text.Trim();
+        public string Priority => cboPriority.SelectedItem?.ToString() ?? "Thường";
+        public string Recipient => rdoIndividual.Checked
+            ? (cboRecipient.SelectedItem?.ToString() ?? "")
+            : "Toàn bộ NV";
+
         public SendBroadcast()
         {
             InitializeComponent();
@@ -33,6 +40,11 @@ namespace GUI
 
         private void BtnSend_Click(object? sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtTitle.Text) || string.IsNullOrWhiteSpace(rtxContent.Text))
+            {
+                MsgBox.Show(this, "Vui lòng nhập tiêu đề và nội dung thông báo!", "Thiếu thông tin", MsgBox.MessageBoxType.Warning);
+                return;
+            }
             DialogResult = DialogResult.OK;
         }
 

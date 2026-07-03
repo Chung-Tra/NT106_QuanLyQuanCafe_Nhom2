@@ -1,13 +1,18 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
 {
     public partial class ucPayroll_Admin : UserControl
     {
-        // Lương cố định theo bộ phận (Admin không cần nhập lại)
+        // Lương cơ bản mặc định theo bộ phận (dùng khi hiển thị nhanh ở selection)
         private static readonly Dictionary<string, decimal> BaseSalaryByRole = new()
         {
             ["Quản lý"] = 12000000m,
@@ -21,10 +26,9 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvPayroll);
-            DgvRefresh.Attach(dgvPayroll, LoadMockPayroll);
+            DgvRefresh.Attach(dgvPayroll, () => _ = LoadRealPayroll());
         }
 
-        // Double-click 1 dòng -> form chi tiết read-only đủ field
         private void DgvPayroll_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -32,65 +36,98 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa dòng lương đang chọn (khoá Mã NV)
-        private void BtnEditPayroll_Click(object? sender, EventArgs e)
+        // Sửa dòng lương đang chọn (khoá Mã NV) — lưu thật lên Firebase
+        private async void BtnEditPayroll_Click(object? sender, EventArgs e)
         {
             if (dgvPayroll.CurrentRow == null || dgvPayroll.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một nhân viên để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            if (RecordEdit.EditRow(dgvPayroll.CurrentRow, "Sửa bảng lương", MsgBox.OwnerWindow(this))
-                && dgvPayroll.DataSource is DataTable dt)
+            string id = (dgvPayroll.CurrentRow?.DataBoundItem as DataRowView)?["Mã lương"]?.ToString() ?? "";
+            if (string.IsNullOrEmpty(id)) return;
+
+            if (RecordEdit.EditRow(dgvPayroll.CurrentRow, "Sửa bảng lương", MsgBox.OwnerWindow(this)))
             {
-                decimal total = 0;
-                foreach (DataRow r in dt.Rows)
-                    total += Convert.ToDecimal(r["Tổng lương"]);
-                lblTotalSalary.Text = total.ToString("N0") + " đ";
+                var row = dgvPayroll.CurrentRow;
+                decimal D(string c) => decimal.TryParse(row.Cells[c].Value?.ToString(), out var v) ? v : 0;
+                decimal total = D("Lương CB") + D("Phụ cấp") + D("Thưởng FB") + D("Thưởng lễ") + D("Trừ lương");
+                int.TryParse(row.Cells["Ngày công"].Value?.ToString(), out int days);
+
+                var payload = new
+                {
+                    ngay_cong = days,
+                    luong_co_ban = D("Lương CB"),
+                    phu_cap = D("Phụ cấp"),
+                    thuong_feedback = D("Thưởng FB"),
+                    thuong_le = D("Thưởng lễ"),
+                    tru_luong = D("Trừ lương"),
+                    ly_do_tru = row.Cells["Lý do trừ"].Value?.ToString() ?? "",
+                    tong_luong = total
+                };
+                await SalaryBUS.Update(id, payload);
+                await LoadRealPayroll();
             }
         }
 
         private void ucPayroll_Admin_Load(object? sender, EventArgs e)
         {
-            cmbMonth.SelectedIndex = DateTime.Now.Month - 1;
-            LoadMockPayroll();
+            if (cmbMonth.Items.Count >= 12)
+                cmbMonth.SelectedIndex = DateTime.Now.Month - 1;
+            _ = LoadRealPayroll();
         }
 
-        private void LoadMockPayroll()
+        private int SelectedMonth() => cmbMonth.SelectedIndex >= 0 ? cmbMonth.SelectedIndex + 1 : DateTime.Now.Month;
+
+        private async Task LoadRealPayroll()
         {
+            int month = SelectedMonth();
             DataTable dt = new();
+            dt.Columns.Add("Mã lương");
             dt.Columns.Add("Mã NV");
             dt.Columns.Add("Họ tên");
             dt.Columns.Add("Bộ phận");
             dt.Columns.Add("Ngày công", typeof(int));
-            dt.Columns.Add("Lương CB", typeof(decimal));       // Lương cơ bản (tự tính theo bộ phận)
+            dt.Columns.Add("Lương CB", typeof(decimal));
             dt.Columns.Add("Phụ cấp", typeof(decimal));
-            dt.Columns.Add("Thưởng FB", typeof(decimal));      // Thưởng feedback tốt
-            dt.Columns.Add("Thưởng lễ", typeof(decimal));      // Thưởng lễ
-            dt.Columns.Add("Trừ lương", typeof(decimal));       // Trừ (nghỉ nhiều, đổ bể)
+            dt.Columns.Add("Thưởng FB", typeof(decimal));
+            dt.Columns.Add("Thưởng lễ", typeof(decimal));
+            dt.Columns.Add("Trừ lương", typeof(decimal));
             dt.Columns.Add("Lý do trừ");
             dt.Columns.Add("Tổng lương", typeof(decimal));
 
-            // NV1 - Manager, feedback tốt, thưởng lễ
-            AddEmployee(dt, "NV001", "Nguyễn Văn An", "Quản lý", 26, 2000000m, 1500000m, 500000m, 0m, "");
-            // NV2 - Barista, bị trừ vì nghỉ 5 ngày
-            AddEmployee(dt, "NV002", "Trần Thị Bích", "Pha chế", 21, 500000m, 800000m, 500000m, -700000m, "Nghỉ 5 ngày (vượt 2 ngày)");
-            // NV3 - Order Staff, bình thường
-            AddEmployee(dt, "NV003", "Lê Hoàng Nam", "Order Staff", 25, 500000m, 600000m, 500000m, 0m, "");
-            // NV4 - Security, thưởng lễ
-            AddEmployee(dt, "NV004", "Phạm Minh Tuấn", "Bảo vệ", 28, 1000000m, 0m, 500000m, 0m, "");
-            // NV5 - Barista, bị trừ vì làm vỡ máy xay
-            AddEmployee(dt, "NV005", "Đỗ Thị Hương", "Pha chế", 24, 500000m, 400000m, 500000m, -1200000m, "Làm hỏng máy xay #2");
-            // NV6 - Stockkeeper
-            AddEmployee(dt, "NV006", "Võ Thanh Tùng", "Thủ kho", 26, 800000m, 700000m, 500000m, 0m, "");
-            // NV7 - Order Staff, nhiều feedback tốt
-            AddEmployee(dt, "NV007", "Hoàng Thị Mai", "Order Staff", 25, 500000m, 1200000m, 500000m, 0m, "");
+            decimal total = 0;
+            int count = 0;
+            try
+            {
+                var salaries = await SalaryBUS.GetAll();
+                var emps = (await EmployeeBUS.GetAllEmployeesAsync())
+                    .Where(x => x.EmployeeId != null)
+                    .ToDictionary(x => x.EmployeeId!, x => x);
+
+                foreach (var kv in salaries.Where(s => s.Value.Month == month).OrderBy(s => s.Key))
+                {
+                    var s = kv.Value;
+                    string name = "", dept = "";
+                    if (s.EmployeeId != null && emps.TryGetValue(s.EmployeeId, out var emp))
+                    {
+                        name = emp.FullName ?? "";
+                        dept = EmployeeText.RoleVi(emp.Role);
+                    }
+                    dt.Rows.Add(kv.Key, s.EmployeeId, name, dept, s.WorkDays,
+                        s.BaseSalary, s.Allowance, s.FeedbackBonus, s.HolidayBonus,
+                        s.Deduction, s.DeductionReason, s.TotalSalary);
+                    total += s.TotalSalary;
+                    count++;
+                }
+            }
+            catch { /* offline */ }
 
             dgvPayroll.DataSource = dt;
             dgvPayroll.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvPayroll.RowHeadersVisible = false;
+            if (dgvPayroll.Columns.Contains("Mã lương")) dgvPayroll.Columns["Mã lương"].Visible = false;
 
-            // Size columns
             dgvPayroll.Columns["Mã NV"].FillWeight = 7;
             dgvPayroll.Columns["Họ tên"].FillWeight = 16;
             dgvPayroll.Columns["Bộ phận"].FillWeight = 10;
@@ -101,7 +138,6 @@ namespace GUI
             dgvPayroll.Columns["Thưởng lễ"].FillWeight = 8;
             dgvPayroll.Columns["Trừ lương"].FillWeight = 8;
             dgvPayroll.Columns["Lý do trừ"].FillWeight = 14;
-            // Cột cuối chừa chỗ cho chip 🔄 trong header -> cần rộng hơn để "Tổng lương" không xuống 2 dòng
             dgvPayroll.Columns["Tổng lương"].FillWeight = 12;
 
             foreach (string col in new[] { "Lương CB", "Phụ cấp", "Thưởng FB", "Thưởng lễ", "Trừ lương", "Tổng lương" })
@@ -111,7 +147,6 @@ namespace GUI
             }
             dgvPayroll.Columns["Ngày công"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            // Color deductions red
             foreach (DataGridViewRow row in dgvPayroll.Rows)
             {
                 if (row.Cells["Trừ lương"].Value is decimal val && val < 0)
@@ -123,46 +158,41 @@ namespace GUI
                     row.Cells["Thưởng FB"].Style.ForeColor = Color.Gold;
             }
 
-            // Update summary
-            decimal total = 0;
-            foreach (DataRow row in dt.Rows)
-                total += (decimal)row["Tổng lương"];
-
             lblTotalSalary.Text = total.ToString("N0") + " đ";
-            lblEmployeeCount.Text = dt.Rows.Count + " nhân viên";
+            lblEmployeeCount.Text = count + " nhân viên";
         }
 
-        private void AddEmployee(DataTable dt, string id, string name, string dept, int days,
-            decimal allowance, decimal fbBonus, decimal holidayBonus, decimal deduction, string deductReason)
-        {
-            decimal baseSalary = BaseSalaryByRole.GetValueOrDefault(dept, 6000000m);
-            // Tính lương theo ngày công (26 ngày chuẩn)
-            decimal actualBase = baseSalary * days / 26m;
-            decimal total = actualBase + allowance + fbBonus + holidayBonus + deduction; // deduction is negative
+        private void cmbMonth_SelectedIndexChanged(object sender, EventArgs e) => _ = LoadRealPayroll();
 
-            dt.Rows.Add(id, name, dept, days,
-                Math.Round(actualBase), allowance, fbBonus, holidayBonus,
-                deduction, deductReason, Math.Round(total));
-        }
-
-        private void cmbMonth_SelectedIndexChanged(object sender, EventArgs e)
+        // Tính lại tổng lương cho tất cả bản ghi của tháng đang chọn rồi lưu.
+        private async void btnApplyBP_Click(object sender, EventArgs e)
         {
-            LoadMockPayroll();
-        }
+            int month = SelectedMonth();
+            int updated = 0;
+            try
+            {
+                var salaries = await SalaryBUS.GetAll();
+                foreach (var kv in salaries.Where(s => s.Value.Month == month))
+                {
+                    var s = kv.Value;
+                    decimal total = s.BaseSalary + s.Allowance + s.FeedbackBonus + s.HolidayBonus + s.Deduction;
+                    if (total != s.TotalSalary)
+                    {
+                        await SalaryBUS.Update(kv.Key, new { tong_luong = total });
+                        updated++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Lỗi tính lương: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
 
-        private void btnApplyBP_Click(object sender, EventArgs e)
-        {
-            MsgBox.Show(
-                MsgBox.OwnerWindow(this),
-                "Đã tính lương tự động cho tất cả nhân viên!\n\n" +
-                "• Lương cơ bản: Tự tính theo bộ phận\n" +
-                "• Thưởng feedback: Dựa trên số feedback tốt\n" +
-                "• Trừ lương: Tự trừ nếu nghỉ quá 3 ngày/tháng\n" +
-                "• Thưởng lễ: Áp dụng cho tháng có ngày lễ",
-                "Tính lương tự động",
-                MsgBox.MessageBoxType.Success
-            );
-            LoadMockPayroll();
+            MsgBox.Show(MsgBox.OwnerWindow(this),
+                $"Đã tính lại tổng lương cho tháng {month}.\nCập nhật {updated} bản ghi.\n\nTổng lương = Lương CB + Phụ cấp + Thưởng FB + Thưởng lễ + Trừ lương.",
+                "Tính lương", MsgBox.MessageBoxType.Success);
+            await LoadRealPayroll();
         }
 
         private void dgvPayroll_SelectionChanged(object sender, EventArgs e)
@@ -170,10 +200,6 @@ namespace GUI
             if (dgvPayroll.CurrentRow == null) return;
             var row = dgvPayroll.CurrentRow;
             string name = row.Cells["Họ tên"].Value?.ToString() ?? "";
-            string dept = row.Cells["Bộ phận"].Value?.ToString() ?? "";
-            decimal baseSalary = BaseSalaryByRole.GetValueOrDefault(dept, 6000000m);
-
-            // Show tooltip-like info (could be status bar)
             string deductReason = row.Cells["Lý do trừ"].Value?.ToString() ?? "";
             if (!string.IsNullOrEmpty(deductReason))
             {
