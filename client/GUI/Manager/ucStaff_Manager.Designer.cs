@@ -369,6 +369,19 @@ namespace GUI
             btnClearFilter.Click += btnClearFilter_Click;
 
             // dgvStaff
+            dgvStaff.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvStaff.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvStaff.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvStaff.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvStaff.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvStaff.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvStaff.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvStaff.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvStaff.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvStaff.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvStaff.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvStaff.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvStaff.GridColor = Color.FromArgb(45, 45, 48);
             ConfigureGrid(dgvStaff);
             dgvStaff.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
             dgvStaff.Location = new Point(18, 100);
@@ -419,6 +432,19 @@ namespace GUI
             btnApproveLeave.Text = "✔  Duyệt";
 
             // dgvLeaveReq
+            dgvLeaveReq.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvLeaveReq.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvLeaveReq.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvLeaveReq.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvLeaveReq.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvLeaveReq.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvLeaveReq.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvLeaveReq.GridColor = Color.FromArgb(45, 45, 48);
             ConfigureGrid(dgvLeaveReq);
             dgvLeaveReq.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
             dgvLeaveReq.Location = new Point(18, 56);
@@ -470,28 +496,31 @@ namespace GUI
             dgv.ColumnHeadersHeight   = 32;
             dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgv.ColumnHeadersDefaultCellStyle.BackColor         = Color.FromArgb(31, 31, 34);
-            dgv.ColumnHeadersDefaultCellStyle.ForeColor         = Color.FromArgb(31, 138, 154);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor         = Color.FromArgb(160, 160, 166);
             dgv.ColumnHeadersDefaultCellStyle.Font              = new Font("Segoe UI", 9F, FontStyle.Bold);
             dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
-            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(31, 138, 154);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
             dgv.DefaultCellStyle.BackColor         = Color.FromArgb(24, 24, 27);
             dgv.DefaultCellStyle.ForeColor         = Color.FromArgb(220, 220, 225);
             dgv.DefaultCellStyle.Font              = new Font("Segoe UI", 9F);
             dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(34, 34, 38);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.EnableHeadersVisualStyles = false;
             dgv.GridColor     = Color.FromArgb(45, 45, 48);
             dgv.MultiSelect   = false;
             dgv.ReadOnly      = true;
             dgv.RowHeadersVisible = false;
             dgv.RowTemplate.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.RowTemplate.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.RowTemplate.Height = 28;
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
             // ThemeStyle
-            dgv.ThemeStyle.AlternatingRowsStyle.BackColor        = Color.FromArgb(34, 34, 38);
+            dgv.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgv.ThemeStyle.AlternatingRowsStyle.Font             = null;
             dgv.ThemeStyle.AlternatingRowsStyle.ForeColor        = Color.FromArgb(220, 220, 225);
             dgv.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
@@ -501,7 +530,7 @@ namespace GUI
             dgv.ThemeStyle.HeaderStyle.BackColor    = Color.FromArgb(31, 31, 34);
             dgv.ThemeStyle.HeaderStyle.BorderStyle  = DataGridViewHeaderBorderStyle.None;
             dgv.ThemeStyle.HeaderStyle.Font         = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dgv.ThemeStyle.HeaderStyle.ForeColor    = Color.FromArgb(31, 138, 154);
+            dgv.ThemeStyle.HeaderStyle.ForeColor    = Color.FromArgb(160, 160, 166);
             dgv.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgv.ThemeStyle.HeaderStyle.Height       = 32;
             dgv.ThemeStyle.ReadOnly = true;
@@ -511,7 +540,7 @@ namespace GUI
             dgv.ThemeStyle.RowsStyle.ForeColor         = Color.FromArgb(220, 220, 225);
             dgv.ThemeStyle.RowsStyle.Height            = 28;
             dgv.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.ThemeStyle.RowsStyle.SelectionForeColor = Color.White;
+            dgv.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
         }
 
         #region Field declarations

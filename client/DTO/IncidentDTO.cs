@@ -9,27 +9,27 @@ namespace DTO
     public class IncidentDTO
     {
         [JsonIgnore]
-        public string? SuCoId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("loai_su_co")]
-        public string? LoaiSuCo { get; set; }  // "an_ninh", "y_te", "chay_no", "sos_khan_cap"
+        public string? Type { get; set; }  // "an_ninh", "y_te", "chay_no", "sos_khan_cap"
 
         [JsonProperty("mo_ta")]
-        public string? MoTa { get; set; }
+        public string? Description { get; set; }
 
         [JsonProperty("nguoi_bao_id")]
-        public string? NguoiBaoId { get; set; }
+        public string? ReporterId { get; set; }
 
         [JsonProperty("thoi_gian")]
-        public long ThoiGian { get; set; }
+        public long Timestamp { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "dang_xu_ly", "da_xu_ly"
+        public string? Status { get; set; }  // "dang_xu_ly", "da_xu_ly"
 
         [JsonProperty("ghi_chu_xu_ly")]
-        public string? GhiChuXuLy { get; set; }
+        public string? HandleNote { get; set; }
 
         [JsonProperty("muc_do")]
-        public string? MucDo { get; set; }  // "thuong", "khan_cap", "nghiem_trong"
+        public string? Severity { get; set; }  // "thuong", "khan_cap", "nghiem_trong"
     }
 }

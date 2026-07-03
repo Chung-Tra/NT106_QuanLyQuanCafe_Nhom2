@@ -30,7 +30,7 @@ namespace GUI
             lblNotifType = new Label();
             lblNotifFrom = new Label();
             lblNotifTime = new Label();
-            txtNotifContent = new TextBox();
+            txtNotifContent = new Guna2TextBox();
             btnAccept = new Guna2Button();
             btnReject = new Guna2Button();
             btnGoToChat = new Guna2Button();
@@ -82,6 +82,19 @@ namespace GUI
             pnlNotifications.Location = new Point(20, 95);
             pnlNotifications.Size = new Size(920, 250);
 
+            dgvNotifications.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvNotifications.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvNotifications.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvNotifications.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvNotifications.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvNotifications.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvNotifications.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvNotifications.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvNotifications.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvNotifications.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvNotifications.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvNotifications.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvNotifications.GridColor = Color.FromArgb(45, 45, 48);
             ConfigureGrid(dgvNotifications);
             dgvNotifications.Location = new Point(18, 18);
             dgvNotifications.Size = new Size(884, 214);
@@ -127,12 +140,14 @@ namespace GUI
             lblNotifTime.Location = new Point(380, 53);
             lblNotifTime.Text = "";
 
-            txtNotifContent.BackColor = Color.FromArgb(24, 24, 27);
-            txtNotifContent.BorderStyle = BorderStyle.None;
+            txtNotifContent.BorderColor = Color.FromArgb(63, 63, 70);
+            txtNotifContent.BorderRadius = 8;
+            txtNotifContent.FillColor = Color.FromArgb(24, 24, 27);
             txtNotifContent.Font = new Font("Segoe UI", 10F);
             txtNotifContent.ForeColor = Color.FromArgb(220, 220, 225);
             txtNotifContent.Location = new Point(18, 84);
             txtNotifContent.Multiline = true;
+            txtNotifContent.PasswordChar = '\0';
             txtNotifContent.ReadOnly = true;
             txtNotifContent.Size = new Size(660, 175);
 
@@ -219,7 +234,11 @@ namespace GUI
             dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
             dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.EnableHeadersVisualStyles = false;
             dgv.GridColor = Color.FromArgb(45, 45, 48);
             dgv.MultiSelect = false;
@@ -227,6 +246,7 @@ namespace GUI
             dgv.RowHeadersVisible = false;
             dgv.RowTemplate.Height = 28;
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion
@@ -242,7 +262,7 @@ namespace GUI
         private Label lblNotifType;
         private Label lblNotifFrom;
         private Label lblNotifTime;
-        private TextBox txtNotifContent;
+        private Guna2TextBox txtNotifContent;
         private Guna2Button btnAccept;
         private Guna2Button btnReject;
         private Guna2Button btnGoToChat;

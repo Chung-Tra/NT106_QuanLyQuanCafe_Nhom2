@@ -136,6 +136,8 @@ namespace GUI
 
                 string greeting = $"Xin chào {welcomePrefix} {GlobalSession.CurrentUser.FullName}!";
 
+                btnSignIn.Enabled = true;
+                btnSignIn.Text = "Đăng nhập";
                 MsgBox.Show(this, "\n" + greeting, "Đăng nhập thành công", MsgBox.MessageBoxType.Success);
 
                 new MainDashboard().Show();

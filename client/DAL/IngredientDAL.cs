@@ -46,11 +46,11 @@ namespace DAL
             try
             {
                 var payload = new Dictionary<string, object?>();
-                if (data.TenNguyenLieu != null) payload["ten_nguyen_lieu"] = data.TenNguyenLieu;
-                if (data.DonVi != null)          payload["don_vi"] = data.DonVi;
-                payload["gia_nhap"] = data.GiaNhap;
-                payload["ton_kho"] = data.TonKho;
-                payload["ton_kho_toi_thieu"] = data.TonKhoToiThieu;
+                if (data.Name != null) payload["ten_nguyen_lieu"] = data.Name;
+                if (data.Unit != null)          payload["don_vi"] = data.Unit;
+                payload["gia_nhap"] = data.ImportPrice;
+                payload["ton_kho"] = data.Stock;
+                payload["ton_kho_toi_thieu"] = data.MinStock;
 
                 var response = await DalHelper.Client.SendAsync(
                     DalHelper.Build(HttpMethod.Put, $"ingredients/{id}", payload));

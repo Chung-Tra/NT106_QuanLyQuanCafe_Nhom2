@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace DTO
 {
-    public class TinNhanChatDTO
+    public class ChatMessageDTO
     {
         [JsonProperty("nguoi_gui_id")]
         public string? SenderId { get; set; }
@@ -20,9 +20,4 @@ namespace DTO
         [JsonProperty("loai_tin_nhan")]
         public string? MessageType { get; set; } = "text";
     }
-
-    public class ChatMessageDTO : TinNhanChatDTO
-    {
-    }
 }
-    

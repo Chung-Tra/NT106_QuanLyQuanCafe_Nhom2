@@ -9,36 +9,36 @@ namespace DTO
     public class LeaveRequestDTO
     {
         [JsonIgnore]
-        public string? XinNghiId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("tu_ngay")]
-        public string? TuNgay { get; set; }  // "dd/MM/yyyy"
+        public string? FromDate { get; set; }  // "dd/MM/yyyy"
 
         [JsonProperty("den_ngay")]
-        public string? DenNgay { get; set; }
+        public string? ToDate { get; set; }
 
         [JsonProperty("so_ngay")]
-        public int SoNgay { get; set; }
+        public int DayCount { get; set; }
 
         [JsonProperty("ly_do")]
-        public string? LyDo { get; set; }
+        public string? Reason { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "cho_duyet", "da_duyet", "tu_choi"
+        public string? Status { get; set; }  // "cho_duyet", "da_duyet", "tu_choi"
 
         [JsonProperty("thoi_gian_gui")]
-        public long ThoiGianGui { get; set; }
+        public long SentAt { get; set; }
 
         [JsonProperty("nguoi_duyet_id")]
-        public string? NguoiDuyetId { get; set; }
+        public string? ApproverId { get; set; }
 
         [JsonProperty("thoi_gian_duyet")]
-        public long ThoiGianDuyet { get; set; }
+        public long ApprovedAt { get; set; }
 
         [JsonProperty("ghi_chu_duyet")]
-        public string? GhiChuDuyet { get; set; }
+        public string? ApprovalNote { get; set; }
     }
 }

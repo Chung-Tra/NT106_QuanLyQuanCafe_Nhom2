@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using GUI.Helpers;
 
 namespace GUI
 {
-    public partial class WarehouseManagerForm : Form
+    public partial class WarehouseManager : Form
     {
-        public WarehouseManagerForm()
+        public WarehouseManager()
         {
             InitializeComponent();
         }
+
+        private void BtnDong_Click(object? sender, EventArgs e) => Close();
+        private void BtnClose_Click(object? sender, EventArgs e) => Close();
 
         private void BtnTaoPhieu_Click(object? sender, EventArgs e)
         {

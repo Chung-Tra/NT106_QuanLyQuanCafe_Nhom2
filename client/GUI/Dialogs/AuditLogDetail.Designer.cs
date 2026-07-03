@@ -34,6 +34,7 @@ namespace GUI
             dgvAuditLog.ReadOnly              = true;
             dgvAuditLog.RowHeadersVisible     = false;
             dgvAuditLog.SelectionMode         = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgvAuditLog);
             dgvAuditLog.ScrollBars            = ScrollBars.None;
             dgvAuditLog.BorderStyle           = BorderStyle.None;
             dgvAuditLog.CellBorderStyle       = DataGridViewCellBorderStyle.SingleHorizontal;
@@ -44,7 +45,7 @@ namespace GUI
             dgvAuditLog.DefaultCellStyle.BackColor          = Color.FromArgb(28, 28, 30);
             dgvAuditLog.DefaultCellStyle.ForeColor          = Color.FromArgb(220, 220, 225);
             dgvAuditLog.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgvAuditLog.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgvAuditLog.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvAuditLog.DefaultCellStyle.Font               = new Font("Segoe UI", 9F);
             dgvAuditLog.ColumnHeadersDefaultCellStyle.BackColor          = Color.FromArgb(35, 35, 38);
             dgvAuditLog.ColumnHeadersDefaultCellStyle.ForeColor          = Color.FromArgb(245, 158, 11);

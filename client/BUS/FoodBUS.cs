@@ -32,9 +32,9 @@ namespace BUS
         {
             if (Validation.IsAnyEmpty(food.Id))
                 return (false, "Không tìm thấy mã món ăn cần cập nhật!");
-            if (Validation.IsAnyEmpty(food.TenMon))
+            if (Validation.IsAnyEmpty(food.Name))
                 return (false, "Tên món không được để trống!");
-            if (food.Gia <= 0)
+            if (food.Price <= 0)
                 return (false, "Giá món ăn phải lớn hơn 0!");
 
             return await FoodDAL.UpdateAsync(food.Id!, food);
@@ -42,9 +42,9 @@ namespace BUS
 
         public static async Task<(bool Success, string Message)> AddFood(FoodDTO food)
         {
-            if (Validation.IsAnyEmpty(food.TenMon))
+            if (Validation.IsAnyEmpty(food.Name))
                 return (false, "Tên món không được để trống!");
-            if (food.Gia <= 0)
+            if (food.Price <= 0)
                 return (false, "Giá món ăn phải lớn hơn 0!");
 
             return await FoodDAL.AddAsync(food);

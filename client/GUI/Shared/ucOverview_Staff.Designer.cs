@@ -102,7 +102,7 @@ namespace GUI
             btnDetailMsg.ShadowDecoration.CustomizableEdges = customizableEdges4;
             btnDetailMsg.Size = new Size(76, 28);
             btnDetailMsg.TabIndex = 2;
-            btnDetailMsg.Text = "Cụ thể";
+            btnDetailMsg.Text = "Chi tiết";
             //
             // pnlWorkingDays
             //
@@ -155,7 +155,7 @@ namespace GUI
             btnDetailWorkingDays.ShadowDecoration.CustomizableEdges = customizableEdges8;
             btnDetailWorkingDays.Size = new Size(76, 28);
             btnDetailWorkingDays.TabIndex = 2;
-            btnDetailWorkingDays.Text = "Cụ thể";
+            btnDetailWorkingDays.Text = "Chi tiết";
             //
             // pnlDaysOff
             //
@@ -208,7 +208,7 @@ namespace GUI
             btnDetailDaysOff.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btnDetailDaysOff.Size = new Size(76, 28);
             btnDetailDaysOff.TabIndex = 2;
-            btnDetailDaysOff.Text = "Cụ thể";
+            btnDetailDaysOff.Text = "Chi tiết";
             //
             // pnlNotif
             //

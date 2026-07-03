@@ -143,6 +143,19 @@ namespace GUI
             pnlGrid.Location = new Point(20, 210);
             pnlGrid.Size = new Size(920, 430);
 
+            dgvPayroll.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvPayroll.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvPayroll.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvPayroll.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvPayroll.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvPayroll.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvPayroll.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvPayroll.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvPayroll.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvPayroll.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvPayroll.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvPayroll.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvPayroll.GridColor = Color.FromArgb(45, 45, 48);
             ConfigureGrid(dgvPayroll);
             dgvPayroll.Location = new Point(18, 18);
             dgvPayroll.Size = new Size(884, 394);
@@ -189,7 +202,11 @@ namespace GUI
             dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
             dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgv.EnableHeadersVisualStyles = false;
             dgv.GridColor = Color.FromArgb(45, 45, 48);
             dgv.MultiSelect = false;
@@ -197,6 +214,7 @@ namespace GUI
             dgv.RowHeadersVisible = false;
             dgv.RowTemplate.Height = 28;
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion

@@ -5,9 +5,9 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    public partial class ucCRM_OrderStaff : UserControl
+    public partial class ucCRM_Order : UserControl
     {
-        public ucCRM_OrderStaff()
+        public ucCRM_Order()
         {
             InitializeComponent();
             btnReport.Click += btnReport_Click;

@@ -10,24 +10,24 @@ namespace DTO
     public class WarningDTO
     {
         [JsonIgnore]
-        public string? CanhBaoId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("loai")]
-        public string? Loai { get; set; }  // "het_nguyen_lieu", "sap_het", "thiet_bi_hong", "khac"
+        public string? Type { get; set; }  // "het_nguyen_lieu", "sap_het", "thiet_bi_hong", "khac"
 
         [JsonProperty("noi_dung")]
-        public string? NoiDung { get; set; }
+        public string? Content { get; set; }
 
         [JsonProperty("nguoi_gui_id")]
-        public string? NguoiGuiId { get; set; }
+        public string? SenderId { get; set; }
 
         [JsonProperty("thoi_gian")]
-        public long ThoiGian { get; set; }
+        public long Timestamp { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "cho_xu_ly", "da_xu_ly"
+        public string? Status { get; set; }  // "cho_xu_ly", "da_xu_ly"
 
         [JsonProperty("nguyen_lieu_id")]
-        public string? NguyenLieuId { get; set; }  // Liên kết NL bị ảnh hưởng (nếu có)
+        public string? IngredientId { get; set; }  // Liên kết NL bị ảnh hưởng (nếu có)
     }
 }

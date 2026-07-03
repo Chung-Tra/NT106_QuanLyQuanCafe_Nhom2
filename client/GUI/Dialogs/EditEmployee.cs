@@ -15,7 +15,7 @@ namespace GUI
     public partial class EditEmployee : Form
     {
 
-        // Lưu trữ thông tin cũ để gọi API sau khi người dùng sửa xong 
+        // Lưu trữ thông tin cũ để gọi API sau khi người dùng sửa xong
         private string _currentEmpId = string.Empty;
         private string _currentAuthUid = string.Empty;
 
@@ -24,64 +24,7 @@ namespace GUI
         {
             InitializeComponent();
             LoadRolesAndStatus();
-            txtFullName.Multiline = true;
-            txtFullName.WordWrap = true;
-            txtFullName.AcceptsReturn = false;
-            txtFullName.TextChanged += (_, _) => RecalcEditEmployeeLayout();
             BindData(emp);
-        }
-
-        private void RecalcEditEmployeeLayout()
-        {
-            const int lx = 30;
-            const int fx = 34;
-            const int fw = 350;
-            const int g = 8;
-
-            int y = lblTitle.Bottom + 14;
-
-            lblEmpId.Location = new Point(lx, y);
-            y += lblEmpId.Height + 2;
-            txtEmpId.Location = new Point(fx, y);
-            txtEmpId.Width = fw;
-            y = txtEmpId.Bottom + g;
-
-            lblEmail.Location = new Point(lx, y);
-            y += lblEmail.Height + 2;
-            txtEmail.Location = new Point(fx, y);
-            txtEmail.Width = fw;
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtEmail, 30, 80);
-            y = txtEmail.Bottom + g;
-
-            lblFullName.Location = new Point(lx, y);
-            y += lblFullName.Height + 2;
-            txtFullName.Location = new Point(fx, y);
-            txtFullName.Width = fw;
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtFullName, 32, 120);
-            y = txtFullName.Bottom + g;
-
-            lblPhone.Location = new Point(lx, y);
-            y += lblPhone.Height + 2;
-            txtPhone.Location = new Point(fx, y);
-            txtPhone.Width = fw;
-            y = txtPhone.Bottom + g;
-
-            lblRole.Location = new Point(lx, y);
-            lblStatus.Location = new Point(220, y);
-            y += Math.Max(lblRole.Height, lblStatus.Height) + 2;
-
-            cboRole.Location = new Point(fx, y);
-            cboStatus.Location = new Point(224, y);
-            y = Math.Max(cboRole.Bottom, cboStatus.Bottom) + g + 8;
-
-            btnCancel.Location = new Point(fx, y);
-            btnSave.Location = new Point(234, y);
-
-            int bottom = y + btnSave.Height + 30;
-            if (bottom > ClientSize.Height || ClientSize.Width < 420)
-                ClientSize = new Size(Math.Max(ClientSize.Width, 420), bottom);
-
-            lblTitle.Location = new Point(Math.Max(30, (ClientSize.Width - lblTitle.Width) / 2), 23);
         }
 
         private void LoadRolesAndStatus()
@@ -120,7 +63,6 @@ namespace GUI
 
             cboRole.SelectedValue = emp.Role ?? "";
             cboStatus.SelectedValue = emp.Status ?? "active";
-            RecalcEditEmployeeLayout();
         }
 
         private async void BtnSave_Click(object sender, EventArgs e)

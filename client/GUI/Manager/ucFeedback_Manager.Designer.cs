@@ -1,5 +1,6 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
@@ -18,158 +19,189 @@ namespace GUI
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dgvStyle = new DataGridViewCellStyle();
-            pnlHeader = new Panel();
+            pnlHeader = new Guna2Panel();
             lblTitle = new Label();
-            pnlGrid = new Panel();
-            dgvFeedback = new DataGridView();
-            pnlDetail = new Panel();
+            pnlGrid = new Guna2Panel();
+            dgvFeedback = new Guna2DataGridView();
+            pnlDetail = new Guna2Panel();
             lblDetailTitle = new Label();
             lblCustomerName = new Label();
             lblDate = new Label();
             lblRating = new Label();
-            txtContent = new TextBox();
-            btnReply = new Button();
+            txtContent = new Guna2TextBox();
+            btnReply = new Guna2Button();
             pnlHeader.SuspendLayout();
             pnlGrid.SuspendLayout();
             pnlDetail.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvFeedback).BeginInit();
             SuspendLayout();
-            pnlHeader.BackColor = Color.FromArgb(30, 30, 30);
+
+            // ====== pnlHeader ======
+            pnlHeader.BackColor = Color.FromArgb(31, 31, 34);
+            pnlHeader.BorderRadius = 14;
             pnlHeader.Controls.Add(lblTitle);
-            pnlHeader.Location = new Point(20, 15);
-            pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(764, 45);
-            pnlHeader.TabIndex = 0;
+            pnlHeader.Location = new Point(20, 20);
+            pnlHeader.Size = new Size(960, 60);
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(15, 10);
-            lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(250, 25);
-            lblTitle.TabIndex = 0;
-            lblTitle.Text = "Phản hồi khách hàng";
-            pnlGrid.BackColor = Color.FromArgb(30, 30, 30);
+            lblTitle.Location = new Point(18, 16);
+            lblTitle.Text = "💬  Phản hồi khách hàng";
+
+            // ====== pnlGrid ======
+            pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
+            pnlGrid.BorderRadius = 14;
             pnlGrid.Controls.Add(dgvFeedback);
-            pnlGrid.Location = new Point(20, 70);
-            pnlGrid.Name = "pnlGrid";
-            pnlGrid.Size = new Size(764, 270);
-            pnlGrid.TabIndex = 1;
-            dgvFeedback.AllowUserToAddRows = false;
+            pnlGrid.Location = new Point(20, 95);
+            pnlGrid.Size = new Size(960, 320);
+
+            // dgvFeedback
+            dgvFeedback.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvFeedback.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvFeedback.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvFeedback.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvFeedback.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvFeedback.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvFeedback.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvFeedback.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvFeedback.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvFeedback.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvFeedback.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvFeedback.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvFeedback.GridColor = Color.FromArgb(45, 45, 48);
+            ConfigureGrid(dgvFeedback);
             dgvFeedback.AllowUserToDeleteRows = false;
-            dgvFeedback.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgvFeedback.BorderStyle = BorderStyle.None;
-            dgvFeedback.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvStyle.BackColor = Color.FromArgb(45, 45, 48);
-            dgvStyle.Font = new Font("Segoe UI", 9F);
-            dgvStyle.ForeColor = Color.White;
-            dgvStyle.SelectionBackColor = Color.Gray;
-            dgvStyle.SelectionForeColor = Color.White;
-            dgvFeedback.DefaultCellStyle = dgvStyle;
-            dgvFeedback.Location = new Point(15, 15);
-            dgvFeedback.Name = "dgvFeedback";
-            dgvFeedback.ReadOnly = true;
-            dgvFeedback.RowHeadersWidth = 51;
-            dgvFeedback.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvFeedback.Size = new Size(734, 240);
-            dgvFeedback.TabIndex = 0;
+            dgvFeedback.Location = new Point(18, 18);
+            dgvFeedback.Size = new Size(924, 284);
             dgvFeedback.SelectionChanged += dgvFeedback_SelectionChanged;
-            pnlDetail.BackColor = Color.FromArgb(30, 30, 30);
+
+            // ====== pnlDetail ======
+            pnlDetail.BackColor = Color.FromArgb(31, 31, 34);
+            pnlDetail.BorderRadius = 14;
             pnlDetail.Controls.Add(lblDetailTitle);
             pnlDetail.Controls.Add(lblCustomerName);
             pnlDetail.Controls.Add(lblDate);
             pnlDetail.Controls.Add(lblRating);
             pnlDetail.Controls.Add(txtContent);
             pnlDetail.Controls.Add(btnReply);
-            pnlDetail.Location = new Point(20, 350);
-            pnlDetail.Name = "pnlDetail";
-            pnlDetail.Size = new Size(764, 165);
-            pnlDetail.TabIndex = 2;
+            pnlDetail.Location = new Point(20, 430);
+            pnlDetail.Size = new Size(960, 220);
+
             lblDetailTitle.AutoSize = true;
             lblDetailTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblDetailTitle.ForeColor = Color.White;
-            lblDetailTitle.Location = new Point(15, 12);
-            lblDetailTitle.Name = "lblDetailTitle";
-            lblDetailTitle.Size = new Size(120, 20);
-            lblDetailTitle.TabIndex = 0;
-            lblDetailTitle.Text = "Chi tiết phản hồi";
+            lblDetailTitle.Location = new Point(18, 14);
+            lblDetailTitle.Text = "📝  Chi tiết phản hồi";
+
             lblCustomerName.AutoSize = true;
             lblCustomerName.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            lblCustomerName.ForeColor = Color.Orange;
-            lblCustomerName.Location = new Point(15, 40);
-            lblCustomerName.Name = "lblCustomerName";
-            lblCustomerName.Size = new Size(150, 19);
-            lblCustomerName.TabIndex = 1;
+            lblCustomerName.ForeColor = Color.FromArgb(245, 158, 11);
+            lblCustomerName.Location = new Point(18, 50);
             lblCustomerName.Text = "Khách hàng: ---";
+
             lblDate.AutoSize = true;
-            lblDate.Font = new Font("Segoe UI", 9F);
-            lblDate.ForeColor = Color.Gray;
-            lblDate.Location = new Point(300, 42);
-            lblDate.Name = "lblDate";
-            lblDate.Size = new Size(80, 15);
-            lblDate.TabIndex = 2;
+            lblDate.Font = new Font("Segoe UI", 9.5F);
+            lblDate.ForeColor = Color.FromArgb(160, 160, 166);
+            lblDate.Location = new Point(360, 52);
             lblDate.Text = "Ngày: ---";
+
             lblRating.AutoSize = true;
             lblRating.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             lblRating.ForeColor = Color.Gold;
-            lblRating.Location = new Point(500, 38);
-            lblRating.Name = "lblRating";
-            lblRating.Size = new Size(50, 21);
-            lblRating.TabIndex = 3;
+            lblRating.Location = new Point(580, 48);
             lblRating.Text = "---";
-            txtContent.BackColor = Color.FromArgb(45, 45, 48);
-            txtContent.BorderStyle = BorderStyle.None;
+
+            // txtContent
+            txtContent.BorderColor = Color.FromArgb(63, 63, 70);
+            txtContent.BorderRadius = 10;
+            txtContent.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtContent.FillColor = Color.FromArgb(30, 30, 33);
+            txtContent.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
             txtContent.Font = new Font("Segoe UI", 10F);
             txtContent.ForeColor = Color.White;
-            txtContent.Location = new Point(15, 68);
+            txtContent.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtContent.Location = new Point(18, 84);
             txtContent.Multiline = true;
-            txtContent.Name = "txtContent";
+            txtContent.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
             txtContent.ReadOnly = true;
-            txtContent.Size = new Size(540, 80);
-            txtContent.TabIndex = 4;
-            btnReply.BackColor = Color.SteelBlue;
+            txtContent.Size = new Size(720, 110);
+
+            // btnReply
+            btnReply.BorderRadius = 10;
             btnReply.Cursor = Cursors.Hand;
-            btnReply.FlatAppearance.BorderSize = 0;
-            btnReply.FlatStyle = FlatStyle.Flat;
+            btnReply.FillColor = Color.FromArgb(31, 138, 154);
             btnReply.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnReply.ForeColor = Color.White;
-            btnReply.Location = new Point(580, 68);
-            btnReply.Name = "btnReply";
-            btnReply.Size = new Size(160, 40);
-            btnReply.TabIndex = 5;
-            btnReply.Text = "Trả lời";
-            btnReply.UseVisualStyleBackColor = false;
+            btnReply.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReply.Location = new Point(760, 84);
+            btnReply.Size = new Size(180, 50);
+            btnReply.Text = "💬  Trả lời";
             btnReply.Click += btnReply_Click;
+
+            // ====== ucFeedback_Manager ======
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 48);
-            Controls.Add(pnlDetail);
-            Controls.Add(pnlGrid);
+            BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlHeader);
+            Controls.Add(pnlGrid);
+            Controls.Add(pnlDetail);
             Name = "ucFeedback_Manager";
-            Size = new Size(804, 530);
+            Size = new Size(1000, 665);
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlGrid.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvFeedback).EndInit();
             pnlDetail.ResumeLayout(false);
             pnlDetail.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvFeedback).EndInit();
             ResumeLayout(false);
+        }
+
+        private static void ConfigureGrid(Guna2DataGridView dgv)
+        {
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersHeight = 32;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgv.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.GridColor = Color.FromArgb(45, 45, 48);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowTemplate.Height = 28;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion
 
-        private Panel pnlHeader;
+        private Guna2Panel pnlHeader;
         private Label lblTitle;
-        private Panel pnlGrid;
-        private DataGridView dgvFeedback;
-        private Panel pnlDetail;
+        private Guna2Panel pnlGrid;
+        private Guna2DataGridView dgvFeedback;
+        private Guna2Panel pnlDetail;
         private Label lblDetailTitle;
         private Label lblCustomerName;
         private Label lblDate;
         private Label lblRating;
-        private TextBox txtContent;
-        private Button btnReply;
+        private Guna2TextBox txtContent;
+        private Guna2Button btnReply;
     }
 }

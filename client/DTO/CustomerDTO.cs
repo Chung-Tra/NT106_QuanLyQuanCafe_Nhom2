@@ -10,24 +10,24 @@ namespace DTO
     public class CustomerDTO
     {
         [JsonIgnore]
-        public string? KhachHangId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("ten_khach_hang")]
-        public string? TenKhachHang { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("so_dien_thoai")]
-        public string? SoDienThoai { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [JsonProperty("email")]
         public string? Email { get; set; }
 
         [JsonProperty("diem_tich_luy")]
-        public int DiemTichLuy { get; set; }
+        public int LoyaltyPoints { get; set; }
 
         [JsonProperty("tong_don")]
-        public int TongDon { get; set; }
+        public int TotalOrders { get; set; }
 
         [JsonProperty("ngay_tao")]
-        public long NgayTao { get; set; }
+        public long CreatedAt { get; set; }
     }
 }

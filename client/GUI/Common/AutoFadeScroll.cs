@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -6,6 +7,26 @@ namespace GUI
 {
     internal static class AutoFadeScroll
     {
+        /// <summary>
+        /// Quét đệ quy mọi DataGridView trong 1 container và attach AutoFadeScroll.
+        /// Gọi từ Load event hoặc sau InitializeComponent (khi handle/parent đã có).
+        /// </summary>
+        public static void AttachAll(Control container)
+        {
+            if (container == null) return;
+            foreach (var dgv in FindAllDgvs(container))
+                Attach(dgv);
+        }
+
+        private static IEnumerable<DataGridView> FindAllDgvs(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (c is DataGridView dgv) yield return dgv;
+                foreach (var nested in FindAllDgvs(c)) yield return nested;
+            }
+        }
+
         // DataGridView: scroll wheel di chuyển selection row + hiện thanh teal fade
         public static void Attach(DataGridView dgv)
         {
