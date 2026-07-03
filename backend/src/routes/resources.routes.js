@@ -17,6 +17,17 @@ const RESOURCES = {
     'incidents':      ['su_co',      'sc_'],
     'warnings':       ['canh_bao',   'cb_'],
     'recipes':        ['cong_thuc',  'ct_'],
+    // Node MỚI cho các màn phụ (khớp DTO client mới)
+    'promotions':     ['khuyen_mai',      'km_'],
+    'expenses':       ['chi_phi',         'cp_'],
+    'losses':         ['that_thoat',      'loss_'],
+    'reservations':   ['dat_ban',         'db_'],
+    'audit-logs':     ['nhat_ky',         'log_'],
+    'broadcasts':     ['thong_bao_chung', 'bc_'],
+    'schedules':      ['lich_lam_viec',   'sch_'],
+    'shift-registers':['dang_ky_ca',      'sr_'],
+    'bug-reports':    ['bao_loi',         'bug_'],
+    'point-logs':     ['diem_log',        'pl_'],
 };
 
 const router = express.Router();

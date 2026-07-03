@@ -21,7 +21,28 @@ namespace GUI
         {
             InitializeComponent();
             DgvRefresh.Attach(dgvMenu, LoadRealData);
-            this.Load += async (s, e) => await LoadRealData();
+            DgvRefresh.Attach(dgvInventory, () => _ = LoadInventory());
+            this.Load += async (s, e) => { await LoadRealData(); await LoadInventory(); };
+        }
+
+        // Đổ tồn kho nguyên liệu thật (node nguyen_lieu) vào bảng bên phải.
+        private async Task LoadInventory()
+        {
+            try
+            {
+                dgvInventory.AllowUserToAddRows = false;
+                dgvInventory.RowHeadersVisible = false;
+                dgvInventory.Rows.Clear();
+
+                var ings = await Task.Run(IngredientBUS.GetAll);
+                foreach (var i in ings.OrderBy(x => x.Name))
+                {
+                    bool low = i.Stock <= i.MinStock;
+                    int idx = dgvInventory.Rows.Add(i.Name, i.Stock, i.Unit, i.MinStock, low ? "Cần nhập" : "Bình thường");
+                    dgvInventory.Rows[idx].Cells[4].Style.ForeColor = low ? Color.IndianRed : Color.MediumSeaGreen;
+                }
+            }
+            catch { /* offline: để trống */ }
         }
 
         private async Task LoadRealData()
@@ -170,6 +191,7 @@ namespace GUI
         {
             using WarehouseManager frm = new();
             frm.ShowDialog(MsgBox.OwnerWindow(this));
+            _ = LoadInventory();   // nhập kho xong -> cập nhật tồn kho
         }
 
         private void BtnFilter_Click(object sender, EventArgs e)

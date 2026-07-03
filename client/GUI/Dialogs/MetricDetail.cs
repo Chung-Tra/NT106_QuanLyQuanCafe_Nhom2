@@ -8,7 +8,7 @@ namespace GUI
 {
     // Detail form for one Dashboard metric (Revenue / Profit / Expense / Loss):
     //  - Left: BREAKDOWN (the small amounts that sum to the figure) + how-it's-computed note.
-    //  - Right: AMOUNT PER MONTH (mock).
+    //  - Right: AMOUNT PER MONTH (dữ liệu thật, do ucDashboard_Admin tổng hợp 12 tháng gần nhất).
     public partial class MetricDetail : Form
     {
         // Ctor không tham số: chỉ để VS Designer mở được form (runtime luôn dùng ctor có tham số bên dưới)

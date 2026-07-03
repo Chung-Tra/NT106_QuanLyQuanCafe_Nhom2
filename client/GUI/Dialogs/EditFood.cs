@@ -11,6 +11,7 @@ namespace GUI
     public partial class EditFood : Form
     {
         private string _currentFoodId = string.Empty;
+        private string _imageUrl = string.Empty;
 
         public EditFood(FoodDTO food)
         {
@@ -40,6 +41,9 @@ namespace GUI
         private void BindData(FoodDTO food)
         {
             _currentFoodId = food.Id ?? "";
+            _imageUrl = food.ImageUrl ?? "";
+            if (!string.IsNullOrWhiteSpace(_imageUrl))
+                btnChooseImage.Text = "Đổi ảnh (đã có ảnh)";
 
             txtTenMon.Text = food.Name ?? "";
             txtGia.Text = food.Price.ToString("N0");
@@ -60,6 +64,39 @@ namespace GUI
             {
                 cmLoai.SelectedIndex = 0;
             }
+        }
+
+        private async void BtnChooseImage_Click(object sender, EventArgs e)
+        {
+            using OpenFileDialog ofd = new()
+            {
+                Title = "Chọn ảnh món",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp"
+            };
+            if (ofd.ShowDialog(this) != DialogResult.OK) return;
+
+            btnChooseImage.Enabled = false;
+            btnChooseImage.Text = "Đang tải ảnh...";
+            try
+            {
+                var (ok, msg, url) = await UploadBUS.UploadImage(ofd.FileName, "mon_uong");
+                if (ok && !string.IsNullOrEmpty(url))
+                {
+                    _imageUrl = url;
+                    btnChooseImage.Text = "Đã đổi ảnh ✓";
+                }
+                else
+                {
+                    btnChooseImage.Text = "Chọn ảnh món...";
+                    MsgBox.Show(this, msg, "Lỗi tải ảnh", MsgBox.MessageBoxType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                btnChooseImage.Text = "Chọn ảnh món...";
+                MsgBox.Show(this, ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnChooseImage.Enabled = true; }
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
@@ -89,7 +126,8 @@ namespace GUI
                     Category = cmLoai.SelectedValue?.ToString() ?? "other",
                     Description = txtMoTa.Text.Trim(),
                     InStock = true,
-                    IsVisible = true
+                    IsVisible = true,
+                    ImageUrl = _imageUrl
                 };
 
                 // Gọi tầng BUS thực hiện cập nhật qua Cloud Function

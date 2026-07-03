@@ -43,9 +43,21 @@ namespace GUI
             _btnQk3.Click += (s, e) => _txtReceived.Text = (200000L).ToString("#,##0");
             _btnQk4.Click += (s, e) => _txtReceived.Text = (500000L).ToString("#,##0");
 
-            // QR panel — runtime reference + amount
-            _qrBox.Paint += (s, e) => DrawMockQr(e.Graphics, _qrBox.ClientRectangle);
-            _lblQrInfo.Text   = $"Ngân hàng:  Vietcombank\r\nChủ TK:  QUAN CAFE NHOM2\r\nSố TK:  0123 456 789\r\nNội dung:  TT {DateTime.Now:HHmmss}";
+            // QR panel — VietQR THẬT (chuẩn Napas): app ngân hàng quét sẽ điền sẵn STK + số tiền + nội dung.
+            string noiDung = $"TT {DateTime.Now:HHmmss}";
+            try
+            {
+                _qrBox.BackColor = Color.White;
+                _qrBox.BackgroundImage?.Dispose();
+                _qrBox.BackgroundImage = Qr.VietQr(_total, noiDung);
+                _qrBox.BackgroundImageLayout = ImageLayout.Zoom;
+            }
+            catch
+            {
+                // Không tạo được QR (cấu hình sai) → vẽ tạm placeholder để không trống.
+                _qrBox.Paint += (s, e) => DrawMockQr(e.Graphics, _qrBox.ClientRectangle);
+            }
+            _lblQrInfo.Text   = $"Ngân hàng:  {QrConfig.BankName}\r\nChủ TK:  {QrConfig.AccountName}\r\nSố TK:  {QrConfig.AccountNo}\r\nNội dung:  {noiDung}";
             _lblQrAmount.Text = "Số tiền:  " + Theme.Vnd(_total);
 
             // Footer

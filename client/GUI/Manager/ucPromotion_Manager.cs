@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -12,42 +16,23 @@ namespace GUI
         {
             InitializeComponent();
 
-            // Tab switching
             btnHappy.Click += (s, e) => SwitchTab(btnHappy, pnlHappy);
             btnCombo.Click += (s, e) => SwitchTab(btnCombo, pnlCombo);
             btnVoucher.Click += (s, e) => SwitchTab(btnVoucher, pnlVoucher);
 
-            // Happy Hour panel runtime wiring
-            btnHappyEdit.Click += (s, e) => EditCurrent(dgvHappy, "Sửa Happy Hour");
-            btnHappyAdd.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Thêm Happy Hour thành công!", "Thành công", MsgBox.MessageBoxType.Success);
+            btnHappyEdit.Click += (s, e) => _ = EditHappy();
+            btnHappyAdd.Click += (s, e) => _ = AddHappyHour();
+            btnComboAdd.Click += (s, e) => _ = AddCombo();
+            btnVoucherGen.Click += (s, e) => _ = AddVoucher();
 
-            // Combo panel runtime wiring
-            btnComboAdd.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Tính năng thêm combo đang phát triển.", "Thông báo", MsgBox.MessageBoxType.Info);
+            _ = LoadHappyGrid();
+            _ = LoadComboGrid();
+            _ = LoadVoucherGrid();
 
-            // Voucher panel runtime wiring
-            btnVoucherGen.Click += (s, e) =>
-            {
-                string code = txtVoucherCode.Text.Trim().ToUpper();
-                string disc = txtVoucherDiscount.Text.Trim();
-                if (string.IsNullOrEmpty(code))
-                {
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập mã voucher!", "Thông báo", MsgBox.MessageBoxType.Warning);
-                    return;
-                }
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo voucher: {code} — Giảm {disc}%", "Thành công", MsgBox.MessageBoxType.Success);
-            };
+            DgvRefresh.Attach(dgvHappy, () => _ = LoadHappyGrid());
+            DgvRefresh.Attach(dgvCombo, () => _ = LoadComboGrid());
+            DgvRefresh.Attach(dgvVoucher, () => _ = LoadVoucherGrid());
 
-            // Runtime grid styling + data binding
-            LoadHappyGrid();
-            LoadComboGrid();
-            LoadVoucherGrid();
-
-            // Nút làm mới từng bảng: chỉ tải lại dữ liệu của bảng đó
-            DgvRefresh.Attach(dgvHappy, LoadHappyGrid);
-            DgvRefresh.Attach(dgvCombo, LoadComboGrid);
-            DgvRefresh.Attach(dgvVoucher, LoadVoucherGrid);
-
-            // Double-click 1 dòng -> form chi tiết read-only (đủ field, kể cả cột ẩn)
             dgvHappy.CellDoubleClick   += (s, e) => ShowDetail(dgvHappy, e, "Chi tiết Happy Hour");
             dgvCombo.CellDoubleClick   += (s, e) => ShowDetail(dgvCombo, e, "Chi tiết Combo");
             dgvVoucher.CellDoubleClick += (s, e) => ShowDetail(dgvVoucher, e, "Chi tiết Voucher");
@@ -55,22 +40,196 @@ namespace GUI
             Load += (s, e) => SwitchTab(btnHappy, pnlHappy);
         }
 
-        // Mở chi tiết read-only của dòng được double-click
         private void ShowDetail(Guna2DataGridView dgv, DataGridViewCellEventArgs e, string title)
         {
             if (e.RowIndex < 0) return;
             RecordDetail.FromRow(dgv.Rows[e.RowIndex], title).ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa dòng đang chọn (form sửa, khoá cột mã/ID)
-        private void EditCurrent(Guna2DataGridView dgv, string title)
+        private static string RowId(DataGridView dgv) =>
+            (dgv.CurrentRow?.DataBoundItem as DataRowView)?["Mã"]?.ToString() ?? "";
+
+        // ---------------- HAPPY HOUR ----------------
+        private async Task LoadHappyGrid()
         {
-            if (dgv.CurrentRow == null || dgv.CurrentRow.Index < 0)
+            Theme.StyleGrid(dgvHappy);
+            var dt = new DataTable();
+            dt.Columns.Add("Mã");
+            dt.Columns.Add("Tên chương trình");
+            dt.Columns.Add("Khung giờ");
+            dt.Columns.Add("Ngày áp dụng");
+            dt.Columns.Add("Giảm (%)");
+            dt.Columns.Add("Trạng thái");
+            try
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một dòng để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                foreach (var kv in (await PromotionBUS.GetAll()).Where(x => x.Value.Loai == "happy_hour"))
+                {
+                    var p = kv.Value;
+                    dt.Rows.Add(kv.Key, p.Ten, p.KhungGio, p.NgayApDung, p.GiamPct, p.TrangThai);
+                }
+            }
+            catch { }
+            dgvHappy.DataSource = dt;
+            if (dgvHappy.Columns.Contains("Mã")) dgvHappy.Columns["Mã"].Visible = false;
+            dgvHappy.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvHappy.Columns.Contains("Tên chương trình")) dgvHappy.Columns["Tên chương trình"].FillWeight = 26;
+            if (dgvHappy.Columns.Contains("Khung giờ")) dgvHappy.Columns["Khung giờ"].FillWeight = 16;
+            if (dgvHappy.Columns.Contains("Ngày áp dụng")) dgvHappy.Columns["Ngày áp dụng"].FillWeight = 26;
+            if (dgvHappy.Columns.Contains("Giảm (%)")) dgvHappy.Columns["Giảm (%)"].FillWeight = 12;
+            if (dgvHappy.Columns.Contains("Trạng thái")) dgvHappy.Columns["Trạng thái"].FillWeight = 20;
+        }
+
+        private async Task AddHappyHour()
+        {
+            string? name = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Happy Hour", "Tên chương trình", "VD: Happy Hour Tối");
+            if (string.IsNullOrWhiteSpace(name)) return;
+            string? gio = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Happy Hour", "Khung giờ", "VD: 14:00 – 16:00");
+            string? ngay = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Happy Hour", "Ngày áp dụng", "VD: T2, T3, T4, T5, T6");
+            string? disc = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Happy Hour", "Mức giảm (%)", "VD: 20");
+
+            var (ok, msg, _) = await PromotionBUS.Add(new PromotionDTO
+            {
+                Loai = "happy_hour",
+                Ten = name,
+                KhungGio = gio ?? "14:00 – 16:00",
+                NgayApDung = ngay ?? "T2 - T6",
+                GiamPct = (string.IsNullOrWhiteSpace(disc) ? "10" : disc) + "%",
+                TrangThai = "🟢 Đang chạy"
+            });
+            if (ok) { await LoadHappyGrid(); MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm Happy Hour!", "Thành công", MsgBox.MessageBoxType.Success); }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+        }
+
+        private async Task EditHappy()
+        {
+            if (dgvHappy.CurrentRow == null || dgvHappy.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một chương trình để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            RecordEdit.EditRow(dgv.CurrentRow, title, MsgBox.OwnerWindow(this));
+            string id = RowId(dgvHappy);
+            if (RecordEdit.EditRow(dgvHappy.CurrentRow, "Sửa Happy Hour", MsgBox.OwnerWindow(this)) && !string.IsNullOrEmpty(id))
+            {
+                var r = dgvHappy.CurrentRow;
+                await PromotionBUS.Update(id, new
+                {
+                    ten = r.Cells["Tên chương trình"].Value?.ToString() ?? "",
+                    khung_gio = r.Cells["Khung giờ"].Value?.ToString() ?? "",
+                    ngay_ap_dung = r.Cells["Ngày áp dụng"].Value?.ToString() ?? "",
+                    giam_pct = r.Cells["Giảm (%)"].Value?.ToString() ?? "",
+                    trang_thai = r.Cells["Trạng thái"].Value?.ToString() ?? ""
+                });
+                await LoadHappyGrid();
+            }
+        }
+
+        // ---------------- COMBO ----------------
+        private async Task LoadComboGrid()
+        {
+            Theme.StyleGrid(dgvCombo);
+            var dt = new DataTable();
+            dt.Columns.Add("Mã");
+            dt.Columns.Add("Tên combo");
+            dt.Columns.Add("Bao gồm");
+            dt.Columns.Add("Giá gốc", typeof(long));
+            dt.Columns.Add("Giá combo", typeof(long));
+            dt.Columns.Add("Tiết kiệm", typeof(long));
+            dt.Columns.Add("Trạng thái");
+            try
+            {
+                foreach (var kv in (await PromotionBUS.GetAll()).Where(x => x.Value.Loai == "combo"))
+                {
+                    var p = kv.Value;
+                    dt.Rows.Add(kv.Key, p.Ten, p.BaoGom, p.GiaGoc, p.GiaCombo, p.TietKiem, p.TrangThai);
+                }
+            }
+            catch { }
+            dgvCombo.DataSource = dt;
+            if (dgvCombo.Columns.Contains("Mã")) dgvCombo.Columns["Mã"].Visible = false;
+            dgvCombo.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            foreach (var c in new[] { "Giá gốc", "Giá combo", "Tiết kiệm" })
+                if (dgvCombo.Columns.Contains(c))
+                {
+                    dgvCombo.Columns[c].DefaultCellStyle.Format = "N0";
+                    dgvCombo.Columns[c].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                }
+        }
+
+        private async Task AddCombo()
+        {
+            string? name = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Combo", "Tên combo", "VD: Combo Trưa");
+            if (string.IsNullOrWhiteSpace(name)) return;
+            string? items = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Combo", "Bao gồm", "VD: 1 Cà phê + 1 Bánh");
+            string? priceStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm Combo", "Giá combo (đồng)", "VD: 50000");
+            long.TryParse((priceStr ?? "").Replace(",", "").Replace(".", ""), out long price);
+
+            var (ok, msg, _) = await PromotionBUS.Add(new PromotionDTO
+            {
+                Loai = "combo",
+                Ten = name,
+                BaoGom = items ?? "",
+                GiaCombo = price,
+                GiaGoc = price + 15000,
+                TietKiem = 15000,
+                TrangThai = "Đang bán"
+            });
+            if (ok) { await LoadComboGrid(); MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm combo!", "Thành công", MsgBox.MessageBoxType.Success); }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+        }
+
+        // ---------------- VOUCHER ----------------
+        private async Task LoadVoucherGrid()
+        {
+            Theme.StyleGrid(dgvVoucher);
+            var dt = new DataTable();
+            dt.Columns.Add("Mã");
+            dt.Columns.Add("Mã voucher");
+            dt.Columns.Add("Giảm");
+            dt.Columns.Add("Hạn sử dụng");
+            dt.Columns.Add("Đã dùng", typeof(int));
+            dt.Columns.Add("Còn lại", typeof(int));
+            dt.Columns.Add("Trạng thái");
+            try
+            {
+                foreach (var kv in (await PromotionBUS.GetAll()).Where(x => x.Value.Loai == "voucher"))
+                {
+                    var p = kv.Value;
+                    dt.Rows.Add(kv.Key, p.Ma, p.Giam, p.HanSuDung, p.DaDung, p.ConLai, p.TrangThai);
+                }
+            }
+            catch { }
+            dgvVoucher.DataSource = dt;
+            if (dgvVoucher.Columns.Contains("Mã")) dgvVoucher.Columns["Mã"].Visible = false;
+            dgvVoucher.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        }
+
+        private async Task AddVoucher()
+        {
+            string code = txtVoucherCode.Text.Trim().ToUpper();
+            string disc = txtVoucherDiscount.Text.Trim();
+            if (string.IsNullOrEmpty(code))
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập mã voucher!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            var (ok, msg, _) = await PromotionBUS.Add(new PromotionDTO
+            {
+                Loai = "voucher",
+                Ma = code,
+                Giam = string.IsNullOrEmpty(disc) ? "10%" : disc + "%",
+                HanSuDung = DateTime.Now.AddMonths(1).ToString("dd/MM/yyyy"),
+                DaDung = 0,
+                ConLai = 50,
+                TrangThai = "🟢 Hoạt động"
+            });
+            if (ok)
+            {
+                txtVoucherCode.Clear();
+                txtVoucherDiscount.Clear();
+                await LoadVoucherGrid();
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo voucher: {code} — Giảm {disc}%", "Thành công", MsgBox.MessageBoxType.Success);
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
 
         private void SwitchTab(Guna2Button active, Panel panel)
@@ -88,85 +247,6 @@ namespace GUI
             foreach (var p in new[] { pnlHappy, pnlCombo, pnlVoucher })
                 p.Visible = false;
             panel.Visible = true;
-        }
-
-        private void LoadHappyGrid()
-        {
-            Theme.StyleGrid(dgvHappy);
-
-            var dt = new DataTable();
-            dt.Columns.Add("Tên chương trình");
-            dt.Columns.Add("Khung giờ");
-            dt.Columns.Add("Ngày áp dụng");
-            dt.Columns.Add("Giảm (%)");
-            dt.Columns.Add("Trạng thái");
-            dt.Rows.Add("Happy Hour Chiều", "14:00 – 16:00", "T2, T3, T4, T5, T6", "20%", "🟢 Đang chạy");
-            dt.Rows.Add("Sáng sớm Tươi", "07:00 – 09:00", "T2, T3, T4, T5, T6", "10%", "🟡 Tạm dừng");
-            dt.Rows.Add("Cuối tuần vui", "10:00 – 12:00", "T7, CN", "15%", "🟢 Đang chạy");
-            dgvHappy.DataSource = dt;
-            dgvHappy.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvHappy.Columns["Tên chương trình"].FillWeight = 26;
-            dgvHappy.Columns["Khung giờ"].FillWeight        = 16;
-            dgvHappy.Columns["Ngày áp dụng"].FillWeight     = 26;
-            dgvHappy.Columns["Giảm (%)"].FillWeight         = 12;
-            dgvHappy.Columns["Trạng thái"].FillWeight       = 20;
-        }
-
-        private void LoadComboGrid()
-        {
-            Theme.StyleGrid(dgvCombo);
-
-            var dt = new DataTable();
-            dt.Columns.Add("Tên combo");
-            dt.Columns.Add("Bao gồm");
-            dt.Columns.Add("Giá gốc", typeof(long));
-            dt.Columns.Add("Giá combo", typeof(long));
-            dt.Columns.Add("Tiết kiệm", typeof(long));
-            dt.Columns.Add("Trạng thái");
-            dt.Rows.Add("Combo Sáng", "Cà phê đen + Bánh mì", 55000L, 45000L, 10000L, "Đang bán");
-            dt.Rows.Add("Combo Sinh Tố", "2x Sinh tố + Bánh flan", 85000L, 70000L, 15000L, "Đang bán");
-            dt.Rows.Add("Combo Đôi", "2 Latte + 1 Cookie", 90000L, 75000L, 15000L, "Đang bán");
-            dt.Rows.Add("Combo Gia đình", "4x Trà sữa trân châu + 1 Bánh", 200000L, 170000L, 30000L, "Tạm dừng");
-            dgvCombo.DataSource = dt;
-            dgvCombo.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvCombo.Columns["Giá gốc"].DefaultCellStyle.Format = "N0";
-            dgvCombo.Columns["Giá combo"].DefaultCellStyle.Format = "N0";
-            dgvCombo.Columns["Tiết kiệm"].DefaultCellStyle.Format = "N0";
-            dgvCombo.Columns["Giá gốc"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvCombo.Columns["Giá combo"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvCombo.Columns["Tiết kiệm"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvCombo.Columns["Tên combo"].FillWeight  = 20;
-            dgvCombo.Columns["Bao gồm"].FillWeight    = 32;
-            dgvCombo.Columns["Giá gốc"].FillWeight    = 12;
-            dgvCombo.Columns["Giá combo"].FillWeight  = 12;
-            dgvCombo.Columns["Tiết kiệm"].FillWeight  = 12;
-            dgvCombo.Columns["Trạng thái"].FillWeight = 12;
-        }
-
-        private void LoadVoucherGrid()
-        {
-            Theme.StyleGrid(dgvVoucher);
-
-            var dt = new DataTable();
-            dt.Columns.Add("Mã voucher");
-            dt.Columns.Add("Giảm");
-            dt.Columns.Add("Hạn sử dụng");
-            dt.Columns.Add("Đã dùng", typeof(int));
-            dt.Columns.Add("Còn lại", typeof(int));
-            dt.Columns.Add("Trạng thái");
-            dt.Rows.Add("WELCOME10", "10%", "30/06/2026", 8, 42, "🟢 Hoạt động");
-            dt.Rows.Add("CAFE20", "20%", "15/06/2026", 25, 0, "🔴 Hết hạn");
-            dt.Rows.Add("SUMMER15", "15%", "31/08/2026", 3, 47, "🟢 Hoạt động");
-            dt.Rows.Add("BIRTHDAY50", "50%", "24/07/2026", 1, 9, "🟢 Hoạt động");
-            dt.Rows.Add("FREESHIP", "10K ship", "31/12/2026", 0, 100, "🟡 Chưa dùng");
-            dgvVoucher.DataSource = dt;
-            dgvVoucher.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvVoucher.Columns["Mã voucher"].FillWeight  = 22;
-            dgvVoucher.Columns["Giảm"].FillWeight        = 12;
-            dgvVoucher.Columns["Hạn sử dụng"].FillWeight = 18;
-            dgvVoucher.Columns["Đã dùng"].FillWeight     = 12;
-            dgvVoucher.Columns["Còn lại"].FillWeight     = 12;
-            dgvVoucher.Columns["Trạng thái"].FillWeight  = 24;
         }
     }
 }

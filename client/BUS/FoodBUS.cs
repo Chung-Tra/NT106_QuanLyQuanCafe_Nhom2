@@ -25,7 +25,9 @@ namespace BUS
         {
             if (Validation.IsAnyEmpty(id))
                 return (false, "Không tìm thấy mã món ăn!");
-            return await FoodDAL.DeleteAsync(id);
+            var r = await FoodDAL.DeleteAsync(id);
+            if (r.Success) Audit.Log("Xóa", "Món " + id);
+            return r;
         }
 
         public static async Task<(bool Success, string Message)> UpdateFood(FoodDTO food)
@@ -37,7 +39,9 @@ namespace BUS
             if (food.Price <= 0)
                 return (false, "Giá món ăn phải lớn hơn 0!");
 
-            return await FoodDAL.UpdateAsync(food.Id!, food);
+            var r = await FoodDAL.UpdateAsync(food.Id!, food);
+            if (r.Success) Audit.Log("Sửa thông tin", "Món " + food.Name);
+            return r;
         }
 
         public static async Task<(bool Success, string Message)> AddFood(FoodDTO food)
@@ -47,7 +51,9 @@ namespace BUS
             if (food.Price <= 0)
                 return (false, "Giá món ăn phải lớn hơn 0!");
 
-            return await FoodDAL.AddAsync(food);
+            var r = await FoodDAL.AddAsync(food);
+            if (r.Success) Audit.Log("Thêm", "Món " + food.Name);
+            return r;
         }
     }
 }

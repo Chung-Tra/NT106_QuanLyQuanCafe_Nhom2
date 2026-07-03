@@ -37,4 +37,16 @@ async function updatePassword(email, newPassword) {
     await auth.updateUser(userRecord.uid, { password: newPassword });
 }
 
-module.exports = { loginEmployee, checkEmailExists, updatePassword };
+// Đổi mật khẩu khi đang đăng nhập: xác thực mật khẩu cũ trước, rồi đổi.
+async function changePassword(email, oldPassword, newPassword) {
+    const apiKey = process.env.FIREBASE_API_KEY;
+    // Ném lỗi nếu mật khẩu cũ sai
+    await axios.post(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+        { email, password: oldPassword, returnSecureToken: false }
+    );
+    const userRecord = await auth.getUserByEmail(email);
+    await auth.updateUser(userRecord.uid, { password: newPassword });
+}
+
+module.exports = { loginEmployee, checkEmailExists, updatePassword, changePassword };

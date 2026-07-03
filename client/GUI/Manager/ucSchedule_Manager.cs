@@ -1,5 +1,10 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -35,11 +40,60 @@ namespace GUI
             grid.EnableDoubleBuffer();
 
             // Static-control event subscriptions (lambdas -> kept in code-behind)
-            btnPrev.Click   += (s, e) => { _weekStart = _weekStart.AddDays(-7); RenderGrid(); };
-            btnNext.Click   += (s, e) => { _weekStart = _weekStart.AddDays(7); RenderGrid(); };
-            btnPublish.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Đã đăng lịch ca tuần này cho toàn bộ nhân viên!", "Đăng lịch thành công", MsgBox.MessageBoxType.Success);
+            btnPrev.Click   += (s, e) => { _weekStart = _weekStart.AddDays(-7); _ = ReloadWeekAsync(); };
+            btnNext.Click   += (s, e) => { _weekStart = _weekStart.AddDays(7); _ = ReloadWeekAsync(); };
+            btnPublish.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Lịch ca tuần này lấy trực tiếp từ dữ liệu phân ca (node schedules) — đã đồng bộ cho toàn bộ nhân viên!", "Đăng lịch", MsgBox.MessageBoxType.Success);
 
-            Load += (s, e) => RenderGrid();
+            Load += (s, e) => _ = ReloadWeekAsync();
+        }
+
+        // Ma trận ca × ngày: _cells[shift][day] = danh sách tên NV (đã ghép chuỗi).
+        // shift 0=Ca sáng(S) · 1=Ca chiều(C) · 2=Ca đêm(N).
+        private string[][] _cells = Array.Empty<string[]>();
+
+        private static string DayCode(ScheduleDTO s, int day) => (day switch
+        {
+            0 => s.T2, 1 => s.T3, 2 => s.T4, 3 => s.T5, 4 => s.T6, 5 => s.T7, _ => s.CN
+        })?.Trim().ToUpperInvariant() ?? "";
+
+        // Nạp lịch THẬT của tuần đang xem từ node schedules, gộp NV theo (ca, ngày).
+        private async Task ReloadWeekAsync()
+        {
+            string weekKey = _weekStart.ToString("dd/MM/yyyy");
+            var names   = new string[_shifts.Length][];
+            for (int s = 0; s < _shifts.Length; s++) names[s] = new string[_days.Length];
+
+            var buckets = new List<string>[_shifts.Length, _days.Length];
+            for (int s = 0; s < _shifts.Length; s++)
+                for (int d = 0; d < _days.Length; d++)
+                    buckets[s, d] = new List<string>();
+
+            try
+            {
+                var scheds = (await ScheduleBUS.GetAll()).Values.Where(x => x.Tuan == weekKey);
+                var emps = (await Task.Run(EmployeeBUS.GetAllEmployeesAsync))
+                           .Where(x => x.EmployeeId != null)
+                           .ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+
+                foreach (var sc in scheds)
+                {
+                    string who = (sc.EmployeeId != null && emps.TryGetValue(sc.EmployeeId, out var n))
+                        ? n : (sc.Ten ?? sc.EmployeeId ?? "?");
+                    for (int d = 0; d < _days.Length; d++)
+                    {
+                        int shift = DayCode(sc, d) switch { "S" => 0, "C" => 1, "N" => 2, _ => -1 };
+                        if (shift >= 0) buckets[shift, d].Add(who);
+                    }
+                }
+            }
+            catch { /* offline → lưới trống */ }
+
+            for (int s = 0; s < _shifts.Length; s++)
+                for (int d = 0; d < _days.Length; d++)
+                    names[s][d] = string.Join(" + ", buckets[s, d]);
+
+            _cells = names;
+            if (!IsDisposed) RenderGrid();
         }
 
         private static DateTime GetMonday(DateTime d)
@@ -75,17 +129,6 @@ namespace GUI
                 grid.Controls.Add(lbl, d + 1, 0);
             }
 
-            // Dữ liệu mẫu mỗi ca
-            string[][] mockData =
-            {
-                // Ca sáng T2..CN
-                new[]{ "An + Bích", "An + Nam", "Bích + Hà", "An + Bích", "Nam + Hà", "Bích", "⚠ Thiếu" },
-                // Ca chiều T2..CN
-                new[]{ "Hà + Tuấn", "Hương + Tùng", "⚠ Thiếu", "Hà + Tuấn", "Hương + Tùng", "Hà + Tuấn", "Nam + Hương" },
-                // Ca đêm T2..CN
-                new[]{ "Tùng + Mai", "Tuấn + Tùng", "Mai + Tuấn", "Tùng + Mai", "Tuấn + Tùng", "---", "---" },
-            };
-
             for (int s = 0; s < _shifts.Length; s++)
             {
                 var shiftLbl = new Label
@@ -102,9 +145,11 @@ namespace GUI
 
                 for (int d = 0; d < _days.Length; d++)
                 {
-                    string cell = mockData[s][d];
-                    bool warn   = cell.StartsWith("⚠");
-                    bool empty  = cell == "---";
+                    bool has     = s < _cells.Length && d < _cells[s].Length && !string.IsNullOrEmpty(_cells[s][d]);
+                    string names = has ? _cells[s][d] : "";
+                    bool empty   = !has;
+                    string cell  = has ? names : "⚠ Thiếu";
+                    bool warn    = !has;
                     var cellLbl = new Label
                     {
                         Text      = cell,

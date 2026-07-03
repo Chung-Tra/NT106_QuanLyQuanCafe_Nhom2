@@ -1,6 +1,8 @@
+using BUS;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -33,7 +35,7 @@ namespace GUI
             Load += (s, e) => LoadData();
         }
 
-        private void LoadData()
+        private async void LoadData()
         {
             _dtFull = new DataTable();
             _dtFull.Columns.Add("Thời gian");
@@ -44,16 +46,19 @@ namespace GUI
             _dtFull.Columns.Add("Lý do");
             _dtFull.Columns.Add("IP");
 
-            _dtFull.Rows.Add("2026-06-24 08:02", "Trần Văn Minh", "Quản trị viên",  "Đăng nhập",    "Hệ thống",         "---",                          "192.168.1.10");
-            _dtFull.Rows.Add("2026-06-24 08:15", "Nguyễn Hồng An", "Quản lý",       "Phê duyệt",    "Đơn nghỉ NV007",   "Duyệt nghỉ phép tháng 6",      "192.168.1.11");
-            _dtFull.Rows.Add("2026-06-24 09:30", "Lê Thu Hà",     "Quản lý",        "Xóa",          "Nguyên liệu #012", "Nguyên liệu hết hạn sử dụng",  "192.168.1.11");
-            _dtFull.Rows.Add("2026-06-24 10:05", "Trần Văn Minh", "Quản trị viên",  "Sửa thông tin","NV002 Lê Thu Hà",  "Cập nhật số điện thoại",        "192.168.1.10");
-            _dtFull.Rows.Add("2026-06-24 11:15", "Phạm Bảo Nam",  "Nhân viên Order","Thanh toán",   "Đơn #HD20240624",  "Xác nhận thanh toán khách bàn 3","192.168.1.14");
-            _dtFull.Rows.Add("2026-06-24 11:45", "Lê Thu Hà",     "Quản lý",        "Xuất báo cáo", "Doanh thu T6",     "Gửi cho admin cuối ngày",       "192.168.1.11");
-            _dtFull.Rows.Add("2026-06-24 13:00", "Trần Văn Minh", "Quản trị viên",  "Xóa",          "NV010 (nghỉ việc)","Nhân viên đã nghỉ việc chính thức","192.168.1.10");
-            _dtFull.Rows.Add("2026-06-24 14:20", "Nguyễn Hồng An","Quản lý",        "Sửa thông tin","Giá món CF001",    "Điều chỉnh giá do lạm phát",    "192.168.1.11");
-            _dtFull.Rows.Add("2026-06-24 15:00", "Đinh Quốc Bảo", "Pha chế",        "Đăng nhập",    "Hệ thống",         "---",                           "192.168.1.15");
-            _dtFull.Rows.Add("2026-06-24 16:30", "Phạm Bảo Nam",  "Nhân viên Order","Phê duyệt",    "Phiếu hủy đơn",    "Khách đổi ý, chưa pha",         "192.168.1.14");
+            try
+            {
+                var logs = await AuditLogBUS.GetAll();
+                foreach (var kv in logs.OrderByDescending(x => x.Value.Timestamp))
+                {
+                    var l = kv.Value;
+                    string time = l.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime.ToString("yyyy-MM-dd HH:mm")
+                        : "";
+                    _dtFull.Rows.Add(time, l.Ten, l.VaiTro, l.ThaoTac, l.DoiTuong, l.LyDo, l.Ip);
+                }
+            }
+            catch { /* offline */ }
 
             ApplyFilter();
         }

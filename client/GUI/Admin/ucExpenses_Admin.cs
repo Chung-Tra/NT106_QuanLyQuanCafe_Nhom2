@@ -1,9 +1,13 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
-using DTO;
 
 namespace GUI
 {
@@ -25,7 +29,7 @@ namespace GUI
                                 "Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
             _cmbMonth.Items.AddRange(months);
             _cmbMonth.SelectedIndex = DateTime.Now.Month - 1;
-            _cmbMonth.SelectedIndexChanged += (s, e) => LoadData();
+            _cmbMonth.SelectedIndexChanged += (s, e) => _ = LoadData();
 
             btnExport.Click += (s, e) =>
                 GridExporter.ExportExcel(_dgv, MsgBox.OwnerWindow(this),
@@ -34,14 +38,18 @@ namespace GUI
             // Double-click 1 dòng -> form chi tiết read-only đủ field (kể cả cột ẩn)
             _dgv.CellDoubleClick += Dgv_CellDoubleClick;
 
-            DgvRefresh.Attach(_dgv, LoadData);
+            DgvRefresh.Attach(_dgv, () => _ = LoadData());
 
-            Load += (s, e) => LoadData();
+            Load += (s, e) => _ = LoadData();
         }
 
-        private void LoadData()
+        private int SelectedMonth() => _cmbMonth.SelectedIndex >= 0 ? _cmbMonth.SelectedIndex + 1 : DateTime.Now.Month;
+
+        private async Task LoadData()
         {
+            int month = SelectedMonth();
             _dt = new DataTable();
+            _dt.Columns.Add("Mã");   // ẩn (đọc qua DataRowView)
             _dt.Columns.Add("Ngày");
             _dt.Columns.Add("Danh mục");
             _dt.Columns.Add("Mô tả");
@@ -50,16 +58,23 @@ namespace GUI
             _dt.Columns.Add("Chứng từ");
             _dt.Columns.Add("Ghi chú");
 
-            _dt.Rows.Add("01/06/2026", "Nhân sự",       "Lương tháng 6 — Nguyễn Văn An (Manager)",   15200000L, "Admin",     "PH-001", "Đã chuyển khoản");
-            _dt.Rows.Add("02/06/2026", "Nguyên liệu",   "Nhập cà phê Arabica 50kg — Công ty ABC",     8500000L,  "Manager",   "PH-002", "Hóa đơn VAT");
-            _dt.Rows.Add("03/06/2026", "Nguyên liệu",   "Nhập sữa tươi 200L — Vinamilk",              3200000L,  "Manager",   "PH-003", "");
-            _dt.Rows.Add("05/06/2026", "Chi khác",      "Sửa chữa máy espresso #1",                   2800000L,  "Admin",     "PH-004", "Bảo hành 3 tháng");
-            _dt.Rows.Add("07/06/2026", "Nhân sự",       "Lương tháng 6 — Toàn bộ barista (6 người)", 42000000L, "Admin",     "PH-005", "Đã chuyển khoản");
-            _dt.Rows.Add("10/06/2026", "Chi khác",      "Tiền điện tháng 6",                          4500000L,  "Admin",     "PH-006", "Hóa đơn EVNHCM");
-            _dt.Rows.Add("12/06/2026", "Nguyên liệu",   "Nhập đường, ly, ống hút",                    1800000L,  "Manager",   "PH-007", "");
-            _dt.Rows.Add("15/06/2026", "Chi khác",      "Tiền thuê mặt bằng T6",                     30000000L,  "Admin",     "PH-008", "Thanh toán trực tiếp");
-            _dt.Rows.Add("18/06/2026", "Nguyên liệu",   "Nhập trà các loại",                          2200000L,  "Manager",   "PH-009", "");
-            _dt.Rows.Add("20/06/2026", "Chi khác",      "Internet + điện thoại",                        850000L,  "Admin",     "PH-010", "");
+            try
+            {
+                var all = await ExpenseBUS.GetAll();
+                var emps = (await EmployeeBUS.GetAllEmployeesAsync())
+                    .Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+
+                foreach (var kv in all.OrderByDescending(x => x.Value.Timestamp))
+                {
+                    var ex = kv.Value;
+                    if (DateTime.TryParseExact(ex.Ngay, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+                        && d.Month != month) continue;
+                    string payer = ex.NguoiChi ?? "";
+                    if (payer != null && emps.TryGetValue(payer, out var n)) payer = n;
+                    _dt.Rows.Add(kv.Key, ex.Ngay, ex.DanhMuc, ex.MoTa, ex.SoTien, payer, ex.ChungTu, ex.GhiChu);
+                }
+            }
+            catch { /* offline */ }
 
             _dgv.DataSource = _dt;
             _dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -121,26 +136,61 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa khoản chi đang chọn
-        private void BtnEditExpense_Click(object? sender, EventArgs e)
+        // Sửa khoản chi đang chọn (lưu thật)
+        private async void BtnEditExpense_Click(object? sender, EventArgs e)
         {
             if (_dgv.CurrentRow == null || _dgv.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một khoản chi để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
+            string id = (_dgv.CurrentRow.DataBoundItem as DataRowView)?["Mã"]?.ToString() ?? "";
             if (RecordEdit.EditRow(_dgv.CurrentRow, "Sửa khoản chi", MsgBox.OwnerWindow(this)))
-                UpdateStats();
+            {
+                var rv = _dgv.CurrentRow.DataBoundItem as DataRowView;
+                if (rv != null && !string.IsNullOrEmpty(id))
+                {
+                    long.TryParse(rv["Số tiền"]?.ToString(), out long amt);
+                    await ExpenseBUS.Update(id, new
+                    {
+                        ngay = rv["Ngày"]?.ToString() ?? "",
+                        danh_muc = rv["Danh mục"]?.ToString() ?? "",
+                        mo_ta = rv["Mô tả"]?.ToString() ?? "",
+                        so_tien = amt,
+                        chung_tu = rv["Chứng từ"]?.ToString() ?? "",
+                        ghi_chu = rv["Ghi chú"]?.ToString() ?? ""
+                    });
+                }
+                await LoadData();
+            }
         }
 
-        private void BtnAdd_Click(object? sender, EventArgs e)
+        private async void BtnAdd_Click(object? sender, EventArgs e)
         {
             string? desc = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm khoản chi", "Mô tả khoản chi", "VD: Nhập nguyên liệu...");
             if (string.IsNullOrEmpty(desc)) return;
+            string? amtStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm khoản chi", "Số tiền (đồng)", "VD: 500000");
+            long.TryParse((amtStr ?? "").Replace(",", "").Replace(".", ""), out long amt);
+            string? cat = InputDialog.Show(MsgBox.OwnerWindow(this), "Thêm khoản chi", "Danh mục (Nhân sự / Nguyên liệu / Chi khác)", "Chi khác");
 
-            _dt.Rows.Add(DateTime.Now.ToString("dd/MM/yyyy"), "Chi khác", desc, 0L, GlobalSession.CurrentUser?.FullName ?? "Admin", "---", "Mới thêm");
-            UpdateStats();
-            MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm khoản chi. Vui lòng nhập số tiền vào cột 'Số tiền'.", "Thêm thành công", MsgBox.MessageBoxType.Success);
+            var dto = new ExpenseDTO
+            {
+                Ngay = DateTime.Now.ToString("dd/MM/yyyy"),
+                DanhMuc = string.IsNullOrWhiteSpace(cat) ? "Chi khác" : cat,
+                MoTa = desc,
+                SoTien = amt,
+                NguoiChi = GlobalSession.CurrentUser?.EmployeeId ?? "",
+                ChungTu = "",
+                GhiChu = "",
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+            var (ok, msg, _) = await ExpenseBUS.Add(dto);
+            if (ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm khoản chi!", "Thành công", MsgBox.MessageBoxType.Success);
+                await LoadData();
+            }
+            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
     }
 }

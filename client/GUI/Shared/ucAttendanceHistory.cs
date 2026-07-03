@@ -1,14 +1,20 @@
 ﻿using BUS;
 using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
 {
     public partial class ucAttendanceHistory : UserControl
     {
+        private bool _filterReady;
+        private Dictionary<string, string> _empNames = new();
+
         public ucAttendanceHistory()
         {
             InitializeComponent();
@@ -23,11 +29,11 @@ namespace GUI
                             .ShowDialog(MsgBox.OwnerWindow(this));
             };
 
-            DgvRefresh.Attach(dgvAttendance, LoadData);
+            DgvRefresh.Attach(dgvAttendance, () => _ = LoadDataAsync());
         }
 
         private async void ucAttendanceHistory_Load(object sender, EventArgs e) => await InitFilterAsync();
-        private void btnFilter_Click(object sender, EventArgs e) => LoadData();
+        private void btnFilter_Click(object sender, EventArgs e) => _ = LoadDataAsync();
 
         // Khởi tạo bộ lọc
         private async Task InitFilterAsync()
@@ -37,28 +43,23 @@ namespace GUI
 
             if (isPrivileged)
             {
-                // Admin/Manager: hiện ComboBox, ẩn label tên
                 cboEmployee.Visible = true;
                 lblEmployeeName.Visible = false;
                 btnFilter.Visible = true;
 
                 try
                 {
-                    // 1. Gọi BUS lấy danh sách nhân viên từ Database (Task.Run: HTTP + parse
-                    // JSON chạy ở thread pool để không chiếm luồng UI trong lúc chờ server)
                     var dsNhanVien = await Task.Run(InventoryImportBUS.GetEmployees);
+                    _empNames = dsNhanVien.Where(nv => nv.EmployeeId != null)
+                                          .ToDictionary(nv => nv.EmployeeId!, nv => nv.FullName ?? nv.EmployeeId!);
 
-                    // 2. Format lại hiển thị thành dạng "Mã - Tên" giống code cũ của bạn
                     var comboData = dsNhanVien.Select(nv => new
                     {
                         Id = nv.EmployeeId,
                         Display = $"{nv.EmployeeId} - {nv.FullName}"
                     }).ToList();
-
-                    // 3. Chèn mục "Tất cả" lên vị trí đầu tiên (Index 0)
                     comboData.Insert(0, new { Id = "ALL", Display = "Tất cả" });
 
-                    // 4. Gán Data cho ComboBox
                     cboEmployee.DataSource = comboData;
                     cboEmployee.DisplayMember = "Display";
                     cboEmployee.ValueMember = "Id";
@@ -70,7 +71,6 @@ namespace GUI
             }
             else
             {
-                // Nhân viên: ẩn ComboBox, hiện label tên + ẩn nút lọc
                 cboEmployee.Visible = false;
                 btnFilter.Visible = false;
                 lblEmployeeName.Visible = true;
@@ -78,10 +78,9 @@ namespace GUI
                 string display = string.IsNullOrWhiteSpace(user?.FullName)
                     ? "Nhân viên"
                     : $"{user!.EmployeeId} - {user.FullName}";
-
                 lblEmployeeName.Text = display;
+                if (user?.EmployeeId != null) _empNames[user.EmployeeId] = user.FullName ?? user.EmployeeId;
 
-                // Tạo 1 list ảo chỉ chứa user hiện tại để ComboBox ẩn vẫn có giá trị lọc đúng
                 var singleUserList = new List<object> { new { Id = user?.EmployeeId ?? "", Display = display } };
                 cboEmployee.DataSource = singleUserList;
                 cboEmployee.DisplayMember = "Display";
@@ -91,50 +90,76 @@ namespace GUI
             dtpFrom.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             dtpTo.Value = DateTime.Now;
 
-            LoadData();
+            _filterReady = true;
+            await LoadDataAsync();
         }
 
-        // Tải dữ liệu
-        private void LoadData()
+        private static string AttStatus(string? s) => s switch
         {
+            "du_gio" => "Đủ giờ",
+            "di_muon" => "Đi muộn",
+            "nghi_phep" => "Nghỉ phép",
+            "nua_ca" => "Nửa ca",
+            _ => s ?? ""
+        };
+
+        private static string HourMin(long ms) => ms > 0
+            ? DateTimeOffset.FromUnixTimeMilliseconds(ms).LocalDateTime.ToString("HH:mm")
+            : "--";
+
+        // Tải dữ liệu chấm công thật từ Firebase
+        private async Task LoadDataAsync()
+        {
+            if (!_filterReady) return;
             if (dtpFrom.Value.Date > dtpTo.Value.Date)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Ngày bắt đầu phải trước ngày kết thúc!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
-            // 2. Lấy điều kiện lọc hiện tại trên giao diện
             DateTime tuNgay = dtpFrom.Value.Date;
             DateTime denNgay = dtpTo.Value.Date;
-            string nhanVienDuocChon = cboEmployee.Text ?? "Tất cả";
+            string empId = cboEmployee.SelectedValue?.ToString() ?? "ALL";
 
-            // 3. Tạo dữ liệu (Ở đây mình dùng code tạo bảng ảo như bạn đã làm)
-            // Nếu sau này có Database, bạn chỉ cần thay đoạn này thành:
-            // DataTable dt = ChamCongBUS.LayDanhSach(tuNgay, denNgay, nhanVienDuocChon);
-            DataTable dt = new DataTable();
-            // ... (Thêm cột và thêm các dòng dữ liệu ảo y hệt code cũ của bạn) ...
+            var dt = new DataTable();
+            dt.Columns.Add("Nhân viên");
+            dt.Columns.Add("Ngày");
+            dt.Columns.Add("Giờ vào");
+            dt.Columns.Add("Giờ ra");
+            dt.Columns.Add("Số giờ");
+            dt.Columns.Add("Trạng thái");
+            dt.Columns.Add("Ghi chú");
 
-            // 4. Áp dụng bộ lọc vào bảng
-            if (nhanVienDuocChon != "Tất cả")
+            int shifts = 0, absent = 0, late = 0;
+            try
             {
-                DataTable filtered = dt.Clone(); // Tạo bảng trống giữ nguyên cấu trúc cột
-                foreach (DataRow row in dt.Rows)
+                var all = await AttendanceBUS.GetAll();
+                foreach (var cc in all.Values
+                    .Where(a => empId == "ALL" || a.EmployeeId == empId)
+                    .OrderByDescending(a => a.Date))
                 {
-                    if (row["Nhân viên"].ToString() == nhanVienDuocChon)
-                    {
-                        filtered.ImportRow(row); // Nhét dòng thỏa mãn điều kiện vào bảng mới
-                    }
+                    if (!DateTime.TryParse(cc.Date, out DateTime d)) continue;
+                    if (d.Date < tuNgay || d.Date > denNgay) continue;
+
+                    string name = (cc.EmployeeId != null && _empNames.TryGetValue(cc.EmployeeId, out var n))
+                        ? $"{cc.EmployeeId} - {n}" : (cc.EmployeeId ?? "");
+                    dt.Rows.Add(name, cc.Date, HourMin(cc.CheckIn), HourMin(cc.CheckOut),
+                                cc.WorkHours.ToString("0.#"), AttStatus(cc.Status), cc.Note);
+
+                    if (cc.Status == "nghi_phep") absent++;
+                    else shifts++;
+                    if (cc.Status == "di_muon") late++;
                 }
-                dt = filtered; // Cập nhật lại dt bằng bảng đã lọc
             }
+            catch { /* offline */ }
 
-            // 5. Đổ dữ liệu lên bảng (dgvAttendance)
             dgvAttendance.DataSource = dt;
+
+            lblShiftsValue.Text = shifts.ToString();
+            lblAbsentValue.Text = absent.ToString();
+            lblLateValue.Text = late.ToString();
         }
 
-        private void cboEmployee_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
+        private void cboEmployee_SelectedIndexChanged(object sender, EventArgs e) => _ = LoadDataAsync();
     }
 }

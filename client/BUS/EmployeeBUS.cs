@@ -28,6 +28,7 @@ namespace BUS
 
             var (success, message) = await EmployeeDAL.AddAsync(emp);
             if (!success) throw new Exception(message);
+            Audit.Log("Thêm nhân viên", emp.FullName ?? emp.Email ?? "");
             return true;
         }
 
@@ -52,21 +53,35 @@ namespace BUS
             if (!Validation.IsValidPhoneNumber(data.PhoneNumber))
                 return (false, "Số điện thoại không hợp lệ.\nVui lòng nhập lại số điện thoại hợp lệ!");
 
-            return await EmployeeDAL.UpdateAsync(empId, data);
+            var r = await EmployeeDAL.UpdateAsync(empId, data);
+            if (r.Success) Audit.Log("Sửa thông tin", "NV " + (data.FullName ?? empId));
+            return r;
+        }
+
+        // Cập nhật riêng ảnh đại diện (partial) — không yêu cầu đủ các field bắt buộc.
+        public static async Task<(bool Success, string Message)> UpdateAvatarAsync(string empId, string avatarUrl)
+        {
+            if (Validation.IsAnyEmpty(empId))
+                return (false, "Không tìm thấy mã nhân viên.");
+            return await EmployeeDAL.UpdateAsync(empId, new EmployeeDTO { AvatarUrl = avatarUrl });
         }
 
         public static async Task<(bool Success, string Message)> LockEmployeeAsync(string empId, string authUid)
         {
             if (Validation.IsAnyEmpty(empId, authUid))
                 return (false, "Không tìm thấy mã nhân viên hoặc mã xác thực.");
-            return await EmployeeDAL.LockAsync(empId, authUid);
+            var r = await EmployeeDAL.LockAsync(empId, authUid);
+            if (r.Success) Audit.Log("Khóa tài khoản", "NV " + empId);
+            return r;
         }
 
         public static async Task<(bool Success, string Message)> DeleteEmployeeAsync(string empId, string authUid)
         {
             if (Validation.IsAnyEmpty(empId, authUid))
                 return (false, "Lỗi: Không tìm thấy mã nhân viên hoặc mã xác thực (AuthUid) để xóa.");
-            return await EmployeeDAL.DeleteAsync(empId, authUid);
+            var r = await EmployeeDAL.DeleteAsync(empId, authUid);
+            if (r.Success) Audit.Log("Xóa", "NV " + empId);
+            return r;
         }
     }
 }

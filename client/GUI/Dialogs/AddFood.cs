@@ -12,6 +12,7 @@ namespace GUI
     {
         public event Action? FoodAdded;
         private readonly string _currentFoodId = string.Empty;
+        private string _imageUrl = string.Empty;
 
         public AddFood()
         {
@@ -63,7 +64,7 @@ namespace GUI
                     Category = cmLoai.SelectedValue?.ToString() ?? "other",
                     IsVisible = true,
                     InStock = true,
-                    ImageUrl = ""
+                    ImageUrl = _imageUrl
                 };
 
                 // Quyết định Thêm hay Sửa dựa trên ID
@@ -93,6 +94,39 @@ namespace GUI
                 btnAdd.Enabled = true;
                 btnAdd.Text = string.IsNullOrEmpty(_currentFoodId) ? "Thêm món" : "Cập nhật";
             }
+        }
+
+        private async void BtnChooseImage_Click(object sender, EventArgs e)
+        {
+            using OpenFileDialog ofd = new()
+            {
+                Title = "Chọn ảnh món",
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.webp"
+            };
+            if (ofd.ShowDialog(this) != DialogResult.OK) return;
+
+            btnChooseImage.Enabled = false;
+            btnChooseImage.Text = "Đang tải ảnh...";
+            try
+            {
+                var (ok, msg, url) = await UploadBUS.UploadImage(ofd.FileName, "mon_uong");
+                if (ok && !string.IsNullOrEmpty(url))
+                {
+                    _imageUrl = url;
+                    btnChooseImage.Text = "Đã chọn ảnh ✓";
+                }
+                else
+                {
+                    btnChooseImage.Text = "Chọn ảnh món...";
+                    MsgBox.Show(this, msg, "Lỗi tải ảnh", MsgBox.MessageBoxType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                btnChooseImage.Text = "Chọn ảnh món...";
+                MsgBox.Show(this, ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnChooseImage.Enabled = true; }
         }
 
         private void BtnClose_Click(object sender, EventArgs e)

@@ -1,7 +1,11 @@
+using BUS;
 using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -23,26 +27,27 @@ namespace GUI
                             .ShowDialog(MsgBox.OwnerWindow(this));
             };
 
-            DgvRefresh.Attach(dgvHistory, LoadMockData);
+            DgvRefresh.Attach(dgvHistory, () => _ = LoadRealData());
         }
 
         private void UcLeaveRequest_Load(object? sender, EventArgs e)
         {
-            // 1. Phân quyền hiển thị nút "Quản lý nghỉ"
             var user = GlobalSession.CurrentUser;
             bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
-
             btnManager.Visible = isPrivileged;
 
-            // 2. Tải dữ liệu bảng (Mock Data)
-            LoadMockData();
+            _ = LoadRealData();
         }
 
-        private void LoadMockData()
+        private static string StatusDisplay(string? s) => s switch
         {
-            lblRemainingValue.Text = "8 ngày";
-            lblPendingValue.Text = "1 đơn";
+            "da_duyet" => "Đã duyệt",
+            "tu_choi" => "Từ chối",
+            _ => "Chờ duyệt"
+        };
 
+        private async Task LoadRealData()
+        {
             DataTable dt = new();
             dt.Columns.Add("Từ ngày");
             dt.Columns.Add("Đến ngày");
@@ -50,17 +55,32 @@ namespace GUI
             dt.Columns.Add("Lý do");
             dt.Columns.Add("Trạng thái");
 
-            dt.Rows.Add("15/04/2026", "16/04/2026", 2, "Việc gia đình", "Đã duyệt");
-            dt.Rows.Add("20/03/2026", "20/03/2026", 1, "Khám bệnh", "Đã duyệt");
-            dt.Rows.Add("10/03/2026", "10/03/2026", 1, "Việc cá nhân", "Đã duyệt");
-            dt.Rows.Add("05/05/2026", "05/05/2026", 1, "Đi thi", "Chờ duyệt");
+            int pending = 0, usedThisYear = 0;
+            string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+            try
+            {
+                var all = await LeaveRequestBUS.GetAll();
+                foreach (var l in all.Values.Where(x => x.EmployeeId == myId)
+                                            .OrderByDescending(x => x.SentAt))
+                {
+                    dt.Rows.Add(l.FromDate, l.ToDate, l.DayCount, l.Reason, StatusDisplay(l.Status));
+                    if (l.Status == "cho_duyet") pending++;
+                    if (l.Status == "da_duyet" &&
+                        DateTime.TryParseExact(l.FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+                        && d.Year == DateTime.Now.Year)
+                        usedThisYear += l.DayCount;
+                }
+            }
+            catch { /* offline */ }
+
+            lblRemainingValue.Text = $"{Math.Max(0, 12 - usedThisYear)} ngày";
+            lblPendingValue.Text = $"{pending} đơn";
 
             dgvHistory.DataSource = dt;
             dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.ReadOnly = true;
             dgvHistory.AllowUserToAddRows = false;
-            // Cân bề rộng mọi cột: "Lý do" cần rộng để không bị cắt ("Việc gia ...").
             dgvHistory.Columns["Từ ngày"].FillWeight    = 18;
             dgvHistory.Columns["Đến ngày"].FillWeight   = 18;
             dgvHistory.Columns["Số ngày"].FillWeight    = 10;
@@ -79,39 +99,46 @@ namespace GUI
             }
         }
 
-        private void BtnSubmit_Click(object? sender, EventArgs e)
+        private async void BtnSubmit_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtReason.Text))
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập lý do nghỉ phép!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-
             if (dtpToDate.Value < dtpFromDate.Value)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Ngày kết thúc phải sau ngày bắt đầu!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
 
-            int days = (dtpToDate.Value - dtpFromDate.Value).Days + 1;
+            int days = (dtpToDate.Value.Date - dtpFromDate.Value.Date).Days + 1;
+            var owner = MsgBox.OwnerWindow(this);
 
-            if (dgvHistory.DataSource is DataTable dt)
+            var dto = new LeaveRequestDTO
             {
-                DataRow newRow = dt.NewRow();
-                newRow["Từ ngày"] = dtpFromDate.Value.ToString("dd/MM/yyyy");
-                newRow["Đến ngày"] = dtpToDate.Value.ToString("dd/MM/yyyy");
-                newRow["Số ngày"] = days;
-                newRow["Lý do"] = txtReason.Text;
-                newRow["Trạng thái"] = "Chờ duyệt";
-                dt.Rows.InsertAt(newRow, 0);
-            }
+                EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                FromDate = dtpFromDate.Value.ToString("dd/MM/yyyy"),
+                ToDate = dtpToDate.Value.ToString("dd/MM/yyyy"),
+                DayCount = days,
+                Reason = txtReason.Text.Trim(),
+                Status = "cho_duyet",
+                SentAt = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                ApproverId = "",
+                ApprovedAt = 0,
+                ApprovalNote = ""
+            };
 
-            MsgBox.Show(
-                MsgBox.OwnerWindow(this),
-                $"Đã gửi đơn xin nghỉ {days} ngày!\nTừ: {dtpFromDate.Value:dd/MM/yyyy}\nĐến: {dtpToDate.Value:dd/MM/yyyy}",
-                "Gửi thành công",
-                MsgBox.MessageBoxType.Success);
-            txtReason.Clear();
+            var (ok, msg, _) = await LeaveRequestBUS.Add(dto);
+            if (ok)
+            {
+                MsgBox.Show(owner,
+                    $"Đã gửi đơn xin nghỉ {days} ngày!\nTừ: {dto.FromDate}\nĐến: {dto.ToDate}",
+                    "Gửi thành công", MsgBox.MessageBoxType.Success);
+                txtReason.Clear();
+                await LoadRealData();
+            }
+            else MsgBox.Show(owner, msg, "Lỗi gửi đơn", MsgBox.MessageBoxType.Error);
         }
 
         private void BtnReport_Click(object? sender, EventArgs e)
@@ -125,7 +152,6 @@ namespace GUI
                 "Gửi báo cáo cho quản lý qua Chat?";
 
             var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo nghỉ phép", MsgBox.MessageBoxType.Warning);
-
             if (result == DialogResult.Yes)
             {
                 MsgBox.Show(
@@ -137,24 +163,9 @@ namespace GUI
 
         private void BtnManager_Click(object sender, EventArgs e)
         {
-            Form popupForm = new Form();
-            popupForm.Text = "Quản lý nghỉ / Lịch sử chấm công";
-            popupForm.Size = new Size(1000, 650); // Kích thước cửa sổ (bạn có thể tự chỉnh lại số này)
-            popupForm.StartPosition = FormStartPosition.CenterScreen; // Mở ra ở giữa màn hình
-
-            // Tùy chọn làm đẹp: tắt nút phóng to, để viền cố định
-            popupForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-            popupForm.MaximizeBox = false;
-
-            // 2. Khởi tạo UserControl ucAttendanceHistory
-            ucAttendanceHistory ucHistory = new ucAttendanceHistory();
-            ucHistory.Dock = DockStyle.Fill; // Ép UserControl lấp đầy khoảng trống của Form
-
-            // 3. Thêm UserControl vào Form
-            popupForm.Controls.Add(ucHistory);
-
-            // 4. Hiển thị cửa sổ lên màn hình (ShowDialog sẽ bắt người dùng phải đóng cửa sổ này mới thao tác được ở form cũ)
-            popupForm.ShowDialog();
+            // Popup theo theme app (không viền Windows, ẩn scrollbar gốc) thay cho Form thô.
+            WindowChrome.ShowUc(new ucAttendanceHistory(), "Quản lý nghỉ / Lịch sử chấm công",
+                                new Size(1000, 650), MsgBox.OwnerWindow(this));
         }
     }
 }

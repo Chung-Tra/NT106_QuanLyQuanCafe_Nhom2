@@ -17,7 +17,11 @@ namespace GUI
         private readonly Dictionary<string, (int qty, long price)> _orderItems = new();
         // Huy hiệu SL trên mỗi thẻ món (key = tên món) để cập nhật khi thêm vào đơn
         private readonly Dictionary<string, Guna2Button> _cardQtyBadges = new();
+        // Menu thật đã tải + tra cứu FoodDTO theo tên món (để lấy mon_id khi tạo đơn)
+        private List<FoodDTO> _menu = new();
+        private readonly Dictionary<string, FoodDTO> _foodByName = new();
         private string _currentTable = "Bàn 01";
+        private string? _currentTableId;
 
         public ucPOS_Order()
         {
@@ -48,6 +52,11 @@ namespace GUI
                     LoadMockProducts();
                     return;
                 }
+
+                _menu = menu;
+                _foodByName.Clear();
+                foreach (var f in menu)
+                    if (!string.IsNullOrWhiteSpace(f.Name)) _foodByName[f.Name!] = f;
 
                 flpProducts.Controls.Clear();
                 _cardQtyBadges.Clear();
@@ -124,11 +133,16 @@ namespace GUI
                 TextAlign = ContentAlignment.MiddleCenter,
             };
             tile.Controls.Add(lblIcon);
-            // Ảnh thật nếu ImageUrl là file cục bộ tồn tại (không tải http để tránh treo UI)
+            // Ảnh thật: file cục bộ tồn tại, hoặc URL Firebase Storage (tải nền, không chặn UI)
             if (TryLoadLocalImage(imageUrl, out Image? realImg))
             {
                 tile.BackgroundImage = realImg;
                 lblIcon.Visible = false;
+            }
+            else if (!string.IsNullOrWhiteSpace(imageUrl) &&
+                     imageUrl!.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                LoadTileImageAsync(tile, lblIcon, imageUrl);
             }
             card.Controls.Add(tile);
 
@@ -258,6 +272,17 @@ namespace GUI
             return ("🍽️", Theme.Teal);
         }
 
+        // Tải ảnh từ Firebase Storage (URL http) ở nền rồi gán làm nền ô ảnh.
+        private static async void LoadTileImageAsync(Guna2Panel tile, Label icon, string url)
+        {
+            var img = await ImageLoader.FromUrlAsync(url);
+            if (img != null && !tile.IsDisposed)
+            {
+                tile.BackgroundImage = img;
+                icon.Visible = false;
+            }
+        }
+
         // Chỉ nạp ảnh từ file cục bộ tồn tại; bỏ qua URL http để không chặn luồng UI
         private static bool TryLoadLocalImage(string? path, out Image? image)
         {
@@ -353,7 +378,7 @@ namespace GUI
             lblTotalAmount.Text = Theme.Vnd(total);
         }
 
-        private void BtnPay_Click(object? sender, EventArgs e)
+        private async void BtnPay_Click(object? sender, EventArgs e)
         {
             if (_orderItems.Count == 0)
             {
@@ -361,24 +386,89 @@ namespace GUI
                 return;
             }
 
-            long sub = _orderItems.Sum(kv => kv.Value.qty * kv.Value.price);
-            if (long.TryParse(txtDiscount.Text.Replace(",", "").Replace(".", "").Trim(), out long disc))
-                sub = Math.Max(0, sub - disc);
+            long subtotal = _orderItems.Sum(kv => kv.Value.qty * kv.Value.price);
+            long discount = 0;
+            long.TryParse(txtDiscount.Text.Replace(",", "").Replace(".", "").Trim(), out discount);
+            discount = Math.Max(0, discount);
+            long total = Math.Max(0, subtotal - discount);
 
             string customer = "Khách lẻ";
-            bool paid = PaymentDialog.Pay(MsgBox.OwnerWindow(this), sub, _currentTable, customer, out string method);
-
+            bool paid = PaymentDialog.Pay(MsgBox.OwnerWindow(this), total, _currentTable, customer, out string method);
             if (!paid) return;
 
-            // Hiện hóa đơn + QR feedback trước khi xóa đơn
-            string orderId = $"HD{DateTime.Now:yyyyMMddHHmm}{_orderItems.Count:00}";
-            ShowReceipt(orderId, sub, method);
+            // Lưu đơn hàng + phiếu thanh toán lên Firebase (qua backend)
+            string? savedId = await PersistOrderAndPayment(subtotal, discount, total, method);
+            string orderId = savedId ?? $"HD{DateTime.Now:yyyyMMddHHmm}{_orderItems.Count:00}";
+
+            ShowReceipt(orderId, total, method);
 
             _orderItems.Clear();
             RefreshOrderGrid();
             txtDiscount.Clear();
             lblTotalAmount.Text = "0 đ";
         }
+
+        // Lưu đơn + thanh toán; trả về mã đơn nếu thành công (null nếu offline/lỗi).
+        private async Task<string?> PersistOrderAndPayment(long subtotal, long discount, long total, string methodDisplay)
+        {
+            try
+            {
+                var items = new Dictionary<string, OrderItemDTO>();
+                int i = 1;
+                foreach (var (name, (qty, price)) in _orderItems)
+                {
+                    _foodByName.TryGetValue(name, out var f);
+                    items[$"ctd_{i:000}"] = new OrderItemDTO
+                    {
+                        FoodId = f?.Id,
+                        Quantity = qty,
+                        UnitPrice = price,
+                        Note = "",
+                        CookingStatus = "hoan_thanh"
+                    };
+                    i++;
+                }
+
+                var order = new OrderDTO
+                {
+                    TableId = _currentTableId,
+                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                    CreatedAt = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    Status = "hoan_thanh",
+                    Note = "",
+                    Items = items
+                };
+                var (ok, _, orderId) = await OrderBUS.Add(order);
+                if (!ok || orderId == null) return null;
+
+                var payment = new PaymentDTO
+                {
+                    OrderId = orderId,
+                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                    Method = MapMethod(methodDisplay),
+                    Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    TotalAmount = subtotal,
+                    Discount = discount,
+                    ActualReceived = total
+                };
+                await PaymentBUS.Add(payment);
+
+                // Bàn được giải phóng sau khi thanh toán
+                if (!string.IsNullOrEmpty(_currentTableId))
+                    await TableBUS.Update(_currentTableId, new { trang_thai = "trong" });
+
+                return orderId;
+            }
+            catch { return null; }
+        }
+
+        private static string MapMethod(string display) => display switch
+        {
+            "Tiền mặt" => "tien_mat",
+            "Thẻ" => "the",
+            "VietQR" => "vietqr",
+            _ => "tien_mat"
+        };
 
         private void BtnVoidOrder_Click(object? sender, EventArgs e)
         {
@@ -413,7 +503,7 @@ namespace GUI
             activeBtn.ForeColor = Color.MediumSeaGreen;
         }
 
-        private void btnTabTables_Click(object sender, EventArgs e)
+        private async void btnTabTables_Click(object sender, EventArgs e)
         {
             SetActiveTab(btnTabTables);
 
@@ -437,63 +527,87 @@ namespace GUI
             actionBar.Controls.Add(btnSplitBill);
             host.Controls.Add(actionBar);
 
-            // Sơ đồ bàn
+            // Sơ đồ bàn (tải thật từ Firebase qua backend)
             var flp = new FlowLayoutPanel { Location = new Point(12, 66), Size = new Size(450, 360), BackColor = Color.Transparent, AutoScroll = true };
-
-            string[] tableNames = Enumerable.Range(1, 15).Select(i => $"Bàn {i:00}").ToArray();
-            bool[] occupied = { false, true, false, true, false, false, true, false, true, false, true, false, false, true, false };
-
-            for (int i = 0; i < tableNames.Length; i++)
-            {
-                int idx = i;
-                var card = new Guna2Panel
-                {
-                    FillColor    = occupied[i] ? Theme.Fade(Theme.Red, 60) : Theme.Surface,
-                    BorderRadius = 10,
-                    Size         = new Size(98, 82),
-                    Margin       = new Padding(4),
-                    Cursor       = Cursors.Hand,
-                    BorderColor  = occupied[i] ? Theme.Red : Theme.Border,
-                    BorderThickness = 1,
-                };
-
-                card.Controls.Add(new Label
-                {
-                    Text      = tableNames[i],
-                    Font      = Theme.F(10F, FontStyle.Bold),
-                    ForeColor = occupied[i] ? Theme.Red : Theme.TextHi,
-                    BackColor = Color.Transparent,
-                    Location  = new Point(8, 14),
-                    AutoSize  = true,
-                });
-                card.Controls.Add(new Label
-                {
-                    Text      = occupied[i] ? "Có khách" : "Trống",
-                    Font      = Theme.F(8F),
-                    ForeColor = occupied[i] ? Theme.Red : Theme.Green,
-                    BackColor = Color.Transparent,
-                    Location  = new Point(8, 40),
-                    AutoSize  = true,
-                });
-
-                card.Click += (s2, e2) =>
-                {
-                    _currentTable = tableNames[idx];
-                    lblCurrentStaff.Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}  ·  {_currentTable}";
-                    MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã chọn {_currentTable}. Quay về tab Order để gọi món.", "Chọn bàn", MsgBox.MessageBoxType.Info);
-                };
-
-                flp.Controls.Add(card);
-            }
-
-            // Legend
             host.Controls.Add(flp);
 
-            var legend = new Label { Text = "🔴 Có khách   ⬛ Trống   — Click để chọn bàn", AutoSize = true, Font = Theme.F(8.5F), ForeColor = Theme.TextMuted, Location = new Point(12, 434), BackColor = Color.Transparent };
+            var legend = new Label { Text = "🔴 Có khách   🟡 Đặt trước   ⬛ Trống   — Click để chọn bàn", AutoSize = true, Font = Theme.F(8.5F), ForeColor = Theme.TextMuted, Location = new Point(12, 434), BackColor = Color.Transparent };
             host.Controls.Add(legend);
 
             pnlMainTabContainer.Controls.Clear();
             pnlMainTabContainer.Controls.Add(host);
+
+            Dictionary<string, TableDTO> tables;
+            try { tables = await TableBUS.GetAll(); }
+            catch { tables = new(); }
+
+            if (tables.Count == 0)
+            {
+                flp.Controls.Add(new Label { Text = "Chưa có dữ liệu bàn.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted });
+                return;
+            }
+
+            foreach (var kv in tables.OrderBy(t => t.Key))
+            {
+                var table = kv.Value;
+                string status = table.Status ?? "trong";
+                (Color accent, string label) = status switch
+                {
+                    "co_khach"  => (Theme.Red, "Có khách"),
+                    "dat_truoc" => (Theme.Amber, "Đặt trước"),
+                    _            => (Theme.Green, "Trống"),
+                };
+                bool free = status == "trong";
+
+                var card = new Guna2Panel
+                {
+                    FillColor    = free ? Theme.Surface : Theme.Fade(accent, 60),
+                    BorderRadius = 10,
+                    Size         = new Size(98, 82),
+                    Margin       = new Padding(4),
+                    Cursor       = Cursors.Hand,
+                    BorderColor  = accent,
+                    BorderThickness = 1,
+                };
+                card.Controls.Add(new Label
+                {
+                    Text      = table.Name ?? kv.Key,
+                    Font      = Theme.F(10F, FontStyle.Bold),
+                    ForeColor = free ? Theme.TextHi : accent,
+                    BackColor = Color.Transparent,
+                    Location  = new Point(8, 12),
+                    AutoSize  = true,
+                });
+                card.Controls.Add(new Label
+                {
+                    Text      = label,
+                    Font      = Theme.F(8F),
+                    ForeColor = accent,
+                    BackColor = Color.Transparent,
+                    Location  = new Point(8, 38),
+                    AutoSize  = true,
+                });
+                card.Controls.Add(new Label
+                {
+                    Text      = $"{table.Capacity} chỗ · {table.Location}",
+                    Font      = Theme.F(7F),
+                    ForeColor = Theme.TextMuted,
+                    BackColor = Color.Transparent,
+                    Location  = new Point(8, 58),
+                    AutoSize  = true,
+                });
+
+                string tid = kv.Key;
+                string tname = table.Name ?? kv.Key;
+                card.Click += (s2, e2) =>
+                {
+                    _currentTable = tname;
+                    _currentTableId = tid;
+                    lblCurrentStaff.Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}  ·  {_currentTable}";
+                    ShowOrderTab();
+                };
+                flp.Controls.Add(card);
+            }
         }
 
         private static Guna2Button MakeActionBtn(string text, Color color, int x)
@@ -520,30 +634,23 @@ namespace GUI
             MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã thực hiện {action}: {_currentTable} → {detail}", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
-        private void btnTabHistory_Click(object sender, EventArgs e)
+        private async void btnTabHistory_Click(object sender, EventArgs e)
         {
             SetActiveTab(btnTabHistory);
 
             var dgv = new Guna2DataGridView { Dock = DockStyle.Fill };
             Theme.StyleGrid(dgv);
-            // Lưới chưa gắn vào parent nên chưa có BindingContext → auto-gen cột không chạy,
-            // Columns["..."] sẽ null. Gán BindingContext để cột sinh ngay khi bind DataTable.
             dgv.BindingContext = new BindingContext();
 
             var dt = new DataTable();
-            dt.Columns.Add("Mã HĐ");
+            dt.Columns.Add("Mã đơn");
             dt.Columns.Add("Thời gian");
             dt.Columns.Add("Bàn");
             dt.Columns.Add("Số món", typeof(int));
             dt.Columns.Add("Tổng tiền", typeof(long));
             dt.Columns.Add("Hình thức TT");
             dt.Columns.Add("NV Order");
-            dt.Rows.Add("HD001", "08:35", "Bàn 02", 3, 135000L, "Tiền mặt",  GlobalSession.CurrentUser?.FullName ?? "Staff");
-            dt.Rows.Add("HD002", "09:10", "Bàn 05", 2,  80000L, "VietQR",    GlobalSession.CurrentUser?.FullName ?? "Staff");
-            dt.Rows.Add("HD003", "10:05", "Bàn 08", 5, 210000L, "Tiền mặt",  GlobalSession.CurrentUser?.FullName ?? "Staff");
-            dt.Rows.Add("HD004", "11:22", "Bàn 01", 1,  45000L, "Thẻ",       GlobalSession.CurrentUser?.FullName ?? "Staff");
-            dt.Rows.Add("HD005", "12:40", "Bàn 03", 4, 175000L, "Tiền mặt",  GlobalSession.CurrentUser?.FullName ?? "Staff");
-            dgv.AutoGenerateColumns = true;   // StyleGrid tắt auto-gen; lưới tạo trong code cần bật lại để sinh cột từ DataTable
+            dgv.AutoGenerateColumns = true;
             dgv.DataSource = dt;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv.Columns["Tổng tiền"].DefaultCellStyle.Format    = "N0";
@@ -551,7 +658,46 @@ namespace GUI
 
             pnlMainTabContainer.Controls.Clear();
             pnlMainTabContainer.Controls.Add(dgv);
+
+            try
+            {
+                var payments = await PaymentBUS.GetAll();
+                var orders   = await OrderBUS.GetAll();
+                var tables   = await TableBUS.GetAll();
+                var emps     = (await EmployeeBUS.GetAllEmployeesAsync())
+                                .ToDictionary(x => x.EmployeeId ?? "", x => x.FullName ?? "");
+
+                foreach (var p in payments.Values.OrderByDescending(x => x.Timestamp))
+                {
+                    orders.TryGetValue(p.OrderId ?? "", out var ord);
+                    string tableName = "";
+                    if (ord?.TableId != null && tables.TryGetValue(ord.TableId, out var tb))
+                        tableName = tb.Name ?? ord.TableId;
+                    int itemCount = ord?.Items?.Values.Sum(it => it.Quantity) ?? 0;
+                    string time = p.Timestamp > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(p.Timestamp).LocalDateTime.ToString("HH:mm dd/MM")
+                        : "";
+                    string nv = emps.TryGetValue(p.EmployeeId ?? "", out var n) ? n : (p.EmployeeId ?? "");
+                    dt.Rows.Add(p.OrderId, time, tableName, itemCount, (long)p.ActualReceived, MethodDisplay(p.Method), nv);
+                }
+                if (dt.Rows.Count == 0)
+                    dt.Rows.Add("", "Chưa có hóa đơn nào", "", 0, 0L, "", "");
+            }
+            catch
+            {
+                dt.Rows.Add("", "Không tải được lịch sử (kiểm tra server)", "", 0, 0L, "", "");
+            }
         }
+
+        private static string MethodDisplay(string? code) => code switch
+        {
+            "tien_mat" => "Tiền mặt",
+            "the" => "Thẻ",
+            "vietqr" => "VietQR",
+            "momo" => "Momo",
+            "chuyen_khoan" => "Chuyển khoản",
+            _ => code ?? ""
+        };
 
         private void BtnReport_Click(object? sender, EventArgs e)
         {
@@ -572,21 +718,13 @@ namespace GUI
         // Hiển thị hóa đơn sau khi thanh toán + mã QR feedback độc nhất theo orderId
         private void ShowReceipt(string orderId, long total, string method)
         {
-            var frm = new Form
-            {
-                Text             = $"Hóa đơn {orderId}",
-                Size             = new Size(440, 560),
-                StartPosition    = FormStartPosition.CenterParent,
-                FormBorderStyle  = FormBorderStyle.FixedDialog,
-                MaximizeBox      = false,
-                MinimizeBox      = false,
-                BackColor        = Theme.AppBg,
-            };
+            var frm = WindowChrome.CreateDialog($"Hóa đơn {orderId}", new Size(440, 560),
+                                                out var content, MsgBox.OwnerWindow(this));
 
-            frm.Controls.Add(new Label { Text = "☕  QUÁN CÀ PHÊ NHÓM 2", AutoSize = true, Font = Theme.F(13F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
-            frm.Controls.Add(new Label { Text = $"Mã HĐ: {orderId}", AutoSize = true, Font = Theme.F(9.5F, FontStyle.Bold), ForeColor = Theme.Teal, Location = new Point(20, 48), BackColor = Color.Transparent });
-            frm.Controls.Add(new Label { Text = $"Bàn: {_currentTable}   ·   {DateTime.Now:HH:mm dd/MM/yyyy}", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextPri, Location = new Point(20, 68), BackColor = Color.Transparent });
-            frm.Controls.Add(new Label { Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}   ·   {method}", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 88), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = "☕  QUÁN CÀ PHÊ NHÓM 2", AutoSize = true, Font = Theme.F(13F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = $"Mã HĐ: {orderId}", AutoSize = true, Font = Theme.F(9.5F, FontStyle.Bold), ForeColor = Theme.Teal, Location = new Point(20, 48), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = $"Bàn: {_currentTable}   ·   {DateTime.Now:HH:mm dd/MM/yyyy}", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextPri, Location = new Point(20, 68), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}   ·   {method}", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 88), BackColor = Color.Transparent });
 
             var dgv = new Guna2DataGridView { Location = new Point(16, 112), Size = new Size(400, 166) };
             Theme.StyleGrid(dgv);
@@ -605,22 +743,22 @@ namespace GUI
             dgv.Columns["Đơn giá"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             dgv.Columns["Thành tiền"].DefaultCellStyle.Format    = "N0";
             dgv.Columns["Thành tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            frm.Controls.Add(dgv);
+            content.Controls.Add(dgv);
 
-            frm.Controls.Add(new Label { Text = $"TỔNG CỘNG:  {Theme.Vnd(total)}", AutoSize = true, Font = Theme.F(11F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 286), BackColor = Color.Transparent });
-            frm.Controls.Add(new Label { Text = "Quét QR để đánh giá dịch vụ:", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 310), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = $"TỔNG CỘNG:  {Theme.Vnd(total)}", AutoSize = true, Font = Theme.F(11F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 286), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = "Quét QR để đánh giá dịch vụ:", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 310), BackColor = Color.Transparent });
 
             var pnlQR = new Panel { Location = new Point(144, 336), Size = new Size(140, 140), BackColor = Color.White };
             pnlQR.Paint += (s, e) => DrawFeedbackQR(e.Graphics, orderId, 140);
-            frm.Controls.Add(pnlQR);
+            content.Controls.Add(pnlQR);
 
-            frm.Controls.Add(new Label { Text = $"cafe.vn/feedback?order={orderId}", AutoSize = true, Font = Theme.F(7.5F), ForeColor = Theme.TextMuted, Location = new Point(96, 482), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = $"cafe.vn/feedback?order={orderId}", AutoSize = true, Font = Theme.F(7.5F), ForeColor = Theme.TextMuted, Location = new Point(96, 482), BackColor = Color.Transparent });
 
             var btnClose = Theme.PrimaryButton("Đóng");
             btnClose.Size     = new Size(110, 36);
             btnClose.Location = new Point(310, 480);
             btnClose.Click   += (s, e) => frm.Close();
-            frm.Controls.Add(btnClose);
+            content.Controls.Add(btnClose);
 
             frm.ShowDialog(MsgBox.OwnerWindow(this));
         }
@@ -663,23 +801,16 @@ namespace GUI
                 return;
             }
 
-            var frm = new Form
-            {
-                Text            = "Tách hóa đơn",
-                Size            = new Size(500, 420),
-                StartPosition   = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                MaximizeBox     = false,
-                BackColor       = Theme.AppBg,
-            };
+            var frm = WindowChrome.CreateDialog("Tách hóa đơn", new Size(500, 420),
+                                                out var content, MsgBox.OwnerWindow(this));
 
-            frm.Controls.Add(new Label { Text = "Chọn món cần tách sang Hóa đơn 2:", AutoSize = true, Font = Theme.F(10F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
-            frm.Controls.Add(new Label { Text = "Tick + nhập SL tách. Phần còn lại ở lại Hóa đơn 1.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 40), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = "Chọn món cần tách sang Hóa đơn 2:", AutoSize = true, Font = Theme.F(10F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = "Tick + nhập SL tách. Phần còn lại ở lại Hóa đơn 1.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 40), BackColor = Color.Transparent });
 
             var dgv = new Guna2DataGridView { Location = new Point(16, 70), Size = new Size(460, 240) };
             Theme.StyleGrid(dgv);
             dgv.BindingContext = new BindingContext();   // sinh cột ngay khi bind (frm chưa hiển thị)
-            frm.Controls.Add(dgv);
+            content.Controls.Add(dgv);
 
             var dt = new DataTable();
             dt.Columns.Add("Tách", typeof(bool));
@@ -733,13 +864,13 @@ namespace GUI
                 string items2   = string.Join("\n", bill2.Select(kv => $"  • {kv.Key} × {kv.Value.qty}   {Theme.Vnd(kv.Value.qty * kv.Value.price)}"));
                 MsgBox.Show(MsgBox.OwnerWindow(this), $"Tách thành công!\n\nHÓA ĐƠN 2:\n{items2}\n\nTổng HĐ2: {Theme.Vnd(bill2Total)}", "Tách hóa đơn", MsgBox.MessageBoxType.Success);
             };
-            frm.Controls.Add(btnConfirm);
+            content.Controls.Add(btnConfirm);
 
             var btnCancel = Theme.GhostButton("Hủy");
             btnCancel.Size     = new Size(90, 36);
             btnCancel.Location = new Point(374, 330);
             btnCancel.Click   += (s2, e2) => frm.Close();
-            frm.Controls.Add(btnCancel);
+            content.Controls.Add(btnCancel);
 
             frm.ShowDialog(MsgBox.OwnerWindow(this));
         }

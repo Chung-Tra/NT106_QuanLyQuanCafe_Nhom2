@@ -1,5 +1,10 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -25,74 +30,170 @@ namespace GUI
             RecordDetail.FromRow(dgv.Rows[e.RowIndex], title).ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        private void ucDashboard_Admin_Load(object sender, EventArgs e)
-        {
-            FillRevenueRows();
-            FillFeedbackRows();
-        }
+        private void ucDashboard_Admin_Load(object sender, EventArgs e) => _ = LoadRealAsync();
 
-        // --- Đổ dữ liệu vào 2 bảng (mock) ---
-        private void FillRevenueRows()
+        // --- Đổ dữ liệu THẬT từ Firebase vào 2 bảng tổng hợp ---
+        private async Task LoadRealAsync()
         {
+            decimal sales = 0, parkingFee = 0;
+            int good = 0, bad = 0, totalFb = 0;
+            try
+            {
+                var payments = await PaymentBUS.GetAll();
+                sales = payments.Values.Sum(p => p.ActualReceived);
+
+                var parking = await ParkingBUS.GetAll();
+                parkingFee = parking.Values.Where(p => p.Status == "da_ra").Sum(p => p.Fee);
+
+                var fbs = await FeedbackBUS.GetAll();
+                totalFb = fbs.Count;
+                good = fbs.Values.Count(f => f.Rating >= 4);
+                bad = fbs.Values.Count(f => f.Rating <= 2);
+            }
+            catch { /* offline */ }
+
             dgvRevenue.Rows.Clear();
-            dgvRevenue.Rows.Add("Bán đồ uống", Theme.Vnd(38_500_000));
-            dgvRevenue.Rows.Add("Bán bánh / snack", Theme.Vnd(5_200_000));
-            dgvRevenue.Rows.Add("Phí gửi xe", Theme.Vnd(2_100_000));
-            int t = dgvRevenue.Rows.Add("Tổng doanh thu", Theme.Vnd(45_800_000));
+            dgvRevenue.Rows.Add("Bán hàng (đơn)", Theme.Vnd((long)sales));
+            dgvRevenue.Rows.Add("Phí gửi xe", Theme.Vnd((long)parkingFee));
+            int t = dgvRevenue.Rows.Add("Tổng doanh thu", Theme.Vnd((long)(sales + parkingFee)));
             dgvRevenue.Rows[t].DefaultCellStyle.Font = Theme.F(9.5F, FontStyle.Bold);
             dgvRevenue.Rows[t].DefaultCellStyle.ForeColor = Theme.Green;
-        }
 
-        private void FillFeedbackRows()
-        {
             dgvFeedback.Rows.Clear();
-            int rG = dgvFeedback.Rows.Add("● Tốt", "42");
+            int rG = dgvFeedback.Rows.Add("● Tốt (4-5★)", good.ToString());
             dgvFeedback.Rows[rG].Cells[0].Style.ForeColor = Theme.Green;
-            int rB = dgvFeedback.Rows.Add("● Xấu", "8");
+            int rB = dgvFeedback.Rows.Add("● Xấu (1-2★)", bad.ToString());
             dgvFeedback.Rows[rB].Cells[0].Style.ForeColor = Theme.Red;
-            int rT = dgvFeedback.Rows.Add("Tổng", "50");
+            int rT = dgvFeedback.Rows.Add("Tổng", totalFb.ToString());
             dgvFeedback.Rows[rT].DefaultCellStyle.Font = Theme.F(9.5F, FontStyle.Bold);
         }
 
-        // --- Bấm "Chi tiết →" cạnh tiêu đề bảng → form biểu đồ cột theo tháng + chọn khoảng thời gian ---
-        private void BtnRevenueDetail_Click(object sender, EventArgs e)
+        // --- "Chi tiết →" cạnh tiêu đề bảng → biểu đồ cột 12 tháng gần nhất (dữ liệu THẬT) ---
+        private async void BtnRevenueDetail_Click(object sender, EventArgs e)
         {
+            var months = Last12Months();
+            var rev = new double[12]; var exp = new double[12];
+            try
+            {
+                foreach (var p in (await PaymentBUS.GetAll()).Values)
+                { int i = MonthIdx(months, p.Timestamp); if (i >= 0) rev[i] += (double)p.ActualReceived / 1_000_000; }
+                foreach (var x in (await ExpenseBUS.GetAll()).Values)
+                { int i = MonthIdx(months, x.Timestamp); if (i >= 0) exp[i] += (double)x.SoTien / 1_000_000; }
+            }
+            catch { /* offline → cột 0 */ }
+
+            var data = new (int, int, double, double)[12];
+            for (int i = 0; i < 12; i++) data[i] = (months[i].Year, months[i].Month, Math.Round(rev[i], 1), Math.Round(exp[i], 1));
             using var f = new ChartDetail("Doanh thu theo tháng (triệu VNĐ)", Theme.Green,
-                "Doanh thu", Color.MediumSeaGreen, "Chi phí", Color.IndianRed, RevenueMonthly);
+                "Doanh thu", Color.MediumSeaGreen, "Chi phí", Color.IndianRed, data);
             f.ShowDialog(FindForm());
         }
 
-        private void BtnFeedbackDetail_Click(object sender, EventArgs e)
+        private async void BtnFeedbackDetail_Click(object sender, EventArgs e)
         {
+            var months = Last12Months();
+            var good = new double[12]; var bad = new double[12];
+            try
+            {
+                foreach (var fb in (await FeedbackBUS.GetAll()).Values)
+                {
+                    int i = MonthIdx(months, fb.Timestamp); if (i < 0) continue;
+                    if (fb.Rating >= 4) good[i]++; else if (fb.Rating <= 2) bad[i]++;
+                }
+            }
+            catch { /* offline */ }
+
+            var data = new (int, int, double, double)[12];
+            for (int i = 0; i < 12; i++) data[i] = (months[i].Year, months[i].Month, good[i], bad[i]);
             using var f = new ChartDetail("Feedback theo tháng", Theme.Teal,
-                "Tốt", Color.MediumSeaGreen, "Xấu", Color.IndianRed, FeedbackMonthly);
+                "Tốt", Color.MediumSeaGreen, "Xấu", Color.IndianRed, data);
             f.ShowDialog(FindForm());
         }
 
-        // --- Bấm "Chi tiết →" trên thẻ → form cấu thành + số tiền theo tháng ---
-        private void BtnRevenueMore_Click(object sender, EventArgs e) => OpenKhoan(
-            "Chi tiết Doanh thu", Theme.Green,
-            new (string, long)[] { ("Bán đồ uống", 38_500_000), ("Bán bánh / snack", 5_200_000), ("Phí gửi xe", 2_100_000) },
-            "Doanh thu = tổng tiền thu được từ bán hàng & dịch vụ trong kỳ (cộng các khoản trên).",
-            Monthly(38.0, 40.5, 42.0, 39.5, 44.0, 48.0, 41.0, 38.5, 45.0, 42.0, 45.0, 45.8));
+        // --- "Chi tiết →" trên thẻ → cấu thành + số tiền theo tháng (dữ liệu THẬT) ---
+        private async void BtnRevenueMore_Click(object sender, EventArgs e)
+        {
+            var months = Last12Months();
+            long sales = 0, park = 0;
+            (string, long)[] monthly = MonthlyVnd(months, Enumerable.Empty<(long, decimal)>());
+            try
+            {
+                var payments = (await PaymentBUS.GetAll()).Values;
+                sales   = (long)payments.Sum(p => p.ActualReceived);
+                park    = (long)(await ParkingBUS.GetAll()).Values.Where(p => p.Status == "da_ra").Sum(p => p.Fee);
+                monthly = MonthlyVnd(months, payments.Select(p => (p.Timestamp, p.ActualReceived)));
+            }
+            catch { }
+            OpenKhoan("Chi tiết Doanh thu", Theme.Green,
+                new (string, long)[] { ("Bán hàng", sales), ("Phí gửi xe", park) },
+                "Doanh thu = tổng tiền thu được từ bán hàng & dịch vụ trong kỳ.", monthly);
+        }
 
-        private void BtnProfitMore_Click(object sender, EventArgs e) => OpenKhoan(
-            "Chi tiết Lợi nhuận ròng", Theme.Teal,
-            new (string, long)[] { ("Doanh thu", 45_800_000), ("Tổng chi phí", -25_100_000), ("Thất thoát", -2_500_000) },
-            "Lợi nhuận ròng = Doanh thu − Tổng chi phí − Thất thoát.",
-            Monthly(14.0, 14.8, 16.1, 14.1, 16.4, 18.4, 14.2, 14.0, 16.5, 14.8, 16.6, 18.2));
+        private async void BtnProfitMore_Click(object sender, EventArgs e)
+        {
+            var months = Last12Months();
+            long rev = 0, exp = 0, loss = 0;
+            (string, long)[] monthly = MonthlyVnd(months, Enumerable.Empty<(long, decimal)>());
+            try
+            {
+                var payments = (await PaymentBUS.GetAll()).Values;
+                var expenses = (await ExpenseBUS.GetAll()).Values;
+                var losses   = (await LossBUS.GetAll()).Values;
+                rev  = (long)payments.Sum(p => p.ActualReceived);
+                exp  = expenses.Sum(x => x.SoTien);
+                loss = (long)losses.Sum(l => l.GiaTri);
 
-        private void BtnExpenseMore_Click(object sender, EventArgs e) => OpenKhoan(
-            "Chi tiết Chi phí", Theme.Red,
-            new (string, long)[] { ("Nguyên liệu", 15_200_000), ("Lương nhân viên", 7_800_000), ("Điện nước", 1_200_000), ("Thuê mặt bằng", 900_000) },
-            "Tổng chi phí = tổng các khoản phải chi để vận hành quán trong kỳ.",
-            Monthly(22.0, 23.5, 24.0, 23.0, 25.5, 27.0, 24.5, 22.5, 26.0, 25.0, 26.0, 25.1));
+                var revM  = MonthlyVnd(months, payments.Select(p => (p.Timestamp, p.ActualReceived)));
+                var expM  = MonthlyVnd(months, expenses.Select(x => (x.Timestamp, (decimal)x.SoTien)));
+                var lossM = MonthlyVnd(months, losses.Select(l => (l.Timestamp, l.GiaTri)));
+                var arr = new (string, long)[months.Length];
+                for (int i = 0; i < months.Length; i++)
+                    arr[i] = (months[i].Label, revM[i].Amount - expM[i].Amount - lossM[i].Amount);
+                monthly = arr;
+            }
+            catch { }
+            OpenKhoan("Chi tiết Lợi nhuận ròng", Theme.Teal,
+                new (string, long)[] { ("Doanh thu", rev), ("Tổng chi phí", -exp), ("Thất thoát", -loss) },
+                "Lợi nhuận ròng = Doanh thu − Tổng chi phí − Thất thoát.", monthly);
+        }
 
-        private void BtnLossMore_Click(object sender, EventArgs e) => OpenKhoan(
-            "Chi tiết Thất thoát", Theme.Amber,
-            new (string, long)[] { ("Hao phí nguyên liệu", 1_800_000), ("Chênh lệch tiền", 700_000) },
-            "Thất thoát = giá trị hao hụt / mất mát ngoài kế hoạch trong kỳ.",
-            Monthly(2.0, 2.2, 1.9, 2.4, 2.1, 2.6, 2.3, 2.0, 2.5, 2.2, 2.4, 2.5));
+        private async void BtnExpenseMore_Click(object sender, EventArgs e)
+        {
+            var months = Last12Months();
+            var rows = new List<(string, long)>();
+            (string, long)[] monthly = MonthlyVnd(months, Enumerable.Empty<(long, decimal)>());
+            try
+            {
+                var expenses = (await ExpenseBUS.GetAll()).Values;
+                rows = expenses.GroupBy(x => string.IsNullOrWhiteSpace(x.DanhMuc) ? "Khác" : x.DanhMuc!)
+                               .Select(g => (g.Key, g.Sum(x => x.SoTien)))
+                               .OrderByDescending(r => r.Item2).ToList();
+                monthly = MonthlyVnd(months, expenses.Select(x => (x.Timestamp, (decimal)x.SoTien)));
+            }
+            catch { }
+            if (rows.Count == 0) rows.Add(("(chưa có chi phí)", 0));
+            OpenKhoan("Chi tiết Chi phí", Theme.Red, rows.ToArray(),
+                "Tổng chi phí = tổng các khoản phải chi để vận hành quán trong kỳ.", monthly);
+        }
+
+        private async void BtnLossMore_Click(object sender, EventArgs e)
+        {
+            var months = Last12Months();
+            var rows = new List<(string, long)>();
+            (string, long)[] monthly = MonthlyVnd(months, Enumerable.Empty<(long, decimal)>());
+            try
+            {
+                var losses = (await LossBUS.GetAll()).Values;
+                rows = losses.GroupBy(l => string.IsNullOrWhiteSpace(l.KhoanMuc) ? "Khác" : l.KhoanMuc!)
+                             .Select(g => (g.Key, (long)g.Sum(l => l.GiaTri)))
+                             .OrderByDescending(r => r.Item2).ToList();
+                monthly = MonthlyVnd(months, losses.Select(l => (l.Timestamp, l.GiaTri)));
+            }
+            catch { }
+            if (rows.Count == 0) rows.Add(("(chưa có thất thoát)", 0));
+            OpenKhoan("Chi tiết Thất thoát", Theme.Amber, rows.ToArray(),
+                "Thất thoát = giá trị hao hụt / mất mát ngoài kế hoạch trong kỳ.", monthly);
+        }
 
         private void OpenKhoan(string title, Color accent, (string, long)[] rows, string note, (string, long)[] monthly)
         {
@@ -100,36 +201,42 @@ namespace GUI
             f.ShowDialog(FindForm());
         }
 
-        // --- Mock data ---
+        // --- Helper gom nhóm 12 tháng gần nhất từ dữ liệu THẬT ---
 
-        // (Năm, Tháng, A, B) — A/B đơn vị triệu đ hoặc số lượt; dùng cho ChartDetail
-        private static readonly (int, int, double, double)[] RevenueMonthly =
+        // 12 tháng gần nhất (cũ → mới) kèm nhãn "T{m}/{yy}".
+        private static (int Year, int Month, string Label)[] Last12Months()
         {
-            (2025, 7, 38.0, 22.0), (2025, 8, 40.5, 23.5), (2025, 9, 42.0, 24.0),
-            (2025, 10, 39.5, 23.0), (2025, 11, 44.0, 25.5), (2025, 12, 48.0, 27.0),
-            (2026, 1, 41.0, 24.5), (2026, 2, 38.5, 22.5), (2026, 3, 45.0, 26.0),
-            (2026, 4, 42.0, 25.0), (2026, 5, 45.0, 26.0), (2026, 6, 45.8, 25.1),
-        };
+            var first = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var arr = new (int, int, string)[12];
+            for (int i = 0; i < 12; i++)
+            {
+                var d = first.AddMonths(-11 + i);
+                arr[i] = (d.Year, d.Month, $"T{d.Month}/{d:yy}");
+            }
+            return arr;
+        }
 
-        private static readonly (int, int, double, double)[] FeedbackMonthly =
+        private static int MonthIdx((int Year, int Month, string Label)[] months, long ts)
         {
-            (2025, 7, 35, 8), (2025, 8, 38, 7), (2025, 9, 40, 9),
-            (2025, 10, 37, 10), (2025, 11, 42, 6), (2025, 12, 45, 5),
-            (2026, 1, 39, 8), (2026, 2, 36, 9), (2026, 3, 44, 6),
-            (2026, 4, 40, 10), (2026, 5, 45, 5), (2026, 6, 42, 8),
-        };
+            if (ts <= 0) return -1;
+            var d = DateTimeOffset.FromUnixTimeMilliseconds(ts).LocalDateTime;
+            for (int i = 0; i < months.Length; i++)
+                if (months[i].Year == d.Year && months[i].Month == d.Month) return i;
+            return -1;
+        }
 
-        // Tạo 12 (tháng, số tiền VND) từ mảng triệu đồng — dùng cho MetricDetail
-        private static readonly string[] _months =
+        // Gom tổng tiền (VND) theo tháng từ danh sách (mốc thời gian ms, số tiền).
+        private static (string Month, long Amount)[] MonthlyVnd(
+            (int Year, int Month, string Label)[] months, IEnumerable<(long Ts, decimal Amount)> items)
         {
-            "T7/25", "T8/25", "T9/25", "T10/25", "T11/25", "T12/25",
-            "T1/26", "T2/26", "T3/26", "T4/26",  "T5/26",  "T6/26",
-        };
-        private static (string, long)[] Monthly(params double[] millions)
-        {
-            var arr = new (string, long)[millions.Length];
-            for (int i = 0; i < millions.Length; i++)
-                arr[i] = (_months[i], (long)(millions[i] * 1_000_000));
+            var sums = new long[months.Length];
+            foreach (var (ts, amt) in items)
+            {
+                int i = MonthIdx(months, ts);
+                if (i >= 0) sums[i] += (long)amt;
+            }
+            var arr = new (string, long)[months.Length];
+            for (int i = 0; i < months.Length; i++) arr[i] = (months[i].Label, sums[i]);
             return arr;
         }
 

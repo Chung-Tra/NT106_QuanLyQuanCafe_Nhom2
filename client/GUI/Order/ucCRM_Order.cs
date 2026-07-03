@@ -1,6 +1,10 @@
+using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GUI
@@ -17,7 +21,7 @@ namespace GUI
             // Lọc trực tiếp khi gõ, không cần bấm nút Tìm
             txtSearch.TextChanged += BtnSearch_Click;
 
-            DgvRefresh.Attach(dgvCustomers, LoadMockData);
+            DgvRefresh.Attach(dgvCustomers, () => _ = LoadRealData());
         }
 
         // Double-click 1 dòng -> form chi tiết read-only đủ field
@@ -28,20 +32,37 @@ namespace GUI
                         .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        // Sửa khách hàng đang chọn (khoá Mã KH)
-        private void BtnEditCustomer_Click(object? sender, EventArgs e)
+        // Sửa khách hàng đang chọn (khoá Mã KH) — lưu thật lên Firebase
+        private async void BtnEditCustomer_Click(object? sender, EventArgs e)
         {
             if (dgvCustomers.CurrentRow == null || dgvCustomers.CurrentRow.Index < 0)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một khách hàng để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            RecordEdit.EditRow(dgvCustomers.CurrentRow, "Sửa khách hàng", MsgBox.OwnerWindow(this));
+            string id = dgvCustomers.CurrentRow.Cells["Mã KH"].Value?.ToString() ?? "";
+            if (RecordEdit.EditRow(dgvCustomers.CurrentRow, "Sửa khách hàng", MsgBox.OwnerWindow(this)))
+            {
+                var row = dgvCustomers.CurrentRow;
+                int.TryParse(row.Cells["Điểm tích lũy"].Value?.ToString(), out int pts);
+                int.TryParse(row.Cells["Tổng đơn"].Value?.ToString(), out int orders);
+                var payload = new
+                {
+                    ten_khach_hang = row.Cells["Tên khách hàng"].Value?.ToString() ?? "",
+                    so_dien_thoai = row.Cells["Số điện thoại"].Value?.ToString() ?? "",
+                    email = row.Cells["Email"].Value?.ToString() ?? "",
+                    diem_tich_luy = pts,
+                    tong_don = orders
+                };
+                var (ok, msg) = await CustomerBUS.Update(id, payload);
+                if (!ok) MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi lưu", MsgBox.MessageBoxType.Error);
+                await LoadRealData();
+            }
         }
 
-        private void UcCRM_Order_Load(object? sender, EventArgs e) => LoadMockData();
+        private void UcCRM_Order_Load(object? sender, EventArgs e) => _ = LoadRealData();
 
-        private void LoadMockData()
+        private async Task LoadRealData()
         {
             DataTable dt = new();
             dt.Columns.Add("Mã KH");
@@ -51,19 +72,21 @@ namespace GUI
             dt.Columns.Add("Điểm tích lũy", typeof(int));
             dt.Columns.Add("Tổng đơn", typeof(int));
 
-            dt.Rows.Add("KH001", "Nguyễn Thị Lan", "0901234567", "lan.nguyen@email.com", 1520, 45);
-            dt.Rows.Add("KH002", "Trần Văn Minh", "0912345678", "minh.tran@email.com", 850, 28);
-            dt.Rows.Add("KH003", "Lê Hồng Phúc", "0923456789", "phuc.le@email.com", 2100, 62);
-            dt.Rows.Add("KH004", "Phạm Thanh Hà", "0934567890", "ha.pham@email.com", 450, 15);
-            dt.Rows.Add("KH005", "Đỗ Minh Quân", "0945678901", "quan.do@email.com", 3200, 95);
-            dt.Rows.Add("KH006", "Võ Thị Hương", "0956789012", "huong.vo@email.com", 680, 22);
+            try
+            {
+                var customers = await CustomerBUS.GetAll();
+                foreach (var kv in customers.OrderBy(c => c.Key))
+                {
+                    var c = kv.Value;
+                    dt.Rows.Add(kv.Key, c.Name, c.PhoneNumber, c.Email, c.LoyaltyPoints, c.TotalOrders);
+                }
+            }
+            catch { /* offline: bảng rỗng */ }
 
             dgvCustomers.DataSource = dt;
             dgvCustomers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvCustomers.RowHeadersVisible = false;
 
-            // Cân bề rộng cho MỌI cột (nếu chỉ set vài cột, các cột còn lại giữ mặc định 100
-            // và nuốt hết chỗ → Mã KH / Tên khách bị bóp, tên bị cắt "Nguyễn T...").
             dgvCustomers.Columns["Mã KH"].FillWeight          = 9;
             dgvCustomers.Columns["Tên khách hàng"].FillWeight = 24;
             dgvCustomers.Columns["Số điện thoại"].FillWeight  = 17;
@@ -116,14 +139,35 @@ namespace GUI
             }
         }
 
-        private void BtnSaveCustomer_Click(object sender, EventArgs e)
+        private async void BtnSaveCustomer_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtName.Text) || string.IsNullOrWhiteSpace(txtPhone.Text))
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập tên và số điện thoại!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã lưu thông tin khách hàng {txtName.Text}!", "Thành công", MsgBox.MessageBoxType.Success);
+
+            var owner = MsgBox.OwnerWindow(this);
+            var dto = new CustomerDTO
+            {
+                Name = txtName.Text.Trim(),
+                PhoneNumber = txtPhone.Text.Trim(),
+                Email = txtEmail.Text.Trim(),
+                LoyaltyPoints = 0,
+                TotalOrders = 0,
+                CreatedAt = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            };
+            var (ok, msg, _) = await CustomerBUS.Add(dto);
+            if (ok)
+            {
+                MsgBox.Show(owner, $"Đã lưu khách hàng {dto.Name}!", "Thành công", MsgBox.MessageBoxType.Success);
+                txtName.Clear(); txtPhone.Clear(); txtEmail.Clear();
+                await LoadRealData();
+            }
+            else
+            {
+                MsgBox.Show(owner, msg, "Lỗi lưu", MsgBox.MessageBoxType.Error);
+            }
         }
     }
 }

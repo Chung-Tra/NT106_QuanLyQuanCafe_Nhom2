@@ -253,5 +253,27 @@ namespace GUI
 
         public static string Vnd(long amount) =>
             amount.ToString("#,##0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + " đ";
+
+        // Gắn scroll teal + bỏ viền panel/card thừa trên toàn bộ cây control của UC/Form.
+        public static void PolishContainer(Control root)
+        {
+            if (root == null || root.IsDisposed) return;
+            try { AutoFadeScroll.AttachAll(root); } catch { }
+            ApplySurfacePolish(root);
+        }
+
+        private static void ApplySurfacePolish(Control c)
+        {
+            if (c is Guna2Panel p)
+                p.BorderThickness = 0;
+
+            if (c is Guna2DataGridView g)
+            {
+                try { StyleGrid(g); } catch { }
+            }
+
+            foreach (Control child in c.Controls)
+                ApplySurfacePolish(child);
+        }
     }
 }

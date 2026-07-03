@@ -26,6 +26,9 @@ namespace DTO
         [JsonProperty("ghi_chu")]
         public string? Note { get; set; }
 
+        [JsonProperty("nguon")]
+        public string? Source { get; set; }  // "qr" = khách tự đặt qua QR bàn; null/"pos" = nhân viên tạo
+
         [JsonProperty("chi_tiet_don")]
         public Dictionary<string, OrderItemDTO>? Items { get; set; }
     }

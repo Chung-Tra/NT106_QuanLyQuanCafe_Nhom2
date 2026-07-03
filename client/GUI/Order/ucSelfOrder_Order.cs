@@ -1,6 +1,11 @@
+using BUS;
+using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 
@@ -9,21 +14,6 @@ namespace GUI
     public partial class ucSelfOrder_Order : UserControl
     {
         private DataTable _dtIncoming = null!;
-        private int _orderCounter = 0;
-
-        private static readonly string[] SimItems =
-        {
-            "Cà phê đen × 1",
-            "Latte × 2, Bánh flan × 1",
-            "Trà sữa trân châu × 2",
-            "Sinh tố xoài × 1, Nước cam × 1",
-            "Cappuccino × 3",
-        };
-
-        private static readonly string[] SimTables =
-        {
-            "Bàn 02", "Bàn 05", "Bàn 09", "Bàn 12", "Bàn 14",
-        };
 
         public ucSelfOrder_Order()
         {
@@ -34,8 +24,9 @@ namespace GUI
                 _cmbTable.Items.Add($"Bàn {i:00}");
             _cmbTable.SelectedIndex = 0;
             lblQRTable.Text = $"Bàn: {_cmbTable.SelectedItem}";
+            RenderTableQr();
 
-            DgvRefresh.Attach(_dgvIncoming, LoadIncoming);
+            DgvRefresh.Attach(_dgvIncoming, () => LoadIncoming());
 
             // Double-click 1 đơn đến -> form chi tiết read-only đủ field
             _dgvIncoming.CellDoubleClick += (s, e) =>
@@ -45,11 +36,10 @@ namespace GUI
                             .ShowDialog(MsgBox.OwnerWindow(this));
             };
 
-            // Runtime QR painting + combo change wiring
-            _pnlQR.Paint += PnlQR_Paint;
+            // Đổi bàn → sinh lại QR tự đặt món (URL kèm mã bàn) cho bàn mới.
             _cmbTable.SelectedIndexChanged += (s, e) =>
             {
-                _pnlQR.Invalidate();
+                RenderTableQr();
                 lblQRTable.Text = $"Bàn: {_cmbTable.SelectedItem}";
             };
 
@@ -60,41 +50,35 @@ namespace GUI
             // Runtime grid styling (declared in Designer, styled here so appearance is identical)
             Theme.StyleGrid(_dgvIncoming);
 
-            Load += (s, e) => LoadIncoming();
+            Load += (s, e) => _ = LoadIncoming();
         }
 
-        private void PnlQR_Paint(object? sender, PaintEventArgs e)
+        // QR tự đặt món THẬT: mã hoá URL trang đặt món kèm mã bàn (khách quét mở menu online).
+        private void RenderTableQr()
         {
-            var g = e.Graphics;
-            g.Clear(Color.White);
             string table = _cmbTable.SelectedItem?.ToString() ?? "Bàn 01";
-            int cell = 240 / 21;
-            var rng = new System.Random(table.GetHashCode());
-            using var blackBrush = new SolidBrush(Color.Black);
-            DrawQRFinder(g, blackBrush, cell, 0, 0);
-            DrawQRFinder(g, blackBrush, cell, 14, 0);
-            DrawQRFinder(g, blackBrush, cell, 0, 14);
-            for (int row = 0; row < 21; row++)
+            string url = $"{QrConfig.SelfOrderBaseUrl}?table={Uri.EscapeDataString(table)}";
+            try
             {
-                for (int col = 0; col < 21; col++)
-                {
-                    if ((row < 8 && col < 8) || (row < 8 && col >= 13) || (row >= 13 && col < 8))
-                        continue;
-                    if (rng.Next(2) == 1)
-                        g.FillRectangle(blackBrush, col * cell, row * cell, cell, cell);
-                }
+                _pnlQR.BackColor = Color.White;
+                _pnlQR.BackgroundImage?.Dispose();
+                _pnlQR.BackgroundImage = Qr.Url(url, 8);
+                _pnlQR.BackgroundImageLayout = ImageLayout.Zoom;
             }
+            catch { /* để trống nếu không sinh được */ }
         }
 
-        private static void DrawQRFinder(Graphics g, Brush b, int cell, int ox, int oy)
+        private static string StatusVi(string? s) => s switch
         {
-            g.FillRectangle(b, ox * cell, oy * cell, 7 * cell, 7 * cell);
-            using var w = new SolidBrush(Color.White);
-            g.FillRectangle(w, (ox + 1) * cell, (oy + 1) * cell, 5 * cell, 5 * cell);
-            g.FillRectangle(b, (ox + 2) * cell, (oy + 2) * cell, 3 * cell, 3 * cell);
-        }
+            "pending"      => "Mới!",
+            "dang_phuc_vu" => "Đã nhận",
+            "hoan_thanh"   => "Hoàn thành",
+            "huy"          => "Huỷ",
+            _              => s ?? ""
+        };
 
-        private void LoadIncoming()
+        // Đơn tự đặt THẬT từ node orders (nguon == "qr"), map tên bàn + tên món từ Firebase.
+        private async Task LoadIncoming()
         {
             _dtIncoming = new DataTable();
             _dtIncoming.Columns.Add("Thời gian");
@@ -103,9 +87,32 @@ namespace GUI
             _dtIncoming.Columns.Add("SL", typeof(int));
             _dtIncoming.Columns.Add("Trạng thái");
 
-            _dtIncoming.Rows.Add("08:41", "Bàn 03", "Cà phê sữa × 2, Bánh croissant × 1", 3, "Đã nhận");
-            _dtIncoming.Rows.Add("09:05", "Bàn 07", "Trà đào cam sả × 3",                  3, "Đã nhận");
-            _dtIncoming.Rows.Add("10:28", "Bàn 11", "Matcha latte × 1, Latte × 2",         3, "Đã nhận");
+            try
+            {
+                var orders = await OrderBUS.GetAll();
+                var tables = await TableBUS.GetAll();
+                var foods  = (await Task.Run(FoodBUS.GetListFoods))
+                             .Where(f => f.Id != null).ToDictionary(f => f.Id!, f => f.Name ?? f.Id!);
+
+                foreach (var kv in orders.Where(o => o.Value.Source == "qr")
+                                         .OrderByDescending(o => o.Value.CreatedAt))
+                {
+                    var o = kv.Value;
+                    string time = o.CreatedAt > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(o.CreatedAt).LocalDateTime.ToString("HH:mm")
+                        : "";
+                    string tableName = (o.TableId != null && tables.TryGetValue(o.TableId, out var tb))
+                        ? (tb.Name ?? o.TableId) : (o.TableId ?? "");
+
+                    var items = o.Items?.Values ?? Enumerable.Empty<OrderItemDTO>();
+                    string monDat = string.Join(", ", items.Select(it =>
+                        $"{(it.FoodId != null && foods.TryGetValue(it.FoodId, out var n) ? n : it.FoodId)} × {it.Quantity}"));
+                    int qty = items.Sum(it => it.Quantity);
+
+                    _dtIncoming.Rows.Add(time, tableName, monDat, qty, StatusVi(o.Status));
+                }
+            }
+            catch { /* offline */ }
 
             _dgvIncoming.DataSource = _dtIncoming;
             _dgvIncoming.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
@@ -124,7 +131,8 @@ namespace GUI
             foreach (DataGridViewRow row in _dgvIncoming.Rows)
             {
                 string status = row.Cells["Trạng thái"].Value?.ToString() ?? "";
-                row.Cells["Trạng thái"].Style.ForeColor = status == "Đã nhận" ? Theme.Green : Theme.Amber;
+                row.Cells["Trạng thái"].Style.ForeColor =
+                    status is "Đã nhận" or "Hoàn thành" ? Theme.Green : Theme.Amber;
                 if (status == "Mới!")
                     row.DefaultCellStyle.BackColor = Theme.Fade(Theme.Teal, 30);
             }
@@ -135,27 +143,57 @@ namespace GUI
             _lblIncomingCount.Text = $"{_dtIncoming.Rows.Count} đơn hôm nay";
         }
 
-        private void BtnSimulate_Click(object? sender, EventArgs e)
+        // "Giả lập" = tạo 1 đơn tự đặt THẬT (nguon=qr) vào node orders để test luồng end-to-end:
+        // đơn sẽ hiện ở đây, ở lịch sử POS và KDS pha chế.
+        private async void BtnSimulate_Click(object? sender, EventArgs e)
         {
-            _orderCounter++;
-            string newTable = SimTables[_orderCounter % SimTables.Length];
-            string newItems = SimItems[_orderCounter % SimItems.Length];
-            int qty = (_orderCounter % 4) + 1;
+            try
+            {
+                var menu = (await Task.Run(FoodBUS.GetListFoods)).Where(f => f.InStock && f.Id != null).ToList();
+                if (menu.Count == 0)
+                {
+                    MsgBox.Show(MsgBox.OwnerWindow(this), "Chưa có món trong thực đơn để tạo đơn thử.", "Thông báo", MsgBox.MessageBoxType.Warning);
+                    return;
+                }
 
-            var row = _dtIncoming.NewRow();
-            row["Thời gian"] = DateTime.Now.ToString("HH:mm");
-            row["Bàn"]       = newTable;
-            row["Món đặt"]   = newItems;
-            row["SL"]        = qty;
-            row["Trạng thái"] = "Mới!";
-            _dtIncoming.Rows.InsertAt(row, 0);
+                var tables = await TableBUS.GetAll();
+                var tableEntry = tables.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+                string? tableId = tableEntry.Key;
+                string tableName = tableEntry.Value?.Name ?? _cmbTable.SelectedItem?.ToString() ?? "Bàn";
 
-            ColorRows();
-            UpdateCount();
+                var rnd = new Random();
+                var picks = menu.OrderBy(_ => Guid.NewGuid()).Take(rnd.Next(1, 3)).ToList();
+                var items = new Dictionary<string, OrderItemDTO>();
+                int i = 1;
+                foreach (var f in picks)
+                    items[$"ct{i++}"] = new OrderItemDTO
+                    {
+                        FoodId = f.Id, Quantity = rnd.Next(1, 4), UnitPrice = f.Price, CookingStatus = "cho"
+                    };
 
-            MsgBox.Show(MsgBox.OwnerWindow(this),
-                $"Đơn mới từ {newTable}!\n\n{newItems}\n\nĐơn đã vào POS — KDS sẽ hiển thị ngay.",
-                "Đơn vào realtime", MsgBox.MessageBoxType.Success);
+                var dto = new OrderDTO
+                {
+                    TableId    = tableId,
+                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                    CreatedAt  = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    Status     = "pending",
+                    Source     = "qr",
+                    Items      = items
+                };
+
+                var (ok, msg, _) = await OrderBUS.Add(dto);
+                if (!ok) { MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error); return; }
+
+                await LoadIncoming();
+                string tomTat = string.Join(", ", picks.Select((f, k) => $"{f.Name} × {items[$"ct{k + 1}"].Quantity}"));
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    $"Đơn tự đặt mới từ {tableName}!\n\n{tomTat}\n\nĐơn đã vào Firebase — POS & KDS pha chế sẽ thấy ngay.",
+                    "Đơn vào realtime", MsgBox.MessageBoxType.Success);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Lỗi tạo đơn thử: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
         }
     }
 }
