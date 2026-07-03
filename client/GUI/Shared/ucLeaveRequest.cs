@@ -6,18 +6,27 @@ using System.Windows.Forms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucLeaveRequest : UserControl
+#pragma warning restore IDE1006
     {
         public ucLeaveRequest()
         {
             InitializeComponent();
-            this.Load += ucLeaveRequest_Load;
-            btnSubmit.Click += btnSubmit_Click;
-            btnReport.Click += btnReport_Click;
-            btnManager.Click += btnManager_Click;
+            GridColumnGuard.SyncColumnNames(dgvHistory);
+
+            // Double-click 1 đơn -> form chi tiết read-only đủ field
+            dgvHistory.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvHistory.Rows[e.RowIndex], "Chi tiết đơn nghỉ phép")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
+
+            DgvRefresh.Attach(dgvHistory, LoadMockData);
         }
 
-        private void ucLeaveRequest_Load(object? sender, EventArgs e)
+        private void UcLeaveRequest_Load(object? sender, EventArgs e)
         {
             // 1. Phân quyền hiển thị nút "Quản lý nghỉ"
             var user = GlobalSession.CurrentUser;
@@ -51,7 +60,12 @@ namespace GUI
             dgvHistory.RowHeadersVisible = false;
             dgvHistory.ReadOnly = true;
             dgvHistory.AllowUserToAddRows = false;
-            dgvHistory.Columns["Lý do"].FillWeight = 30;
+            // Cân bề rộng mọi cột: "Lý do" cần rộng để không bị cắt ("Việc gia ...").
+            dgvHistory.Columns["Từ ngày"].FillWeight    = 18;
+            dgvHistory.Columns["Đến ngày"].FillWeight   = 18;
+            dgvHistory.Columns["Số ngày"].FillWeight    = 10;
+            dgvHistory.Columns["Lý do"].FillWeight      = 34;
+            dgvHistory.Columns["Trạng thái"].FillWeight = 20;
 
             foreach (DataGridViewRow row in dgvHistory.Rows)
             {
@@ -65,7 +79,7 @@ namespace GUI
             }
         }
 
-        private void btnSubmit_Click(object? sender, EventArgs e)
+        private void BtnSubmit_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtReason.Text))
             {
@@ -100,7 +114,7 @@ namespace GUI
             txtReason.Clear();
         }
 
-        private void btnReport_Click(object? sender, EventArgs e)
+        private void BtnReport_Click(object? sender, EventArgs e)
         {
             string report =
                 "BÁO CÁO NGHỈ PHÉP\n" +
@@ -121,7 +135,7 @@ namespace GUI
             }
         }
 
-        private void btnManager_Click(object sender, EventArgs e)
+        private void BtnManager_Click(object sender, EventArgs e)
         {
             Form popupForm = new Form();
             popupForm.Text = "Quản lý nghỉ / Lịch sử chấm công";

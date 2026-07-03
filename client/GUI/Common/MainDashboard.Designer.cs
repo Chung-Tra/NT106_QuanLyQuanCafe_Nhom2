@@ -35,6 +35,8 @@ namespace GUI
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainDashboard));
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             pnlSidebar = new Guna2Panel();
             pnlMenuScroll = new Panel();
             pnlLogoutWrap = new Panel();
@@ -49,13 +51,13 @@ namespace GUI
             lblUserName = new Label();
             lblUserRole = new Label();
             lblSubtitle = new Label();
+            btnReport = new Guna2Button();
             pnlHeader = new Guna2Panel();
             pnlLogoBlock = new Panel();
             pictureBox2 = new PictureBox();
             lblBrand = new Label();
             lblTagline = new Label();
             lblDate = new Label();
-            btnClose = new Guna2Button();
             pnlSidebar.SuspendLayout();
             pnlLogoutWrap.SuspendLayout();
             pnlMainContent.SuspendLayout();
@@ -83,6 +85,7 @@ namespace GUI
             // 
             // pnlMenuScroll
             // 
+            pnlMenuScroll.AutoScroll = true;
             pnlMenuScroll.BackColor = Color.FromArgb(31, 31, 34);
             pnlMenuScroll.Dock = DockStyle.Fill;
             pnlMenuScroll.Location = new Point(0, 0);
@@ -119,7 +122,7 @@ namespace GUI
             btnLogout.ShadowDecoration.CustomizableEdges = customizableEdges2;
             btnLogout.Size = new Size(212, 50);
             btnLogout.TabIndex = 0;
-            btnLogout.Text = "🚪  Đăng xuất";
+            btnLogout.Text = "Đăng xuất";
             btnLogout.Click += BtnLogout_Click;
             // 
             // pnlMainContent
@@ -139,35 +142,38 @@ namespace GUI
             // pnlContentHost
             // 
             pnlContentHost.BackColor = Color.FromArgb(39, 39, 42);
+            pnlContentHost.AutoScroll = true;
             pnlContentHost.Controls.Add(lblWelcome);
             pnlContentHost.Dock = DockStyle.Fill;
-            pnlContentHost.Location = new Point(0, 140);
+            pnlContentHost.Location = new Point(0, 155);
             pnlContentHost.Name = "pnlContentHost";
-            pnlContentHost.Padding = new Padding(20);
-            pnlContentHost.Size = new Size(1000, 680);
+            pnlContentHost.Padding = new Padding(0);
+            pnlContentHost.Size = new Size(1000, 665);
             pnlContentHost.TabIndex = 2;
             // 
             // lblWelcome
             // 
-            lblWelcome.AutoSize = true;
+            lblWelcome.Dock = DockStyle.Fill;
             lblWelcome.Font = new Font("Segoe UI", 13F);
             lblWelcome.ForeColor = Color.FromArgb(110, 110, 115);
-            lblWelcome.Location = new Point(315, 265);
+            lblWelcome.Location = new Point(20, 20);
             lblWelcome.Name = "lblWelcome";
-            lblWelcome.Size = new Size(386, 25);
+            lblWelcome.Size = new Size(960, 640);
             lblWelcome.TabIndex = 0;
             lblWelcome.Text = "Vui lòng chọn một mục từ thanh menu bên trái";
+            lblWelcome.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // pnlSubHeader
             // 
             pnlSubHeader.BackColor = Color.FromArgb(39, 39, 42);
             pnlSubHeader.Controls.Add(lblTitle);
+            pnlSubHeader.Controls.Add(btnReport);
             pnlSubHeader.Controls.Add(pnlUserCard);
             pnlSubHeader.Controls.Add(lblSubtitle);
             pnlSubHeader.Dock = DockStyle.Top;
             pnlSubHeader.Location = new Point(0, 80);
             pnlSubHeader.Name = "pnlSubHeader";
-            pnlSubHeader.Size = new Size(1000, 60);
+            pnlSubHeader.Size = new Size(1000, 75);
             pnlSubHeader.TabIndex = 1;
             // 
             // lblTitle
@@ -183,13 +189,14 @@ namespace GUI
             // 
             // pnlUserCard
             // 
+            pnlUserCard.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             pnlUserCard.BackColor = Color.FromArgb(31, 31, 34);
             pnlUserCard.BorderRadius = 22;
             pnlUserCard.Controls.Add(picAvatar);
             pnlUserCard.Controls.Add(lblUserName);
             pnlUserCard.Controls.Add(lblUserRole);
             pnlUserCard.CustomizableEdges = customizableEdges6;
-            pnlUserCard.Location = new Point(780, 0);
+            pnlUserCard.Location = new Point(760, 8);
             pnlUserCard.Name = "pnlUserCard";
             pnlUserCard.ShadowDecoration.CustomizableEdges = customizableEdges7;
             pnlUserCard.Size = new Size(220, 60);
@@ -237,18 +244,35 @@ namespace GUI
             lblSubtitle.AutoSize = true;
             lblSubtitle.Font = new Font("Segoe UI", 9F);
             lblSubtitle.ForeColor = Color.FromArgb(150, 150, 155);
-            lblSubtitle.Location = new Point(30, 40);
+            lblSubtitle.Location = new Point(30, 48);
             lblSubtitle.Name = "lblSubtitle";
             lblSubtitle.Size = new Size(134, 15);
             lblSubtitle.TabIndex = 1;
             lblSubtitle.Text = "Bảng điều khiển QLCafe";
-            // 
+            //
+            // btnReport
+            //
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReport.BorderRadius = 10;
+            btnReport.CustomizableEdges = customizableEdges20;
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FillColor = Color.FromArgb(31, 138, 154);
+            btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReport.Location = new Point(600, 18);
+            btnReport.Name = "btnReport";
+            btnReport.ShadowDecoration.CustomizableEdges = customizableEdges21;
+            btnReport.Size = new Size(148, 40);
+            btnReport.TabIndex = 4;
+            btnReport.Text = "Báo lỗi";
+            btnReport.Click += BtnReport_Click;
+            //
             // pnlHeader
-            // 
+            //
             pnlHeader.BackColor = Color.FromArgb(39, 39, 42);
             pnlHeader.Controls.Add(pnlLogoBlock);
             pnlHeader.Controls.Add(lblDate);
-            pnlHeader.Controls.Add(btnClose);
             pnlHeader.CustomizableEdges = customizableEdges16;
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
@@ -292,7 +316,6 @@ namespace GUI
             // lblTagline
             // 
             lblTagline.AutoSize = true;
-            lblTagline.Enabled = false;
             lblTagline.Font = new Font("Segoe UI", 8F, FontStyle.Italic);
             lblTagline.ForeColor = Color.FromArgb(140, 140, 145);
             lblTagline.Location = new Point(57, 32);
@@ -312,30 +335,15 @@ namespace GUI
             lblDate.TabIndex = 1;
             lblDate.Text = "Thứ Năm, 08 tháng 05";
             //
-            // btnClose
-            // 
-            btnClose.BorderRadius = 8;
-            btnClose.Cursor = Cursors.Hand;
-            btnClose.CustomizableEdges = customizableEdges14;
-            btnClose.FillColor = Color.Transparent;
-            btnClose.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnClose.ForeColor = Color.FromArgb(220, 220, 225);
-            btnClose.HoverState.FillColor = Color.FromArgb(180, 60, 60);
-            btnClose.HoverState.ForeColor = Color.White;
-            btnClose.Location = new Point(956, 24);
-            btnClose.Name = "btnClose";
-            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges15;
-            btnClose.Size = new Size(30, 32);
-            btnClose.TabIndex = 7;
-            btnClose.Text = "✕";
-            btnClose.Click += BtnClose_Click;
-            // 
             // MainDashboard
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(39, 39, 42);
             ClientSize = new Size(1240, 820);
+            // Không cho thu nhỏ quá mức: các màn thiết kế tuyệt đối sẽ bị cắt đáy
+            // (vd. thẻ "Đổi mật khẩu" của ucProfile) nếu vùng nội dung < ~660px cao.
+            MinimumSize = new Size(1150, 800);
             Controls.Add(pnlMainContent);
             Controls.Add(pnlSidebar);
             FormBorderStyle = FormBorderStyle.None;
@@ -377,10 +385,10 @@ namespace GUI
         private Guna2CirclePictureBox picAvatar;
         private Label lblUserName;
         private Label lblUserRole;
-        private Guna2Button btnClose;
         private Panel pnlSubHeader;
         private Label lblTitle;
         private Label lblSubtitle;
+        private Guna2Button btnReport;
         private Panel pnlContentHost;
         private Label lblWelcome;
         private PictureBox pictureBox2;

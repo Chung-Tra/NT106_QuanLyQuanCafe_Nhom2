@@ -1,4 +1,4 @@
-using BUS;
+﻿using BUS;
 using DTO;
 using System;
 using System.Data;
@@ -12,20 +12,24 @@ namespace GUI
         public ucAttendanceHistory()
         {
             InitializeComponent();
+            dgvAttendance.AutoGenerateColumns = false; // cột khai trong Designer; tắt auto-gen ở .cs cho an toàn round-trip
+            GridColumnGuard.SyncColumnNames(dgvAttendance);
 
-            this.Load += ucAttendanceHistory_Load;
+            // Double-click 1 dòng -> form chi tiết read-only đủ field
+            dgvAttendance.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvAttendance.Rows[e.RowIndex], "Chi tiết chấm công")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
 
-            btnFilter.Click += btnFilter_Click;
-
-            btnReport.Click += BtnReport_Click;
+            DgvRefresh.Attach(dgvAttendance, LoadData);
         }
 
         private async void ucAttendanceHistory_Load(object sender, EventArgs e) => await InitFilterAsync();
         private void btnFilter_Click(object sender, EventArgs e) => LoadData();
 
-        // ──────────────────────────────────────────────
-        // KHỞI TẠO BỘ LỌC
-        // ──────────────────────────────────────────────
+        // Khởi tạo bộ lọc
         private async Task InitFilterAsync()
         {
             var user = GlobalSession.CurrentUser;
@@ -40,9 +44,9 @@ namespace GUI
 
                 try
                 {
-                    // 1. Gọi BUS lấy danh sách nhân viên từ Database
-                    // Chú ý: Thay 'InventoryImportBUS' bằng tên BUS quản lý nhân viên thực tế của bạn nếu khác
-                    var dsNhanVien = await InventoryImportBUS.GetEmployees();
+                    // 1. Gọi BUS lấy danh sách nhân viên từ Database (Task.Run: HTTP + parse
+                    // JSON chạy ở thread pool để không chiếm luồng UI trong lúc chờ server)
+                    var dsNhanVien = await Task.Run(InventoryImportBUS.GetEmployees);
 
                     // 2. Format lại hiển thị thành dạng "Mã - Tên" giống code cũ của bạn
                     var comboData = dsNhanVien.Select(nv => new
@@ -90,9 +94,7 @@ namespace GUI
             LoadData();
         }
 
-        // ──────────────────────────────────────────────
-        // TẢI DỮ LIỆU
-        // ──────────────────────────────────────────────
+        // Tải dữ liệu
         private void LoadData()
         {
             if (dtpFrom.Value.Date > dtpTo.Value.Date)
@@ -106,13 +108,13 @@ namespace GUI
             DateTime denNgay = dtpTo.Value.Date;
             string nhanVienDuocChon = cboEmployee.Text ?? "Tất cả";
 
-            // 3. TẠO DỮ LIỆU (Ở đây mình dùng code tạo bảng ảo như bạn đã làm)
+            // 3. Tạo dữ liệu (Ở đây mình dùng code tạo bảng ảo như bạn đã làm)
             // Nếu sau này có Database, bạn chỉ cần thay đoạn này thành:
             // DataTable dt = ChamCongBUS.LayDanhSach(tuNgay, denNgay, nhanVienDuocChon);
             DataTable dt = new DataTable();
             // ... (Thêm cột và thêm các dòng dữ liệu ảo y hệt code cũ của bạn) ...
 
-            // 4. ÁP DỤNG BỘ LỌC VÀO BẢNG
+            // 4. Áp dụng bộ lọc vào bảng
             if (nhanVienDuocChon != "Tất cả")
             {
                 DataTable filtered = dt.Clone(); // Tạo bảng trống giữ nguyên cấu trúc cột
@@ -126,36 +128,8 @@ namespace GUI
                 dt = filtered; // Cập nhật lại dt bằng bảng đã lọc
             }
 
-            // 5. ĐỔ DỮ LIỆU LÊN BẢNG (dgvAttendance)
+            // 5. Đổ dữ liệu lên bảng (dgvAttendance)
             dgvAttendance.DataSource = dt;
-        }
-
-        // ──────────────────────────────────────────────
-        // NÚT BÁO CÁO SAI SÓT
-        // ──────────────────────────────────────────────
-        private void BtnReport_Click(object? sender, EventArgs e)
-        {
-            string report =
-                "BÁO CÁO CHẤM CÔNG\n" +
-                $"Từ: {dtpFrom.Value:dd/MM/yyyy}  →  Đến: {dtpTo.Value:dd/MM/yyyy}\n" +
-                "──────────────────\n" +
-                $"• Ngày công : {lblShiftsValue.Text}\n" +
-                $"• Nghỉ phép : {lblAbsentValue.Text}\n" +
-                $"• Đi muộn  : {lblLateValue.Text}\n" +
-                "──────────────────\n" +
-                "Gửi báo cáo này cho quản lý qua Chat?";
-
-            var result = MsgBox.Show(
-                MsgBox.OwnerWindow(this), report,
-                "Báo cáo chấm công", MsgBox.MessageBoxType.Warning);
-
-            if (result == DialogResult.Yes)
-            {
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Đã gửi báo cáo chấm công cho quản lý!\nQuản lý sẽ duyệt và phản hồi qua Chat nội bộ.",
-                    "Thành công", MsgBox.MessageBoxType.Success);
-            }
         }
 
         private void cboEmployee_SelectedIndexChanged(object sender, EventArgs e)

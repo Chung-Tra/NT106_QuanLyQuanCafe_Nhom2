@@ -20,6 +20,7 @@ namespace GUI
         public FoodDetail(FoodDTO food)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             _currentFood = food;
             BindData(food);
         }
@@ -27,11 +28,11 @@ namespace GUI
         private void BindData(FoodDTO food)
         {
             txtFoodId.Text = food.Id;
-            txtFoodName.Text = food.TenMon;
+            txtFoodName.Text = food.Name;
 
-            txtPrice.Text = food.Gia.ToString("N0") + " VNĐ";
+            txtPrice.Text = food.Price.ToString("N0") + " VNĐ";
 
-            txtCategory.Text = food.Loai switch
+            txtCategory.Text = food.Category switch
             {
                 "cafe" => "Cà phê",
                 "tea" => "Trà / Trà sữa",
@@ -39,77 +40,21 @@ namespace GUI
                 "juice" => "Nước ép / Sinh tố",
                 "food" => "Đồ ăn vặt",
                 "other" => "Khác",
-                _ => food.Loai ?? "—"
+                _ => food.Category ?? "—"
             };
 
-            if (food.ConHang)
+            if (food.InStock)
             {
                 txtStatus.Text = "Đang kinh doanh";
-                txtStatus.ForeColor = Color.LimeGreen;
+                txtStatus.ForeColor = Color.FromArgb(34, 197, 94);
             }
             else
             {
                 txtStatus.Text = "Ngừng kinh doanh";
-                txtStatus.ForeColor = Color.IndianRed;
+                txtStatus.ForeColor = Color.FromArgb(220, 80, 80);
             }
 
-            txtMoTa.Text = string.IsNullOrWhiteSpace(food.MoTa) ? "—" : food.MoTa;
-            RecalcFoodDetailLayout();
-        }
-
-        private void RecalcFoodDetailLayout()
-        {
-            const int lx = 30;
-            const int fx = 34;
-            const int fw = 350;
-            const int g = 8;
-
-            int y = lblTitle.Bottom + 14;
-
-            lblFoodId.Location = new Point(lx, y);
-            y += lblFoodId.Height + 2;
-            txtFoodId.Location = new Point(fx, y);
-            txtFoodId.Width = fw;
-            y = txtFoodId.Bottom + g;
-
-            lblFoodName.Location = new Point(lx, y);
-            y += lblFoodName.Height + 2;
-            txtFoodName.Location = new Point(fx, y);
-            txtFoodName.Width = fw;
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtFoodName, 32, 120);
-            y = txtFoodName.Bottom + g;
-
-            lblPrice.Location = new Point(lx, y);
-            y += lblPrice.Height + 2;
-            txtPrice.Location = new Point(fx, y);
-            txtPrice.Width = fw;
-            y = txtPrice.Bottom + g;
-
-            int rowCatY = y;
-            lblCategory.Location = new Point(lx, rowCatY);
-            lblStatus.Location = new Point(220, rowCatY);
-            rowCatY += Math.Max(lblCategory.Height, lblStatus.Height) + 2;
-
-            txtCategory.Location = new Point(fx, rowCatY);
-            txtStatus.Location = new Point(224, rowCatY);
-            y = Math.Max(txtCategory.Bottom, txtStatus.Bottom) + g;
-
-            lblMoTa.Location = new Point(lx, y);
-            y += lblMoTa.Height + 2;
-            txtMoTa.Location = new Point(fx, y);
-            txtMoTa.Width = fw;
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtMoTa, 56, 280);
-            y = txtMoTa.Bottom + g + 8;
-
-            BtnRemove.Location = new Point(fx, y);
-            btnClose.Location = new Point(Math.Min(fx + 200, fx + fw - btnClose.Width), y);
-
-            int bottom = y + BtnRemove.Height + 32;
-            int preferredW = Math.Max(ClientSize.Width, 420);
-            int maxH = DialogAutosizeHelper.MaxDialogClientHeight(this);
-            DialogAutosizeHelper.CapFormHeightWithAutoScroll(this, bottom, preferredW, maxH);
-
-            lblTitle.Location = new Point(Math.Max(16, (ClientSize.Width - lblTitle.Width) / 2), 22);
+            txtMoTa.Text = string.IsNullOrWhiteSpace(food.Description) ? "—" : food.Description;
         }
 
         private async void BtnRemove_Click(object sender, EventArgs e)
@@ -117,7 +62,7 @@ namespace GUI
             // Hiển thị hộp thoại xác nhận "xịn" của sếp
             DialogResult confirm = MsgBox.Show(
                 this,
-                $"Sếp có chắc chắn muốn XÓA VĨNH VIỄN món [{_currentFood.TenMon}] không?\nHành động này không thể hoàn tác!",
+                $"Sếp có chắc chắn muốn XÓA VĨNH VIỄN món [{_currentFood.Name}] không?\nHành động này không thể hoàn tác!",
                 "Cảnh báo xóa món",
                 MsgBox.MessageBoxType.Warning);
 

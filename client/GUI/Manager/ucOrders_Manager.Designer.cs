@@ -1,317 +1,324 @@
-﻿namespace GUI
+using System.Drawing;
+using System.Windows.Forms;
+using Guna.UI2.WinForms;
+
+namespace GUI
 {
     partial class ucOrders_Manager
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            pnlSummary = new Panel();
-            lblEmptyTablesValue = new Label();
+            tblStats = new TableLayoutPanel();
+            tblMain = new TableLayoutPanel();
+            pnlSummary = new Guna2Panel();
+            pnlStatEmpty = new Guna2Panel();
             lblEmptyTablesTitle = new Label();
-            lblPendingValue = new Label();
+            lblEmptyTablesValue = new Label();
+            pnlStatPending = new Guna2Panel();
             lblPendingTitle = new Label();
-            lblSoldOutValue = new Label();
+            lblPendingValue = new Label();
+            pnlStatSoldOut = new Guna2Panel();
             lblSoldOutTitle = new Label();
-            pnlTableStatus = new Panel();
-            btnStatus = new Button();
-            btnFilterTable = new Button();
-            cboTableStatus = new ComboBox();
-            dgvTableStatus = new DataGridView();
+            lblSoldOutValue = new Label();
+            pnlTableStatus = new Guna2Panel();
             lblTableStatusTitle = new Label();
-            pnlSoldOut = new Panel();
-            btnUpdateSoldOut = new Button();
-            lstSoldOut = new ListBox();
+            btnStatus = new Guna2Button();
+            cboTableStatus = new Guna2ComboBox();
+            btnFilterTable = new Guna2Button();
+            dgvTableStatus = new Guna2DataGridView();
+            colTableId = new DataGridViewTextBoxColumn();
+            colTableName = new DataGridViewTextBoxColumn();
+            colTableStatusCol = new DataGridViewTextBoxColumn();
+            colTableProgress = new DataGridViewTextBoxColumn();
+            colTableAmount = new DataGridViewTextBoxColumn();
+            pnlSoldOut = new Guna2Panel();
             lblSoldOutListTitle = new Label();
-            pnlKitchenWarning = new Panel();
-            lstKitchenWarning = new ListBox();
+            btnUpdateSoldOut = new Guna2Button();
+            lstSoldOut = new ListBox();
+            pnlKitchenWarning = new Guna2Panel();
             lblKitchenWarningTitle = new Label();
+            lstKitchenWarning = new ListBox();
+            tblStats.SuspendLayout();
+            tblMain.SuspendLayout();
             pnlSummary.SuspendLayout();
+            pnlStatEmpty.SuspendLayout();
+            pnlStatPending.SuspendLayout();
+            pnlStatSoldOut.SuspendLayout();
             pnlTableStatus.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTableStatus).BeginInit();
             pnlSoldOut.SuspendLayout();
             pnlKitchenWarning.SuspendLayout();
             SuspendLayout();
-            // 
-            // pnlSummary
-            // 
-            pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
-            pnlSummary.Controls.Add(lblEmptyTablesValue);
-            pnlSummary.Controls.Add(lblEmptyTablesTitle);
-            pnlSummary.Controls.Add(lblPendingValue);
-            pnlSummary.Controls.Add(lblPendingTitle);
-            pnlSummary.Controls.Add(lblSoldOutValue);
-            pnlSummary.Controls.Add(lblSoldOutTitle);
+
+            // ====== pnlSummary (wrapper) ======
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlSummary.BackColor = Color.Transparent;
+            pnlSummary.Controls.Add(tblStats);
             pnlSummary.Location = new Point(20, 20);
-            pnlSummary.Name = "pnlSummary";
-            pnlSummary.Size = new Size(764, 80);
-            pnlSummary.TabIndex = 0;
-            // 
-            // lblEmptyTablesValue
-            // 
-            lblEmptyTablesValue.AutoSize = true;
-            lblEmptyTablesValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblEmptyTablesValue.ForeColor = Color.MediumSeaGreen;
-            lblEmptyTablesValue.Location = new Point(20, 35);
-            lblEmptyTablesValue.Name = "lblEmptyTablesValue";
-            lblEmptyTablesValue.Size = new Size(125, 30);
-            lblEmptyTablesValue.TabIndex = 0;
-            lblEmptyTablesValue.Text = "12 / 20 bàn";
-            // 
-            // lblEmptyTablesTitle
-            // 
+            pnlSummary.Size = new Size(960, 90);
+
+            // tblStats — 3 thẻ thống kê giãn đều theo bề ngang
+            tblStats.Dock = DockStyle.Fill;
+            tblStats.ColumnCount = 3;
+            tblStats.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
+            tblStats.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            tblStats.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            tblStats.RowCount = 1;
+            tblStats.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tblStats.Controls.Add(pnlStatEmpty, 0, 0);
+            tblStats.Controls.Add(pnlStatPending, 1, 0);
+            tblStats.Controls.Add(pnlStatSoldOut, 2, 0);
+
+            // pnlStatEmpty
+            pnlStatEmpty.BackColor = Color.FromArgb(31, 31, 34);
+            pnlStatEmpty.BorderRadius = 14;
+            pnlStatEmpty.Controls.Add(lblEmptyTablesTitle);
+            pnlStatEmpty.Controls.Add(lblEmptyTablesValue);
+            pnlStatEmpty.Dock = DockStyle.Fill;
+            pnlStatEmpty.Margin = new Padding(0, 0, 10, 0);
             lblEmptyTablesTitle.AutoSize = true;
-            lblEmptyTablesTitle.Font = new Font("Segoe UI", 9.75F);
-            lblEmptyTablesTitle.ForeColor = Color.Gray;
-            lblEmptyTablesTitle.Location = new Point(20, 15);
-            lblEmptyTablesTitle.Name = "lblEmptyTablesTitle";
-            lblEmptyTablesTitle.Size = new Size(127, 17);
-            lblEmptyTablesTitle.TabIndex = 1;
+            lblEmptyTablesTitle.Font = new Font("Segoe UI", 9F);
+            lblEmptyTablesTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblEmptyTablesTitle.Location = new Point(18, 16);
             lblEmptyTablesTitle.Text = "Trạng thái Bàn trống";
-            // 
-            // lblPendingValue
-            // 
-            lblPendingValue.AutoSize = true;
-            lblPendingValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblPendingValue.ForeColor = Color.Orange;
-            lblPendingValue.Location = new Point(260, 35);
-            lblPendingValue.Name = "lblPendingValue";
-            lblPendingValue.Size = new Size(68, 30);
-            lblPendingValue.TabIndex = 2;
-            lblPendingValue.Text = "3 bàn";
-            // 
-            // lblPendingTitle
-            // 
+            lblEmptyTablesValue.AutoSize = true;
+            lblEmptyTablesValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblEmptyTablesValue.ForeColor = Color.FromArgb(34, 197, 94);
+            lblEmptyTablesValue.Location = new Point(18, 40);
+            lblEmptyTablesValue.Text = "12 / 20 bàn";
+
+            // pnlStatPending
+            pnlStatPending.BackColor = Color.FromArgb(31, 31, 34);
+            pnlStatPending.BorderRadius = 14;
+            pnlStatPending.Controls.Add(lblPendingTitle);
+            pnlStatPending.Controls.Add(lblPendingValue);
+            pnlStatPending.Dock = DockStyle.Fill;
+            pnlStatPending.Margin = new Padding(0, 0, 10, 0);
             lblPendingTitle.AutoSize = true;
-            lblPendingTitle.Font = new Font("Segoe UI", 9.75F);
-            lblPendingTitle.ForeColor = Color.Gray;
-            lblPendingTitle.Location = new Point(260, 15);
-            lblPendingTitle.Name = "lblPendingTitle";
-            lblPendingTitle.Size = new Size(139, 17);
-            lblPendingTitle.TabIndex = 3;
+            lblPendingTitle.Font = new Font("Segoe UI", 9F);
+            lblPendingTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblPendingTitle.Location = new Point(18, 16);
             lblPendingTitle.Text = "Bàn đang chờ lên món";
-            // 
-            // lblSoldOutValue
-            // 
-            lblSoldOutValue.AutoSize = true;
-            lblSoldOutValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblSoldOutValue.ForeColor = Color.IndianRed;
-            lblSoldOutValue.Location = new Point(500, 35);
-            lblSoldOutValue.Name = "lblSoldOutValue";
-            lblSoldOutValue.Size = new Size(76, 30);
-            lblSoldOutValue.TabIndex = 4;
-            lblSoldOutValue.Text = "2 món";
-            // 
-            // lblSoldOutTitle
-            // 
+            lblPendingValue.AutoSize = true;
+            lblPendingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblPendingValue.ForeColor = Color.FromArgb(245, 158, 11);
+            lblPendingValue.Location = new Point(18, 40);
+            lblPendingValue.Text = "3 bàn";
+
+            // pnlStatSoldOut
+            pnlStatSoldOut.BackColor = Color.FromArgb(31, 31, 34);
+            pnlStatSoldOut.BorderRadius = 14;
+            pnlStatSoldOut.Controls.Add(lblSoldOutTitle);
+            pnlStatSoldOut.Controls.Add(lblSoldOutValue);
+            pnlStatSoldOut.Dock = DockStyle.Fill;
+            pnlStatSoldOut.Margin = new Padding(0, 0, 0, 0);
             lblSoldOutTitle.AutoSize = true;
-            lblSoldOutTitle.Font = new Font("Segoe UI", 9.75F);
-            lblSoldOutTitle.ForeColor = Color.Gray;
-            lblSoldOutTitle.Location = new Point(500, 15);
-            lblSoldOutTitle.Name = "lblSoldOutTitle";
-            lblSoldOutTitle.Size = new Size(142, 17);
-            lblSoldOutTitle.TabIndex = 5;
+            lblSoldOutTitle.Font = new Font("Segoe UI", 9F);
+            lblSoldOutTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblSoldOutTitle.Location = new Point(18, 16);
             lblSoldOutTitle.Text = "Món Đã Hết (Sold Out)";
-            // 
-            // pnlTableStatus
-            // 
-            pnlTableStatus.BackColor = Color.FromArgb(30, 30, 30);
-            pnlTableStatus.Controls.Add(btnStatus);
-            pnlTableStatus.Controls.Add(btnFilterTable);
-            pnlTableStatus.Controls.Add(cboTableStatus);
-            pnlTableStatus.Controls.Add(dgvTableStatus);
+            lblSoldOutValue.AutoSize = true;
+            lblSoldOutValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblSoldOutValue.ForeColor = Color.FromArgb(220, 80, 80);
+            lblSoldOutValue.Location = new Point(18, 40);
+            lblSoldOutValue.Text = "2 món";
+
+            // ====== tblMain — 2 cột: bảng bàn (trái, chiếm 2 hàng) + 2 panel phải ======
+            tblMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tblMain.ColumnCount = 2;
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 59F));
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 41F));
+            tblMain.RowCount = 2;
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 48F));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 52F));
+            tblMain.Location = new Point(20, 125);
+            tblMain.Size = new Size(960, 525);
+            tblMain.Controls.Add(pnlTableStatus, 0, 0);
+            tblMain.SetRowSpan(pnlTableStatus, 2);
+            tblMain.Controls.Add(pnlSoldOut, 1, 0);
+            tblMain.Controls.Add(pnlKitchenWarning, 1, 1);
+
+            // ====== pnlTableStatus ======
+            pnlTableStatus.BackColor = Color.FromArgb(31, 31, 34);
+            pnlTableStatus.BorderRadius = 14;
             pnlTableStatus.Controls.Add(lblTableStatusTitle);
-            pnlTableStatus.Location = new Point(20, 120);
-            pnlTableStatus.Name = "pnlTableStatus";
-            pnlTableStatus.Size = new Size(450, 390);
-            pnlTableStatus.TabIndex = 1;
-            // 
-            // btnStatus
-            // 
-            btnStatus.BackColor = Color.FromArgb(45, 45, 48);
-            btnStatus.FlatAppearance.BorderSize = 0;
-            btnStatus.FlatStyle = FlatStyle.Flat;
-            btnStatus.ForeColor = Color.White;
-            btnStatus.Location = new Point(345, 12);
-            btnStatus.Name = "btnStatus";
-            btnStatus.Size = new Size(85, 25);
-            btnStatus.TabIndex = 3;
-            btnStatus.Text = "Cập nhật";
-            btnStatus.UseVisualStyleBackColor = false;
-            // 
-            // btnFilterTable
-            // 
-            btnFilterTable.BackColor = Color.FromArgb(45, 45, 48);
-            btnFilterTable.FlatAppearance.BorderSize = 0;
-            btnFilterTable.FlatStyle = FlatStyle.Flat;
-            btnFilterTable.ForeColor = Color.White;
-            btnFilterTable.Location = new Point(345, 345);
-            btnFilterTable.Name = "btnFilterTable";
-            btnFilterTable.Size = new Size(85, 25);
-            btnFilterTable.TabIndex = 4;
-            btnFilterTable.Text = "Lọc";
-            btnFilterTable.UseVisualStyleBackColor = false;
-            btnFilterTable.Click += btnFilterTable_Click;
-            // 
-            // cboTableStatus
-            // 
-            cboTableStatus.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboTableStatus.FormattingEnabled = true;
-            cboTableStatus.Location = new Point(20, 346);
-            cboTableStatus.Name = "cboTableStatus";
-            cboTableStatus.Size = new Size(315, 23);
-            cboTableStatus.TabIndex = 3;
-            // 
-            // dgvTableStatus
-            // 
-            dgvTableStatus.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgvTableStatus.BorderStyle = BorderStyle.None;
-            dgvTableStatus.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(45, 45, 48);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = Color.Gray;
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvTableStatus.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvTableStatus.Location = new Point(20, 50);
-            dgvTableStatus.Name = "dgvTableStatus";
-            dgvTableStatus.Size = new Size(410, 320);
-            dgvTableStatus.TabIndex = 1;
-            // 
+            pnlTableStatus.Controls.Add(btnStatus);
+            pnlTableStatus.Controls.Add(cboTableStatus);
+            pnlTableStatus.Controls.Add(btnFilterTable);
+            pnlTableStatus.Controls.Add(dgvTableStatus);
+            pnlTableStatus.Dock = DockStyle.Fill;
+            pnlTableStatus.Margin = new Padding(0, 0, 15, 0);
+            // Giữ Size thiết kế để con neo (Anchor) tính đúng khoảng bù trước khi TLP giãn
+            pnlTableStatus.Size = new Size(560, 525);
+
             // lblTableStatusTitle
-            // 
             lblTableStatusTitle.AutoSize = true;
-            lblTableStatusTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblTableStatusTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblTableStatusTitle.ForeColor = Color.White;
-            lblTableStatusTitle.Location = new Point(15, 15);
-            lblTableStatusTitle.Name = "lblTableStatusTitle";
-            lblTableStatusTitle.Size = new Size(214, 21);
-            lblTableStatusTitle.TabIndex = 2;
+            lblTableStatusTitle.Location = new Point(18, 16);
             lblTableStatusTitle.Text = "Trạng thái Phục vụ các Bàn";
-            // 
-            // pnlSoldOut
-            // 
-            pnlSoldOut.BackColor = Color.FromArgb(30, 30, 30);
+
+            // btnStatus
+            btnStatus.BorderRadius = 8;
+            btnStatus.Cursor = Cursors.Hand;
+            btnStatus.FillColor = Color.FromArgb(31, 138, 154);
+            btnStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnStatus.ForeColor = Color.White;
+            btnStatus.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnStatus.Location = new Point(438, 12);
+            btnStatus.Size = new Size(106, 30);
+            btnStatus.Text = "Sửa";
+            btnStatus.Click += BtnEditTable_Click;
+
+            // dgvTableStatus
+            dgvTableStatus.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvTableStatus.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvTableStatus.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvTableStatus.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvTableStatus.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvTableStatus.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvTableStatus.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvTableStatus.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvTableStatus.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvTableStatus.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvTableStatus.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvTableStatus.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvTableStatus.GridColor = Color.FromArgb(45, 45, 48);
+            ConfigureGrid(dgvTableStatus);            dgvTableStatus.Columns.AddRange(new DataGridViewColumn[] { colTableId, colTableName, colTableStatusCol, colTableProgress, colTableAmount });
+            colTableId.HeaderText = "TableId"; colTableId.Name = "TableId"; colTableId.DataPropertyName = "TableId"; colTableId.Visible = false;
+            colTableName.HeaderText = "Bàn"; colTableName.Name = "TableName"; colTableName.DataPropertyName = "TableName";
+            colTableStatusCol.HeaderText = "Trạng Thái"; colTableStatusCol.Name = "Status"; colTableStatusCol.DataPropertyName = "Status";
+            colTableProgress.HeaderText = "Tiến độ món"; colTableProgress.Name = "Progress"; colTableProgress.DataPropertyName = "Progress";
+            colTableAmount.HeaderText = "Tạm Tính"; colTableAmount.Name = "TotalAmount"; colTableAmount.DataPropertyName = "TotalAmount";
+            dgvTableStatus.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvTableStatus.Location = new Point(18, 54);
+            dgvTableStatus.Size = new Size(526, 410);
+            dgvTableStatus.CellDoubleClick += DgvTableStatus_CellDoubleClick;
+
+            // cboTableStatus
+            cboTableStatus.BackColor = Color.Transparent;
+            cboTableStatus.BorderColor = Color.FromArgb(63, 63, 70);
+            cboTableStatus.BorderRadius = 8;
+            cboTableStatus.DrawMode = DrawMode.OwnerDrawFixed;
+            cboTableStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboTableStatus.FillColor = Color.FromArgb(30, 30, 33);
+            cboTableStatus.FocusedColor = Color.FromArgb(31, 138, 154);
+            cboTableStatus.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            cboTableStatus.Font = new Font("Segoe UI", 9.5F);
+            cboTableStatus.ForeColor = Color.White;
+            cboTableStatus.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            cboTableStatus.ItemHeight = 26;
+            cboTableStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            cboTableStatus.Location = new Point(18, 478);
+            cboTableStatus.Size = new Size(420, 32);
+
+            // btnFilterTable
+            btnFilterTable.BorderRadius = 8;
+            btnFilterTable.Cursor = Cursors.Hand;
+            btnFilterTable.FillColor = Color.FromArgb(31, 138, 154);
+            btnFilterTable.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnFilterTable.ForeColor = Color.White;
+            btnFilterTable.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnFilterTable.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnFilterTable.Location = new Point(444, 478);
+            btnFilterTable.Size = new Size(100, 32);
+            btnFilterTable.Text = "Lọc";
+            btnFilterTable.Click += btnFilterTable_Click;
+
+            // ====== pnlSoldOut ======
+            pnlSoldOut.BackColor = Color.FromArgb(31, 31, 34);
+            pnlSoldOut.BorderRadius = 14;
+            pnlSoldOut.Controls.Add(lblSoldOutListTitle);
             pnlSoldOut.Controls.Add(btnUpdateSoldOut);
             pnlSoldOut.Controls.Add(lstSoldOut);
-            pnlSoldOut.Controls.Add(lblSoldOutListTitle);
-            pnlSoldOut.Location = new Point(490, 120);
-            pnlSoldOut.Name = "pnlSoldOut";
-            pnlSoldOut.Size = new Size(294, 180);
-            pnlSoldOut.TabIndex = 2;
-            // 
-            // btnUpdateSoldOut
-            // 
-            btnUpdateSoldOut.BackColor = Color.FromArgb(45, 45, 48);
-            btnUpdateSoldOut.FlatAppearance.BorderSize = 0;
-            btnUpdateSoldOut.FlatStyle = FlatStyle.Flat;
-            btnUpdateSoldOut.ForeColor = Color.White;
-            btnUpdateSoldOut.Location = new Point(194, 12);
-            btnUpdateSoldOut.Name = "btnUpdateSoldOut";
-            btnUpdateSoldOut.Size = new Size(85, 25);
-            btnUpdateSoldOut.TabIndex = 0;
-            btnUpdateSoldOut.Text = "Cập nhật";
-            btnUpdateSoldOut.UseVisualStyleBackColor = false;
-            // 
-            // lstSoldOut
-            // 
-            lstSoldOut.BackColor = Color.FromArgb(45, 45, 48);
-            lstSoldOut.BorderStyle = BorderStyle.None;
-            lstSoldOut.Font = new Font("Segoe UI", 9.75F);
-            lstSoldOut.ForeColor = Color.White;
-            lstSoldOut.FormattingEnabled = true;
-            lstSoldOut.ItemHeight = 17;
-            lstSoldOut.Location = new Point(20, 50);
-            lstSoldOut.Name = "lstSoldOut";
-            lstSoldOut.Size = new Size(254, 102);
-            lstSoldOut.TabIndex = 1;
-            lstSoldOut.SelectedIndexChanged += lstSoldOut_SelectedIndexChanged;
-            // 
-            // lblSoldOutListTitle
-            // 
+            pnlSoldOut.Dock = DockStyle.Fill;
+            pnlSoldOut.Margin = new Padding(0, 0, 0, 8);
+            pnlSoldOut.Size = new Size(385, 250);
             lblSoldOutListTitle.AutoSize = true;
             lblSoldOutListTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            lblSoldOutListTitle.ForeColor = Color.IndianRed;
-            lblSoldOutListTitle.Location = new Point(15, 15);
-            lblSoldOutListTitle.Name = "lblSoldOutListTitle";
-            lblSoldOutListTitle.Size = new Size(165, 20);
-            lblSoldOutListTitle.TabIndex = 2;
+            lblSoldOutListTitle.ForeColor = Color.FromArgb(220, 80, 80);
+            lblSoldOutListTitle.Location = new Point(18, 16);
             lblSoldOutListTitle.Text = "Danh sách món đã hết";
-            // 
-            // pnlKitchenWarning
-            // 
-            pnlKitchenWarning.BackColor = Color.FromArgb(30, 30, 30);
-            pnlKitchenWarning.Controls.Add(lstKitchenWarning);
+
+            // btnUpdateSoldOut
+            btnUpdateSoldOut.BorderRadius = 8;
+            btnUpdateSoldOut.Cursor = Cursors.Hand;
+            btnUpdateSoldOut.FillColor = Color.FromArgb(31, 138, 154);
+            btnUpdateSoldOut.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnUpdateSoldOut.ForeColor = Color.White;
+            btnUpdateSoldOut.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnUpdateSoldOut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnUpdateSoldOut.Location = new Point(255, 12);
+            btnUpdateSoldOut.Size = new Size(112, 30);
+
+            btnUpdateSoldOut.Text = "Cập nhật";
+
+            // lstSoldOut
+            lstSoldOut.BackColor = Color.FromArgb(24, 24, 27);
+            lstSoldOut.BorderStyle = BorderStyle.None;
+            lstSoldOut.Font = new Font("Segoe UI", 10F);
+            lstSoldOut.ForeColor = Color.FromArgb(220, 220, 225);
+            lstSoldOut.FormattingEnabled = true;
+            lstSoldOut.ItemHeight = 20;
+            lstSoldOut.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lstSoldOut.Location = new Point(18, 54);
+            lstSoldOut.Size = new Size(349, 180);
+            lstSoldOut.SelectedIndexChanged += lstSoldOut_SelectedIndexChanged;
+
+            // ====== pnlKitchenWarning ======
+            pnlKitchenWarning.BackColor = Color.FromArgb(31, 31, 34);
+            pnlKitchenWarning.BorderRadius = 14;
             pnlKitchenWarning.Controls.Add(lblKitchenWarningTitle);
-            pnlKitchenWarning.Location = new Point(490, 320);
-            pnlKitchenWarning.Name = "pnlKitchenWarning";
-            pnlKitchenWarning.Size = new Size(294, 190);
-            pnlKitchenWarning.TabIndex = 3;
-            // 
-            // lstKitchenWarning
-            // 
-            lstKitchenWarning.AccessibleRole = AccessibleRole.Sound;
-            lstKitchenWarning.BackColor = Color.FromArgb(45, 45, 48);
-            lstKitchenWarning.BorderStyle = BorderStyle.None;
-            lstKitchenWarning.Font = new Font("Segoe UI", 9.75F);
-            lstKitchenWarning.ForeColor = Color.White;
-            lstKitchenWarning.FormattingEnabled = true;
-            lstKitchenWarning.ItemHeight = 17;
-            lstKitchenWarning.Location = new Point(20, 50);
-            lstKitchenWarning.Name = "lstKitchenWarning";
-            lstKitchenWarning.Size = new Size(254, 119);
-            lstKitchenWarning.TabIndex = 0;
-            lstKitchenWarning.DoubleClick += lstKitchenWarning_DoubleClick;
-            // 
-            // lblKitchenWarningTitle
-            // 
+            pnlKitchenWarning.Controls.Add(lstKitchenWarning);
+            pnlKitchenWarning.Dock = DockStyle.Fill;
+            pnlKitchenWarning.Margin = new Padding(0, 7, 0, 0);
+            pnlKitchenWarning.Size = new Size(385, 260);
             lblKitchenWarningTitle.AutoSize = true;
             lblKitchenWarningTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            lblKitchenWarningTitle.ForeColor = Color.Orange;
-            lblKitchenWarningTitle.Location = new Point(15, 15);
-            lblKitchenWarningTitle.Name = "lblKitchenWarningTitle";
-            lblKitchenWarningTitle.Size = new Size(194, 20);
-            lblKitchenWarningTitle.TabIndex = 1;
+            lblKitchenWarningTitle.ForeColor = Color.FromArgb(245, 158, 11);
+            lblKitchenWarningTitle.Location = new Point(18, 16);
             lblKitchenWarningTitle.Text = "Cảnh báo Món chờ quá lâu";
-            // 
-            // ucOrders_Manager
-            // 
+
+            // lstKitchenWarning
+            lstKitchenWarning.AccessibleRole = AccessibleRole.Sound;
+            lstKitchenWarning.BackColor = Color.FromArgb(24, 24, 27);
+            lstKitchenWarning.BorderStyle = BorderStyle.None;
+            lstKitchenWarning.Font = new Font("Segoe UI", 10F);
+            lstKitchenWarning.ForeColor = Color.FromArgb(220, 220, 225);
+            lstKitchenWarning.FormattingEnabled = true;
+            lstKitchenWarning.ItemHeight = 20;
+            lstKitchenWarning.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lstKitchenWarning.Location = new Point(18, 54);
+            lstKitchenWarning.Size = new Size(349, 190);
+            lstKitchenWarning.DoubleClick += lstKitchenWarning_DoubleClick;
+
+            // ====== ucOrders_Manager ======
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 48);
-            Controls.Add(pnlKitchenWarning);
-            Controls.Add(pnlSoldOut);
-            Controls.Add(pnlTableStatus);
+            BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlSummary);
+            Controls.Add(tblMain);
             Name = "ucOrders_Manager";
-            Size = new Size(804, 530);
+            Size = new Size(1000, 665);
             pnlSummary.ResumeLayout(false);
-            pnlSummary.PerformLayout();
+            pnlStatEmpty.ResumeLayout(false);
+            pnlStatEmpty.PerformLayout();
+            pnlStatPending.ResumeLayout(false);
+            pnlStatPending.PerformLayout();
+            pnlStatSoldOut.ResumeLayout(false);
+            pnlStatSoldOut.PerformLayout();
             pnlTableStatus.ResumeLayout(false);
             pnlTableStatus.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTableStatus).EndInit();
@@ -319,30 +326,77 @@
             pnlSoldOut.PerformLayout();
             pnlKitchenWarning.ResumeLayout(false);
             pnlKitchenWarning.PerformLayout();
+            tblStats.ResumeLayout(false);
+            tblMain.ResumeLayout(false);
             ResumeLayout(false);
+        }
+
+        private static void ConfigureGrid(Guna2DataGridView dgv)
+        {
+            dgv.AutoGenerateColumns = false;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersHeight = 32;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgv.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.GridColor = Color.FromArgb(45, 45, 48);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowTemplate.Height = 28;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlSummary;
-        private System.Windows.Forms.Label lblEmptyTablesTitle;
-        private System.Windows.Forms.Label lblEmptyTablesValue;
-        private System.Windows.Forms.Label lblPendingTitle;
-        private System.Windows.Forms.Label lblPendingValue;
-        private System.Windows.Forms.Label lblSoldOutTitle;
-        private System.Windows.Forms.Label lblSoldOutValue;
-        private System.Windows.Forms.Panel pnlTableStatus;
-        private System.Windows.Forms.Label lblTableStatusTitle;
-        private System.Windows.Forms.DataGridView dgvTableStatus;
-        private System.Windows.Forms.Panel pnlSoldOut;
-        private System.Windows.Forms.Label lblSoldOutListTitle;
-        private System.Windows.Forms.ListBox lstSoldOut;
-        private System.Windows.Forms.Button btnUpdateSoldOut;
-        private System.Windows.Forms.Panel pnlKitchenWarning;
-        private System.Windows.Forms.Label lblKitchenWarningTitle;
-        private System.Windows.Forms.ListBox lstKitchenWarning;
-        private ComboBox cboTableStatus;
-        private System.Windows.Forms.Button btnFilterTable;
-        private Button btnStatus;
+        private TableLayoutPanel tblStats;
+        private TableLayoutPanel tblMain;
+        private Guna2Panel pnlSummary;
+        private Guna2Panel pnlStatEmpty;
+        private Label lblEmptyTablesTitle;
+        private Label lblEmptyTablesValue;
+        private Guna2Panel pnlStatPending;
+        private Label lblPendingTitle;
+        private Label lblPendingValue;
+        private Guna2Panel pnlStatSoldOut;
+        private Label lblSoldOutTitle;
+        private Label lblSoldOutValue;
+        private Guna2Panel pnlTableStatus;
+        private Label lblTableStatusTitle;
+        private Guna2DataGridView dgvTableStatus;
+        private DataGridViewTextBoxColumn colTableId;
+        private DataGridViewTextBoxColumn colTableName;
+        private DataGridViewTextBoxColumn colTableStatusCol;
+        private DataGridViewTextBoxColumn colTableProgress;
+        private DataGridViewTextBoxColumn colTableAmount;
+        private Guna2Panel pnlSoldOut;
+        private Label lblSoldOutListTitle;
+        private ListBox lstSoldOut;
+        private Guna2Button btnUpdateSoldOut;
+        private Guna2Panel pnlKitchenWarning;
+        private Label lblKitchenWarningTitle;
+        private ListBox lstKitchenWarning;
+        private Guna2ComboBox cboTableStatus;
+        private Guna2Button btnFilterTable;
+        private Guna2Button btnStatus;
     }
 }

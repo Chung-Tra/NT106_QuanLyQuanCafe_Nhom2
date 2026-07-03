@@ -17,13 +17,20 @@ namespace GUI
         private void InitializeComponent()
         {
             dgvManagers = new Guna2DataGridView();
+            colMgrId = new DataGridViewTextBoxColumn();
+            colMgrName = new DataGridViewTextBoxColumn();
+            colMgrEmail = new DataGridViewTextBoxColumn();
+            colMgrPhone = new DataGridViewTextBoxColumn();
+            colMgrJoinDate = new DataGridViewTextBoxColumn();
+            colMgrStatus = new DataGridViewTextBoxColumn();
+            colMgrMonthOrders = new DataGridViewTextBoxColumn();
             btnClose    = new Guna2Button();
             lblTitle    = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvManagers).BeginInit();
             SuspendLayout();
 
             // lblTitle
-            lblTitle.Text      = "📇  Hồ sơ đầy đủ Quản lý";
+            lblTitle.Text      = "Hồ sơ đầy đủ Quản lý";
             lblTitle.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.AutoSize  = true;
@@ -34,24 +41,32 @@ namespace GUI
             dgvManagers.ReadOnly              = true;
             dgvManagers.RowHeadersVisible     = false;
             dgvManagers.SelectionMode         = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgvManagers);
             dgvManagers.ScrollBars            = ScrollBars.None;
             dgvManagers.BorderStyle           = BorderStyle.None;
             dgvManagers.CellBorderStyle       = DataGridViewCellBorderStyle.SingleHorizontal;
-            dgvManagers.BackgroundColor       = Color.FromArgb(28, 36, 38);
-            dgvManagers.GridColor             = Color.FromArgb(45, 60, 64);
+            dgvManagers.BackgroundColor       = Color.FromArgb(31, 31, 34);
+            dgvManagers.GridColor             = Color.FromArgb(63, 63, 70);
             dgvManagers.RowTemplate.Height    = 32;
             dgvManagers.EnableHeadersVisualStyles = false;
-            dgvManagers.DefaultCellStyle.BackColor          = Color.FromArgb(28, 36, 38);
-            dgvManagers.DefaultCellStyle.ForeColor          = Color.FromArgb(220, 230, 232);
+            dgvManagers.DefaultCellStyle.BackColor          = Color.FromArgb(31, 31, 34);
+            dgvManagers.DefaultCellStyle.ForeColor          = Color.FromArgb(220, 220, 225);
             dgvManagers.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
-            dgvManagers.DefaultCellStyle.SelectionForeColor = Color.White;
+            dgvManagers.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvManagers.DefaultCellStyle.Font               = new Font("Segoe UI", 9F);
-            dgvManagers.ColumnHeadersDefaultCellStyle.BackColor          = Color.FromArgb(34, 44, 47);
-            dgvManagers.ColumnHeadersDefaultCellStyle.ForeColor          = Color.FromArgb(31, 138, 154);
+            dgvManagers.ColumnHeadersDefaultCellStyle.BackColor          = Color.FromArgb(24, 24, 27);
+            dgvManagers.ColumnHeadersDefaultCellStyle.ForeColor          = Color.FromArgb(160, 160, 166);
             dgvManagers.ColumnHeadersDefaultCellStyle.Font               = new Font("Segoe UI", 9F, FontStyle.Bold);
-            dgvManagers.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(34, 44, 47);
+            dgvManagers.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(24, 24, 27);
             dgvManagers.Location = new Point(20, 58);
-            dgvManagers.Size     = new Size(820, 340);
+            dgvManagers.Size     = new Size(820, 340);            dgvManagers.Columns.AddRange(new DataGridViewColumn[] { colMgrId, colMgrName, colMgrEmail, colMgrPhone, colMgrJoinDate, colMgrStatus, colMgrMonthOrders });
+            colMgrId.HeaderText = "Mã QL"; colMgrId.Name = "Mã QL"; colMgrId.DataPropertyName = "Mã QL";
+            colMgrName.HeaderText = "Họ tên"; colMgrName.Name = "Họ tên"; colMgrName.DataPropertyName = "Họ tên";
+            colMgrEmail.HeaderText = "Email"; colMgrEmail.Name = "Email"; colMgrEmail.DataPropertyName = "Email";
+            colMgrPhone.HeaderText = "SĐT"; colMgrPhone.Name = "SĐT"; colMgrPhone.DataPropertyName = "SĐT";
+            colMgrJoinDate.HeaderText = "Ngày vào"; colMgrJoinDate.Name = "Ngày vào"; colMgrJoinDate.DataPropertyName = "Ngày vào";
+            colMgrStatus.HeaderText = "Trạng thái"; colMgrStatus.Name = "Trạng thái"; colMgrStatus.DataPropertyName = "Trạng thái";
+            colMgrMonthOrders.HeaderText = "Đơn tháng này"; colMgrMonthOrders.Name = "Đơn tháng này"; colMgrMonthOrders.DataPropertyName = "Đơn tháng này";
 
             // btnClose
             btnClose.Text        = "Đóng";
@@ -81,6 +96,13 @@ namespace GUI
         }
 
         private Guna2DataGridView dgvManagers;
+        private DataGridViewTextBoxColumn colMgrId;
+        private DataGridViewTextBoxColumn colMgrName;
+        private DataGridViewTextBoxColumn colMgrEmail;
+        private DataGridViewTextBoxColumn colMgrPhone;
+        private DataGridViewTextBoxColumn colMgrJoinDate;
+        private DataGridViewTextBoxColumn colMgrStatus;
+        private DataGridViewTextBoxColumn colMgrMonthOrders;
         private Guna2Button       btnClose;
         private Label             lblTitle;
     }

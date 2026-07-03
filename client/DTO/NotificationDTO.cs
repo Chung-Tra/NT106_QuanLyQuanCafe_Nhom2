@@ -8,30 +8,30 @@ namespace DTO
     public class NotificationDTO
     {
         [JsonIgnore]
-        public string? ThongBaoId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("loai")]
-        public string? Loai { get; set; }  // "don_moi", "xin_nghi", "sua_nguyen_lieu", "feedback_xau", "cham_cong", "sos"
+        public string? Type { get; set; }  // "don_moi", "xin_nghi", "sua_nguyen_lieu", "feedback_xau", "cham_cong", "sos"
 
         [JsonProperty("noi_dung")]
-        public string? NoiDung { get; set; }
+        public string? Content { get; set; }
 
         [JsonProperty("nguoi_nhan_id")]
-        public string? NguoiNhanId { get; set; }
+        public string? ReceiverId { get; set; }
 
         [JsonProperty("nguoi_gui_id")]
-        public string? NguoiGuiId { get; set; }
+        public string? SenderId { get; set; }
 
         [JsonProperty("thoi_gian")]
-        public long ThoiGian { get; set; }
+        public long Timestamp { get; set; }
 
         [JsonProperty("da_doc")]
-        public bool DaDoc { get; set; }
+        public bool IsRead { get; set; }
 
         [JsonProperty("don_hang_id")]
-        public string? DonHangId { get; set; }
+        public string? OrderId { get; set; }
 
         [JsonProperty("trang_lien_quan")]
-        public string? TrangLienQuan { get; set; }  // "leave", "stock", "feedback", "attendance", "order"
+        public string? RelatedPage { get; set; }  // "leave", "stock", "feedback", "attendance", "order"
     }
 }

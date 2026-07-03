@@ -8,18 +8,18 @@ namespace DTO
     public class TableDTO
     {
         [JsonIgnore]
-        public string? BanId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("ten_ban")]
-        public string? TenBan { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("so_cho")]
-        public int SoCho { get; set; }
+        public int Capacity { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "trong", "co_khach", "dat_truoc"
+        public string? Status { get; set; }  // "trong", "co_khach", "dat_truoc"
 
         [JsonProperty("vi_tri")]
-        public string? ViTri { get; set; }
+        public string? Location { get; set; }
     }
 }

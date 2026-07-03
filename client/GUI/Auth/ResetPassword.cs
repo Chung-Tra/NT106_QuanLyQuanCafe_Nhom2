@@ -7,19 +7,19 @@ namespace GUI
     public partial class ResetPassword : Form
     {
         private readonly string userEmail;
-        public ResetPassword(string email)
+        private readonly string _resetToken;
+        public ResetPassword(string email, string resetToken)
         {
             InitializeComponent();
             FormCorners.Round(this);
-            AppFonts.ApplyTo(lblTitle, lblDescription);
+            WindowChrome.Apply(this, close: false, host: pnlCard);
             this.userEmail = email;
+            this._resetToken = resetToken;
             btnShowNewPass.BringToFront();
             btnShowConfirmPass.BringToFront();
         }
 
-        // ──────────────────────────────────────────────
         // Hiện/ẩn mật khẩu mới
-        // ──────────────────────────────────────────────
         private void BtnShowNewPass_MouseDown(object sender, MouseEventArgs e)
         {
             txtNewPass.PasswordChar          = '\0';
@@ -34,9 +34,7 @@ namespace GUI
             btnShowNewPass.Text              = "Hiện";
         }
 
-        // ──────────────────────────────────────────────
         // Hiện/ẩn xác nhận mật khẩu
-        // ──────────────────────────────────────────────
         private void BtnShowConfirmPass_MouseDown(object sender, MouseEventArgs e)
         {
             txtConfirmPass.PasswordChar          = '\0';
@@ -59,8 +57,8 @@ namespace GUI
             btnSave.Text = "Đang lưu...";
             btnSave.Enabled = false;
 
-            // Gọi hàm xử lý (truyền email, pass mới, và xác nhận pass)
-            var result = await AuthBUS.HandlePasswordReset(userEmail, newPass, confirmPass);
+            // Gọi hàm xử lý (truyền email, pass mới, xác nhận pass, và reset-token đã xác thực OTP)
+            var result = await AuthBUS.HandlePasswordReset(userEmail, newPass, confirmPass, _resetToken);
 
             if (result.IsValid)
             {
@@ -87,9 +85,7 @@ namespace GUI
 
         }
 
-        // ──────────────────────────────────────────────
         // Quay lại form VerifyCode
-        // ──────────────────────────────────────────────
         private void LblBackToLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Form? VerifyForm = Application.OpenForms["VerifyCode"];
@@ -99,7 +95,7 @@ namespace GUI
             }
             else
             {
-                VerifyCode veri = new(string.Empty, string.Empty);
+                VerifyCode veri = new(userEmail);
                 veri.Show();
             }
             this.Close();

@@ -13,8 +13,17 @@ namespace GUI
         public ucParking_Security()
         {
             InitializeComponent();
-            btnReport.Click += btnReport_Click;
+            GridColumnGuard.SyncColumnNames(dgvParkingLog);
+            DgvRefresh.Attach(dgvParkingLog, LoadMockData);
             this.Load += (s, e) => LoadMockData();
+
+            // Double-click 1 lượt gửi xe -> form chi tiết read-only đủ field
+            dgvParkingLog.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvParkingLog.Rows[e.RowIndex], "Chi tiết gửi xe")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
 
         private void LoadMockData()

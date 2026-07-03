@@ -5,15 +5,19 @@ using System.Windows.Forms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucNotification_Admin : UserControl
+#pragma warning restore IDE1006
     {
         private DataTable _dtNotif = new();
 
         public ucNotification_Admin()
         {
             InitializeComponent();
-            this.Load += (s, e) => LoadMockNotifications();
+            DgvRefresh.Attach(dgvNotifications, LoadMockNotifications);
         }
+
+        private void UcNotification_Admin_Load(object? sender, EventArgs e) => LoadMockNotifications();
 
         private void LoadMockNotifications()
         {
@@ -118,11 +122,9 @@ namespace GUI
                 btnGoToChat.BackColor = Color.SteelBlue;
                 btnGoToChat.Text = "Chat với quản lý";
             }
-
-            btnGoToPage.Visible = true;
         }
 
-        private void dgvNotifications_SelectionChanged(object? sender, EventArgs e)
+        private void DgvNotifications_SelectionChanged(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
             var row = dgvNotifications.CurrentRow;
@@ -152,7 +154,7 @@ namespace GUI
             UpdateDetailButtons();
         }
 
-        private void dgvNotifications_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        private void DgvNotifications_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
 
@@ -191,7 +193,7 @@ namespace GUI
             }
         }
 
-        private void btnAccept_Click(object? sender, EventArgs e)
+        private void BtnAccept_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
             int idx = dgvNotifications.CurrentRow.Index;
@@ -202,7 +204,7 @@ namespace GUI
             MsgBox.Show(MsgBox.OwnerWindow(this), "Đã duyệt đơn xin nghỉ!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
-        private void btnReject_Click(object? sender, EventArgs e)
+        private void BtnReject_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
             int idx = dgvNotifications.CurrentRow.Index;
@@ -213,34 +215,14 @@ namespace GUI
             MsgBox.Show(MsgBox.OwnerWindow(this), "Đã từ chối đơn xin nghỉ!", "Thông báo", MsgBox.MessageBoxType.Warning);
         }
 
-        private void btnGoToChat_Click(object? sender, EventArgs e)
+        private void BtnGoToChat_Click(object? sender, EventArgs e)
         {
             if (dgvNotifications.CurrentRow == null) return;
             string from = dgvNotifications.CurrentRow.Cells["Từ"].Value?.ToString() ?? "";
             MsgBox.Show(MsgBox.OwnerWindow(this), $"Mở cửa sổ chat với {from}...", "Chat", MsgBox.MessageBoxType.Info);
         }
 
-        private void btnGoToPage_Click(object? sender, EventArgs e)
-        {
-            if (dgvNotifications.CurrentRow == null) return;
-            int idx = dgvNotifications.CurrentRow.Index;
-            _dtNotif.Rows[idx]["Đã đọc"] = true;
-            ColorRows();
-            UpdateUnreadCount();
-
-            string page = _dtNotif.Rows[idx]["Trang liên quan"].ToString() ?? "";
-            string pageName = page switch
-            {
-                "leave" => "Quản lý nghỉ phép",
-                "stock" => "Kiểm soát kho",
-                "feedback" => "Feedback khách hàng",
-                "attendance" => "Chấm công",
-                _ => "Trang chủ"
-            };
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Chuyển tới trang: {pageName}", "Điều hướng", MsgBox.MessageBoxType.Info);
-        }
-
-        private void btnMarkAllRead_Click(object? sender, EventArgs e)
+        private void BtnMarkAllRead_Click(object? sender, EventArgs e)
         {
             foreach (DataRow row in _dtNotif.Rows)
                 row["Đã đọc"] = true;

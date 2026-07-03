@@ -12,12 +12,15 @@ using System.Windows.Forms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucProducts_Manager : UserControl
+#pragma warning restore IDE1006
     {
 
         public ucProducts_Manager()
         {
             InitializeComponent();
+            DgvRefresh.Attach(dgvMenu, LoadRealData);
             this.Load += async (s, e) => await LoadRealData();
         }
 
@@ -28,8 +31,9 @@ namespace GUI
                 this.Cursor = Cursors.WaitCursor;
                 dgvMenu.DataSource = null;
 
-                // Lấy danh sách món ăn 
-                List<FoodDTO> fullList = await FoodBUS.GetListFoods();
+                // Lấy danh sách món ăn (Task.Run: HTTP + parse JSON ở thread pool,
+                // không chiếm luồng UI trong lúc chờ server)
+                List<FoodDTO> fullList = await Task.Run(FoodBUS.GetListFoods);
 
                 if (fullList == null || fullList.Count == 0)
                     return;
@@ -50,17 +54,22 @@ namespace GUI
                 {
                     dt.Rows.Add(
                         food.Id,
-                        food.TenMon,
-                        food.Gia,
-                        food.Loai,
-                        food.ConHang ? "Đang kinh doanh" : "Ngừng bán",
-                        food.MoTa,
-                        food.HinhAnhUrl,
-                        food.ConHang
+                        food.Name,
+                        food.Price,
+                        food.Category,
+                        food.InStock ? "Đang kinh doanh" : "Ngừng bán",
+                        food.Description,
+                        food.ImageUrl,
+                        food.InStock
                     );
                 }
 
                 dgvMenu.DataSource = dt;
+
+                // VS hay đổi Name cột thành "colFoodName"… trong khi code dưới đây tra cứu theo
+                // TÊN NGHIỆP VỤ ("Tên món ăn", "Mã món"…). Đồng bộ Name == DataPropertyName ngay
+                // sau khi bind để mọi Columns["…"]/Cells["…"] không trả null (tránh NullReference).
+                GridColumnGuard.SyncColumnNames(dgvMenu);
 
                 // Thiết lập hiển thị - Đưa "Mã món" và "Giá bán" vào danh sách ẩn
                 string[] hideCols = ["Mã món", "MoTa", "HinhAnhUrl", "ConHang"];
@@ -99,7 +108,7 @@ namespace GUI
 
         private async void BtnAddMenu_Click(object sender, EventArgs e)
         {
-            FoodForm frmAdd = new();
+            AddFood frmAdd = new();
             if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
@@ -120,15 +129,15 @@ namespace GUI
             FoodDTO foodToEdit = new()
             {
                 Id = row.Cells["Mã món"].Value?.ToString() ?? string.Empty,
-                TenMon = row.Cells["Tên món ăn"].Value?.ToString() ?? string.Empty,
-                Gia = Convert.ToDecimal(row.Cells["Giá bán"].Value),
-                Loai = row.Cells["Loại"].Value?.ToString() ?? string.Empty,
-                MoTa = row.Cells["MoTa"].Value?.ToString() ?? string.Empty,
-                HinhAnhUrl = row.Cells["HinhAnhUrl"].Value?.ToString() ?? string.Empty,
-                ConHang = Convert.ToBoolean(row.Cells["ConHang"].Value)
+                Name = row.Cells["Tên món ăn"].Value?.ToString() ?? string.Empty,
+                Price = Convert.ToDecimal(row.Cells["Giá bán"].Value),
+                Category = row.Cells["Loại"].Value?.ToString() ?? string.Empty,
+                Description = row.Cells["MoTa"].Value?.ToString() ?? string.Empty,
+                ImageUrl = row.Cells["HinhAnhUrl"].Value?.ToString() ?? string.Empty,
+                InStock = Convert.ToBoolean(row.Cells["ConHang"].Value)
             };
 
-            FoodEditForm frmEdit = new(foodToEdit);
+            EditFood frmEdit = new(foodToEdit);
             if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
@@ -145,11 +154,11 @@ namespace GUI
             FoodDTO food = new()
             {
                 Id = row.Cells["Mã món"].Value?.ToString() ?? string.Empty,
-                TenMon = row.Cells["Tên món ăn"].Value?.ToString(),
-                Gia = Convert.ToDecimal(row.Cells["Giá bán"].Value),
-                Loai = row.Cells["Loại"].Value?.ToString(),
-                MoTa = row.Cells["MoTa"].Value?.ToString(),
-                ConHang = Convert.ToBoolean(row.Cells["ConHang"].Value),
+                Name = row.Cells["Tên món ăn"].Value?.ToString(),
+                Price = Convert.ToDecimal(row.Cells["Giá bán"].Value),
+                Category = row.Cells["Loại"].Value?.ToString(),
+                Description = row.Cells["MoTa"].Value?.ToString(),
+                InStock = Convert.ToBoolean(row.Cells["ConHang"].Value),
             };
 
             using FoodDetail dlg = new(food);
@@ -159,47 +168,46 @@ namespace GUI
 
         private void BtnImportMaterial_Click(object sender, EventArgs e)
         {
-            using WarehouseManagerForm frm = new();
+            using WarehouseManager frm = new();
             frm.ShowDialog(MsgBox.OwnerWindow(this));
         }
 
-        private void btnFilter_Click(object sender, EventArgs e)
+        private void BtnFilter_Click(object sender, EventArgs e)
         {
             // Lấy DataTable đang chứa dữ liệu của lưới dgvMenu
-            DataTable? dt = dgvMenu.DataSource as DataTable;
-            if (dt == null) return;
+            if (dgvMenu.DataSource is not DataTable dt) return;
 
             // Tạo một danh sách (List) để gom các điều kiện lọc lại với nhau
-            List<string> filterParts = new ();
+            List<string> filterParts = [];
 
-            // TÌM THEO TÊN HOẶC DANH MỤC (LOẠI) ---
-            string keyword = txtSearch.Text.Trim().Replace("'", "''"); // Tránh lỗi SQL Injection nội bộ
-            if (!string.IsNullOrEmpty(keyword))
+            // Từ khóa quét mọi cột nghiệp vụ (tên, loại, trạng thái, giá, mô tả, mã món);
+            // bỏ cột kỹ thuật URL ảnh và cờ bool
+            string kwFilter = SearchFilter.AllColumnsFilter(dt, txtSearch.Text, "HinhAnhUrl", "ConHang");
+            if (!string.IsNullOrEmpty(kwFilter))
             {
-                // Sửa [Mã món] thành cột [Loại]
-                filterParts.Add($"([Tên món ăn] LIKE '%{keyword}%' OR [Loại] LIKE '%{keyword}%')");
+                filterParts.Add(kwFilter);
             }
 
-            // GIÁ TỪ ) ---
+            // Giá từ
             string minText = txtMinPrice.Text.Replace(",", "").Replace(".", "").Trim();
             if (decimal.TryParse(minText, out decimal minPrice))
             {
                 filterParts.Add($"[Giá bán] >= {minPrice}");
             }
 
-            // GIÁ ĐẾN 
+            // Giá đến
             string maxText = txtMaxPrice.Text.Replace(",", "").Replace(".", "").Trim();
             if (decimal.TryParse(maxText, out decimal maxPrice))
             {
                 filterParts.Add($"[Giá bán] <= {maxPrice}");
             }
 
-            // GHÉP CÁC ĐIỀU KIỆN LẠI VỚI NHAU (Bằng chữ AND)
+            // Ghép các điều kiện lại với nhau (Bằng chữ AND)
             string finalFilter = string.Join(" AND ", filterParts);
 
             try
             {
-                // Áp dụng thẳng bộ lọc vào DataGridView 
+                // Áp dụng thẳng bộ lọc vào DataGridView
                 dt.DefaultView.RowFilter = finalFilter;
             }
             catch (Exception ex)
@@ -208,7 +216,7 @@ namespace GUI
             }
         }
 
-        private void btnClearFilter_Click(object sender, EventArgs e)
+        private void BtnClearFilter_Click(object sender, EventArgs e)
         {
             txtSearch.Clear();
             txtMinPrice.Clear();

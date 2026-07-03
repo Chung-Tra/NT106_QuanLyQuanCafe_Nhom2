@@ -7,9 +7,10 @@ namespace GUI
 {
     public partial class AuditLogDetail : Form
     {
-        public AuditLogDetail(DataTable data, string title = "🔔  Lịch sử thao tác")
+        public AuditLogDetail(DataTable data, string title = "Lịch sử thao tác")
         {
             InitializeComponent();
+            WindowChrome.Apply(this);
             lblTitle.Text = title;
 
             dgvAuditLog.DataSource          = data;

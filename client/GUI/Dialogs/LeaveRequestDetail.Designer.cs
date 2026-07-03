@@ -22,7 +22,7 @@ namespace GUI
             SuspendLayout();
 
             // lblTitle
-            lblTitle.Text      = "🏖  Danh sách đơn xin nghỉ";
+            lblTitle.Text      = "Danh sách đơn xin nghỉ";
             lblTitle.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.AutoSize  = true;

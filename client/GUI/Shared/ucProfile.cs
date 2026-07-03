@@ -2,16 +2,16 @@ using DTO;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucProfile : UserControl
+#pragma warning restore IDE1006
     {
         public ucProfile()
         {
             InitializeComponent();
-            this.Load += (s, e) => LoadProfileData();
-            btnUpdateInfo.Click += btnUpdateInfo_Click;
-            btnChangePass.Click += btnChangePass_Click;
-            btnChangeAvatar.Click += btnChangeAvatar_Click;
         }
+
+        private void UcProfile_Load(object? sender, EventArgs e) => LoadProfileData();
 
         private void LoadProfileData()
         {
@@ -45,12 +45,12 @@ namespace GUI
             _ => "Barista / Staff"
         };
 
-        private void btnUpdateInfo_Click(object? sender, EventArgs e)
+        private void BtnUpdateInfo_Click(object? sender, EventArgs e)
         {
             MsgBox.Show(MsgBox.OwnerWindow(this), "Đã cập nhật thông tin cá nhân!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
-        private void btnChangePass_Click(object? sender, EventArgs e)
+        private void BtnChangePass_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtOldPass.Text) ||
                 string.IsNullOrWhiteSpace(txtNewPass.Text) ||
@@ -75,7 +75,7 @@ namespace GUI
             txtConfirmPass.Clear();
         }
 
-        private void btnChangeAvatar_Click(object? sender, EventArgs e)
+        private void BtnChangeAvatar_Click(object? sender, EventArgs e)
         {
             using OpenFileDialog ofd = new();
             ofd.Title = "Chọn ảnh đại diện";

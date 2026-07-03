@@ -1,307 +1,247 @@
-﻿namespace GUI
+using System.Drawing;
+using System.Windows.Forms;
+using Guna.UI2.WinForms;
+
+namespace GUI
 {
     partial class ucLeaveRequest
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
         #region Component Designer generated code
 
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            pnlSummary = new Panel();
-            btnManager = new Button();
-            lblRemainingValue = new Label();
+            pnlSummary = new Guna2Panel();
             lblRemainingTitle = new Label();
-            lblPendingValue = new Label();
+            lblRemainingValue = new Label();
+            pnlDivider1 = new Panel();
             lblPendingTitle = new Label();
-            btnReport = new Button();
-            pnlNewRequest = new Panel();
-            btnSubmit = new Button();
-            txtReason = new TextBox();
-            lblReason = new Label();
-            dtpToDate = new DateTimePicker();
-            lblToDate = new Label();
-            dtpFromDate = new DateTimePicker();
-            lblFromDate = new Label();
+            lblPendingValue = new Label();
+            btnManager = new Guna2Button();
+            btnReport = new Guna2Button();
+            pnlNewRequest = new Guna2Panel();
             lblNewRequestTitle = new Label();
-            pnlHistory = new Panel();
-            dgvHistory = new DataGridView();
+            lblFromDate = new Label();
+            dtpFromDate = new Guna2DateTimePicker();
+            lblToDate = new Label();
+            dtpToDate = new Guna2DateTimePicker();
+            lblReason = new Label();
+            txtReason = new Guna2TextBox();
+            btnSubmit = new Guna2Button();
+            pnlHistory = new Guna2Panel();
             lblHistoryTitle = new Label();
+            dgvHistory = new Guna2DataGridView();
+            colFrom = new DataGridViewTextBoxColumn();
+            colTo = new DataGridViewTextBoxColumn();
+            colDays = new DataGridViewTextBoxColumn();
+            colReason = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlSummary.SuspendLayout();
             pnlNewRequest.SuspendLayout();
             pnlHistory.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistory).BeginInit();
             SuspendLayout();
-            // 
-            // pnlSummary
-            // 
-            pnlSummary.BackColor = Color.FromArgb(30, 30, 30);
-            pnlSummary.Controls.Add(btnManager);
-            pnlSummary.Controls.Add(lblRemainingValue);
+
+            // ====== pnlSummary ======
+            pnlSummary.BackColor = Color.FromArgb(31, 31, 34);
+            pnlSummary.BorderRadius = 14;
             pnlSummary.Controls.Add(lblRemainingTitle);
-            pnlSummary.Controls.Add(lblPendingValue);
+            pnlSummary.Controls.Add(lblRemainingValue);
+            pnlSummary.Controls.Add(pnlDivider1);
             pnlSummary.Controls.Add(lblPendingTitle);
+            pnlSummary.Controls.Add(lblPendingValue);
+            pnlSummary.Controls.Add(btnManager);
             pnlSummary.Controls.Add(btnReport);
-            pnlSummary.Location = new Point(23, 27);
-            pnlSummary.Margin = new Padding(3, 4, 3, 4);
-            pnlSummary.Name = "pnlSummary";
-            pnlSummary.Size = new Size(873, 107);
-            pnlSummary.TabIndex = 0;
-            // 
-            // btnManager
-            // 
-            btnManager.BackColor = Color.SteelBlue;
-            btnManager.Cursor = Cursors.Hand;
-            btnManager.FlatAppearance.BorderSize = 0;
-            btnManager.FlatStyle = FlatStyle.Flat;
-            btnManager.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            btnManager.ForeColor = Color.White;
-            btnManager.Location = new Point(553, 33);
-            btnManager.Margin = new Padding(3, 4, 3, 4);
-            btnManager.Name = "btnManager";
-            btnManager.Size = new Size(137, 43);
-            btnManager.TabIndex = 4;
-            btnManager.Text = "Quản lý nghỉ";
-            btnManager.UseVisualStyleBackColor = false;
-            btnManager.Click += btnManager_Click;
-            // 
-            // lblRemainingValue
-            // 
-            lblRemainingValue.AutoSize = true;
-            lblRemainingValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblRemainingValue.ForeColor = Color.MediumSeaGreen;
-            lblRemainingValue.Location = new Point(23, 47);
-            lblRemainingValue.Name = "lblRemainingValue";
-            lblRemainingValue.Size = new Size(119, 37);
-            lblRemainingValue.TabIndex = 0;
-            lblRemainingValue.Text = "12 ngày";
-            // 
-            // lblRemainingTitle
-            // 
+            pnlSummary.Location = new Point(20, 20);
+            pnlSummary.Size = new Size(960, 100);
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
             lblRemainingTitle.AutoSize = true;
-            lblRemainingTitle.Font = new Font("Segoe UI", 9.75F);
-            lblRemainingTitle.ForeColor = Color.Gray;
-            lblRemainingTitle.Location = new Point(23, 20);
-            lblRemainingTitle.Name = "lblRemainingTitle";
-            lblRemainingTitle.Size = new Size(149, 23);
-            lblRemainingTitle.TabIndex = 1;
+            lblRemainingTitle.Font = new Font("Segoe UI", 9F);
+            lblRemainingTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblRemainingTitle.Location = new Point(20, 18);
             lblRemainingTitle.Text = "Ngày phép còn lại";
-            // 
-            // lblPendingValue
-            // 
-            lblPendingValue.AutoSize = true;
-            lblPendingValue.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold);
-            lblPendingValue.ForeColor = Color.Orange;
-            lblPendingValue.Location = new Point(297, 47);
-            lblPendingValue.Name = "lblPendingValue";
-            lblPendingValue.Size = new Size(90, 37);
-            lblPendingValue.TabIndex = 2;
-            lblPendingValue.Text = "2 đơn";
-            // 
-            // lblPendingTitle
-            // 
+
+            lblRemainingValue.AutoSize = true;
+            lblRemainingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblRemainingValue.ForeColor = Color.FromArgb(34, 197, 94);
+            lblRemainingValue.Location = new Point(20, 42);
+            lblRemainingValue.Text = "12 ngày";
+
+            pnlDivider1.BackColor = Color.FromArgb(63, 63, 70);
+            pnlDivider1.Location = new Point(270, 22);
+            pnlDivider1.Size = new Size(1, 58);
+
             lblPendingTitle.AutoSize = true;
-            lblPendingTitle.Font = new Font("Segoe UI", 9.75F);
-            lblPendingTitle.ForeColor = Color.Gray;
-            lblPendingTitle.Location = new Point(297, 20);
-            lblPendingTitle.Name = "lblPendingTitle";
-            lblPendingTitle.Size = new Size(132, 23);
-            lblPendingTitle.TabIndex = 3;
+            lblPendingTitle.Font = new Font("Segoe UI", 9F);
+            lblPendingTitle.ForeColor = Color.FromArgb(160, 160, 166);
+            lblPendingTitle.Location = new Point(300, 18);
             lblPendingTitle.Text = "Đang chờ duyệt";
-            // 
-            // btnReport
-            // 
-            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+
+            lblPendingValue.AutoSize = true;
+            lblPendingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblPendingValue.ForeColor = Color.FromArgb(245, 158, 11);
+            lblPendingValue.Location = new Point(300, 42);
+            lblPendingValue.Text = "2 đơn";
+
+            btnManager.BorderRadius = 10;
+            btnManager.Cursor = Cursors.Hand;
+            btnManager.FillColor = Color.FromArgb(31, 138, 154);
+            btnManager.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnManager.ForeColor = Color.White;
+            btnManager.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnManager.Location = new Point(632, 32);
+            btnManager.Size = new Size(150, 36);
+            btnManager.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnManager.Text = "Quản lý nghỉ";
+            btnManager.Click += BtnManager_Click;
+
+            btnReport.BorderRadius = 10;
             btnReport.Cursor = Cursors.Hand;
-            btnReport.FlatAppearance.BorderSize = 0;
-            btnReport.FlatStyle = FlatStyle.Flat;
-            btnReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnReport.FillColor = Color.FromArgb(31, 138, 154);
+            btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnReport.ForeColor = Color.White;
-            btnReport.Location = new Point(709, 33);
-            btnReport.Margin = new Padding(3, 4, 3, 4);
-            btnReport.Name = "btnReport";
-            btnReport.Size = new Size(137, 43);
-            btnReport.TabIndex = 4;
+            btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReport.Location = new Point(792, 32);
+            btnReport.Size = new Size(150, 36);
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnReport.Text = "Báo cáo";
-            btnReport.UseVisualStyleBackColor = false;
-            // 
-            // pnlNewRequest
-            // 
-            pnlNewRequest.BackColor = Color.FromArgb(30, 30, 30);
-            pnlNewRequest.Controls.Add(btnSubmit);
-            pnlNewRequest.Controls.Add(txtReason);
-            pnlNewRequest.Controls.Add(lblReason);
-            pnlNewRequest.Controls.Add(dtpToDate);
-            pnlNewRequest.Controls.Add(lblToDate);
-            pnlNewRequest.Controls.Add(dtpFromDate);
-            pnlNewRequest.Controls.Add(lblFromDate);
+
+            // ====== pnlNewRequest ======
+            pnlNewRequest.BackColor = Color.FromArgb(31, 31, 34);
+            pnlNewRequest.BorderRadius = 14;
             pnlNewRequest.Controls.Add(lblNewRequestTitle);
-            pnlNewRequest.Location = new Point(23, 160);
-            pnlNewRequest.Margin = new Padding(3, 4, 3, 4);
-            pnlNewRequest.Name = "pnlNewRequest";
-            pnlNewRequest.Size = new Size(343, 520);
-            pnlNewRequest.TabIndex = 1;
-            // 
-            // btnSubmit
-            // 
-            btnSubmit.BackColor = Color.MediumSeaGreen;
-            btnSubmit.FlatAppearance.BorderSize = 0;
-            btnSubmit.FlatStyle = FlatStyle.Flat;
+            pnlNewRequest.Controls.Add(lblFromDate);
+            pnlNewRequest.Controls.Add(dtpFromDate);
+            pnlNewRequest.Controls.Add(lblToDate);
+            pnlNewRequest.Controls.Add(dtpToDate);
+            pnlNewRequest.Controls.Add(lblReason);
+            pnlNewRequest.Controls.Add(txtReason);
+            pnlNewRequest.Controls.Add(btnSubmit);
+            pnlNewRequest.Location = new Point(20, 135);
+            pnlNewRequest.Size = new Size(340, 510);
+            pnlNewRequest.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+
+            lblNewRequestTitle.AutoSize = true;
+            lblNewRequestTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            lblNewRequestTitle.ForeColor = Color.FromArgb(31, 138, 154);
+            lblNewRequestTitle.Location = new Point(20, 18);
+            lblNewRequestTitle.Text = "Tạo yêu cầu nghỉ";
+
+            lblFromDate.AutoSize = true;
+            lblFromDate.Font = new Font("Segoe UI", 9F);
+            lblFromDate.ForeColor = Color.FromArgb(160, 160, 166);
+            lblFromDate.Location = new Point(20, 70);
+            lblFromDate.Text = "Từ ngày";
+
+            dtpFromDate.BorderColor = Color.FromArgb(63, 63, 70);
+            dtpFromDate.BorderRadius = 10;
+            dtpFromDate.FillColor = Color.FromArgb(30, 30, 33);
+            dtpFromDate.Font = new Font("Segoe UI", 10F);
+            dtpFromDate.ForeColor = Color.White;
+            dtpFromDate.Format = DateTimePickerFormat.Short;
+            dtpFromDate.Location = new Point(20, 92);
+            dtpFromDate.Size = new Size(300, 36);
+
+            lblToDate.AutoSize = true;
+            lblToDate.Font = new Font("Segoe UI", 9F);
+            lblToDate.ForeColor = Color.FromArgb(160, 160, 166);
+            lblToDate.Location = new Point(20, 144);
+            lblToDate.Text = "Đến ngày";
+
+            dtpToDate.BorderColor = Color.FromArgb(63, 63, 70);
+            dtpToDate.BorderRadius = 10;
+            dtpToDate.FillColor = Color.FromArgb(30, 30, 33);
+            dtpToDate.Font = new Font("Segoe UI", 10F);
+            dtpToDate.ForeColor = Color.White;
+            dtpToDate.Format = DateTimePickerFormat.Short;
+            dtpToDate.Location = new Point(20, 166);
+            dtpToDate.Size = new Size(300, 36);
+
+            lblReason.AutoSize = true;
+            lblReason.Font = new Font("Segoe UI", 9F);
+            lblReason.ForeColor = Color.FromArgb(160, 160, 166);
+            lblReason.Location = new Point(20, 218);
+            lblReason.Text = "Lý do nghỉ";
+
+            txtReason.BorderColor = Color.FromArgb(63, 63, 70);
+            txtReason.BorderRadius = 10;
+            txtReason.FillColor = Color.FromArgb(30, 30, 33);
+            txtReason.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtReason.Font = new Font("Segoe UI", 10F);
+            txtReason.ForeColor = Color.White;
+            txtReason.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtReason.Location = new Point(20, 240);
+            txtReason.Multiline = true;
+            txtReason.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtReason.PlaceholderText = "Nhập lý do nghỉ phép...";
+            txtReason.Size = new Size(300, 160);
+
+            btnSubmit.BorderRadius = 10;
+            btnSubmit.Cursor = Cursors.Hand;
+            btnSubmit.FillColor = Color.FromArgb(34, 197, 94);
             btnSubmit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnSubmit.ForeColor = Color.White;
-            btnSubmit.Location = new Point(23, 440);
-            btnSubmit.Margin = new Padding(3, 4, 3, 4);
-            btnSubmit.Name = "btnSubmit";
-            btnSubmit.Size = new Size(297, 53);
-            btnSubmit.TabIndex = 7;
-            btnSubmit.Text = "GỬI YÊU CẦU";
-            btnSubmit.UseVisualStyleBackColor = false;
-            // 
-            // txtReason
-            // 
-            txtReason.BackColor = Color.FromArgb(45, 45, 48);
-            txtReason.BorderStyle = BorderStyle.None;
-            txtReason.ForeColor = Color.White;
-            txtReason.Location = new Point(23, 253);
-            txtReason.Margin = new Padding(3, 4, 3, 4);
-            txtReason.Multiline = true;
-            txtReason.Name = "txtReason";
-            txtReason.Size = new Size(297, 160);
-            txtReason.TabIndex = 6;
-            // 
-            // lblReason
-            // 
-            lblReason.AutoSize = true;
-            lblReason.ForeColor = Color.Gray;
-            lblReason.Location = new Point(23, 227);
-            lblReason.Name = "lblReason";
-            lblReason.Size = new Size(80, 20);
-            lblReason.TabIndex = 5;
-            lblReason.Text = "Lý do nghỉ:";
-            // 
-            // dtpToDate
-            // 
-            dtpToDate.Format = DateTimePickerFormat.Short;
-            dtpToDate.Location = new Point(23, 173);
-            dtpToDate.Margin = new Padding(3, 4, 3, 4);
-            dtpToDate.Name = "dtpToDate";
-            dtpToDate.Size = new Size(297, 27);
-            dtpToDate.TabIndex = 4;
-            // 
-            // lblToDate
-            // 
-            lblToDate.AutoSize = true;
-            lblToDate.ForeColor = Color.Gray;
-            lblToDate.Location = new Point(23, 147);
-            lblToDate.Name = "lblToDate";
-            lblToDate.Size = new Size(75, 20);
-            lblToDate.TabIndex = 3;
-            lblToDate.Text = "Đến ngày:";
-            // 
-            // dtpFromDate
-            // 
-            dtpFromDate.Format = DateTimePickerFormat.Short;
-            dtpFromDate.Location = new Point(23, 100);
-            dtpFromDate.Margin = new Padding(3, 4, 3, 4);
-            dtpFromDate.Name = "dtpFromDate";
-            dtpFromDate.Size = new Size(297, 27);
-            dtpFromDate.TabIndex = 2;
-            // 
-            // lblFromDate
-            // 
-            lblFromDate.AutoSize = true;
-            lblFromDate.ForeColor = Color.Gray;
-            lblFromDate.Location = new Point(23, 73);
-            lblFromDate.Name = "lblFromDate";
-            lblFromDate.Size = new Size(65, 20);
-            lblFromDate.TabIndex = 1;
-            lblFromDate.Text = "Từ ngày:";
-            // 
-            // lblNewRequestTitle
-            // 
-            lblNewRequestTitle.AutoSize = true;
-            lblNewRequestTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-            lblNewRequestTitle.ForeColor = Color.White;
-            lblNewRequestTitle.Location = new Point(17, 20);
-            lblNewRequestTitle.Name = "lblNewRequestTitle";
-            lblNewRequestTitle.Size = new Size(174, 28);
-            lblNewRequestTitle.TabIndex = 0;
-            lblNewRequestTitle.Text = "Tạo yêu cầu nghỉ";
-            // 
-            // pnlHistory
-            // 
-            pnlHistory.BackColor = Color.FromArgb(30, 30, 30);
-            pnlHistory.Controls.Add(dgvHistory);
+            btnSubmit.HoverState.FillColor = Color.FromArgb(45, 207, 104);
+            btnSubmit.Location = new Point(20, 420);
+            btnSubmit.Size = new Size(300, 44);
+            btnSubmit.Text = "Gửi yêu cầu";
+
+            // ====== pnlHistory ======
+            pnlHistory.BackColor = Color.FromArgb(31, 31, 34);
+            pnlHistory.BorderRadius = 14;
             pnlHistory.Controls.Add(lblHistoryTitle);
-            pnlHistory.Location = new Point(389, 160);
-            pnlHistory.Margin = new Padding(3, 4, 3, 4);
-            pnlHistory.Name = "pnlHistory";
-            pnlHistory.Size = new Size(507, 520);
-            pnlHistory.TabIndex = 2;
-            // 
-            // dgvHistory
-            // 
-            dgvHistory.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgvHistory.BorderStyle = BorderStyle.None;
-            dgvHistory.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(45, 45, 48);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = Color.Gray;
-            dataGridViewCellStyle2.SelectionForeColor = Color.White;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            dgvHistory.DefaultCellStyle = dataGridViewCellStyle2;
-            dgvHistory.Location = new Point(17, 67);
-            dgvHistory.Margin = new Padding(3, 4, 3, 4);
-            dgvHistory.Name = "dgvHistory";
-            dgvHistory.RowHeadersWidth = 51;
-            dgvHistory.Size = new Size(473, 427);
-            dgvHistory.TabIndex = 1;
-            // 
-            // lblHistoryTitle
-            // 
+            pnlHistory.Controls.Add(dgvHistory);
+            pnlHistory.Location = new Point(380, 135);
+            pnlHistory.Size = new Size(600, 510);
+            pnlHistory.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
             lblHistoryTitle.AutoSize = true;
-            lblHistoryTitle.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblHistoryTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblHistoryTitle.ForeColor = Color.White;
-            lblHistoryTitle.Location = new Point(17, 20);
-            lblHistoryTitle.Name = "lblHistoryTitle";
-            lblHistoryTitle.Size = new Size(157, 28);
-            lblHistoryTitle.TabIndex = 0;
+            lblHistoryTitle.Location = new Point(20, 18);
             lblHistoryTitle.Text = "Lịch sử yêu cầu";
-            // 
-            // ucLeaveRequest
-            // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+
+            dgvHistory.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgvHistory.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvHistory.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvHistory.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvHistory.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgvHistory.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgvHistory.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvHistory.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvHistory.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvHistory.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgvHistory.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvHistory.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvHistory.GridColor = Color.FromArgb(45, 45, 48);
+            ConfigureGrid(dgvHistory);            dgvHistory.Columns.AddRange(new DataGridViewColumn[] { colFrom, colTo, colDays, colReason, colStatus });
+            colFrom.HeaderText = "Từ ngày"; colFrom.Name = "Từ ngày"; colFrom.DataPropertyName = "Từ ngày";
+            colTo.HeaderText = "Đến ngày"; colTo.Name = "Đến ngày"; colTo.DataPropertyName = "Đến ngày";
+            colDays.HeaderText = "Số ngày"; colDays.Name = "Số ngày"; colDays.DataPropertyName = "Số ngày";
+            colReason.HeaderText = "Lý do"; colReason.Name = "Lý do"; colReason.DataPropertyName = "Lý do";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
+            dgvHistory.Location = new Point(18, 56);
+            dgvHistory.Size = new Size(564, 436);
+            dgvHistory.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            // ====== ucLeaveRequest ======
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 48);
-            Controls.Add(pnlHistory);
-            Controls.Add(pnlNewRequest);
+            BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlSummary);
-            Margin = new Padding(3, 4, 3, 4);
+            Controls.Add(pnlNewRequest);
+            Controls.Add(pnlHistory);
             Name = "ucLeaveRequest";
-            Size = new Size(919, 707);
+            Size = new Size(1000, 665);
             pnlSummary.ResumeLayout(false);
             pnlSummary.PerformLayout();
             pnlNewRequest.ResumeLayout(false);
@@ -309,30 +249,73 @@
             pnlHistory.ResumeLayout(false);
             pnlHistory.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistory).EndInit();
+            this.Load += UcLeaveRequest_Load;
+            btnSubmit.Click += BtnSubmit_Click;
+            btnReport.Click += BtnReport_Click;
             ResumeLayout(false);
+        }
 
+        private static void ConfigureGrid(Guna2DataGridView dgv)
+        {
+            dgv.AutoGenerateColumns = false;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersHeight = 32;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgv.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.GridColor = Color.FromArgb(45, 45, 48);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowTemplate.Height = 28;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel pnlSummary;
-        private System.Windows.Forms.Label lblRemainingTitle;
-        private System.Windows.Forms.Label lblRemainingValue;
-        private System.Windows.Forms.Label lblPendingTitle;
-        private System.Windows.Forms.Label lblPendingValue;
-        private System.Windows.Forms.Panel pnlNewRequest;
-        private System.Windows.Forms.Label lblNewRequestTitle;
-        private System.Windows.Forms.Label lblFromDate;
-        private System.Windows.Forms.DateTimePicker dtpFromDate;
-        private System.Windows.Forms.Label lblToDate;
-        private System.Windows.Forms.DateTimePicker dtpToDate;
-        private System.Windows.Forms.Label lblReason;
-        private System.Windows.Forms.TextBox txtReason;
-        private System.Windows.Forms.Button btnSubmit;
-        private System.Windows.Forms.Panel pnlHistory;
-        private System.Windows.Forms.Label lblHistoryTitle;
-        private System.Windows.Forms.DataGridView dgvHistory;
-        private System.Windows.Forms.Button btnReport;
-        private Button btnManager;
+        private Guna2Panel pnlSummary;
+        private Label lblRemainingTitle;
+        private Label lblRemainingValue;
+        private Panel pnlDivider1;
+        private Label lblPendingTitle;
+        private Label lblPendingValue;
+        private Guna2Button btnManager;
+        private Guna2Button btnReport;
+        private Guna2Panel pnlNewRequest;
+        private Label lblNewRequestTitle;
+        private Label lblFromDate;
+        private Guna2DateTimePicker dtpFromDate;
+        private Label lblToDate;
+        private Guna2DateTimePicker dtpToDate;
+        private Label lblReason;
+        private Guna2TextBox txtReason;
+        private Guna2Button btnSubmit;
+        private Guna2Panel pnlHistory;
+        private Label lblHistoryTitle;
+        private Guna2DataGridView dgvHistory;
+        private DataGridViewTextBoxColumn colFrom;
+        private DataGridViewTextBoxColumn colTo;
+        private DataGridViewTextBoxColumn colDays;
+        private DataGridViewTextBoxColumn colReason;
+        private DataGridViewTextBoxColumn colStatus;
     }
 }

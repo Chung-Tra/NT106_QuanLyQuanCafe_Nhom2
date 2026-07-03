@@ -33,7 +33,7 @@ namespace GUI
             pnlLeft = new Guna2Panel();
             lblChatTitle = new Label();
             lblContactsHint = new Label();
-            cmbChatTarget = new ComboBox();
+            cmbChatTarget = new Guna2ComboBox();
             btnBroadcast = new Guna2Button();
             pnlRight = new Panel();
             pnlChatHeader = new Guna2Panel();
@@ -61,7 +61,7 @@ namespace GUI
             pnlLeft.Location = new Point(0, 0);
             pnlLeft.Name = "pnlLeft";
             pnlLeft.ShadowDecoration.CustomizableEdges = customizableEdges18;
-            pnlLeft.Size = new Size(230, 648);
+            pnlLeft.Size = new Size(230, 665);
             pnlLeft.TabIndex = 1;
             // 
             // lblChatTitle
@@ -73,7 +73,7 @@ namespace GUI
             lblChatTitle.Name = "lblChatTitle";
             lblChatTitle.Size = new Size(129, 21);
             lblChatTitle.TabIndex = 0;
-            lblChatTitle.Text = "💭  Chat nội bộ";
+            lblChatTitle.Text = "Chat nội bộ";
             // 
             // lblContactsHint
             // 
@@ -89,18 +89,23 @@ namespace GUI
             // cmbChatTarget
             // 
             cmbChatTarget.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            cmbChatTarget.BackColor = Color.FromArgb(38, 38, 42);
+            cmbChatTarget.BackColor = Color.Transparent;
+            cmbChatTarget.BorderColor = Color.FromArgb(63, 63, 70);
+            cmbChatTarget.BorderRadius = 8;
+            cmbChatTarget.DrawMode = DrawMode.OwnerDrawFixed;
             cmbChatTarget.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbChatTarget.FlatStyle = FlatStyle.Flat;
+            cmbChatTarget.FillColor = Color.FromArgb(38, 38, 42);
+            cmbChatTarget.FocusedColor = Color.FromArgb(31, 138, 154);
+            cmbChatTarget.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
             cmbChatTarget.Font = new Font("Segoe UI", 9.5F);
             cmbChatTarget.ForeColor = Color.White;
-            cmbChatTarget.IntegralHeight = false;
+            cmbChatTarget.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            cmbChatTarget.ItemHeight = 26;
             cmbChatTarget.Location = new Point(12, 82);
-            cmbChatTarget.MaxDropDownItems = 12;
             cmbChatTarget.Name = "cmbChatTarget";
-            cmbChatTarget.Size = new Size(206, 25);
+            cmbChatTarget.Size = new Size(206, 32);
             cmbChatTarget.TabIndex = 2;
-            cmbChatTarget.SelectedIndexChanged += cmbChatTarget_SelectedIndexChanged;
+            cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
             // 
             // btnBroadcast
             // 
@@ -112,14 +117,14 @@ namespace GUI
             btnBroadcast.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnBroadcast.ForeColor = Color.FromArgb(253, 186, 116);
             btnBroadcast.HoverState.FillColor = Color.FromArgb(146, 64, 14);
-            btnBroadcast.Location = new Point(12, 598);
+            btnBroadcast.Location = new Point(12, 615);
             btnBroadcast.Name = "btnBroadcast";
             btnBroadcast.ShadowDecoration.CustomizableEdges = customizableEdges16;
             btnBroadcast.Size = new Size(206, 38);
             btnBroadcast.TabIndex = 3;
-            btnBroadcast.Text = "📢  Thông báo toàn bộ";
+            btnBroadcast.Text = "Thông báo toàn bộ";
             btnBroadcast.Visible = false;
-            btnBroadcast.Click += btnBroadcast_Click_1;
+            btnBroadcast.Click += BtnBroadcast_Click;
             // 
             // pnlRight
             // 
@@ -130,7 +135,7 @@ namespace GUI
             pnlRight.Dock = DockStyle.Fill;
             pnlRight.Location = new Point(230, 0);
             pnlRight.Name = "pnlRight";
-            pnlRight.Size = new Size(730, 648);
+            pnlRight.Size = new Size(770, 665);
             pnlRight.TabIndex = 0;
             // 
             // pnlChatHeader
@@ -143,7 +148,7 @@ namespace GUI
             pnlChatHeader.Location = new Point(0, 0);
             pnlChatHeader.Name = "pnlChatHeader";
             pnlChatHeader.ShadowDecoration.CustomizableEdges = customizableEdges22;
-            pnlChatHeader.Size = new Size(730, 54);
+            pnlChatHeader.Size = new Size(770, 54);
             pnlChatHeader.TabIndex = 2;
             // 
             // lblCurrentChat
@@ -155,7 +160,7 @@ namespace GUI
             lblCurrentChat.Name = "lblCurrentChat";
             lblCurrentChat.Size = new Size(171, 19);
             lblCurrentChat.TabIndex = 0;
-            lblCurrentChat.Text = "🌐  Chat nhóm — Tất cả";
+            lblCurrentChat.Text = "Chat nhóm — Tất cả";
             // 
             // btnOpenChatWindow
             // 
@@ -167,7 +172,7 @@ namespace GUI
             btnOpenChatWindow.Font = new Font("Segoe UI", 8.5F);
             btnOpenChatWindow.ForeColor = Color.FromArgb(160, 160, 166);
             btnOpenChatWindow.HoverState.FillColor = Color.FromArgb(60, 60, 66);
-            btnOpenChatWindow.Location = new Point(1140, 12);
+            btnOpenChatWindow.Location = new Point(658, 12);
             btnOpenChatWindow.Name = "btnOpenChatWindow";
             btnOpenChatWindow.ShadowDecoration.CustomizableEdges = customizableEdges20;
             btnOpenChatWindow.Size = new Size(100, 30);
@@ -181,10 +186,10 @@ namespace GUI
             pnlInputBar.Controls.Add(btnSend);
             pnlInputBar.CustomizableEdges = customizableEdges27;
             pnlInputBar.Dock = DockStyle.Bottom;
-            pnlInputBar.Location = new Point(0, 588);
+            pnlInputBar.Location = new Point(0, 605);
             pnlInputBar.Name = "pnlInputBar";
             pnlInputBar.ShadowDecoration.CustomizableEdges = customizableEdges28;
-            pnlInputBar.Size = new Size(730, 60);
+            pnlInputBar.Size = new Size(770, 60);
             pnlInputBar.TabIndex = 1;
             // 
             // txtMessage
@@ -205,7 +210,7 @@ namespace GUI
             txtMessage.PlaceholderText = "Nhập tin nhắn...";
             txtMessage.SelectedText = "";
             txtMessage.ShadowDecoration.CustomizableEdges = customizableEdges24;
-            txtMessage.Size = new Size(610, 36);
+            txtMessage.Size = new Size(650, 36);
             txtMessage.TabIndex = 0;
             // 
             // btnSend
@@ -218,7 +223,7 @@ namespace GUI
             btnSend.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnSend.ForeColor = Color.White;
             btnSend.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnSend.Location = new Point(632, 12);
+            btnSend.Location = new Point(672, 12);
             btnSend.Name = "btnSend";
             btnSend.ShadowDecoration.CustomizableEdges = customizableEdges26;
             btnSend.Size = new Size(86, 36);
@@ -236,7 +241,7 @@ namespace GUI
             lstChatHistory.Location = new Point(0, 0);
             lstChatHistory.Name = "lstChatHistory";
             lstChatHistory.SelectionMode = SelectionMode.None;
-            lstChatHistory.Size = new Size(730, 648);
+            lstChatHistory.Size = new Size(770, 551);
             lstChatHistory.TabIndex = 0;
             lstChatHistory.SelectedIndexChanged += lstChatHistory_SelectedIndexChanged;
             // 
@@ -248,8 +253,9 @@ namespace GUI
             Controls.Add(pnlRight);
             Controls.Add(pnlLeft);
             Name = "ucInternalChat";
-            Size = new Size(960, 648);
+            Size = new Size(1000, 665);
             Load += ucInternalChat_Load;
+            btnSend.Click += BtnSend_Click;
             pnlLeft.ResumeLayout(false);
             pnlLeft.PerformLayout();
             pnlRight.ResumeLayout(false);
@@ -262,7 +268,7 @@ namespace GUI
         private Guna2Panel   pnlLeft;
         private Label        lblChatTitle;
         private Label        lblContactsHint;
-        private ComboBox     cmbChatTarget;
+        private Guna2ComboBox cmbChatTarget;
         private Panel        pnlRight;
         private Guna2Panel   pnlChatHeader;
         private Label        lblCurrentChat;

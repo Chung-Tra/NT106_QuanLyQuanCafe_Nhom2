@@ -8,27 +8,27 @@ namespace DTO
     public class PaymentDTO
     {
         [JsonIgnore]
-        public string? ThanhToanId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("don_hang_id")]
-        public string? DonHangId { get; set; }
+        public string? OrderId { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("phuong_thuc")]
-        public string? PhuongThuc { get; set; }  // "tien_mat", "momo", "chuyen_khoan"
+        public string? Method { get; set; }  // "tien_mat", "momo", "chuyen_khoan"
 
         [JsonProperty("thoi_gian")]
-        public long ThoiGian { get; set; }
+        public long Timestamp { get; set; }
 
         [JsonProperty("tong_tien")]
-        public decimal TongTien { get; set; }
+        public decimal TotalAmount { get; set; }
 
         [JsonProperty("tien_giam")]
-        public decimal TienGiam { get; set; }
+        public decimal Discount { get; set; }
 
         [JsonProperty("tien_thuc_thu")]
-        public decimal TienThucThu { get; set; }
+        public decimal ActualReceived { get; set; }
     }
 }

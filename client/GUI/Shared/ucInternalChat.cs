@@ -13,47 +13,62 @@ namespace GUI
     public partial class ucInternalChat : UserControl
     {
 
-        // 1. GỌI ÔNG QUẢN LÝ CHAT LÊN
+        // 1. Gọi ông quản lý chat lên
         private readonly ChatManager _chatManager;
 
         public ucInternalChat()
         {
             InitializeComponent();
 
-            // 2. GIAO PHÓ LISTBOX CHO ÔNG MANAGER
+            // 2. Giao phó listbox cho ông manager
             _chatManager = new ChatManager(this, lstChatHistory);
 
             this.Load += async (s, e) =>
             {
-                // Tạm tắt sự kiện để LoadStaffData không kích hoạt SwitchChatRoom sớm
-                cmbChatTarget.SelectedIndexChanged -= OnChatTargetChanged;
-                await LoadStaffData();
-                await _chatManager.ConnectToChatServer();
-                cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
+                // try/catch bắt buộc: handler async void — exception lọt ra ngoài sẽ
+                // bật hộp thoại crash của WinForms và có thể sập app.
+                try
+                {
+                    // Tạm tắt sự kiện để LoadStaffData không kích hoạt SwitchChatRoom sớm
+                    cmbChatTarget.SelectedIndexChanged -= OnChatTargetChanged;
+                    await LoadStaffData();
+                    // Kết nối SignalR ở luồng nền — mọi cập nhật UI trong ChatManager đều qua Invoke
+                    await Task.Run(_chatManager.ConnectToChatServer);
+                    cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
 
-                // Sau khi kết nối xong mới JoinRoom và tải lịch sử
-                var emp = GetEmployeeFromCombo();
-                await _chatManager.SwitchChatRoom(emp.EmployeeId ?? "", emp.FullName ?? "Chat nhóm");
+                    // Sau khi kết nối xong mới JoinRoom và tải lịch sử
+                    var emp = GetEmployeeFromCombo();
+                    await _chatManager.SwitchChatRoom(emp.EmployeeId ?? "", emp.FullName ?? "Chat nhóm");
+                }
+                catch (Exception ex)
+                {
+                    if (!IsDisposed) lstChatHistory.Items.Add($"[Lỗi]: Không khởi tạo được chat - {ex.Message}");
+                }
             };
 
-            btnSend.Click += BtnSend_Click;
             btnOpenChatWindow.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Đang mở cửa sổ Messenger...", "Thông báo", MsgBox.MessageBoxType.Info);
-            btnBroadcast.Click += BtnBroadcast_Click;
 
             // Hiện nút Thông báo toàn bộ cho admin/manager
             string role = GlobalSession.CurrentUser?.Role?.ToLower() ?? "";
             if (role == "admin" || role == "manager")
                 btnBroadcast.Visible = true;
 
-            txtMessage.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BtnSend_Click(s, e); } };
-            cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
+            txtMessage.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    BtnSend_Click(s, e);
+                }
+            };
         }
 
         private async Task LoadStaffData()
         {
             try
             {
-                List<EmployeeDTO> allEmployees = await EmployeeBUS.GetAllEmployeesAsync();
+                // Task.Run: gọi HTTP + parse JSON ở thread pool, UI chỉ nhận kết quả
+                List<EmployeeDTO> allEmployees = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
 
                 cmbChatTarget.Items.Clear();
                 cmbChatTarget.Items.Add("--- Gửi cho tất cả (Chat nhóm) ---");
@@ -86,7 +101,7 @@ namespace GUI
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập nội dung tin nhắn!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            // 3. ĐẨY MESSAGE CHO MANAGER GỬI ĐI
+            // 3. Đẩy message cho manager gửi đi
             await _chatManager.SendMessageAsync(message);
 
             txtMessage.Clear();
@@ -153,29 +168,19 @@ namespace GUI
         {
             if (cmbChatTarget.SelectedIndex <= 0)
             {
-                lblCurrentChat.Text = "🌐  Chat nhóm — Tất cả";
+                lblCurrentChat.Text = "Chat nhóm — Tất cả";
                 lblCurrentChat.ForeColor = Color.White;
             }
             else
             {
                 string raw = cmbChatTarget.SelectedItem?.ToString() ?? "";
                 string name = raw.Contains(']') ? raw.Split(']')[1].Trim().Split('(')[0].Trim() : raw;
-                lblCurrentChat.Text = "💬  " + name;
+                lblCurrentChat.Text = name;
                 lblCurrentChat.ForeColor = Color.FromArgb(31, 138, 154);
             }
         }
 
-        private void btnBroadcast_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
         private void lstChatHistory_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void cmbChatTarget_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

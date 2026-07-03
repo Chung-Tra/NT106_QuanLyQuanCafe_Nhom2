@@ -9,45 +9,45 @@ namespace DTO
     public class SalaryDTO
     {
         [JsonIgnore]
-        public string? LuongId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("thang")]
-        public int Thang { get; set; }  // 1-12
+        public int Month { get; set; }  // 1-12
 
         [JsonProperty("nam")]
-        public int Nam { get; set; }
+        public int Year { get; set; }
 
         [JsonProperty("ngay_cong")]
-        public int NgayCong { get; set; }
+        public int WorkDays { get; set; }
 
         [JsonProperty("luong_co_ban")]
-        public decimal LuongCoBan { get; set; }
+        public decimal BaseSalary { get; set; }
 
         [JsonProperty("phu_cap")]
-        public decimal PhuCap { get; set; }
+        public decimal Allowance { get; set; }
 
         [JsonProperty("thuong_feedback")]
-        public decimal ThuongFeedback { get; set; }
+        public decimal FeedbackBonus { get; set; }
 
         [JsonProperty("thuong_le")]
-        public decimal ThuongLe { get; set; }
+        public decimal HolidayBonus { get; set; }
 
         [JsonProperty("tru_luong")]
-        public decimal TruLuong { get; set; }
+        public decimal Deduction { get; set; }
 
         [JsonProperty("ly_do_tru")]
-        public string? LyDoTru { get; set; }
+        public string? DeductionReason { get; set; }
 
         [JsonProperty("tong_luong")]
-        public decimal TongLuong { get; set; }
+        public decimal TotalSalary { get; set; }
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "chua_duyet", "da_duyet", "da_tra"
+        public string? Status { get; set; }  // "chua_duyet", "da_duyet", "da_tra"
 
         [JsonProperty("ngay_tinh")]
-        public long NgayTinh { get; set; }
+        public long CalculatedAt { get; set; }
     }
 }

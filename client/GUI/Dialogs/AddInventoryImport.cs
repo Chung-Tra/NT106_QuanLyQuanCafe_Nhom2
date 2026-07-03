@@ -1,6 +1,5 @@
 using BUS;
 using DTO;
-using GUI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +19,7 @@ namespace GUI
         {
             _prefillLines = prefillLines;
             InitializeComponent();
-            this.Load += AddInventoryImport_Load;
-            btnLuu.Click += BtnLuu_Click;
-            dgvChiTietNhap.CellEndEdit += DgvChiTietNhap_CellEndEdit;
+            WindowChrome.Apply(this);
             dgvChiTietNhap.RowsRemoved += (_, _) => CapNhatTongTien();
             dgvChiTietNhap.UserDeletedRow += (_, _) => CapNhatTongTien();
         }
@@ -30,6 +27,7 @@ namespace GUI
         private async void AddInventoryImport_Load(object? sender, EventArgs e)
         {
             await KhoiTaoDuLieuForm();
+            AutoFadeScroll.Attach(dgvChiTietNhap);
         }
 
         private async Task KhoiTaoDuLieuForm()
@@ -72,7 +70,7 @@ namespace GUI
             _danhSachNguyenLieu = await InventoryImportBUS.GetIngredients();
 
             var dsNguonCombo = _danhSachNguyenLieu
-                .Select(x => new { x.Id, HienThi = $"{x.Id} - {x.TenNguyenLieu} ({x.DonVi})" })
+                .Select(x => new { x.Id, HienThi = $"{x.Id} - {x.Name} ({x.Unit})" })
                 .ToList();
 
             colMaNL.DataSource = dsNguonCombo;
@@ -110,7 +108,7 @@ namespace GUI
                     continue;
                 }
 
-                long gia = line.GiaNhap ?? nl.GiaNhap;
+                long gia = line.GiaNhap ?? nl.ImportPrice;
 
                 int idx = dgvChiTietNhap.Rows.Add();
                 DataGridViewRow row = dgvChiTietNhap.Rows[idx];
@@ -151,7 +149,7 @@ namespace GUI
             IngredientDTO? item = _danhSachNguyenLieu.FirstOrDefault(x => x.Id == nguyenLieuId);
             if (item == null) return;
 
-            row.Cells[colGiaNhap.Name].Value = item.GiaNhap;
+            row.Cells[colGiaNhap.Name].Value = item.ImportPrice;
             if (row.Cells[colSoLuong.Name].Value == null ||
                 string.IsNullOrWhiteSpace(row.Cells[colSoLuong.Name].Value?.ToString()))
                 row.Cells[colSoLuong.Name].Value = 1;
@@ -199,10 +197,10 @@ namespace GUI
 
                 var phieuNhap = new InventoryImportDTO
                 {
-                    GhiChu = txtGhiChu.Text.Trim(),
-                    NgayNhap = int.Parse(dtpNgayNhap.Value.ToString("yyyyMMdd")),
-                    NhanVienId = nhanVienId,
-                    DanhSachNL = danhSachChiTiet
+                    Note = txtGhiChu.Text.Trim(),
+                    ImportDate = int.Parse(dtpNgayNhap.Value.ToString("yyyyMMdd")),
+                    EmployeeId = nhanVienId,
+                    Items = danhSachChiTiet
                 };
 
                 btnLuu.Enabled = false;
@@ -247,15 +245,15 @@ namespace GUI
 
                 if (ketQua.TryGetValue(nguyenLieuId, out InventoryImportItemDTO? chiTiet))
                 {
-                    chiTiet.SoLuong += (int)soLuong;
-                    chiTiet.GiaNhap = giaNhap;
+                    chiTiet.Quantity += (int)soLuong;
+                    chiTiet.ImportPrice = giaNhap;
                 }
                 else
                 {
                     ketQua[nguyenLieuId] = new InventoryImportItemDTO
                     {
-                        SoLuong = (int)soLuong,
-                        GiaNhap = giaNhap
+                        Quantity = (int)soLuong,
+                        ImportPrice = giaNhap
                     };
                 }
             }

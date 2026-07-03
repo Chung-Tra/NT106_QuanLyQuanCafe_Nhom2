@@ -8,27 +8,27 @@ namespace DTO
     public class AttendanceDTO
     {
         [JsonIgnore]
-        public string? ChamCongId { get; set; }
+        public string? Id { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("ngay")]
-        public string? Ngay { get; set; }  // "2024-03-31"
+        public string? Date { get; set; }  // "2024-03-31"
 
         [JsonProperty("gio_vao")]
-        public long GioVao { get; set; }  // Unix timestamp ms
+        public long CheckIn { get; set; }  // Unix timestamp ms
 
         [JsonProperty("gio_ra")]
-        public long GioRa { get; set; }
+        public long CheckOut { get; set; }
 
         [JsonProperty("so_gio_lam")]
-        public double SoGioLam { get; set; }
+        public double WorkHours { get; set; }
 
         [JsonProperty("ghi_chu")]
-        public string? GhiChu { get; set; }  // "Ca sáng", "Ca tối"
+        public string? Note { get; set; }  // "Ca sáng", "Ca tối"
 
         [JsonProperty("trang_thai")]
-        public string? TrangThai { get; set; }  // "du_gio", "di_muon", "nghi_phep", "nua_ca"
+        public string? Status { get; set; }  // "du_gio", "di_muon", "nghi_phep", "nua_ca"
     }
 }

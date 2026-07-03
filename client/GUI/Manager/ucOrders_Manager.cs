@@ -21,6 +21,8 @@ namespace GUI
         public ucOrders_Manager()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvTableStatus);
+            DgvRefresh.Attach(dgvTableStatus, LoadDummyData);
             LoadDummyData();
         }
 
@@ -60,6 +62,31 @@ namespace GUI
             lstKitchenWarning.DataSource = null;
             lstKitchenWarning.DataSource = _kitchenWarnings;
             lstKitchenWarning.DisplayMember = "DisplayText";
+
+            // Khớp với thẻ "Món Đã Hết (Sold Out): 2 món"
+            lstSoldOut.Items.Clear();
+            lstSoldOut.Items.Add("Trà đào cam sả — hết nguyên liệu");
+            lstSoldOut.Items.Add("Bánh croissant — hết hàng trong ngày");
+        }
+
+        // Double-click 1 bàn -> form chi tiết read-only đủ field (kể cả TableId ẩn)
+        private void DgvTableStatus_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvTableStatus.Rows[e.RowIndex], "Chi tiết bàn")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa bàn đang chọn (khoá TableId)
+        private void BtnEditTable_Click(object? sender, EventArgs e)
+        {
+            if (dgvTableStatus.CurrentRow == null || dgvTableStatus.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một bàn để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            if (RecordEdit.EditRow(dgvTableStatus.CurrentRow, "Sửa thông tin bàn", MsgBox.OwnerWindow(this)))
+                dgvTableStatus.Refresh();
         }
 
         private void btnFilterTable_Click(object sender, EventArgs e)

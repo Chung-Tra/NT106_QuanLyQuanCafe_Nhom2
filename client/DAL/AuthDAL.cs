@@ -2,7 +2,6 @@ using DTO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Configuration;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -10,8 +9,6 @@ namespace DAL
 {
     public static class AuthDAL
     {
-        private static readonly string? _secretKey = ConfigurationManager.AppSettings["FirebaseSecretKey"];
-
         public static async Task<(EmployeeDTO? User, string? Token)> LoginAsync(string email, string password)
         {
             try
@@ -42,27 +39,52 @@ namespace DAL
             catch { return false; }
         }
 
-        public static async Task<string?> GenerateOtpAsync(string toEmail)
+        // Backend tạo mã, gửi email và LƯU mã ở server. Client chỉ nhận thông báo, không nhận mã.
+        public static async Task<(bool Success, string Message)> GenerateOtpAsync(string toEmail)
         {
             try
             {
                 var response = await DalHelper.Client.SendAsync(
                     DalHelper.Build(HttpMethod.Post, "auth/otp/generate", new { toEmail }));
-                if (!response.IsSuccessStatusCode) return null;
-
-                var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return json["code"]?.ToString();
+                string body = await response.Content.ReadAsStringAsync();
+                return response.IsSuccessStatusCode
+                    ? (true, "Đã gửi mã OTP tới email.")
+                    : (false, DalHelper.ParseErrorMessage(body));
             }
-            catch { return null; }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi kết nối: " + ex.Message);
+            }
         }
 
-        public static async Task<(bool Success, string Message)> UpdatePasswordAsync(string email, string newPassword)
+        // Gửi mã người dùng nhập lên server để so sánh. Đúng -> server trả reset-token dùng 1 lần.
+        public static async Task<(bool Success, string? ResetToken, string Message)> VerifyOtpAsync(string email, string code)
+        {
+            try
+            {
+                var response = await DalHelper.Client.SendAsync(
+                    DalHelper.Build(HttpMethod.Post, "auth/otp/verify", new { email, code }));
+                string body = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                    return (false, null, DalHelper.ParseErrorMessage(body));
+
+                var json = JObject.Parse(body);
+                return (true, json["resetToken"]?.ToString(), "Xác thực thành công.");
+            }
+            catch (Exception ex)
+            {
+                return (false, null, "Lỗi kết nối: " + ex.Message);
+            }
+        }
+
+        // Đổi mật khẩu: bắt buộc kèm reset-token (server đã xác thực OTP). Không còn dùng secretKey tĩnh.
+        public static async Task<(bool Success, string Message)> UpdatePasswordAsync(string email, string newPassword, string resetToken)
         {
             try
             {
                 var response = await DalHelper.Client.SendAsync(
                     DalHelper.Build(HttpMethod.Put, "auth/password",
-                        new { email, newPassword, secretKey = _secretKey }));
+                        new { email, newPassword, resetToken }));
 
                 string body = await response.Content.ReadAsStringAsync();
                 return response.IsSuccessStatusCode

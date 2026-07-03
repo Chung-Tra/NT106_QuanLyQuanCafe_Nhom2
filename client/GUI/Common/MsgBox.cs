@@ -1,48 +1,17 @@
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Hộp thoại thông báo tùy chỉnh, thay thế MessageBox mặc định của Windows.
-    /// Hỗ trợ 4 kiểu: Info, Success, Error, Warning.
-    /// - Warning : hiện 2 nút (Có / Không), trả về DialogResult.Yes / No
-    /// - Còn lại  : hiện 1 nút (Đồng ý),    trả về DialogResult.OK
-    /// Form tự động co giãn chiều cao theo độ dài nội dung.
-    /// </summary>
-    internal partial class MsgBox : Form
+    // Hộp thoại thông báo dark-theme tự xuống dòng + tự giãn chiều cao theo nội dung.
+    // Giữ nguyên API MsgBox.Show(...) để các call site không phải đổi.
+    internal static class MsgBox
     {
-        // Chiều rộng cố định của hộp thoại (px)
-        private const int FormWidthPx = 420;
+        public enum MessageBoxType { Info, Success, Error, Warning }
 
-        // ────────────────────────────────────────────────
-        // Win32 API — cho phép kéo form không có title bar
-        // ────────────────────────────────────────────────
-        [DllImport("user32.dll")]
-        private static extern bool ReleaseCapture();
-
-        [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        public MsgBox()
-        {
-            InitializeComponent();
-
-            // Bật double-buffer để tránh nhấp nháy khi vẽ lại form
-            SetStyle(
-                ControlStyles.AllPaintingInWmPaint |
-                ControlStyles.UserPaint            |
-                ControlStyles.DoubleBuffer,
-                true);
-            DoubleBuffered = true;
-        }
-
-        // ──────────────────────────────────────────────
-        // PUBLIC API
-        // ──────────────────────────────────────────────
         public static DialogResult Show(
             string message,
             string title        = "Thông báo",
@@ -55,205 +24,232 @@ namespace GUI
             string title        = "Thông báo",
             MessageBoxType type = MessageBoxType.Info)
         {
-            using MsgBox msg = new MsgBox();
-            msg.lblTitle.Text = title;
-            msg.ApplyTypeStyle(type);
-            msg.LayoutForContent(message ?? string.Empty, type);
-            RefreshRoundedRegion(msg);
+            Form? parent = owner switch
+            {
+                Form f      => f,
+                Control c   => c.FindForm(),
+                _           => Application.OpenForms.Cast<Form>().LastOrDefault()
+            };
 
-            return owner == null ? msg.ShowDialog() : msg.ShowDialog(owner);
+            using var dlg = new MessageForm(message ?? string.Empty, title ?? string.Empty, type);
+            if (parent != null && !parent.IsDisposed)
+                return dlg.ShowDialog(parent);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            return dlg.ShowDialog();
         }
 
-  
+        // Lấy IWin32Window an toàn từ một Control bất kỳ (UC, Form, ...).
         public static IWin32Window? OwnerWindow(Control? control)
         {
             if (control == null) return null;
             return control.FindForm() ?? control.TopLevelControl as IWin32Window;
         }
 
-        // ──────────────────────────────────────────────
-        // BO GÓC TRÒN
-        // ──────────────────────────────────────────────
-        private static void RefreshRoundedRegion(MsgBox msg)
+        // Form thông báo tự dựng bằng code: icon + tiêu đề + nội dung wrap + nút.
+        private sealed class MessageForm : Form
         {
-            if (msg.IsDisposed || msg.ClientSize.Width < 10 || msg.ClientSize.Height < 10)
-                return;
+            private static readonly Color Surface   = Color.FromArgb(31, 31, 34);
+            private static readonly Color Border    = Color.FromArgb(63, 63, 70);
+            private static readonly Color Teal       = Color.FromArgb(31, 138, 154);
+            private static readonly Color TealHover  = Color.FromArgb(45, 158, 174);
+            private static readonly Color SurfaceHov = Color.FromArgb(45, 45, 50);
+            private static readonly Color TextHi     = Color.FromArgb(240, 240, 245);
+            private static readonly Color TextPri    = Color.FromArgb(220, 220, 225);
 
-            msg.Region?.Dispose();
-            msg.Region = RoundedCornerRegion(msg.ClientRectangle, radius: 18);
-        }
+            private const int Pad = 24;
+            private const int IconSize = 42;
+            private const int Gap = 16;
+            private const int MinContentW = 230;
+            private const int MaxContentW = 400;
 
-        private static Region RoundedCornerRegion(Rectangle bounds, float radius)
-        {
-            using GraphicsPath gp = CreateRoundRect(bounds, radius);
-            return new Region(gp);
-        }
-
-        /// <summary>
-        /// Xây dựng GraphicsPath hình chữ nhật bo 4 góc theo chiều kim đồng hồ.
-        /// diameter bị clamp để không vượt quá chiều rộng/cao thực tế của form.
-        /// </summary>
-        private static GraphicsPath CreateRoundRect(Rectangle b, float r)
-        {
-            float diameter = Math.Min(Math.Min(Math.Abs(r) * 2, b.Width), b.Height);
-            var path = new GraphicsPath();
-
-            RectangleF arc = new(b.X, b.Y, diameter, diameter);
-            path.AddArc(arc, 180, 90); // góc trên-trái
-
-            arc.X = b.Right - diameter;
-            path.AddArc(arc, 270, 90); // góc trên-phải
-
-            arc.Y = b.Bottom - diameter;
-            path.AddArc(arc, 0, 90);   // góc dưới-phải
-
-            arc.X = b.X;
-            path.AddArc(arc, 90, 90);  // góc dưới-trái
-
-            path.CloseFigure();
-            return path;
-        }
-
-        // Cập nhật lại Region khi form thay đổi kích thước
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-            RefreshRoundedRegion(this);
-        }
-
-        // ──────────────────────────────────────────────
-        // TỰ ĐỘNG CO GIÃN THEO NỘI DUNG
-        // ──────────────────────────────────────────────
-        private static int GetMaxMessageViewportPx()
-        {
-            try
+            public MessageForm(string message, string title, MessageBoxType type)
             {
-                int h = Screen.PrimaryScreen?.WorkingArea.Height ?? 800;
-                return Math.Min(520, Math.Max(200, (int)(h * 0.45)));
+                if (message.Length == 0) message = " ";
+
+                (string glyph, Color accent) = type switch
+                {
+                    MessageBoxType.Success => ("✓", Color.FromArgb(34, 197, 94)),
+                    MessageBoxType.Error   => ("✕", Color.FromArgb(220, 80, 80)),
+                    MessageBoxType.Warning => ("!", Color.FromArgb(245, 158, 11)),
+                    _                      => ("i", Teal),
+                };
+
+                FormBorderStyle = FormBorderStyle.None;
+                StartPosition   = FormStartPosition.CenterParent;
+                BackColor       = Surface;
+                ShowInTaskbar   = false;
+                MinimizeBox     = false;
+                MaximizeBox     = false;
+                KeyPreview      = true;
+                Font            = new Font("Segoe UI", 10F);
+
+                var titleFont = new Font("Segoe UI", 13F, FontStyle.Bold);
+                var msgFont   = new Font("Segoe UI", 10.5F);
+
+                int leftContent = Pad + IconSize + Gap;
+
+                // Bề rộng vùng nội dung: vừa với chữ ngắn, wrap với chữ dài.
+                int naturalMsgW = TextRenderer.MeasureText(message, msgFont).Width;
+                int titleW      = TextRenderer.MeasureText(title, titleFont).Width;
+                int contentW    = Math.Min(MaxContentW, Math.Max(MinContentW, Math.Max(naturalMsgW, titleW)));
+
+                int formW = leftContent + contentW + Pad;
+                int titleY = Pad + 2;
+                int msgY   = titleY + (string.IsNullOrWhiteSpace(title) ? 0 : 34);
+
+                // Icon tròn màu theo loại.
+                var icon = new Guna2Button
+                {
+                    Size         = new Size(IconSize, IconSize),
+                    BorderRadius = IconSize / 2,
+                    FillColor    = Blend(accent, Surface, 0.22),
+                    ForeColor    = accent,
+                    Text         = glyph,
+                    Font         = new Font("Segoe UI", 15F, FontStyle.Bold),
+                    Location     = new Point(Pad, Pad),
+                    Enabled      = false,
+                    TabStop      = false,
+                };
+                icon.DisabledState.FillColor   = Blend(accent, Surface, 0.22);
+                icon.DisabledState.ForeColor   = accent;
+                icon.DisabledState.BorderColor = Color.Transparent;
+                Controls.Add(icon);
+
+                // Tiêu đề.
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    var lblTitle = new Label
+                    {
+                        AutoSize    = false,
+                        Size        = new Size(contentW, 28),
+                        Location    = new Point(leftContent, titleY),
+                        Text        = title,
+                        Font        = titleFont,
+                        ForeColor   = TextHi,
+                        BackColor   = Color.Transparent,
+                        UseMnemonic = false,
+                        AutoEllipsis = true,
+                    };
+                    Controls.Add(lblTitle);
+                }
+
+                // Nội dung: wrap + giãn cao; nếu quá cao thì cho cuộn.
+                int maxMsgH = Math.Max(80, DialogAutosizeHelper.MaxDialogClientHeight(this) - (msgY + 22 + 44 + Pad));
+                int msgH = DialogAutosizeHelper.MeasureWrappedHeight(message, msgFont, contentW);
+
+                Control msgArea;
+                if (msgH <= maxMsgH)
+                {
+                    msgArea = new Label
+                    {
+                        AutoSize    = false,
+                        Size        = new Size(contentW, msgH),
+                        Location    = new Point(leftContent, msgY),
+                        Text        = message,
+                        Font        = msgFont,
+                        ForeColor   = TextPri,
+                        BackColor   = Color.Transparent,
+                        UseMnemonic = false,
+                        TextAlign   = ContentAlignment.TopLeft,
+                    };
+                }
+                else
+                {
+                    int innerW = contentW - 18; // chừa chỗ thanh cuộn
+                    int innerH = DialogAutosizeHelper.MeasureWrappedHeight(message, msgFont, innerW);
+                    var lblMsg = new Label
+                    {
+                        AutoSize    = false,
+                        Size        = new Size(innerW, innerH),
+                        Location    = new Point(0, 0),
+                        Text        = message,
+                        Font        = msgFont,
+                        ForeColor   = TextPri,
+                        BackColor   = Color.Transparent,
+                        UseMnemonic = false,
+                        TextAlign   = ContentAlignment.TopLeft,
+                    };
+                    var pnl = new Panel
+                    {
+                        Size      = new Size(contentW, maxMsgH),
+                        Location  = new Point(leftContent, msgY),
+                        AutoScroll = true,
+                        BackColor = Color.Transparent,
+                    };
+                    pnl.Controls.Add(lblMsg);
+                    msgArea = pnl;
+                }
+                Controls.Add(msgArea);
+
+                // Nút.
+                int btnY = msgArea.Bottom + 22;
+                int btnW = 112, btnH = 42;
+
+                if (type == MessageBoxType.Warning)
+                {
+                    var btnYes = MakePrimary("Có");
+                    var btnNo  = MakeGhost("Không");
+                    btnYes.Size = new Size(btnW, btnH);
+                    btnNo.Size  = new Size(btnW, btnH);
+                    btnYes.Location = new Point(formW - Pad - btnW, btnY);
+                    btnNo.Location  = new Point(btnYes.Left - 12 - btnW, btnY);
+                    btnYes.Click += (s, e) => CloseWith(DialogResult.Yes);
+                    btnNo.Click  += (s, e) => CloseWith(DialogResult.No);
+                    Controls.Add(btnYes);
+                    Controls.Add(btnNo);
+                    AcceptButton = btnYes;
+                    CancelButton = btnNo;
+                }
+                else
+                {
+                    var btnOk = MakePrimary("OK");
+                    btnOk.Size = new Size(btnW, btnH);
+                    btnOk.Location = new Point(formW - Pad - btnW, btnY);
+                    btnOk.Click += (s, e) => CloseWith(DialogResult.OK);
+                    Controls.Add(btnOk);
+                    AcceptButton = btnOk;
+                    CancelButton = btnOk;
+                }
+
+                ClientSize = new Size(formW, btnY + btnH + Pad);
+                FormCorners.Round(this, 16);
             }
-            catch
+
+            private void CloseWith(DialogResult result)
             {
-                return 420; 
-            }
-        }
-
-        private void LayoutForContent(string message, MessageBoxType type)
-        {
-            int padX   = 24;                      // khoảng cách lề trái/phải
-            int innerW = FormWidthPx - padX * 2;  // chiều rộng nội dung
-
-            // Đảm bảo handle được tạo trước khi đo kích thước text
-            if (!IsHandleCreated) CreateControl();
-            txtMessage.CreateControl();
-
-            txtMessage.Location = new Point(padX, 18);
-            txtMessage.Width    = innerW;
-            txtMessage.WordWrap = true;
-
-            // Chuẩn hóa ký tự xuống dòng (tránh lẫn lộn \r\n / \n / \r)
-            string m = (message ?? string.Empty)
-                       .Replace("\r\n", "\n")
-                       .Replace('\r', '\n');
-            txtMessage.Text = m.Replace("\n", Environment.NewLine);
-
-            // Tự động điều chỉnh chiều cao TextBox vừa đủ với nội dung
-            int maxViewport = GetMaxMessageViewportPx();
-            DialogAutosizeHelper.SetWrappedTextBoxHeight(txtMessage, minHeight: 56, maxHeight: maxViewport);
-
-            const int gapBeforeButtons = 18; 
-            const int bottomMargin     = 20; 
-            int btnY = txtMessage.Bottom + gapBeforeButtons;
-
-            if (type == MessageBoxType.Warning)
-            {
-                btnOk.Text         = "Có";
-                btnOk.DialogResult = DialogResult.Yes;
-
-                btnCancel.Visible      = true;
-                btnCancel.Text         = "Không";
-                btnCancel.DialogResult = DialogResult.No;
-
-                int totalW = btnOk.Width + 14 + btnCancel.Width;
-                int leftX  = (FormWidthPx - totalW) / 2;
-                btnOk.Location     = new Point(leftX, btnY);
-                btnCancel.Location = new Point(leftX + btnOk.Width + 14, btnY);
-            }
-            else
-            {
-                btnOk.Text         = "Đồng ý";
-                btnOk.DialogResult = DialogResult.OK;
-                btnCancel.Visible  = false;
-
-                int cx = Math.Max(padX, (FormWidthPx - btnOk.Width) / 2);
-                btnOk.Location = new Point(cx, btnY);
+                DialogResult = result;
+                Close();
             }
 
-            // Điều chỉnh chiều cao tổng thể của form
-            int bodyHeight = btnY + btnOk.Height + bottomMargin;
-            ClientSize = new Size(FormWidthPx, pnlHeader.Height + bodyHeight);
-        }
-
-        // ──────────────────────────────────────────────
-        // ÁP DỤNG STYLE THEO LOẠI THÔNG BÁO
-        // ──────────────────────────────────────────────
-        private void ApplyTypeStyle(MessageBoxType type)
-        {
-            (Color themeColor, string icon) = type switch
+            private static Guna2Button MakePrimary(string text) => new()
             {
-                MessageBoxType.Success => (Color.FromArgb(34,  167, 94),  "✓"),
-                MessageBoxType.Error   => (Color.FromArgb(220, 53,  69),  "✕"),
-                MessageBoxType.Warning => (Color.FromArgb(245, 158, 11),  "⚠"),
-                _                      => (Color.FromArgb(31,  138, 154), "ℹ"),
+                Text         = text,
+                BorderRadius = 10,
+                FillColor    = Teal,
+                ForeColor    = Color.White,
+                Font         = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Cursor       = Cursors.Hand,
+                HoverState   = { FillColor = TealHover },
             };
 
-            pnlHeader.BackColor        = themeColor;
-            lblIcon.Text               = icon;
-            btnOk.FillColor            = themeColor;
-            btnOk.HoverState.FillColor = LightenColor(themeColor, 0.1f);
-            btnOk.ForeColor            = Color.White;
-        }
+            private static Guna2Button MakeGhost(string text) => new()
+            {
+                Text            = text,
+                BorderRadius    = 10,
+                BorderThickness = 1,
+                BorderColor     = Border,
+                FillColor       = Color.Transparent,
+                ForeColor       = TextPri,
+                Font            = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Cursor          = Cursors.Hand,
+                HoverState      = { FillColor = SurfaceHov, BorderColor = Color.FromArgb(103, 103, 110) },
+            };
 
-        private static Color LightenColor(Color c, float factor)
-        {
-            int r = (int)Math.Min(255, c.R + (255 - c.R) * factor);
-            int g = (int)Math.Min(255, c.G + (255 - c.G) * factor);
-            int b = (int)Math.Min(255, c.B + (255 - c.B) * factor);
-            return Color.FromArgb(r, g, b);
-        }
-
-        // ──────────────────────────────────────────────
-        // ENUM LOẠI THÔNG BÁO
-        // ──────────────────────────────────────────────
-        public enum MessageBoxType { Info, Success, Error, Warning }
-
-        // ──────────────────────────────────────────────
-        // SỰ KIỆN
-        // ──────────────────────────────────────────────
-
-        private void PnlHeader_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            ReleaseCapture();
-            _ = SendMessage(Handle, 0xA1, 0x2, 0);
-        }
-
-        // ────────────────────────────────────
-        // Sự kiện click của nút OK và Cancel. 
-        // ────────────────────────────────────
-        private void BtnOk_Click(object sender, EventArgs e)
-        {
-            DialogResult = btnOk.DialogResult == DialogResult.None
-                ? DialogResult.OK
-                : btnOk.DialogResult;
-            Close();
-        }
-
-        private void BtnCancel_Click(object sender, EventArgs e)
-        {
-            DialogResult = btnCancel.DialogResult == DialogResult.None
-                ? DialogResult.Cancel
-                : btnCancel.DialogResult;
-            Close();
+            private static Color Blend(Color fg, Color bg, double a) => Color.FromArgb(
+                (int)(fg.R * a + bg.R * (1 - a)),
+                (int)(fg.G * a + bg.G * (1 - a)),
+                (int)(fg.B * a + bg.B * (1 - a)));
         }
     }
 }

@@ -1,4 +1,4 @@
-using BUS;
+﻿using BUS;
 using DTO;
 using Guna.UI2.WinForms;
 using System;
@@ -15,33 +15,59 @@ namespace GUI
         public ucStaff_Manager()
         {
             InitializeComponent();
-            btnApproveLeave.Click += BtnApproveLeave_Click;
-            dgvStaff.CellDoubleClick += DgvStaff_CellDoubleClick;
             InitFilterControls();
+
+            // Nút làm mới từng bảng: chỉ tải lại dữ liệu của bảng đó
+            DgvRefresh.Attach(dgvStaff, LoadRealData);
+            DgvRefresh.Attach(dgvLeaveReq, LoadLeaveRequests);
+
+            // Đơn xin nghỉ hiện dạng thẻ giống màn "Quản lý" của Admin: bấm tiêu đề
+            // hoặc double-click dòng để mở dialog LeaveRequestDetail (tái dùng, không dựng lại).
+            lblLeaveReqTitle.Cursor = Cursors.Hand;
+            lblLeaveReqTitle.Click     += (s, e) => ShowLeaveRequestsDialog();
+            dgvLeaveReq.CellDoubleClick += (s, e) => ShowLeaveRequestsDialog();
         }
 
-        // ──────────────────────────────────────────────
-        // SỰ KIỆN LOAD (wired in Designer)
-        // ──────────────────────────────────────────────
+        // Mở dialog thẻ đơn xin nghỉ của nhân viên (cùng giao diện với đơn của Quản lý).
+        private void ShowLeaveRequestsDialog()
+        {
+            var items = new List<LeaveItem>();
+            if (dgvLeaveReq.DataSource is DataTable dt)
+                foreach (DataRow r in dt.Rows)
+                {
+                    string date = r["Ngày nghỉ"]?.ToString() ?? "";
+                    items.Add(new LeaveItem(
+                        r["Nhân viên"]?.ToString() ?? "",
+                        date, date,
+                        r["Lý do"]?.ToString() ?? "",
+                        "Chờ duyệt"));
+                }
+
+            new LeaveRequestDetail(items, "Đơn xin nghỉ của nhân viên")
+                .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sự kiện load (wired in Designer)
         private async void ucStaff_Manager_Load(object sender, EventArgs e)
         {
             await LoadRealData();
             LoadLeaveRequests();
         }
 
-        // ──────────────────────────────────────────────
-        // TẢI DANH SÁCH NHÂN VIÊN
-        // ──────────────────────────────────────────────
+        // Tải danh sách nhân viên
         private async Task LoadRealData()
         {
             try
             {
                 this.Cursor = Cursors.WaitCursor;
+                // Cột dgvStaff đã khai sẵn trong Designer (Name + DataPropertyName).
+                // KHÔNG Clear cột: vì AutoGenerateColumns=false, xoá cột sẽ làm grid trống
+                // và Columns["Mã NV"] = null → NullReferenceException. Chỉ cần reset DataSource.
                 dgvStaff.DataSource = null;
-                dgvStaff.Columns.Clear();
 
-                // 1. Lấy TẤT CẢ danh sách từ Server về
-                List<EmployeeDTO> fullList = await EmployeeBUS.GetAllEmployeesAsync();
+                // 1. Lấy TẤT CẢ danh sách từ Server về (Task.Run: HTTP + parse JSON
+                // chạy ở thread pool để không chiếm luồng UI trong lúc chờ server)
+                List<EmployeeDTO> fullList = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
 
                 if (fullList == null || fullList.Count == 0) return;
 
@@ -60,11 +86,12 @@ namespace GUI
 
                 foreach (var emp in staffList)
                 {
+                    // Hiển thị tiếng Việt; dialog Edit/Detail cần raw nên dịch ngược qua EmployeeText
                     dt.Rows.Add(
                         emp.EmployeeId,
                         emp.FullName,
-                        emp.Role,
-                        emp.Status,
+                        EmployeeText.RoleVi(emp.Role),
+                        EmployeeText.StatusVi(emp.Status),
                         emp.PhoneNumber,
                         emp.AuthUid,
                         emp.Email
@@ -72,6 +99,10 @@ namespace GUI
                 }
 
                 dgvStaff.DataSource = dt;
+
+                // Bảo hiểm: nếu VS round-trip đổi Name cột thành "colStaff…" thì mọi
+                // Columns["Mã NV"]/Cells["…"] sẽ null → crash. Đồng bộ lại Name == DataPropertyName.
+                GridColumnGuard.SyncColumnNames(dgvStaff);
 
                 // Ẩn cột không cần hiển thị
                 foreach (string col in new[] { "AuthUid", "Số điện thoại", "Email" })
@@ -87,6 +118,13 @@ namespace GUI
                 dgvStaff.Columns["Mã NV"].DefaultCellStyle.Alignment      = DataGridViewContentAlignment.MiddleCenter;
                 dgvStaff.Columns["Vị Trí"].DefaultCellStyle.Alignment     = DataGridViewContentAlignment.MiddleCenter;
                 dgvStaff.Columns["Trạng Thái"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+                foreach (DataGridViewRow row in dgvStaff.Rows)
+                {
+                    string status = row.Cells["Trạng Thái"].Value?.ToString() ?? "";
+                    row.Cells["Trạng Thái"].Style.ForeColor =
+                        status == "Đang làm" ? System.Drawing.Color.MediumSeaGreen : System.Drawing.Color.Orange;
+                }
 
                 // Cập nhật stat card
                 var activeList = staffList.Where(emp => emp.Status == "active").ToList();
@@ -105,9 +143,7 @@ namespace GUI
             }
         }
 
-        // ──────────────────────────────────────────────
-        // TẢI DANH SÁCH ĐƠN XIN NGHỈ
-        // ──────────────────────────────────────────────
+        // Tải danh sách đơn xin nghỉ
         private void LoadLeaveRequests()
         {
             var dt = new DataTable();
@@ -120,15 +156,14 @@ namespace GUI
             dt.Rows.Add("NV07 Trần Thị B",  "21/05/2026", "Khám bệnh");
 
             dgvLeaveReq.DataSource = dt;
+            GridColumnGuard.SyncColumnNames(dgvLeaveReq);
             dgvLeaveReq.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvLeaveReq.Columns["Nhân viên"].FillWeight = 35;
             dgvLeaveReq.Columns["Ngày nghỉ"].FillWeight = 30;
             dgvLeaveReq.Columns["Lý do"].FillWeight     = 35;
         }
 
-        // ──────────────────────────────────────────────
-        // DUYỆT ĐƠN XIN NGHỈ
-        // ──────────────────────────────────────────────
+        // Duyệt đơn xin nghỉ
         private void BtnApproveLeave_Click(object? sender, EventArgs e)
         {
             if (dgvLeaveReq.CurrentRow == null || dgvLeaveReq.CurrentRow.Index < 0)
@@ -156,9 +191,7 @@ namespace GUI
                 btnApproveLeave.Enabled = false;
         }
 
-        // ──────────────────────────────────────────────
-        // THÊM NHÂN VIÊN MỚI
-        // ──────────────────────────────────────────────
+        // Thêm nhân viên mới
         private async void btnAddStaff_Click(object sender, EventArgs e)
         {
             AddEmployee frmAdd = new();
@@ -169,9 +202,7 @@ namespace GUI
             }
         }
 
-        // ──────────────────────────────────────────────
-        // SỬA NHÂN VIÊN
-        // ──────────────────────────────────────────────
+        // Sửa nhân viên
         private void btnEditStaff_Click(object sender, EventArgs e)
         {
             if (dgvStaff.CurrentRow == null || dgvStaff.CurrentRow.Index < 0)
@@ -180,59 +211,48 @@ namespace GUI
                 return;
             }
 
-            DataGridViewRow row = dgvStaff.CurrentRow;
-            EmployeeDTO empToEdit = new()
-            {
-                EmployeeId  = row.Cells["Mã NV"].Value?.ToString(),
-                FullName    = row.Cells["Họ và Tên"].Value?.ToString(),
-                Role        = row.Cells["Vị Trí"].Value?.ToString(),
-                Status      = row.Cells["Trạng Thái"].Value?.ToString(),
-                PhoneNumber = row.Cells["Số điện thoại"].Value?.ToString(),
-                AuthUid     = row.Cells["AuthUid"].Value?.ToString(),
-                Email       = row.Cells["Email"].Value?.ToString(),
-            };
+            EmployeeDTO empToEdit = BuildEmployeeFromRow(dgvStaff.CurrentRow);
 
             EditEmployee frmEdit = new(empToEdit);
             if (frmEdit.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
                 _ = LoadRealData();
         }
 
-        // ──────────────────────────────────────────────
-        // DOUBLE-CLICK XEM CHI TIẾT
-        // ──────────────────────────────────────────────
+        // Double-click xem chi tiết
         private async void DgvStaff_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
 
-            DataGridViewRow row = dgvStaff.Rows[e.RowIndex];
-            EmployeeDTO emp = new()
-            {
-                EmployeeId  = row.Cells["Mã NV"].Value?.ToString(),
-                FullName    = row.Cells["Họ và Tên"].Value?.ToString(),
-                Role        = row.Cells["Vị Trí"].Value?.ToString(),
-                Status      = row.Cells["Trạng Thái"].Value?.ToString(),
-                PhoneNumber = row.Cells["Số điện thoại"].Value?.ToString(),
-                AuthUid     = row.Cells["AuthUid"].Value?.ToString(),
-                Email       = row.Cells["Email"].Value?.ToString(),
-            };
+            EmployeeDTO emp = BuildEmployeeFromRow(dgvStaff.Rows[e.RowIndex]);
 
             using EmployeeDetail dlg = new(emp);
             if (dlg.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
                 await LoadRealData();
         }
 
-        // ──────────────────────────────────────────────
-        // BỘ LỌC NHÂN VIÊN
-        // ──────────────────────────────────────────────
+        // Grid hiển thị Vị Trí/Trạng Thái tiếng Việt -> dịch ngược về raw
+        // vì EditEmployee/EmployeeDetail bind theo "manager"/"active"…
+        private static EmployeeDTO BuildEmployeeFromRow(DataGridViewRow row) => new()
+        {
+            EmployeeId  = row.Cells["Mã NV"].Value?.ToString(),
+            FullName    = row.Cells["Họ và Tên"].Value?.ToString(),
+            Role        = EmployeeText.RoleRaw(row.Cells["Vị Trí"].Value?.ToString()),
+            Status      = EmployeeText.StatusRaw(row.Cells["Trạng Thái"].Value?.ToString()),
+            PhoneNumber = row.Cells["Số điện thoại"].Value?.ToString(),
+            AuthUid     = row.Cells["AuthUid"].Value?.ToString(),
+            Email       = row.Cells["Email"].Value?.ToString(),
+        };
+
+        // Bộ lọc nhân viên
         private void InitFilterControls()
         {
             cbRole.Items.Clear();
-            foreach (var r in new[] { "-- Vị trí --", "manager", "barista", "order staff", "security" })
+            foreach (var r in new[] { "-- Vị trí --", "Quản lý", "Pha chế", "Nhân viên Order", "Bảo vệ" })
                 cbRole.Items.Add(r);
             cbRole.SelectedIndex = 0;
 
             cbStatus.Items.Clear();
-            foreach (var s in new[] { "-- Trạng thái --", "active", "inactive" })
+            foreach (var s in new[] { "-- Trạng thái --", "Đang làm", "Xin nghỉ" })
                 cbStatus.Items.Add(s);
             cbStatus.SelectedIndex = 0;
 
@@ -247,9 +267,10 @@ namespace GUI
 
             List<string> parts = new();
 
-            string keyword = txtSearch.Text.Trim().Replace("'", "''");
-            if (!string.IsNullOrEmpty(keyword))
-                parts.Add($"([Họ và Tên] LIKE '%{keyword}%' OR [Mã NV] LIKE '%{keyword}%')");
+            // Từ khóa quét mọi trường (tên, mã, vị trí, trạng thái, SĐT, email) — trừ cột kỹ thuật
+            string kwFilter = SearchFilter.AllColumnsFilter(dt, txtSearch.Text, "AuthUid");
+            if (!string.IsNullOrEmpty(kwFilter))
+                parts.Add(kwFilter);
 
             if (cbRole.SelectedIndex > 0)
                 parts.Add($"[Vị Trí] = '{cbRole.SelectedItem}'");

@@ -1,19 +1,13 @@
 using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
     partial class EmployeeDetail
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -25,263 +19,392 @@ namespace GUI
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            panel1 = new Guna2Panel();
             lblTitle = new Label();
             lblEmpId = new Label();
-            txtEmpId = new TextBox();
+            txtEmpId = new Guna2TextBox();
             lblEmail = new Label();
-            txtEmail = new TextBox();
+            txtEmail = new Guna2TextBox();
             lblFullName = new Label();
-            txtFullName = new TextBox();
+            txtFullName = new Guna2TextBox();
             lblPhone = new Label();
-            txtPhone = new TextBox();
+            txtPhone = new Guna2TextBox();
             lblRole = new Label();
-            txtRole = new TextBox();
+            txtRole = new Guna2TextBox();
             lblStatus = new Label();
-            txtStatus = new TextBox();
-            btnClose = new Button();
-            BtnRemove = new Button();
+            txtStatus = new Guna2TextBox();
+            btnClose = new Guna2Button();
+            BtnRemove = new Guna2Button();
+            shadow = new Guna2ShadowForm(components);
+            panel1.SuspendLayout();
             SuspendLayout();
-            // 
+            //
+            // panel1
+            //
+            panel1.BackColor = Color.FromArgb(39, 39, 42);
+            panel1.BorderRadius = 18;
+            panel1.Controls.Add(lblTitle);
+            panel1.Controls.Add(lblEmpId);
+            panel1.Controls.Add(txtEmpId);
+            panel1.Controls.Add(lblEmail);
+            panel1.Controls.Add(txtEmail);
+            panel1.Controls.Add(lblFullName);
+            panel1.Controls.Add(txtFullName);
+            panel1.Controls.Add(lblPhone);
+            panel1.Controls.Add(txtPhone);
+            panel1.Controls.Add(lblRole);
+            panel1.Controls.Add(txtRole);
+            panel1.Controls.Add(lblStatus);
+            panel1.Controls.Add(txtStatus);
+            panel1.Controls.Add(btnClose);
+            panel1.Controls.Add(BtnRemove);
+            panel1.CustomizableEdges = customizableEdges1;
+            panel1.Location = new Point(16, 16);
+            panel1.Name = "panel1";
+            panel1.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            panel1.Size = new Size(448, 528);
+            panel1.TabIndex = 0;
+            //
             // lblTitle
-            // 
-            lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            //
+            lblTitle.AutoSize = false;
+            lblTitle.BackColor = Color.Transparent;
+            lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(83, 22);
+            lblTitle.Location = new Point(12, 22);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(265, 30);
+            lblTitle.Size = new Size(424, 32);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "THÔNG TIN NHÂN VIÊN";
-            // 
+            lblTitle.TextAlign = ContentAlignment.MiddleCenter;
+            //
             // lblEmpId
-            // 
+            //
             lblEmpId.AutoSize = true;
-            lblEmpId.Font = new Font("Segoe UI", 10F);
-            lblEmpId.ForeColor = Color.LightGray;
-            lblEmpId.Location = new Point(30, 80);
+            lblEmpId.BackColor = Color.Transparent;
+            lblEmpId.Font = new Font("Segoe UI", 9.5F);
+            lblEmpId.ForeColor = Color.FromArgb(160, 160, 166);
+            lblEmpId.Location = new Point(40, 72);
             lblEmpId.Name = "lblEmpId";
-            lblEmpId.Size = new Size(96, 19);
+            lblEmpId.Size = new Size(90, 17);
             lblEmpId.TabIndex = 1;
             lblEmpId.Text = "Mã nhân viên:";
-            // 
+            //
             // txtEmpId
-            // 
-            txtEmpId.BackColor = Color.FromArgb(45, 45, 48);
-            txtEmpId.BorderStyle = BorderStyle.FixedSingle;
-            txtEmpId.Font = new Font("Segoe UI", 11F);
+            //
+            txtEmpId.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmpId.BorderRadius = 10;
+            txtEmpId.CustomizableEdges = customizableEdges3;
+            txtEmpId.DefaultText = "";
+            txtEmpId.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmpId.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtEmpId.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtEmpId.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtEmpId.FillColor = Color.FromArgb(45, 45, 48);
+            txtEmpId.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtEmpId.Font = new Font("Segoe UI", 10.5F);
             txtEmpId.ForeColor = Color.White;
-            txtEmpId.Location = new Point(34, 102);
+            txtEmpId.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtEmpId.Location = new Point(40, 92);
             txtEmpId.Name = "txtEmpId";
+            txtEmpId.PasswordChar = '\0';
+            txtEmpId.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtEmpId.PlaceholderText = "";
             txtEmpId.ReadOnly = true;
-            txtEmpId.Size = new Size(350, 27);
+            txtEmpId.SelectedText = "";
+            txtEmpId.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            txtEmpId.Size = new Size(365, 42);
             txtEmpId.TabIndex = 2;
-            // 
+            //
             // lblEmail
-            // 
+            //
             lblEmail.AutoSize = true;
-            lblEmail.Font = new Font("Segoe UI", 10F);
-            lblEmail.ForeColor = Color.LightGray;
-            lblEmail.Location = new Point(30, 136);
+            lblEmail.BackColor = Color.Transparent;
+            lblEmail.Font = new Font("Segoe UI", 9.5F);
+            lblEmail.ForeColor = Color.FromArgb(160, 160, 166);
+            lblEmail.Location = new Point(40, 142);
             lblEmail.Name = "lblEmail";
-            lblEmail.Size = new Size(44, 19);
-            lblEmail.TabIndex = 13;
+            lblEmail.Size = new Size(44, 17);
+            lblEmail.TabIndex = 3;
             lblEmail.Text = "Email:";
-            // 
+            //
             // txtEmail
-            // 
-            txtEmail.BackColor = Color.FromArgb(45, 45, 48);
-            txtEmail.BorderStyle = BorderStyle.FixedSingle;
-            txtEmail.Font = new Font("Segoe UI", 11F);
+            //
+            txtEmail.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmail.BorderRadius = 10;
+            txtEmail.CustomizableEdges = customizableEdges5;
+            txtEmail.DefaultText = "";
+            txtEmail.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtEmail.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtEmail.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtEmail.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtEmail.FillColor = Color.FromArgb(45, 45, 48);
+            txtEmail.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtEmail.Font = new Font("Segoe UI", 10.5F);
             txtEmail.ForeColor = Color.White;
-            txtEmail.Location = new Point(34, 158);
-            txtEmail.Multiline = true;
+            txtEmail.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtEmail.Location = new Point(40, 162);
             txtEmail.Name = "txtEmail";
+            txtEmail.PasswordChar = '\0';
+            txtEmail.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtEmail.PlaceholderText = "";
             txtEmail.ReadOnly = true;
-            txtEmail.Size = new Size(350, 32);
-            txtEmail.TabIndex = 14;
-            txtEmail.WordWrap = true;
-            // 
+            txtEmail.SelectedText = "";
+            txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            txtEmail.Size = new Size(365, 42);
+            txtEmail.TabIndex = 4;
+            //
             // lblFullName
-            // 
+            //
             lblFullName.AutoSize = true;
-            lblFullName.Font = new Font("Segoe UI", 10F);
-            lblFullName.ForeColor = Color.LightGray;
-            lblFullName.Location = new Point(30, 140);
+            lblFullName.BackColor = Color.Transparent;
+            lblFullName.Font = new Font("Segoe UI", 9.5F);
+            lblFullName.ForeColor = Color.FromArgb(160, 160, 166);
+            lblFullName.Location = new Point(40, 212);
             lblFullName.Name = "lblFullName";
-            lblFullName.Size = new Size(72, 19);
-            lblFullName.TabIndex = 3;
+            lblFullName.Size = new Size(72, 17);
+            lblFullName.TabIndex = 5;
             lblFullName.Text = "Họ và tên:";
-            // 
+            //
             // txtFullName
-            // 
-            txtFullName.BackColor = Color.FromArgb(45, 45, 48);
-            txtFullName.BorderStyle = BorderStyle.FixedSingle;
-            txtFullName.Font = new Font("Segoe UI", 11F);
+            //
+            txtFullName.BorderColor = Color.FromArgb(63, 63, 70);
+            txtFullName.BorderRadius = 10;
+            txtFullName.CustomizableEdges = customizableEdges7;
+            txtFullName.DefaultText = "";
+            txtFullName.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtFullName.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtFullName.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtFullName.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtFullName.FillColor = Color.FromArgb(45, 45, 48);
+            txtFullName.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtFullName.Font = new Font("Segoe UI", 10.5F);
             txtFullName.ForeColor = Color.White;
-            txtFullName.Location = new Point(34, 162);
-            txtFullName.Multiline = true;
+            txtFullName.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtFullName.Location = new Point(40, 232);
             txtFullName.Name = "txtFullName";
+            txtFullName.PasswordChar = '\0';
+            txtFullName.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtFullName.PlaceholderText = "";
             txtFullName.ReadOnly = true;
-            txtFullName.ScrollBars = ScrollBars.None;
-            txtFullName.Size = new Size(350, 36);
-            txtFullName.TabIndex = 4;
-            txtFullName.WordWrap = true;
-            // 
+            txtFullName.SelectedText = "";
+            txtFullName.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            txtFullName.Size = new Size(365, 42);
+            txtFullName.TabIndex = 6;
+            //
             // lblPhone
-            // 
+            //
             lblPhone.AutoSize = true;
-            lblPhone.Font = new Font("Segoe UI", 10F);
-            lblPhone.ForeColor = Color.LightGray;
-            lblPhone.Location = new Point(30, 200);
+            lblPhone.BackColor = Color.Transparent;
+            lblPhone.Font = new Font("Segoe UI", 9.5F);
+            lblPhone.ForeColor = Color.FromArgb(160, 160, 166);
+            lblPhone.Location = new Point(40, 282);
             lblPhone.Name = "lblPhone";
-            lblPhone.Size = new Size(92, 19);
-            lblPhone.TabIndex = 5;
+            lblPhone.Size = new Size(92, 17);
+            lblPhone.TabIndex = 7;
             lblPhone.Text = "Số điện thoại:";
-            // 
+            //
             // txtPhone
-            // 
-            txtPhone.BackColor = Color.FromArgb(45, 45, 48);
-            txtPhone.BorderStyle = BorderStyle.FixedSingle;
-            txtPhone.Font = new Font("Segoe UI", 11F);
+            //
+            txtPhone.BorderColor = Color.FromArgb(63, 63, 70);
+            txtPhone.BorderRadius = 10;
+            txtPhone.CustomizableEdges = customizableEdges9;
+            txtPhone.DefaultText = "";
+            txtPhone.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtPhone.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtPhone.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtPhone.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtPhone.FillColor = Color.FromArgb(45, 45, 48);
+            txtPhone.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtPhone.Font = new Font("Segoe UI", 10.5F);
             txtPhone.ForeColor = Color.White;
-            txtPhone.Location = new Point(34, 222);
+            txtPhone.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtPhone.Location = new Point(40, 302);
             txtPhone.Name = "txtPhone";
+            txtPhone.PasswordChar = '\0';
+            txtPhone.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtPhone.PlaceholderText = "";
             txtPhone.ReadOnly = true;
-            txtPhone.Size = new Size(350, 27);
-            txtPhone.TabIndex = 6;
-            // 
+            txtPhone.SelectedText = "";
+            txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            txtPhone.Size = new Size(365, 42);
+            txtPhone.TabIndex = 8;
+            //
             // lblRole
-            // 
+            //
             lblRole.AutoSize = true;
-            lblRole.Font = new Font("Segoe UI", 10F);
-            lblRole.ForeColor = Color.LightGray;
-            lblRole.Location = new Point(30, 260);
+            lblRole.BackColor = Color.Transparent;
+            lblRole.Font = new Font("Segoe UI", 9.5F);
+            lblRole.ForeColor = Color.FromArgb(160, 160, 166);
+            lblRole.Location = new Point(40, 352);
             lblRole.Name = "lblRole";
-            lblRole.Size = new Size(62, 19);
-            lblRole.TabIndex = 7;
+            lblRole.Size = new Size(58, 17);
+            lblRole.TabIndex = 9;
             lblRole.Text = "Chức vụ:";
-            // 
+            //
             // txtRole
-            // 
-            txtRole.BackColor = Color.FromArgb(45, 45, 48);
-            txtRole.BorderStyle = BorderStyle.FixedSingle;
-            txtRole.Font = new Font("Segoe UI", 11F);
+            //
+            txtRole.BorderColor = Color.FromArgb(63, 63, 70);
+            txtRole.BorderRadius = 10;
+            txtRole.CustomizableEdges = customizableEdges11;
+            txtRole.DefaultText = "";
+            txtRole.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtRole.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtRole.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtRole.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtRole.FillColor = Color.FromArgb(45, 45, 48);
+            txtRole.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtRole.Font = new Font("Segoe UI", 10.5F);
             txtRole.ForeColor = Color.White;
-            txtRole.Location = new Point(34, 282);
-            txtRole.Multiline = true;
+            txtRole.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtRole.Location = new Point(40, 372);
             txtRole.Name = "txtRole";
+            txtRole.PasswordChar = '\0';
+            txtRole.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtRole.PlaceholderText = "";
             txtRole.ReadOnly = true;
-            txtRole.Size = new Size(160, 30);
-            txtRole.TabIndex = 8;
-            txtRole.WordWrap = true;
-            // 
+            txtRole.SelectedText = "";
+            txtRole.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            txtRole.Size = new Size(170, 42);
+            txtRole.TabIndex = 10;
+            //
             // lblStatus
-            // 
+            //
             lblStatus.AutoSize = true;
-            lblStatus.Font = new Font("Segoe UI", 10F);
-            lblStatus.ForeColor = Color.LightGray;
-            lblStatus.Location = new Point(220, 260);
+            lblStatus.BackColor = Color.Transparent;
+            lblStatus.Font = new Font("Segoe UI", 9.5F);
+            lblStatus.ForeColor = Color.FromArgb(160, 160, 166);
+            lblStatus.Location = new Point(235, 352);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(73, 19);
-            lblStatus.TabIndex = 9;
+            lblStatus.Size = new Size(70, 17);
+            lblStatus.TabIndex = 11;
             lblStatus.Text = "Trạng thái:";
-            // 
+            //
             // txtStatus
-            // 
-            txtStatus.BackColor = Color.FromArgb(45, 45, 48);
-            txtStatus.BorderStyle = BorderStyle.FixedSingle;
-            txtStatus.Font = new Font("Segoe UI", 11F);
+            //
+            txtStatus.BorderColor = Color.FromArgb(63, 63, 70);
+            txtStatus.BorderRadius = 10;
+            txtStatus.CustomizableEdges = customizableEdges13;
+            txtStatus.DefaultText = "";
+            txtStatus.DisabledState.BorderColor = Color.FromArgb(63, 63, 70);
+            txtStatus.DisabledState.FillColor = Color.FromArgb(45, 45, 48);
+            txtStatus.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            txtStatus.DisabledState.PlaceholderForeColor = Color.FromArgb(125, 137, 149);
+            txtStatus.FillColor = Color.FromArgb(45, 45, 48);
+            txtStatus.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtStatus.Font = new Font("Segoe UI", 10.5F);
             txtStatus.ForeColor = Color.White;
-            txtStatus.Location = new Point(224, 282);
+            txtStatus.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtStatus.Location = new Point(235, 372);
             txtStatus.Name = "txtStatus";
+            txtStatus.PasswordChar = '\0';
+            txtStatus.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
+            txtStatus.PlaceholderText = "";
             txtStatus.ReadOnly = true;
-            txtStatus.Size = new Size(160, 27);
-            txtStatus.TabIndex = 10;
-            // 
+            txtStatus.SelectedText = "";
+            txtStatus.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            txtStatus.Size = new Size(170, 42);
+            txtStatus.TabIndex = 12;
+            //
             // btnClose
-            // 
-            btnClose.BackColor = Color.FromArgb(60, 60, 60);
-            btnClose.FlatAppearance.BorderSize = 0;
-            btnClose.FlatStyle = FlatStyle.Flat;
+            //
+            btnClose.BorderRadius = 10;
+            btnClose.Cursor = Cursors.Hand;
+            btnClose.CustomizableEdges = customizableEdges15;
+            btnClose.DisabledState.BorderColor = Color.DarkGray;
+            btnClose.DisabledState.CustomBorderColor = Color.DarkGray;
+            btnClose.DisabledState.FillColor = Color.FromArgb(80, 80, 80);
+            btnClose.DisabledState.ForeColor = Color.FromArgb(190, 190, 190);
+            btnClose.FillColor = Color.FromArgb(31, 138, 154);
             btnClose.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             btnClose.ForeColor = Color.White;
-            btnClose.Location = new Point(234, 342);
+            btnClose.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnClose.Location = new Point(235, 444);
             btnClose.Name = "btnClose";
-            btnClose.Size = new Size(150, 40);
-            btnClose.TabIndex = 11;
-            btnClose.Text = "ĐÓNG";
-            btnClose.UseVisualStyleBackColor = false;
+            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            btnClose.Size = new Size(170, 46);
+            btnClose.TabIndex = 13;
+            btnClose.Text = "Đóng";
             btnClose.Click += btnClose_Click;
-            // 
+            //
             // BtnRemove
-            // 
-            BtnRemove.BackColor = Color.FromArgb(220, 53, 69);
-            BtnRemove.FlatAppearance.BorderSize = 0;
-            BtnRemove.FlatStyle = FlatStyle.Flat;
+            //
+            BtnRemove.BorderColor = Color.FromArgb(180, 60, 60);
+            BtnRemove.BorderRadius = 10;
+            BtnRemove.BorderThickness = 1;
+            BtnRemove.Cursor = Cursors.Hand;
+            BtnRemove.FillColor = Color.Transparent;
             BtnRemove.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            BtnRemove.ForeColor = Color.White;
-            BtnRemove.Location = new Point(34, 342);
+            BtnRemove.ForeColor = Color.FromArgb(220, 80, 80);
+            BtnRemove.HoverState.FillColor = Color.FromArgb(180, 60, 60);
+            BtnRemove.HoverState.ForeColor = Color.White;
+            BtnRemove.Location = new Point(40, 444);
             BtnRemove.Name = "BtnRemove";
-            BtnRemove.Size = new Size(150, 40);
-            BtnRemove.TabIndex = 12;
-            BtnRemove.Text = "XÓA";
-            BtnRemove.UseVisualStyleBackColor = false;
+            BtnRemove.Size = new Size(170, 46);
+            BtnRemove.TabIndex = 14;
+            BtnRemove.Text = "Xóa";
             BtnRemove.Click += BtnRemove_Click;
-            // 
-            // InformationStaff
-            // 
+            //
+            // shadow
+            //
+            shadow.TargetForm = this;
+            //
+            // EmployeeDetail
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(25, 25, 25);
-            ClientSize = new Size(420, 420);
-            Controls.Add(BtnRemove);
-            Controls.Add(btnClose);
-            Controls.Add(txtStatus);
-            Controls.Add(lblStatus);
-            Controls.Add(txtRole);
-            Controls.Add(lblRole);
-            Controls.Add(txtPhone);
-            Controls.Add(lblPhone);
-            Controls.Add(txtFullName);
-            Controls.Add(lblFullName);
-            Controls.Add(txtEmail);
-            Controls.Add(lblEmail);
-            Controls.Add(txtEmpId);
-            Controls.Add(lblEmpId);
-            Controls.Add(lblTitle);
+            BackColor = Color.FromArgb(24, 24, 27);
+            ClientSize = new Size(480, 560);
+            Controls.Add(panel1);
+            Font = new Font("Segoe UI", 10F);
             FormBorderStyle = FormBorderStyle.None;
             MaximizeBox = false;
             MinimizeBox = false;
-            Name = "InformationStaff";
+            Name = "EmployeeDetail";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Thông tin nhân viên";
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
-
         }
 
         #endregion
 
-        private System.Windows.Forms.Label lblTitle;
-        private System.Windows.Forms.Label lblEmpId;
-        private System.Windows.Forms.TextBox txtEmpId;
-        private System.Windows.Forms.Label lblEmail;
-        private System.Windows.Forms.TextBox txtEmail;
-        private System.Windows.Forms.Label lblFullName;
-        private System.Windows.Forms.TextBox txtFullName;
-        private System.Windows.Forms.Label lblPhone;
-        private System.Windows.Forms.TextBox txtPhone;
-        private System.Windows.Forms.Label lblRole;
-        private System.Windows.Forms.TextBox txtRole;
-        private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.TextBox txtStatus;
-        private System.Windows.Forms.Button btnClose;
-        private Button BtnRemove;
+        private Guna2Panel panel1;
+        private Label lblTitle;
+        private Label lblEmpId;
+        private Guna2TextBox txtEmpId;
+        private Label lblEmail;
+        private Guna2TextBox txtEmail;
+        private Label lblFullName;
+        private Guna2TextBox txtFullName;
+        private Label lblPhone;
+        private Guna2TextBox txtPhone;
+        private Label lblRole;
+        private Guna2TextBox txtRole;
+        private Label lblStatus;
+        private Guna2TextBox txtStatus;
+        private Guna2Button btnClose;
+        private Guna2Button BtnRemove;
+        private Guna2ShadowForm shadow;
     }
 }

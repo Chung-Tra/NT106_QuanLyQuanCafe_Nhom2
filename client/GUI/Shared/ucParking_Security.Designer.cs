@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
@@ -18,232 +19,356 @@ namespace GUI
 
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dgvStyle = new DataGridViewCellStyle();
-            pnlHeader = new Panel();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            pnlHeader = new Guna2Panel();
             lblTitle = new Label();
-            btnVehicleIn = new Button();
-            btnVehicleOut = new Button();
-            btnReport = new Button();
-            pnlInfo = new Panel();
+            btnReport = new Guna2Button();
+            btnVehicleIn = new Guna2Button();
+            btnVehicleOut = new Guna2Button();
+            pnlInfo = new Guna2Panel();
             lblPlate = new Label();
-            txtPlate = new TextBox();
+            txtPlate = new Guna2TextBox();
             lblType = new Label();
-            cmbVehicleType = new ComboBox();
+            cmbVehicleType = new Guna2ComboBox();
             lblSlots = new Label();
             lblSlotsValue = new Label();
-            pnlGrid = new Panel();
+            pnlGrid = new Guna2Panel();
             lblLogTitle = new Label();
-            dgvParkingLog = new DataGridView();
+            dgvParkingLog = new Guna2DataGridView();
+            colPlate = new DataGridViewTextBoxColumn();
+            colVehicleType = new DataGridViewTextBoxColumn();
+            colTimeIn = new DataGridViewTextBoxColumn();
+            colTimeOut = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlHeader.SuspendLayout();
             pnlInfo.SuspendLayout();
             pnlGrid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvParkingLog).BeginInit();
             SuspendLayout();
-            //
+            // 
             // pnlHeader
-            //
-            pnlHeader.BackColor = Color.FromArgb(30, 30, 30);
+            // 
+            pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlHeader.BackColor = Color.FromArgb(31, 31, 34);
+            pnlHeader.BorderRadius = 14;
             pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Controls.Add(btnReport);
             pnlHeader.Controls.Add(btnVehicleIn);
             pnlHeader.Controls.Add(btnVehicleOut);
-            pnlHeader.Controls.Add(btnReport);
-            pnlHeader.Location = new Point(20, 15);
+            pnlHeader.CustomizableEdges = customizableEdges7;
+            pnlHeader.Location = new Point(20, 20);
             pnlHeader.Name = "pnlHeader";
-            pnlHeader.Size = new Size(764, 55);
+            pnlHeader.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            pnlHeader.Size = new Size(960, 70);
             pnlHeader.TabIndex = 0;
-            //
+            // 
             // lblTitle
-            //
+            // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(15, 14);
+            lblTitle.Location = new Point(18, 22);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(200, 25);
+            lblTitle.Size = new Size(170, 25);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "Quản lý bãi xe";
-            //
-            // btnVehicleIn
-            //
-            btnVehicleIn.BackColor = Color.MediumSeaGreen;
-            btnVehicleIn.Cursor = Cursors.Hand;
-            btnVehicleIn.FlatAppearance.BorderSize = 0;
-            btnVehicleIn.FlatStyle = FlatStyle.Flat;
-            btnVehicleIn.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnVehicleIn.ForeColor = Color.White;
-            btnVehicleIn.Location = new Point(430, 10);
-            btnVehicleIn.Name = "btnVehicleIn";
-            btnVehicleIn.Size = new Size(150, 35);
-            btnVehicleIn.TabIndex = 1;
-            btnVehicleIn.Text = "XE VÀO";
-            btnVehicleIn.UseVisualStyleBackColor = false;
-            btnVehicleIn.Click += btnVehicleIn_Click;
-            //
-            // btnVehicleOut
-            //
-            btnVehicleOut.BackColor = Color.IndianRed;
-            btnVehicleOut.Cursor = Cursors.Hand;
-            btnVehicleOut.FlatAppearance.BorderSize = 0;
-            btnVehicleOut.FlatStyle = FlatStyle.Flat;
-            btnVehicleOut.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnVehicleOut.ForeColor = Color.White;
-            btnVehicleOut.Location = new Point(595, 10);
-            btnVehicleOut.Name = "btnVehicleOut";
-            btnVehicleOut.Size = new Size(150, 35);
-            btnVehicleOut.TabIndex = 2;
-            btnVehicleOut.Text = "XE RA";
-            btnVehicleOut.UseVisualStyleBackColor = false;
-            btnVehicleOut.Click += btnVehicleOut_Click;
-            //
+            // 
             // btnReport
-            //
-            btnReport.BackColor = Color.FromArgb(70, 130, 180);
+            // 
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReport.BorderRadius = 10;
             btnReport.Cursor = Cursors.Hand;
-            btnReport.FlatAppearance.BorderSize = 0;
-            btnReport.FlatStyle = FlatStyle.Flat;
-            btnReport.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnReport.CustomizableEdges = customizableEdges1;
+            btnReport.FillColor = Color.FromArgb(31, 138, 154);
+            btnReport.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnReport.ForeColor = Color.White;
-            btnReport.Location = new Point(330, 14);
+            btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReport.Location = new Point(588, 18);
             btnReport.Name = "btnReport";
-            btnReport.Size = new Size(90, 28);
-            btnReport.TabIndex = 3;
+            btnReport.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            btnReport.Size = new Size(110, 34);
+            btnReport.TabIndex = 1;
             btnReport.Text = "Báo cáo";
-            btnReport.UseVisualStyleBackColor = false;
-            //
+            btnReport.Click += btnReport_Click;
+            // 
+            // btnVehicleIn
+            // 
+            btnVehicleIn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnVehicleIn.BorderRadius = 10;
+            btnVehicleIn.Cursor = Cursors.Hand;
+            btnVehicleIn.CustomizableEdges = customizableEdges3;
+            btnVehicleIn.FillColor = Color.FromArgb(34, 197, 94);
+            btnVehicleIn.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnVehicleIn.ForeColor = Color.White;
+            btnVehicleIn.HoverState.FillColor = Color.FromArgb(45, 207, 104);
+            btnVehicleIn.Location = new Point(708, 18);
+            btnVehicleIn.Name = "btnVehicleIn";
+            btnVehicleIn.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            btnVehicleIn.Size = new Size(110, 34);
+            btnVehicleIn.TabIndex = 2;
+            btnVehicleIn.Text = "Xe vào";
+            btnVehicleIn.Click += btnVehicleIn_Click;
+            // 
+            // btnVehicleOut
+            // 
+            btnVehicleOut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnVehicleOut.BorderRadius = 10;
+            btnVehicleOut.Cursor = Cursors.Hand;
+            btnVehicleOut.CustomizableEdges = customizableEdges5;
+            btnVehicleOut.FillColor = Color.FromArgb(220, 80, 80);
+            btnVehicleOut.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnVehicleOut.ForeColor = Color.White;
+            btnVehicleOut.HoverState.FillColor = Color.FromArgb(180, 60, 60);
+            btnVehicleOut.Location = new Point(828, 18);
+            btnVehicleOut.Name = "btnVehicleOut";
+            btnVehicleOut.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            btnVehicleOut.Size = new Size(110, 34);
+            btnVehicleOut.TabIndex = 3;
+            btnVehicleOut.Text = "Xe ra";
+            btnVehicleOut.Click += btnVehicleOut_Click;
+            // 
             // pnlInfo
-            //
-            pnlInfo.BackColor = Color.FromArgb(30, 30, 30);
+            // 
+            pnlInfo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlInfo.BackColor = Color.FromArgb(31, 31, 34);
+            pnlInfo.BorderRadius = 14;
             pnlInfo.Controls.Add(lblPlate);
             pnlInfo.Controls.Add(txtPlate);
             pnlInfo.Controls.Add(lblType);
             pnlInfo.Controls.Add(cmbVehicleType);
             pnlInfo.Controls.Add(lblSlots);
             pnlInfo.Controls.Add(lblSlotsValue);
-            pnlInfo.Location = new Point(20, 80);
+            pnlInfo.CustomizableEdges = customizableEdges13;
+            pnlInfo.Location = new Point(20, 105);
             pnlInfo.Name = "pnlInfo";
-            pnlInfo.Size = new Size(764, 65);
+            pnlInfo.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            pnlInfo.Size = new Size(960, 95);
             pnlInfo.TabIndex = 1;
-            //
+            // 
             // lblPlate
-            //
+            // 
             lblPlate.AutoSize = true;
-            lblPlate.Font = new Font("Segoe UI", 10F);
-            lblPlate.ForeColor = Color.Gray;
-            lblPlate.Location = new Point(20, 22);
+            lblPlate.Font = new Font("Segoe UI", 9F);
+            lblPlate.ForeColor = Color.FromArgb(160, 160, 166);
+            lblPlate.Location = new Point(20, 18);
             lblPlate.Name = "lblPlate";
-            lblPlate.Size = new Size(65, 19);
+            lblPlate.Size = new Size(45, 15);
             lblPlate.TabIndex = 0;
-            lblPlate.Text = "Biển số:";
-            //
+            lblPlate.Text = "Biển số";
+            // 
             // txtPlate
-            //
-            txtPlate.BackColor = Color.FromArgb(45, 45, 48);
-            txtPlate.BorderStyle = BorderStyle.FixedSingle;
-            txtPlate.Font = new Font("Segoe UI", 11F);
+            // 
+            txtPlate.BorderColor = Color.FromArgb(63, 63, 70);
+            txtPlate.BorderRadius = 10;
+            txtPlate.CustomizableEdges = customizableEdges9;
+            txtPlate.DefaultText = "";
+            txtPlate.FillColor = Color.FromArgb(30, 30, 33);
+            txtPlate.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
+            txtPlate.Font = new Font("Segoe UI", 10F);
             txtPlate.ForeColor = Color.White;
-            txtPlate.Location = new Point(95, 19);
+            txtPlate.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtPlate.Location = new Point(20, 40);
             txtPlate.Name = "txtPlate";
+            txtPlate.PasswordChar = '\0';
+            txtPlate.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
             txtPlate.PlaceholderText = "VD: 59A-12345";
-            txtPlate.Size = new Size(180, 27);
+            txtPlate.SelectedText = "";
+            txtPlate.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            txtPlate.Size = new Size(240, 36);
             txtPlate.TabIndex = 1;
-            //
+            // 
             // lblType
-            //
+            // 
             lblType.AutoSize = true;
-            lblType.Font = new Font("Segoe UI", 10F);
-            lblType.ForeColor = Color.Gray;
-            lblType.Location = new Point(300, 22);
+            lblType.Font = new Font("Segoe UI", 9F);
+            lblType.ForeColor = Color.FromArgb(160, 160, 166);
+            lblType.Location = new Point(290, 18);
             lblType.Name = "lblType";
-            lblType.Size = new Size(60, 19);
+            lblType.Size = new Size(43, 15);
             lblType.TabIndex = 2;
-            lblType.Text = "Loại xe:";
-            //
+            lblType.Text = "Loại xe";
+            // 
             // cmbVehicleType
-            //
-            cmbVehicleType.BackColor = Color.FromArgb(45, 45, 48);
+            // 
+            cmbVehicleType.BackColor = Color.Transparent;
+            cmbVehicleType.BorderColor = Color.FromArgb(63, 63, 70);
+            cmbVehicleType.BorderRadius = 8;
+            cmbVehicleType.CustomizableEdges = customizableEdges11;
+            cmbVehicleType.DrawMode = DrawMode.OwnerDrawFixed;
             cmbVehicleType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbVehicleType.FlatStyle = FlatStyle.Flat;
+            cmbVehicleType.FillColor = Color.FromArgb(30, 30, 33);
+            cmbVehicleType.FocusedColor = Color.FromArgb(31, 138, 154);
+            cmbVehicleType.FocusedState.BorderColor = Color.FromArgb(31, 138, 154);
             cmbVehicleType.Font = new Font("Segoe UI", 10F);
             cmbVehicleType.ForeColor = Color.White;
+            cmbVehicleType.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            cmbVehicleType.ItemHeight = 26;
             cmbVehicleType.Items.AddRange(new object[] { "Xe máy", "Xe đạp", "Ô tô" });
-            cmbVehicleType.Location = new Point(370, 19);
+            cmbVehicleType.Location = new Point(290, 40);
             cmbVehicleType.Name = "cmbVehicleType";
-            cmbVehicleType.Size = new Size(120, 25);
+            cmbVehicleType.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            cmbVehicleType.Size = new Size(180, 32);
             cmbVehicleType.TabIndex = 3;
-            //
+            // 
             // lblSlots
-            //
+            // 
+            lblSlots.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblSlots.AutoSize = true;
-            lblSlots.Font = new Font("Segoe UI", 10F);
-            lblSlots.ForeColor = Color.Gray;
-            lblSlots.Location = new Point(550, 12);
+            lblSlots.Font = new Font("Segoe UI", 9F);
+            lblSlots.ForeColor = Color.FromArgb(160, 160, 166);
+            lblSlots.Location = new Point(780, 18);
             lblSlots.Name = "lblSlots";
-            lblSlots.Size = new Size(60, 19);
+            lblSlots.Size = new Size(61, 15);
             lblSlots.TabIndex = 4;
-            lblSlots.Text = "Chỗ trống:";
-            //
+            lblSlots.Text = "Chỗ trống";
+            // 
             // lblSlotsValue
-            //
+            // 
+            lblSlotsValue.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblSlotsValue.AutoSize = true;
-            lblSlotsValue.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            lblSlotsValue.ForeColor = Color.MediumSeaGreen;
-            lblSlotsValue.Location = new Point(550, 32);
+            lblSlotsValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+            lblSlotsValue.ForeColor = Color.FromArgb(34, 197, 94);
+            lblSlotsValue.Location = new Point(780, 40);
             lblSlotsValue.Name = "lblSlotsValue";
-            lblSlotsValue.Size = new Size(80, 25);
+            lblSlotsValue.Size = new Size(88, 31);
             lblSlotsValue.TabIndex = 5;
             lblSlotsValue.Text = "15 / 30";
-            //
+            // 
             // pnlGrid
-            //
-            pnlGrid.BackColor = Color.FromArgb(30, 30, 30);
+            // 
+            pnlGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
+            pnlGrid.BorderRadius = 14;
             pnlGrid.Controls.Add(lblLogTitle);
             pnlGrid.Controls.Add(dgvParkingLog);
-            pnlGrid.Location = new Point(20, 155);
+            pnlGrid.CustomizableEdges = customizableEdges15;
+            pnlGrid.Location = new Point(20, 215);
             pnlGrid.Name = "pnlGrid";
-            pnlGrid.Size = new Size(764, 360);
+            pnlGrid.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            pnlGrid.Size = new Size(960, 430);
             pnlGrid.TabIndex = 2;
-            //
+            // 
             // lblLogTitle
-            //
+            // 
             lblLogTitle.AutoSize = true;
             lblLogTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblLogTitle.ForeColor = Color.White;
-            lblLogTitle.Location = new Point(15, 12);
+            lblLogTitle.Location = new Point(20, 16);
             lblLogTitle.Name = "lblLogTitle";
-            lblLogTitle.Size = new Size(160, 20);
+            lblLogTitle.Size = new Size(105, 20);
             lblLogTitle.TabIndex = 0;
             lblLogTitle.Text = "Lịch sử ra vào";
-            //
+            // 
             // dgvParkingLog
-            //
-            dgvParkingLog.AllowUserToAddRows = false;
-            dgvParkingLog.BackgroundColor = Color.FromArgb(45, 45, 48);
-            dgvParkingLog.BorderStyle = BorderStyle.None;
-            dgvParkingLog.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dgvStyle.BackColor = Color.FromArgb(45, 45, 48);
-            dgvStyle.Font = new Font("Segoe UI", 9F);
-            dgvStyle.ForeColor = Color.White;
-            dgvStyle.SelectionBackColor = Color.Gray;
-            dgvStyle.SelectionForeColor = Color.White;
-            dgvParkingLog.DefaultCellStyle = dgvStyle;
-            dgvParkingLog.Location = new Point(15, 40);
+            // 
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(24, 24, 27);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvParkingLog.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvParkingLog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvParkingLog.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(160, 160, 166);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dgvParkingLog.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvParkingLog.Columns.AddRange(new DataGridViewColumn[] { colPlate, colVehicleType, colTimeIn, colTimeOut, colStatus });
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(24, 24, 27);
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(220, 220, 225);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgvParkingLog.DefaultCellStyle = dataGridViewCellStyle3;
+            dgvParkingLog.GridColor = Color.FromArgb(45, 45, 48);
+            dgvParkingLog.Location = new Point(18, 52);
             dgvParkingLog.Name = "dgvParkingLog";
-            dgvParkingLog.ReadOnly = true;
-            dgvParkingLog.RowHeadersWidth = 51;
-            dgvParkingLog.Size = new Size(734, 305);
+            dgvParkingLog.RowHeadersVisible = false;
+            dgvParkingLog.Size = new Size(924, 360);
             dgvParkingLog.TabIndex = 1;
-            //
+            dgvParkingLog.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvParkingLog.ThemeStyle.AlternatingRowsStyle.Font = null;
+            dgvParkingLog.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvParkingLog.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
+            dgvParkingLog.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
+            dgvParkingLog.ThemeStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvParkingLog.ThemeStyle.GridColor = Color.FromArgb(45, 45, 48);
+            dgvParkingLog.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgvParkingLog.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvParkingLog.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgvParkingLog.ThemeStyle.HeaderStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgvParkingLog.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvParkingLog.ThemeStyle.HeaderStyle.Height = 23;
+            dgvParkingLog.ThemeStyle.ReadOnly = false;
+            dgvParkingLog.ThemeStyle.RowsStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgvParkingLog.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvParkingLog.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
+            dgvParkingLog.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgvParkingLog.ThemeStyle.RowsStyle.Height = 25;
+            dgvParkingLog.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgvParkingLog.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            // 
+            // colPlate
+            // 
+            colPlate.DataPropertyName = "Biển số";
+            colPlate.HeaderText = "Biển số";
+            colPlate.Name = "Biển số";
+            // 
+            // colVehicleType
+            // 
+            colVehicleType.DataPropertyName = "Loại xe";
+            colVehicleType.HeaderText = "Loại xe";
+            colVehicleType.Name = "Loại xe";
+            // 
+            // colTimeIn
+            // 
+            colTimeIn.DataPropertyName = "Giờ vào";
+            colTimeIn.HeaderText = "Giờ vào";
+            colTimeIn.Name = "Giờ vào";
+            // 
+            // colTimeOut
+            // 
+            colTimeOut.DataPropertyName = "Giờ ra";
+            colTimeOut.HeaderText = "Giờ ra";
+            colTimeOut.Name = "Giờ ra";
+            // 
+            // colStatus
+            // 
+            colStatus.DataPropertyName = "Trạng thái";
+            colStatus.HeaderText = "Trạng thái";
+            colStatus.Name = "Trạng thái";
+            // 
             // ucParking_Security
-            //
+            // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.FromArgb(45, 45, 48);
-            Controls.Add(pnlGrid);
-            Controls.Add(pnlInfo);
+            BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlHeader);
+            Controls.Add(pnlInfo);
+            Controls.Add(pnlGrid);
             Name = "ucParking_Security";
-            Size = new Size(804, 530);
+            Size = new Size(1000, 665);
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlInfo.ResumeLayout(false);
@@ -254,22 +379,62 @@ namespace GUI
             ResumeLayout(false);
         }
 
+        private static void ConfigureGrid(Guna2DataGridView dgv)
+        {
+            dgv.AutoGenerateColumns = false;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToResizeRows = false;
+            dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
+            dgv.BorderStyle = BorderStyle.None;
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersHeight = 32;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.FromArgb(160, 160, 166);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 31, 34);
+            dgv.ColumnHeadersDefaultCellStyle.SelectionForeColor = Color.FromArgb(160, 160, 166);
+            dgv.DefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.DefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.DefaultCellStyle.Font = new Font("Segoe UI", 9F);
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
+            dgv.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
+            dgv.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
+            dgv.EnableHeadersVisualStyles = false;
+            dgv.GridColor = Color.FromArgb(45, 45, 48);
+            dgv.MultiSelect = false;
+            dgv.ReadOnly = true;
+            dgv.RowHeadersVisible = false;
+            dgv.RowTemplate.Height = 28;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            DgvDarkScroll.Apply(dgv);
+        }
+
         #endregion
 
-        private Panel pnlHeader;
+        private Guna2Panel pnlHeader;
         private Label lblTitle;
-        private Button btnVehicleIn;
-        private Button btnVehicleOut;
-        private Panel pnlInfo;
+        private Guna2Button btnVehicleIn;
+        private Guna2Button btnVehicleOut;
+        private Guna2Panel pnlInfo;
         private Label lblPlate;
-        private TextBox txtPlate;
+        private Guna2TextBox txtPlate;
         private Label lblType;
-        private ComboBox cmbVehicleType;
+        private Guna2ComboBox cmbVehicleType;
         private Label lblSlots;
         private Label lblSlotsValue;
-        private Panel pnlGrid;
+        private Guna2Panel pnlGrid;
         private Label lblLogTitle;
-        private DataGridView dgvParkingLog;
-        private Button btnReport;
+        private Guna2DataGridView dgvParkingLog;
+        private DataGridViewTextBoxColumn colPlate;
+        private DataGridViewTextBoxColumn colVehicleType;
+        private DataGridViewTextBoxColumn colTimeIn;
+        private DataGridViewTextBoxColumn colTimeOut;
+        private DataGridViewTextBoxColumn colStatus;
+        private Guna2Button btnReport;
     }
 }

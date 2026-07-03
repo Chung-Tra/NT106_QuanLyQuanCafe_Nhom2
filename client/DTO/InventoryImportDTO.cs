@@ -9,30 +9,30 @@ namespace DTO
         public string? Id { get; set; }
 
         [JsonProperty("ghi_chu")]
-        public string? GhiChu { get; set; }
+        public string? Note { get; set; }
 
         [JsonProperty("ngay_nhap")]
-        public int NgayNhap { get; set; }
+        public int ImportDate { get; set; }
 
         [JsonProperty("nhanvien_id")]
-        public string? NhanVienId { get; set; }
+        public string? EmployeeId { get; set; }
 
         [JsonProperty("thanh_tien")]
-        public long TongTien { get; set; }
+        public long TotalAmount { get; set; }
 
         [JsonProperty("ds_nl")]
-        public Dictionary<string, InventoryImportItemDTO>? DanhSachNL { get; set; }
+        public Dictionary<string, InventoryImportItemDTO>? Items { get; set; }
     }
 
     public class InventoryImportItemDTO
     {
         [JsonProperty("gia_nhap")]
-        public long GiaNhap { get; set; }
+        public long ImportPrice { get; set; }
 
         [JsonProperty("so_luong")]
-        public int SoLuong { get; set; }
+        public int Quantity { get; set; }
 
         [JsonProperty("thanh_tien")]
-        public long ThanhTien { get; set; }
+        public long Subtotal { get; set; }
     }
 }

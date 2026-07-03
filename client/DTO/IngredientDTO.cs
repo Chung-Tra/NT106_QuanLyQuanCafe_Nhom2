@@ -7,19 +7,19 @@ namespace DTO
         public string? Id { get; set; }
 
         [JsonProperty("ten_nguyen_lieu")]
-        public string? TenNguyenLieu { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("gia_nhap")]
-        public long GiaNhap { get; set; }
+        public long ImportPrice { get; set; }
 
         [JsonProperty("don_vi")]
-        public string? DonVi { get; set; }
+        public string? Unit { get; set; }
 
         // double để chứa được số lẻ (2.2 kg, 1.5 lít...)
         [JsonProperty("ton_kho")]
-        public double TonKho { get; set; }
+        public double Stock { get; set; }
 
         [JsonProperty("ton_kho_toi_thieu")]
-        public double TonKhoToiThieu { get; set; }
+        public double MinStock { get; set; }
     }
 }

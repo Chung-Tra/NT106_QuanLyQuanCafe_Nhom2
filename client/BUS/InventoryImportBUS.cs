@@ -18,20 +18,20 @@ namespace BUS
 
         public static async Task<(bool Success, string Message)> AddImport(InventoryImportDTO phieu)
         {
-            if (string.IsNullOrEmpty(phieu.NhanVienId))
+            if (string.IsNullOrEmpty(phieu.EmployeeId))
                 return (false, "Vui lòng chọn nhân viên thực hiện!");
 
-            if (phieu.DanhSachNL == null || phieu.DanhSachNL.Count == 0)
+            if (phieu.Items == null || phieu.Items.Count == 0)
                 return (false, "Vui lòng nhập ít nhất một nguyên liệu!");
 
             // Tính thành tiền từng dòng và tổng tiền
             long tongTien = 0;
-            foreach (var chiTiet in phieu.DanhSachNL.Values)
+            foreach (var chiTiet in phieu.Items.Values)
             {
-                chiTiet.ThanhTien = chiTiet.GiaNhap * chiTiet.SoLuong;
-                tongTien += chiTiet.ThanhTien;
+                chiTiet.Subtotal = chiTiet.ImportPrice * chiTiet.Quantity;
+                tongTien += chiTiet.Subtotal;
             }
-            phieu.TongTien = tongTien;
+            phieu.TotalAmount = tongTien;
 
             return await InventoryImportDAL.AddAsync(phieu);
         }

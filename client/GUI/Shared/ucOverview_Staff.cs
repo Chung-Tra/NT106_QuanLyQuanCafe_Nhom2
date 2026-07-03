@@ -6,9 +6,17 @@ namespace GUI
 {
     public partial class ucOverview_Staff : UserControl
     {
+        private readonly NotificationFeed _feed;
+        private bool _simulatedIncoming;
+
         public ucOverview_Staff()
         {
             InitializeComponent();
+
+            // Bảng tin: chưa đọc xếp trước + click để đánh dấu đã đọc (helper dùng chung)
+            _feed = new NotificationFeed(lstNotifications, lblNotifTitle);
+            btnRefreshFeed.Click += (s, e) => RefreshFeed();
+
             this.Load += (s, e) => LoadMockData();
 
             btnDetailMsg.Click += (s, e) =>
@@ -36,15 +44,29 @@ namespace GUI
             lblWorkingDaysValue.Text  = "23 ngày";
             lblDaysOffValue.Text      = "7 ngày";
 
-            lstNotifications.Items.Clear();
-            lstNotifications.Items.AddRange(new object[]
+            _feed.SetItems(new[]
             {
-                "🔴  [08:30]  Nhân viên phục vụ Nguyễn Văn A xin phép nghỉ ốm ngày hôm nay.",
-                "⭐  [09:15]  Feedback Bàn số 5: \"Cà phê muối rất ngon, nhân viên nhiệt tình, 5 sao!\"",
-                "⚠️  [10:00]  Kho hàng cảnh báo: Hết nguyên liệu Sữa tươi, cần nhập gấp.",
-                "⭐  [11:20]  Feedback Bàn số 12: \"Quán decor đẹp, đồ uống lên nhanh.\"",
-                "🟢  [12:00]  Quản lý đã duyệt đơn xin nghỉ của Nguyễn Văn A."
+                new NotificationFeed.Item { Icon = "🔴", Time = "08:30", Text = "Nhân viên phục vụ Nguyễn Văn A xin phép nghỉ ốm ngày hôm nay." },
+                new NotificationFeed.Item { Icon = "⭐", Time = "09:15", Text = "Feedback Bàn số 5: \"Cà phê muối rất ngon, nhân viên nhiệt tình, 5 sao!\"" },
+                new NotificationFeed.Item { Icon = "⚠️", Time = "10:00", Text = "Kho hàng cảnh báo: Hết nguyên liệu Sữa tươi, cần nhập gấp." },
+                new NotificationFeed.Item { Icon = "⭐", Time = "11:20", Text = "Feedback Bàn số 12: \"Quán decor đẹp, đồ uống lên nhanh.\"", IsRead = true },
+                new NotificationFeed.Item { Icon = "🟢", Time = "12:00", Text = "Quản lý đã duyệt đơn xin nghỉ của Nguyễn Văn A.", IsRead = true },
             });
+        }
+
+        // Làm mới bảng tin: khi có API thật thì fetch tại đây; mock mô phỏng nhận 1 tin mới
+        private void RefreshFeed()
+        {
+            if (!_simulatedIncoming)
+            {
+                _simulatedIncoming = true;
+                _feed.AddIncoming(new NotificationFeed.Item
+                {
+                    Icon = "📩",
+                    Time = DateTime.Now.ToString("HH:mm"),
+                    Text = "Lịch ca tuần sau đã được xếp — kiểm tra mục Chọn ca / Đổi ca.",
+                });
+            }
         }
     }
 }

@@ -5,14 +5,26 @@ using System.Windows.Forms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucAlert_Barista : UserControl
+#pragma warning restore IDE1006
     {
         public ucAlert_Barista()
         {
             InitializeComponent();
-            btnReport.Click += btnReport_Click;
-            this.Load += (s, e) => LoadMockData();
+            GridColumnGuard.SyncColumnNames(dgvAlertHistory);
+            DgvRefresh.Attach(dgvAlertHistory, LoadMockData);
+
+            // Double-click 1 cảnh báo -> form chi tiết read-only
+            dgvAlertHistory.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvAlertHistory.Rows[e.RowIndex], "Chi tiết cảnh báo")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
+
+        private void UcAlert_Barista_Load(object? sender, EventArgs e) => LoadMockData();
 
         private void LoadMockData()
         {
@@ -33,10 +45,15 @@ namespace GUI
             dgvAlertHistory.DataSource = dt;
             dgvAlertHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvAlertHistory.RowHeadersVisible = false;
-            dgvAlertHistory.Columns["Nội dung"].FillWeight = 35;
+            // "Nội dung" là cột dài nhất → phải RỘNG nhất. Set cho mọi cột, vì nếu chỉ set
+            // riêng "Nội dung"=35 thì 3 cột kia giữ mặc định 100 → Nội dung hoá hẹp nhất, cắt chữ.
+            dgvAlertHistory.Columns["Thời gian"].FillWeight  = 20;
+            dgvAlertHistory.Columns["Loại"].FillWeight       = 22;
+            dgvAlertHistory.Columns["Nội dung"].FillWeight   = 42;
+            dgvAlertHistory.Columns["Trạng thái"].FillWeight = 16;
         }
 
-        private void btnReport_Click(object? sender, EventArgs e)
+        private void BtnReport_Click(object? sender, EventArgs e)
         {
             int totalAlerts = 0;
             int pendingAlerts = 0;
@@ -71,7 +88,7 @@ namespace GUI
             }
         }
 
-        private void btnSendAlert_Click(object sender, EventArgs e)
+        private void BtnSendAlert_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtMessage.Text))
             {
