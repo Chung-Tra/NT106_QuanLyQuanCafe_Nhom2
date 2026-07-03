@@ -3,13 +3,12 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
+using Guna.Charts.WinForms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Trang xem thất thoát / hao phí của quán cho Manager.
-    /// Hiển thị theo ngày / tháng / năm, bảng chi tiết từng khoản.
-    /// </summary>
+    // Trang xem thất thoát / hao phí của quán cho Manager.
+    // Hiển thị theo ngày / tháng / năm, bảng chi tiết từng khoản.
     public partial class ucLoss_Manager : UserControl
     {
         private string _mode = "month";
@@ -17,6 +16,8 @@ namespace GUI
         public ucLoss_Manager()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvLossDetail);
+            DgvRefresh.Attach(dgvLossDetail, LoadData);
             LoadData();
         }
 
@@ -47,6 +48,25 @@ namespace GUI
             var dr = dlg.ShowDialog(MsgBox.OwnerWindow(this));
             if (dr == DialogResult.OK || dr == DialogResult.Yes)
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo!", "Thành công", MsgBox.MessageBoxType.Success);
+        }
+
+        // Double-click 1 dòng -> form chi tiết read-only đủ field
+        private void DgvLossDetail_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvLossDetail.Rows[e.RowIndex], "Chi tiết khoản thất thoát")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa dòng đang chọn (khoá cột mã/ID)
+        private void BtnEditLoss_Click(object? sender, EventArgs e)
+        {
+            if (dgvLossDetail.CurrentRow == null || dgvLossDetail.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một khoản để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            RecordEdit.EditRow(dgvLossDetail.CurrentRow, "Sửa khoản thất thoát", MsgBox.OwnerWindow(this));
         }
 
         private static void HighlightBtn(Guna2Button active, Guna2Button b1, Guna2Button b2)
@@ -97,17 +117,19 @@ namespace GUI
             dgvLossDetail.DataSource = dt;
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Format = "N0";
             dgvLossDetail.Columns["Giá trị"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvLossDetail.Columns["Khoản mục"].FillWeight        = 22;
+            dgvLossDetail.Columns["Số lượng"].FillWeight         = 13;
+            dgvLossDetail.Columns["Giá trị"].FillWeight          = 14;
+            dgvLossDetail.Columns["Nguyên nhân"].FillWeight      = 31;
+            dgvLossDetail.Columns["Người phát hiện"].FillWeight  = 20;
             foreach (DataGridViewRow row in dgvLossDetail.Rows)
                 row.DefaultCellStyle.ForeColor = Color.FromArgb(220, 80, 80);
 
-            pnlChart.Invalidate();
+            DrawLossChart();
         }
 
-        private void PnlChart_Paint(object? sender, PaintEventArgs e)
+        private void DrawLossChart()
         {
-            var g = e.Graphics;
-            g.Clear(Color.FromArgb(31, 31, 34));
-
             int[] values = _mode switch
             {
                 "day"  => new[] { 320, 280, 410, 190, 350, 320, 300 },
@@ -120,41 +142,15 @@ namespace GUI
                 "year" => new[] { "2023", "2024", "2025", "2026" },
                 _      => new[] { "T10", "T11", "T12", "T1", "T2", "T3" }
             };
-            string title = _mode switch
-            {
-                "day"  => "Thất thoát 7 ngày gần nhất (nghìn đ)",
-                "year" => "Thất thoát theo năm (nghìn đ)",
-                _      => "Thất thoát 6 tháng gần nhất (nghìn đ)"
-            };
 
-            int maxVal = 0;
-            foreach (var v in values) maxVal = Math.Max(maxVal, v);
-            maxVal = (int)(maxVal * 1.2);
-
-            int chartH = 140, chartY = 36, barW = 46, gap = 24;
-            int totalW = values.Length * barW + (values.Length - 1) * gap;
-            int startX = (pnlChart.Width - totalW) / 2;
-
-            using var fontS  = new Font("Segoe UI", 8F);
-            using var titleF = new Font("Segoe UI", 9F, FontStyle.Italic);
-            using var red    = new SolidBrush(Color.FromArgb(220, 80, 80));
-            using var gray   = new SolidBrush(Color.FromArgb(160, 160, 166));
-            using var line   = new Pen(Color.FromArgb(63, 63, 70), 1);
-
-            g.DrawString(title, titleF, gray, 18, 12);
-            for (int i = 0; i <= 4; i++)
-            {
-                int y = chartY + (int)(chartH * i / 4.0);
-                g.DrawLine(line, startX - 5, y, startX + totalW, y);
-            }
-
+            var ds = new GunaBarDataset { Label = "Thất thoát (nghìn đ)" };
             for (int i = 0; i < values.Length; i++)
-            {
-                int x = startX + i * (barW + gap);
-                int h = maxVal > 0 ? (int)((double)values[i] / maxVal * chartH) : 0;
-                g.FillRectangle(red, x, chartY + chartH - h, barW, h);
-                g.DrawString(labels[i], fontS, gray, x + 12, chartY + chartH + 6);
-            }
+                ds.DataPoints.Add(labels[i], values[i]);
+            ds.FillColors.Add(Color.FromArgb(220, 80, 80));
+
+            chartLoss.Datasets.Clear();
+            chartLoss.Datasets.Add(ds);
+            chartLoss.Update();
         }
     }
 }

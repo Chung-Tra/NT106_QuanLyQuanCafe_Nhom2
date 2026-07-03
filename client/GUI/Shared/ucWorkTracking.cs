@@ -10,9 +10,18 @@ namespace GUI
         public ucWorkTracking()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvWorkTracking);
+            DgvRefresh.Attach(dgvWorkTracking, LoadAttendanceHistory);
             this.Load += (s, e) => LoadAttendanceHistory();
-            btnReport.Click += btnReport_Click;
             dtpFilterMonth.ValueChanged += (s, e) => LoadAttendanceHistory();
+
+            // Double-click 1 dòng -> form chi tiết read-only đủ field
+            dgvWorkTracking.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvWorkTracking.Rows[e.RowIndex], "Chi tiết ngày công")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
 
         private void LoadAttendanceHistory()
@@ -40,6 +49,12 @@ namespace GUI
             dt.Rows.Add("21/04/2026", "T3", "07:50", "16:00", 8.2, "Đủ giờ", "");
             dt.Rows.Add("20/04/2026", "T2", "07:55", "16:05", 8.2, "Đủ giờ", "");
 
+            // Lưới khai sẵn 4 cột "log" cũ trong Designer (Thời gian/Loại/Nội dung/Trạng thái)
+            // + AutoGenerateColumns=false → bind DataTable 7 cột chấm công sẽ KHÔNG sinh cột mới,
+            // nên Columns["Ngày"] = null → NullReferenceException. Bật auto-gen + xoá cột cũ để
+            // cột sinh theo DataTable (Name == tên cột nghiệp vụ), mọi lookup theo tên hoạt động.
+            dgvWorkTracking.AutoGenerateColumns = true;
+            dgvWorkTracking.Columns.Clear();
             dgvWorkTracking.DataSource = dt;
             dgvWorkTracking.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 

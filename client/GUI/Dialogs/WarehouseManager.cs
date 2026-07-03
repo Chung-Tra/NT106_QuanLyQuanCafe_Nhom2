@@ -10,6 +10,7 @@ namespace GUI
         public WarehouseManager()
         {
             InitializeComponent();
+            WindowChrome.Apply(this, close: false, host: pnlMain);
         }
 
         private void BtnDong_Click(object? sender, EventArgs e) => Close();

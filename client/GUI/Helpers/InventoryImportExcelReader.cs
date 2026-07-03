@@ -4,11 +4,7 @@ using System.Text;
 
 namespace GUI
 {
-    /// <summary>
-    /// Đọc chi tiết phiếu từ Excel (.xlsx) hoặc CSV (xuất từ Excel — UTF-8).<br/>
-    /// Hàng đầu: nhãn có MaNL / Số lượng / Giá nhập / Id / SL.<br/>
-    /// Không có tiêu đề hợp lệ → 2–3 cột: MaNL, SoLuong [, GiaNhap].
-    /// </summary>
+    // Đọc chi tiết phiếu từ Excel (.xlsx) hoặc CSV (UTF-8); nhận dạng cột theo tiêu đề.
     internal static class InventoryImportExcelReader
     {
         public static IReadOnlyList<InventoryImportPrefillLine> Read(string path)
@@ -32,7 +28,7 @@ namespace GUI
                 return [];
 
             string delim = GuessDelim(lines[0]);
-            string[][] rows = lines.Select(l => SplitCsvLine(l, delim)).ToArray();
+            string[][] rows = [.. lines.Select(l => SplitCsvLine(l, delim))];
             return ParseMatrix(rows);
         }
 
@@ -59,10 +55,10 @@ namespace GUI
             int c0 = used.FirstColumn().ColumnNumber();
             int c1 = used.LastColumn().ColumnNumber();
 
-            var rows = new List<string[]>();
+            List<string[]> rows = [];
             for (int r = r0; r <= r1; r++)
             {
-                var cells = new List<string>();
+                List<string> cells = [];
                 for (int c = c0; c <= c1; c++)
                 {
                     ClosedXML.Excel.IXLCell cell = ws.Cell(r, c);
@@ -73,13 +69,13 @@ namespace GUI
                 }
                 if (cells.All(string.IsNullOrWhiteSpace))
                     continue;
-                rows.Add(cells.ToArray());
+                rows.Add([.. cells]);
             }
 
             if (rows.Count == 0)
                 return [];
 
-            return ParseMatrix(rows.ToArray());
+            return ParseMatrix([.. rows]);
         }
 
         private static List<InventoryImportPrefillLine> ParseMatrix(string[][] rows)
@@ -105,7 +101,7 @@ namespace GUI
                 colPrice = rows[0].Length > 2 ? 2 : -1;
             }
 
-            var list = new List<InventoryImportPrefillLine>();
+            List<InventoryImportPrefillLine> list = [];
             for (int i = start; i < rows.Length; i++)
             {
                 string[] row = rows[i];

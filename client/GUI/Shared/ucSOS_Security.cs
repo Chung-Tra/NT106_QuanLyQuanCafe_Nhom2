@@ -10,8 +10,17 @@ namespace GUI
         public ucSOS_Security()
         {
             InitializeComponent();
-            btnReport.Click += btnReport_Click;
+            GridColumnGuard.SyncColumnNames(dgvIncidents);
+            DgvRefresh.Attach(dgvIncidents, LoadMockData);
             this.Load += (s, e) => LoadMockData();
+
+            // Double-click 1 sự cố -> form chi tiết read-only đủ field
+            dgvIncidents.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvIncidents.Rows[e.RowIndex], "Chi tiết sự cố")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
 
         private void LoadMockData()
@@ -31,7 +40,12 @@ namespace GUI
             dgvIncidents.DataSource = dt;
             dgvIncidents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvIncidents.RowHeadersVisible = false;
-            dgvIncidents.Columns["Mô tả"].FillWeight = 30;
+            // Cân bề rộng mọi cột: "Mô tả" là cột dài nhất → rộng nhất (tránh cắt "Khách hàng ...").
+            dgvIncidents.Columns["Thời gian"].FillWeight  = 18;
+            dgvIncidents.Columns["Loại sự cố"].FillWeight = 12;
+            dgvIncidents.Columns["Mô tả"].FillWeight      = 38;
+            dgvIncidents.Columns["Người báo"].FillWeight  = 18;
+            dgvIncidents.Columns["Trạng thái"].FillWeight = 14;
         }
 
         private void btnReport_Click(object? sender, EventArgs e)

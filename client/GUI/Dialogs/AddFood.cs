@@ -16,6 +16,7 @@ namespace GUI
         public AddFood()
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             LoadCategories();
         }
 

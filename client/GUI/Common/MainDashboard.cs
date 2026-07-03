@@ -1,4 +1,4 @@
-using DTO;
+﻿using DTO;
 using Guna.UI2.WinForms;
 using System;
 using System.Collections.Generic;
@@ -15,9 +15,12 @@ namespace GUI
         private readonly BaseDashboard _dashboardManager;
         private readonly List<Guna2Button> _menuButtons = new();
 
-        // ──────────────────────────────────────────────
-        // MÀU SẮC SIDEBAR
-        // ──────────────────────────────────────────────
+        // Cache UC theo menu: mỗi màn hình chỉ dựng 1 lần (lần đầu bấm), các lần sau
+        // hiện lại ngay lập tức — trước đây mỗi click dựng lại toàn bộ UC (chậm) và
+        // UC cũ bị gỡ ra nhưng không dispose (rò rỉ handle).
+        private readonly Dictionary<MenuItemConfig, UserControl> _ucCache = new();
+
+        // Màu sắc sidebar
         private static readonly Color SidebarBg = Color.FromArgb(31, 31, 34);
         private static readonly Color MenuFg = Color.FromArgb(200, 200, 205);
         private static readonly Color MenuHoverBg = Color.FromArgb(45, 45, 50);
@@ -25,72 +28,82 @@ namespace GUI
         private static readonly Color MenuActiveFg = Color.White;
         private static readonly Color GroupLabelFg = Color.FromArgb(120, 120, 125);
 
-        // ──────────────────────────────────────────────
-        // CẤU HÌNH MENU THEO VAI TRÒ
-        // ──────────────────────────────────────────────
+        // Cấu hình menu theo vai trò
         private record MenuItemConfig(string Group, string ButtonText, string TitleText, Func<UserControl> CreateUC);
 
         private static readonly Dictionary<string, List<MenuItemConfig>> RoleMenus = new()
         {
             ["admin"] = new()
             {
-                new("CHÍNH",      "📊  Tổng quan",          "Tổng quan toàn quán",  () => new ucDashboard_Admin()),
-                new("CHÍNH",      "👥  Quản trị viên",      "Quản lý các Manager",  () => new ucManagers_Admin()),
-                new("CHÍNH",      "👤  Nhân viên",          "Danh sách nhân viên",  () => new ucStaff_Manager()),
-                new("CHÍNH",      "💰  Tiền lương",         "Tiền lương tự động",   () => new ucPayroll_Admin()),
-                new("KHÁCH HÀNG", "💬  Feedback",           "Kiểm soát Feedback",   () => new ucFeedback_Admin()),
-                new("KHÁCH HÀNG", "🔔  Thông báo",          "Trung tâm Thông báo",  () => new ucNotification_Admin()),
-                new("KHÁCH HÀNG", "📢  Gửi thông báo",      "Phát thông báo nội bộ",() => new ucBroadcastCenter()),
-                new("CÁ NHÂN",    "✅  Điểm danh",          "Điểm danh nhân viên",  () => new ucWorkTracking()),
-                new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",          () => new ucInternalChat()),
-                new("CÁ NHÂN",    "👤  Profile",            "Thông tin cá nhân",    () => new ucProfile())
+                new("CHÍNH",      "  Tổng quan",          "Tổng quan",                () => new ucDashboard_Admin()),
+                new("CHÍNH",      "  Quản lý",            "Danh sách Quản lý",        () => new ucManagers_Admin()),
+                new("CHÍNH",      "  Nhân viên",          "Danh sách Nhân viên",      () => new ucStaff_Manager()),
+                new("CHÍNH",      "  Tiền lương",         "Tiền lương tự động",       () => new ucPayroll_Admin()),
+                new("CHÍNH",      "  Tiền chi",           "Tiền chi chi tiết",        () => new ucExpenses_Admin()),
+                new("CHÍNH",      "  Xuất báo cáo",       "Xuất báo cáo Excel / PDF", () => new ucReport_Admin()),
+                new("KHÁCH HÀNG", "  Feedback",           "Kiểm soát Feedback",       () => new ucFeedback_Admin()),
+                new("KHÁCH HÀNG", "  Thông báo",          "Trung tâm Thông báo",      () => new ucNotification_Admin()),
+                new("KHÁCH HÀNG", "  Gửi thông báo",      "Gửi thông báo nội bộ",     () => new ucBroadcastCenter()),
+                new("CÁ NHÂN",    "  Điểm danh",          "Điểm danh nhân viên",      () => new ucAttendanceHistory()),
+                new("CÁ NHÂN",    "  Nhật ký",            "Nhật ký hệ thống",         () => new ucAuditLog()),
+                new("CÁ NHÂN",    "  Chat nội bộ",        "Chat nội bộ",              () => new ucInternalChat()),
+                new("CÁ NHÂN",    "  Hồ sơ cá nhân",      "Hồ sơ cá nhân",            () => new ucProfile()),
             },
             ["manager"] = new()
             {
-                new("CHÍNH",      "📊  Tổng quan",          "Tổng quan ca làm",       () => new ucOverview_Manager()),
-                new("CHÍNH",      "🍽  Sản phẩm & Thực đơn","Quản lý món + nhập kho", () => new ucProducts_Manager()),
-                new("CHÍNH",      "📋  Đơn hàng & Hóa đơn", "Đơn hàng và Hóa đơn",    () => new ucOrders_Manager()),
-                new("CHÍNH",      "👤  Nhân viên",          "Danh sách nhân viên",    () => new ucStaff_Manager()),
-                new("CHÍNH",      "📉  Thất thoát",         "Thất thoát & Hao phí",   () => new ucLoss_Manager()),
-                new("KHÁCH HÀNG", "💬  Feedback",           "Chăm sóc Khách hàng",    () => new ucFeedback_Manager()),
-                new("KHÁCH HÀNG", "🔔  Thông báo",          "Xử lý Thông báo",        () => new ucNotification_Manager()),
-                new("KHÁCH HÀNG", "📢  Gửi thông báo",      "Phát thông báo nội bộ",  () => new ucBroadcastCenter()),
-                new("CÁ NHÂN",    "🏖  Xin nghỉ",           "Duyệt đơn xin nghỉ",     () => new ucLeaveRequest()),
-                new("CÁ NHÂN",    "✅  Điểm danh",          "Điểm danh nhân viên",    () => new ucWorkTracking()),
-                new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
-                new("CÁ NHÂN",    "👤  Profile",            "Thông tin cá nhân",      () => new ucProfile()),
+                new("CHÍNH",      "  Tổng quan",          "Tổng quan ca làm",         () => new ucOverview_Manager()),
+                new("CHÍNH",      "  Sản phẩm & Thực đơn","Sản phẩm & Thực đơn",      () => new ucProducts_Manager()),
+                new("CHÍNH",      "  Đơn hàng & Hóa đơn", "Đơn hàng & Hóa đơn",       () => new ucOrders_Manager()),
+                new("CHÍNH",      "  Nhân viên",          "Danh sách Nhân viên",      () => new ucStaff_Manager()),
+                new("CHÍNH",      "  Lịch ca làm",        "Lịch ca làm theo tuần",    () => new ucSchedule_Manager()),
+                new("CHÍNH",      "  Khuyến mãi",         "Khuyến mãi & Voucher",     () => new ucPromotion_Manager()),
+                new("CHÍNH",      "  Thất thoát",         "Thất thoát & Hao phí",     () => new ucLoss_Manager()),
+                new("KHÁCH HÀNG", "  Feedback",           "Feedback Khách hàng",      () => new ucFeedback_Manager()),
+                new("KHÁCH HÀNG", "  Thông báo",          "Xử lý Thông báo",          () => new ucNotification_Manager()),
+                new("KHÁCH HÀNG", "  Gửi thông báo",      "Gửi thông báo nội bộ",     () => new ucBroadcastCenter()),
+                new("CÁ NHÂN",    "  Xin nghỉ",           "Duyệt đơn xin nghỉ",       () => new ucLeaveRequest()),
+                new("CÁ NHÂN",    "  Điểm danh",          "Điểm danh nhân viên",      () => new ucWorkTracking()),
+                new("CÁ NHÂN",    "  Nhật ký",            "Nhật ký hệ thống",         () => new ucAuditLog()),
+                new("CÁ NHÂN",    "  Chat nội bộ",        "Chat nội bộ",              () => new ucInternalChat()),
+                new("CÁ NHÂN",    "  Hồ sơ cá nhân",      "Hồ sơ cá nhân",            () => new ucProfile()),
             },
             ["order staff"] = new()
             {
-                new("CHÍNH",      "📊  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
-                new("CHÍNH",      "🛒  Lên đơn / POS",      "Lên đơn / POS",          () => new ucPOS_Order()),
-                new("CHÍNH",      "👥  Khách hàng (CRM)",   "Quản lý Khách hàng",     () => new ucCRM_Order()),
-                new("CHÍNH",      "💵  Tiền mặt",           "Quản lý Tiền mặt",       () => new ucCashManagement_Order()),
-                new("CÁ NHÂN",    "📅  Lịch sử chấm công",  "Xem lịch sử + báo cáo",  () => new ucAttendanceHistory()),
-                new("CÁ NHÂN",    "🏖  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
-                new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
-                new("CÁ NHÂN",    "👤  Profile",            "Thông tin cá nhân",      () => new ucProfile()),
+                new("CHÍNH",      "  Tổng quan",          "Tổng quan cá nhân",        () => new ucOverview_Staff()),
+                new("CHÍNH",      "  Lên đơn / POS",      "Lên đơn / POS",            () => new ucPOS_Order()),
+                new("CHÍNH",      "  Khách hàng (CRM)",   "Khách hàng (CRM)",         () => new ucCRM_Order()),
+                new("CHÍNH",      "  Tích điểm",          "Tích điểm & Hạng thành viên",() => new ucLoyalty_Order()),
+                new("CHÍNH",      "  Đặt bàn",            "Quản lý Đặt bàn trước",    () => new ucReservation_Order()),
+                new("CHÍNH",      "  Đặt tại bàn QR",    "Đặt tại bàn QR & Đơn realtime", () => new ucSelfOrder_Order()),
+                new("CHÍNH",      "  Tiền mặt",           "Quản lý Tiền mặt",         () => new ucCashManagement_Order()),
+                new("CÁ NHÂN",    "  Lịch sử chấm công",  "Lịch sử chấm công & Báo cáo", () => new ucAttendanceHistory()),
+                new("CÁ NHÂN",    "  Xin nghỉ",           "Đơn xin nghỉ phép",        () => new ucLeaveRequest()),
+                new("CÁ NHÂN",    "  Chọn ca / Đổi ca",   "Chọn ca & Đổi ca",         () => new ucShiftRegister()),
+                new("CÁ NHÂN",    "  Chat nội bộ",        "Chat nội bộ",              () => new ucInternalChat()),
+                new("CÁ NHÂN",    "  Hồ sơ cá nhân",      "Hồ sơ cá nhân",            () => new ucProfile()),
             },
             ["barista"] = new()
             {
-                new("CHÍNH",      "📊  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
-                new("CHÍNH",      "🍳  Màn hình Bếp",       "Màn hình Bếp realtime",  () => new ucKDS_Barista()),
-                new("CHÍNH",      "📖  Cẩm nang Pha chế",   "Công thức pha chế",      () => new ucRecipe_Barista()),
-                new("CHÍNH",      "⚠  Báo động NL",        "Cảnh báo NL sắp hết",    () => new ucAlert_Barista()),
-                new("CÁ NHÂN",    "📅  Lịch sử chấm công",  "Xem lịch sử + báo cáo",  () => new ucAttendanceHistory()),
-                new("CÁ NHÂN",    "🏖  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
-                new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
-                new("CÁ NHÂN",    "👤  Profile",            "Thông tin cá nhân",      () => new ucProfile()),
+                new("CHÍNH",      "  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
+                new("CHÍNH",      "  Màn hình Bếp",       "Màn hình Bếp realtime",  () => new ucKDS_Barista()),
+                new("CHÍNH",      "  Công thức pha chế",  "Công thức pha chế",      () => new ucRecipe_Barista()),
+                new("CHÍNH",      "  Cảnh báo NL",        "Cảnh báo NL sắp hết",    () => new ucAlert_Barista()),
+                new("CÁ NHÂN",    "  Lịch sử chấm công",  "Lịch sử chấm công & Báo cáo", () => new ucAttendanceHistory()),
+                new("CÁ NHÂN",    "  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
+                new("CÁ NHÂN",    "  Chọn ca / Đổi ca",   "Chọn ca & Đổi ca",       () => new ucShiftRegister()),
+                new("CÁ NHÂN",    "  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
+                new("CÁ NHÂN",    "  Hồ sơ cá nhân",      "Hồ sơ cá nhân",          () => new ucProfile()),
             },
             ["security"] = new()
             {
-                new("CHÍNH",      "📊  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
-                new("CHÍNH",      "🅿  Bãi xe",             "Kiểm soát Bãi xe",       () => new ucParking_Security()),
-                new("CHÍNH",      "🚨  SOS An ninh",        "Hệ thống cảnh báo SOS",  () => new ucSOS_Security()),
-                new("CÁ NHÂN",    "📅  Lịch sử chấm công",  "Xem lịch sử + báo cáo",  () => new ucAttendanceHistory()),
-                new("CÁ NHÂN",    "🏖  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
-                new("CÁ NHÂN",    "💭  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
-                new("CÁ NHÂN",    "👤  Profile",            "Thông tin cá nhân",      () => new ucProfile()),
+                new("CHÍNH",      "  Tổng quan",          "Tổng quan cá nhân",      () => new ucOverview_Staff()),
+                new("CHÍNH",      "  Bãi xe",             "Kiểm soát Bãi xe",       () => new ucParking_Security()),
+                new("CHÍNH",      "  SOS An ninh",        "Hệ thống cảnh báo SOS",  () => new ucSOS_Security()),
+                new("CÁ NHÂN",    "  Lịch sử chấm công",  "Lịch sử chấm công & Báo cáo", () => new ucAttendanceHistory()),
+                new("CÁ NHÂN",    "  Xin nghỉ",           "Đơn xin nghỉ phép",      () => new ucLeaveRequest()),
+                new("CÁ NHÂN",    "  Chọn ca / Đổi ca",   "Chọn ca & Đổi ca",       () => new ucShiftRegister()),
+                new("CÁ NHÂN",    "  Chat nội bộ",        "Chat nội bộ",            () => new ucInternalChat()),
+                new("CÁ NHÂN",    "  Hồ sơ cá nhân",      "Hồ sơ cá nhân",          () => new ucProfile()),
             },
         };
 
@@ -103,15 +116,19 @@ namespace GUI
             ["security"] = "Bảo vệ",
         };
 
-        // ──────────────────────────────────────────────
-        // KHỞI TẠO FORM
-        // ──────────────────────────────────────────────
+        // Khởi tạo form
         public MainDashboard()
         {
             InitializeComponent();
             FormCorners.Round(this);
-            AppFonts.ApplyTo(lblBrand, lblTitle);
+            WindowChrome.Apply(this, minimize: true, maximize: true, close: true,
+                               host: pnlHeader, dragHandle: pnlHeader, onClose: () => Application.Exit());
             _dashboardManager = new BaseDashboard(this);
+
+            // Giảm giật/nháy khi chuyển màn hình và khi cuộn sidebar
+            DoubleBuffered = true;
+            EnableDoubleBuffer(pnlContentHost);
+            EnableDoubleBuffer(pnlMenuScroll);
 
             LoadLogo();
             lblDate.Text = FormatVietnameseDate(DateTime.Now);
@@ -124,20 +141,19 @@ namespace GUI
 
             BuildSidebar(role);
 
+            // Nút menu vừa dựng xong (sau WindowChrome.Apply) → tắt mnemonic ngay
+            // để '&' trong "Sản phẩm & Thực đơn"… không lóe thành '_' ở frame đầu.
+            MnemonicFix.Apply(pnlSidebar);
         }
 
-        // ──────────────────────────────────────────────
-        // ĐỊNH DẠNG NGÀY TIẾNG VIỆT
-        // ──────────────────────────────────────────────
+        // Định dạng ngày tiếng Việt
         private static string FormatVietnameseDate(DateTime dt)
         {
             string[] dayNames = { "Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy" };
             return $"{dayNames[(int)dt.DayOfWeek]}, {dt:dd 'tháng' MM 'năm' yyyy}";
         }
 
-        // ──────────────────────────────────────────────
-        // TẢI LOGO
-        // ──────────────────────────────────────────────
+        // Tải logo
         private void LoadLogo()
         {
             try
@@ -150,9 +166,7 @@ namespace GUI
             catch { }
         }
 
-        // ──────────────────────────────────────────────
-        // XÂY DỰNG SIDEBAR THEO ROLE
-        // ──────────────────────────────────────────────
+        // Xây dựng sidebar theo role
         private void BuildSidebar(string role)
         {
             if (!RoleMenus.TryGetValue(role, out var menuItems)) return;
@@ -203,13 +217,9 @@ namespace GUI
             LayoutMenuSidebarButtons();
         }
 
-        // ──────────────────────────────────────────────
-        // SỰ KIỆN FORM
-        // ──────────────────────────────────────────────
+        // Sự kiện form
         private void MainDashboard_Load(object sender, EventArgs e)
         {
-            _dashboardManager.ApplyDrag();
-
             if (_menuButtons.Count > 0)
                 _menuButtons[0].PerformClick();
         }
@@ -222,15 +232,24 @@ namespace GUI
             if (sender is not Guna2Button btn) return;
             if (btn.Tag is not MenuItemConfig config) return;
 
-            UserControl uc = config.CreateUC();
-            AddUserControl(uc);
+            if (!_ucCache.TryGetValue(config, out var uc) || uc.IsDisposed)
+            {
+                // Lần đầu mở màn hình: dựng UC (phần nặng) — hiện con trỏ chờ
+                Cursor.Current = Cursors.WaitCursor;
+                try
+                {
+                    uc = config.CreateUC();
+                    _ucCache[config] = uc;
+                }
+                finally { Cursor.Current = Cursors.Default; }
+            }
+
+            ShowUserControl(uc);
             lblTitle.Text = config.TitleText;
             HighlightActiveButton(btn);
         }
 
-        // ──────────────────────────────────────────────
-        // CĂN CHỈNH LAYOUT SIDEBAR
-        // ──────────────────────────────────────────────
+        // Căn chỉnh layout sidebar
         private void LayoutMenuSidebarButtons()
         {
             if (pnlMenuScroll.IsDisposed) return;
@@ -261,21 +280,38 @@ namespace GUI
 
         }
 
-        // ──────────────────────────────────────────────
-        // QUẢN LÝ NỘI DUNG CHÍNH
-        // ──────────────────────────────────────────────
-        private void AddUserControl(UserControl uc)
+        // Quản lý nội dung chính: UC được giữ lại trong host và ẩn/hiện thay vì
+        // gỡ ra dựng lại — chuyển màn hình gần như tức thì từ lần mở thứ hai.
+        private void ShowUserControl(UserControl uc)
         {
-            uc.Dock = DockStyle.Fill;
-            for (int i = pnlContentHost.Controls.Count - 1; i >= 0; i--)
-                pnlContentHost.Controls.RemoveAt(i);
+            pnlContentHost.SuspendLayout();
 
-            pnlContentHost.Controls.Add(uc);
+            if (!pnlContentHost.Controls.Contains(uc))
+            {
+                // Bổ sung Anchor khi UC còn ở kích thước thiết kế → khi Dock=Fill vào
+                // khung lớn hơn, các panel/lưới sẽ giãn vừa khít thay vì nằm yên góc trái.
+                ResponsiveLayout.Apply(uc);
+                uc.Dock = DockStyle.Fill;
+                pnlContentHost.Controls.Add(uc);
+            }
+
+            uc.Visible = true;
             uc.BringToFront();
+            foreach (Control c in pnlContentHost.Controls)
+                if (c != uc) c.Visible = false;
 
-            // Tự động gắn AutoFadeScroll (thanh teal) cho mọi DGV bên trong UC
+            pnlContentHost.ResumeLayout(true);
+
+            // Tự động gắn AutoFadeScroll (thanh teal) cho mọi DGV/panel bên trong UC
+            // và tắt mnemonic để '&' không bị vẽ thành '_'. Cả hai đều idempotent.
             AutoFadeScroll.AttachAll(uc);
+            MnemonicFix.Apply(uc);
         }
+
+        private static void EnableDoubleBuffer(Control c) =>
+            typeof(Control).GetProperty("DoubleBuffered",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(c, true);
 
         private void HighlightActiveButton(Guna2Button activeBtn)
         {
@@ -292,9 +328,14 @@ namespace GUI
             activeBtn.HoverState.ForeColor = MenuActiveFg;
         }
 
-        // ──────────────────────────────────────────────
-        // ĐĂNG XUẤT & ĐÓNG ỨNG DỤNG
-        // ──────────────────────────────────────────────
+        // Mở hộp thoại Báo lỗi gửi Admin (kèm tên màn hình đang mở để dễ truy vết)
+        private void BtnReport_Click(object? sender, EventArgs e)
+        {
+            using var dlg = new ReportBug(lblTitle.Text);
+            dlg.ShowDialog(this);
+        }
+
+        // Đăng xuất & đóng ứng dụng
         private void BtnLogout_Click(object? sender, EventArgs e)
         {
             Form? loginForm = Application.OpenForms["Login"];
@@ -320,14 +361,15 @@ namespace GUI
             }
         }
 
-        private void BtnMinimize_Click(object sender, EventArgs e)
+        // Khi form bị minimize, vùng client co về ~0×0. WinForms sẽ tính lại
+        // vị trí/offset của các control neo (Anchor Top|Right: pnlUserCard và các
+        // nút min/max/close) theo kích thước tí hon đó → khi phóng to lại chúng
+        // bị lệch và chồng lên nhau. Bỏ qua layout khi đang minimize; layout sẽ
+        // chạy lại đúng khi form được khôi phục.
+        protected override void OnResize(EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
-        }
-
-        private void BtnClose_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
+            if (WindowState == FormWindowState.Minimized) return;
+            base.OnResize(e);
         }
     }
 }

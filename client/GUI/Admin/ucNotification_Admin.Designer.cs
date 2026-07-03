@@ -25,6 +25,13 @@ namespace GUI
             btnMarkAllRead = new Guna2Button();
             pnlNotifications = new Guna2Panel();
             dgvNotifications = new Guna2DataGridView();
+            colId = new DataGridViewTextBoxColumn();
+            colType = new DataGridViewTextBoxColumn();
+            colFrom = new DataGridViewTextBoxColumn();
+            colContent = new DataGridViewTextBoxColumn();
+            colTime = new DataGridViewTextBoxColumn();
+            colRead = new DataGridViewTextBoxColumn();
+            colPage = new DataGridViewTextBoxColumn();
             pnlDetail = new Guna2Panel();
             lblDetailTitle = new Label();
             lblNotifType = new Label();
@@ -34,7 +41,6 @@ namespace GUI
             btnAccept = new Guna2Button();
             btnReject = new Guna2Button();
             btnGoToChat = new Guna2Button();
-            btnGoToPage = new Guna2Button();
             pnlHeader.SuspendLayout();
             pnlNotifications.SuspendLayout();
             pnlDetail.SuspendLayout();
@@ -48,13 +54,14 @@ namespace GUI
             pnlHeader.Controls.Add(lblUnreadCount);
             pnlHeader.Controls.Add(btnMarkAllRead);
             pnlHeader.Location = new Point(20, 20);
-            pnlHeader.Size = new Size(920, 60);
+            pnlHeader.Size = new Size(960, 60);
+            pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(18, 18);
-            lblTitle.Text = "🔔  Thông báo";
+            lblTitle.Text = "Thông báo";
 
             lblUnreadCount.AutoSize = true;
             lblUnreadCount.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -70,17 +77,19 @@ namespace GUI
             btnMarkAllRead.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             btnMarkAllRead.ForeColor = Color.FromArgb(220, 220, 225);
             btnMarkAllRead.HoverState.FillColor = Color.FromArgb(45, 45, 50);
-            btnMarkAllRead.Location = new Point(760, 14);
+            btnMarkAllRead.Location = new Point(800, 14);
             btnMarkAllRead.Size = new Size(140, 30);
-            btnMarkAllRead.Text = "✓  Đọc tất cả";
-            btnMarkAllRead.Click += btnMarkAllRead_Click;
+            btnMarkAllRead.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnMarkAllRead.Text = "Đọc tất cả";
+            btnMarkAllRead.Click += BtnMarkAllRead_Click;
 
             // ====== pnlNotifications ======
             pnlNotifications.BackColor = Color.FromArgb(31, 31, 34);
             pnlNotifications.BorderRadius = 14;
             pnlNotifications.Controls.Add(dgvNotifications);
             pnlNotifications.Location = new Point(20, 95);
-            pnlNotifications.Size = new Size(920, 250);
+            pnlNotifications.Size = new Size(960, 290);
+            pnlNotifications.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             dgvNotifications.BackgroundColor = Color.FromArgb(24, 24, 27);
             dgvNotifications.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
@@ -95,11 +104,19 @@ namespace GUI
             dgvNotifications.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvNotifications.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvNotifications.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvNotifications);
+            ConfigureGrid(dgvNotifications);            dgvNotifications.Columns.AddRange(new DataGridViewColumn[] { colId, colType, colFrom, colContent, colTime, colRead, colPage });
+            colId.HeaderText = "ID"; colId.Name = "ID"; colId.DataPropertyName = "ID"; colId.Visible = false;
+            colType.HeaderText = "Loại"; colType.Name = "Loại"; colType.DataPropertyName = "Loại";
+            colFrom.HeaderText = "Từ"; colFrom.Name = "Từ"; colFrom.DataPropertyName = "Từ";
+            colContent.HeaderText = "Nội dung"; colContent.Name = "Nội dung"; colContent.DataPropertyName = "Nội dung";
+            colTime.HeaderText = "Thời gian"; colTime.Name = "Thời gian"; colTime.DataPropertyName = "Thời gian";
+            colRead.HeaderText = "Đã đọc"; colRead.Name = "Đã đọc"; colRead.DataPropertyName = "Đã đọc"; colRead.Visible = false;
+            colPage.HeaderText = "Trang liên quan"; colPage.Name = "Trang liên quan"; colPage.DataPropertyName = "Trang liên quan"; colPage.Visible = false;
             dgvNotifications.Location = new Point(18, 18);
-            dgvNotifications.Size = new Size(884, 214);
-            dgvNotifications.SelectionChanged += dgvNotifications_SelectionChanged;
-            dgvNotifications.CellDoubleClick += dgvNotifications_CellDoubleClick;
+            dgvNotifications.Size = new Size(924, 254);
+            dgvNotifications.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvNotifications.SelectionChanged += DgvNotifications_SelectionChanged;
+            dgvNotifications.CellDoubleClick += DgvNotifications_CellDoubleClick;
 
             // ====== pnlDetail ======
             pnlDetail.BackColor = Color.FromArgb(31, 31, 34);
@@ -112,15 +129,15 @@ namespace GUI
             pnlDetail.Controls.Add(btnAccept);
             pnlDetail.Controls.Add(btnReject);
             pnlDetail.Controls.Add(btnGoToChat);
-            pnlDetail.Controls.Add(btnGoToPage);
-            pnlDetail.Location = new Point(20, 360);
-            pnlDetail.Size = new Size(920, 280);
+            pnlDetail.Location = new Point(20, 400);
+            pnlDetail.Size = new Size(960, 245);
+            pnlDetail.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             lblDetailTitle.AutoSize = true;
             lblDetailTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblDetailTitle.ForeColor = Color.White;
             lblDetailTitle.Location = new Point(18, 16);
-            lblDetailTitle.Text = "📩  Chi tiết thông báo";
+            lblDetailTitle.Text = "Chi tiết thông báo";
 
             lblNotifType.AutoSize = true;
             lblNotifType.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -149,7 +166,8 @@ namespace GUI
             txtNotifContent.Multiline = true;
             txtNotifContent.PasswordChar = '\0';
             txtNotifContent.ReadOnly = true;
-            txtNotifContent.Size = new Size(660, 175);
+            txtNotifContent.Size = new Size(700, 143);
+            txtNotifContent.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             btnAccept.BorderRadius = 10;
             btnAccept.Cursor = Cursors.Hand;
@@ -157,10 +175,11 @@ namespace GUI
             btnAccept.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnAccept.ForeColor = Color.White;
             btnAccept.HoverState.FillColor = Color.FromArgb(50, 217, 110);
-            btnAccept.Location = new Point(700, 84);
+            btnAccept.Location = new Point(740, 84);
             btnAccept.Size = new Size(95, 38);
-            btnAccept.Text = "✓ Duyệt";
-            btnAccept.Click += btnAccept_Click;
+            btnAccept.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnAccept.Text = "Duyệt";
+            btnAccept.Click += BtnAccept_Click;
 
             btnReject.BorderRadius = 10;
             btnReject.Cursor = Cursors.Hand;
@@ -168,10 +187,11 @@ namespace GUI
             btnReject.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnReject.ForeColor = Color.White;
             btnReject.HoverState.FillColor = Color.FromArgb(240, 100, 100);
-            btnReject.Location = new Point(805, 84);
+            btnReject.Location = new Point(845, 84);
             btnReject.Size = new Size(95, 38);
-            btnReject.Text = "✕ Từ chối";
-            btnReject.Click += btnReject_Click;
+            btnReject.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReject.Text = "Từ chối";
+            btnReject.Click += BtnReject_Click;
 
             btnGoToChat.BorderRadius = 10;
             btnGoToChat.Cursor = Cursors.Hand;
@@ -179,23 +199,11 @@ namespace GUI
             btnGoToChat.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnGoToChat.ForeColor = Color.White;
             btnGoToChat.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnGoToChat.Location = new Point(700, 132);
+            btnGoToChat.Location = new Point(740, 132);
             btnGoToChat.Size = new Size(200, 38);
-            btnGoToChat.Text = "💬  Chat với quản lý";
-            btnGoToChat.Click += btnGoToChat_Click;
-
-            btnGoToPage.BorderColor = Color.FromArgb(80, 80, 90);
-            btnGoToPage.BorderRadius = 10;
-            btnGoToPage.BorderThickness = 1;
-            btnGoToPage.Cursor = Cursors.Hand;
-            btnGoToPage.FillColor = Color.Transparent;
-            btnGoToPage.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            btnGoToPage.ForeColor = Color.FromArgb(220, 220, 225);
-            btnGoToPage.HoverState.FillColor = Color.FromArgb(45, 45, 50);
-            btnGoToPage.Location = new Point(700, 180);
-            btnGoToPage.Size = new Size(200, 38);
-            btnGoToPage.Text = "→ Đi tới trang liên quan";
-            btnGoToPage.Click += btnGoToPage_Click;
+            btnGoToChat.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnGoToChat.Text = "Chat với quản lý";
+            btnGoToChat.Click += BtnGoToChat_Click;
 
             // ====== ucNotification_Admin ======
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -205,18 +213,20 @@ namespace GUI
             Controls.Add(pnlNotifications);
             Controls.Add(pnlDetail);
             Name = "ucNotification_Admin";
-            Size = new Size(960, 660);
+            Size = new Size(1000, 665);
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlNotifications.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvNotifications).EndInit();
             pnlDetail.ResumeLayout(false);
             pnlDetail.PerformLayout();
+            this.Load += UcNotification_Admin_Load;
             ResumeLayout(false);
         }
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -257,6 +267,13 @@ namespace GUI
         private Guna2Button btnMarkAllRead;
         private Guna2Panel pnlNotifications;
         private Guna2DataGridView dgvNotifications;
+        private DataGridViewTextBoxColumn colId;
+        private DataGridViewTextBoxColumn colType;
+        private DataGridViewTextBoxColumn colFrom;
+        private DataGridViewTextBoxColumn colContent;
+        private DataGridViewTextBoxColumn colTime;
+        private DataGridViewTextBoxColumn colRead;
+        private DataGridViewTextBoxColumn colPage;
         private Guna2Panel pnlDetail;
         private Label lblDetailTitle;
         private Label lblNotifType;
@@ -266,6 +283,5 @@ namespace GUI
         private Guna2Button btnAccept;
         private Guna2Button btnReject;
         private Guna2Button btnGoToChat;
-        private Guna2Button btnGoToPage;
     }
 }

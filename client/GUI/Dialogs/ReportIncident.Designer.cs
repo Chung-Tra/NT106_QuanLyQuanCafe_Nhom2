@@ -98,7 +98,7 @@ namespace GUI
             lblHeader.Name = "lblHeader";
             lblHeader.Size = new Size(504, 30);
             lblHeader.TabIndex = 0;
-            lblHeader.Text = "📋  Báo cáo sự cố / sai sót";
+            lblHeader.Text = "Báo cáo sự cố / sai sót";
             lblHeader.TextAlign = ContentAlignment.MiddleCenter;
             //
             // lblPage
@@ -295,7 +295,7 @@ namespace GUI
             lblUrgent.Name = "lblUrgent";
             lblUrgent.Size = new Size(266, 17);
             lblUrgent.TabIndex = 11;
-            lblUrgent.Text = "⚠  Sự cố KHẨN CẤP — cần xử lý ngay";
+            lblUrgent.Text = "Sự cố KHẨN CẤP — cần xử lý ngay";
             //
             // btnSubmit
             //

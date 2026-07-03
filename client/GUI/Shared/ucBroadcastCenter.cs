@@ -5,17 +5,24 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Trung tâm phát thông báo nội bộ.
-    /// - Hiển thị lịch sử thông báo đã gửi (status, người nhận, thời gian)
-    /// - Nút "Soạn thông báo mới" mở `SendBroadcast` dialog
-    /// </summary>
+    // Trung tâm phát thông báo nội bộ.
+    // - Hiển thị lịch sử thông báo đã gửi (status, người nhận, thời gian)
+    // - Nút "Soạn thông báo mới" mở `SendBroadcast` dialog
     public partial class ucBroadcastCenter : UserControl
     {
         public ucBroadcastCenter()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvHistory);
             LoadHistory();
+
+            // Double-click 1 dòng -> form chi tiết read-only đủ field
+            dgvHistory.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvHistory.Rows[e.RowIndex], "Chi tiết thông báo")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
 
         private void BtnNew_Click(object? sender, EventArgs e)
@@ -56,6 +63,13 @@ namespace GUI
             dt.Rows.Add("04/05 11:00", "Toàn bộ NV", "Thông báo nghỉ lễ 30/4-1/5", "Quan trọng !", "8/8",  "Đã đọc");
 
             dgvHistory.DataSource = dt;
+            dgvHistory.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvHistory.Columns["Thời gian"].FillWeight  = 13;
+            dgvHistory.Columns["Người nhận"].FillWeight = 15;
+            dgvHistory.Columns["Tiêu đề"].FillWeight    = 36;
+            dgvHistory.Columns["Mức độ"].FillWeight     = 12;
+            dgvHistory.Columns["Đã đọc"].FillWeight     = 9;
+            dgvHistory.Columns["Trạng thái"].FillWeight = 15;
 
             foreach (DataGridViewRow row in dgvHistory.Rows)
             {
@@ -79,10 +93,8 @@ namespace GUI
         private void ApplyFilter()
         {
             if (dgvHistory.DataSource is not DataTable dt) return;
-            string keyword = txtSearch.Text.Trim().Replace("'", "''");
-            dt.DefaultView.RowFilter = string.IsNullOrEmpty(keyword)
-                ? string.Empty
-                : $"[Tiêu đề] LIKE '%{keyword}%' OR [Người nhận] LIKE '%{keyword}%'";
+            // Quét mọi cột: thời gian, người nhận, tiêu đề, mức độ, đã đọc, trạng thái
+            dt.DefaultView.RowFilter = SearchFilter.AllColumnsFilter(dt, txtSearch.Text);
         }
     }
 }

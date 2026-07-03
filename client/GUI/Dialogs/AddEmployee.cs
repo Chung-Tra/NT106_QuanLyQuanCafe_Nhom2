@@ -1,4 +1,4 @@
-using BUS;
+﻿using BUS;
 using DTO;
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,7 @@ namespace GUI
         public AddEmployee()
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             LoadRoles();
         }
 
@@ -62,10 +63,10 @@ namespace GUI
         {
             try
             {
-                //Khóa nút để tránh spam click
+                // Khóa nút để tránh spam click
                 btnSave.Enabled = false;
                 btnSave.Text = "Đang lưu...";
-                //Thu thập dữ liệu từ Form
+                // Thu thập dữ liệu từ Form
                 EmployeeDTO newEmp = new()
                 {
                     Email = txtEmail.Text.Trim(),

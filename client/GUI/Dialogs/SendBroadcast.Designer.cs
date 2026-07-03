@@ -100,7 +100,7 @@ namespace GUI
             lblHeader.Name = "lblHeader";
             lblHeader.Size = new Size(504, 30);
             lblHeader.TabIndex = 0;
-            lblHeader.Text = "📨  Gửi thông báo";
+            lblHeader.Text = "Gửi thông báo";
             lblHeader.TextAlign = ContentAlignment.MiddleCenter;
 
             // ====== pnlRecipient (group card) ======

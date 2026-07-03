@@ -7,10 +7,36 @@ namespace GUI
 {
     public partial class ucRecipe_Barista : UserControl
     {
+        private static readonly string[] AllRecipes =
+        {
+            "Cà phê sữa đá",
+            "Americano",
+            "Cappuccino",
+            "Latte",
+            "Mocha",
+            "Espresso",
+            "Trà đào cam sả",
+            "Trà sữa trân châu",
+            "Sinh tố bơ",
+            "Matcha Latte"
+        };
+
         public ucRecipe_Barista()
         {
             InitializeComponent();
             this.Load += (s, e) => LoadMockData();
+            txtSearchRecipe.TextChanged += (s, e) => FilterRecipes();
+
+            // Làm mới bảng nguyên liệu = nạp lại công thức đang chọn
+            DgvRefresh.Attach(dgvIngredients, () => lstRecipes_SelectedIndexChanged(lstRecipes, EventArgs.Empty));
+
+            // Double-click 1 nguyên liệu -> form chi tiết read-only
+            dgvIngredients.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvIngredients.Rows[e.RowIndex], "Chi tiết nguyên liệu")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
             btnReport.Click += (s, e) =>
             {
                 string currentRecipe = lblRecipeName.Text;
@@ -30,19 +56,23 @@ namespace GUI
 
         private void LoadMockData()
         {
-            lstRecipes.Items.AddRange(new object[]
-            {
-                "Cà phê sữa đá",
-                "Americano",
-                "Cappuccino",
-                "Latte",
-                "Mocha",
-                "Espresso",
-                "Trà đào cam sả",
-                "Trà sữa trân châu",
-                "Sinh tố bơ",
-                "Matcha Latte"
-            });
+            lstRecipes.Items.AddRange(AllRecipes);
+
+            if (lstRecipes.Items.Count > 0)
+                lstRecipes.SelectedIndex = 0;
+        }
+
+        // Lọc danh sách công thức theo từ khóa (không phân biệt hoa thường)
+        private void FilterRecipes()
+        {
+            string kw = txtSearchRecipe.Text.Trim();
+
+            lstRecipes.BeginUpdate();
+            lstRecipes.Items.Clear();
+            foreach (string recipe in AllRecipes)
+                if (kw.Length == 0 || recipe.Contains(kw, StringComparison.CurrentCultureIgnoreCase))
+                    lstRecipes.Items.Add(recipe);
+            lstRecipes.EndUpdate();
 
             if (lstRecipes.Items.Count > 0)
                 lstRecipes.SelectedIndex = 0;

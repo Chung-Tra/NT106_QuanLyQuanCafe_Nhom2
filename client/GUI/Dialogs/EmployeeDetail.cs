@@ -18,6 +18,7 @@ namespace GUI
         public EmployeeDetail(EmployeeDTO emp)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             _currentEmp = emp;
             BindData(emp);
         }

@@ -23,6 +23,7 @@ namespace GUI
         public EditEmployee(EmployeeDTO emp)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             LoadRolesAndStatus();
             BindData(emp);
         }

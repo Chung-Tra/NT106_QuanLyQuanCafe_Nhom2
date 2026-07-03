@@ -16,7 +16,6 @@ namespace GUI
         private HubConnection? _connection;
         public string CurrentRoomId { get; private set; } = "room_global";
 
-        // --- HÀM 1: KẾT NỐI SERVER ---
         public async Task ConnectToChatServer()
         {
             try
@@ -59,7 +58,7 @@ namespace GUI
                     }
                 });
 
-                // FIX: sau khi mạng bị ngắt rồi reconnect, client phải JoinRoom lại
+                // Fix: sau khi mạng bị ngắt rồi reconnect, client phải JoinRoom lại
                 // Vì SignalR Groups không được giữ sau khi mất kết nối
                 _connection.Reconnected += async _ =>
                 {
@@ -79,10 +78,18 @@ namespace GUI
                     return Task.CompletedTask;
                 };
 
-                await _connection.StartAsync();
+                // Giới hạn 5s: nếu IP chat server sai hoặc server không bật, TCP mặc định
+                // chờ tới ~21s mới báo lỗi — cắt sớm để màn hình Chat không treo.
+                using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await _connection.StartAsync(timeout.Token);
 
                 if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
                     uiControl.Invoke(() => lstChatHistory.Items.Add($"[Hệ thống]: Đã kết nối tới máy chủ ({savedIP})."));
+            }
+            catch (OperationCanceledException)
+            {
+                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
+                    uiControl.Invoke(() => lstChatHistory.Items.Add("[Lỗi]: Không kết nối được server chat (quá 5 giây). Kiểm tra ChatServerIP trong App.config."));
             }
             catch (Exception ex)
             {
@@ -91,7 +98,6 @@ namespace GUI
             }
         }
 
-        // --- HÀM 2: CHUYỂN PHÒNG & TẢI LỊCH SỬ ---
         public async Task SwitchChatRoom(string targetId, string targetName)
         {
             if (GlobalSession.CurrentUser == null) return;
@@ -146,7 +152,6 @@ namespace GUI
             }
         }
 
-        // --- HÀM 3: GỬI TIN NHẮN ---
         public async Task SendMessageAsync(string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return;

@@ -14,12 +14,10 @@ namespace DAL
             return (exists, exists ? "Email hợp lệ." : "Email không tồn tại trong hệ thống.");
         }
 
-        public static async Task<(bool Success, string Code, string Message)> SendOtpAsync(string email)
-        {
-            string? code = await AuthDAL.GenerateOtpAsync(email);
-            return code != null
-                ? (true, code, "Đã gửi mã OTP tới email.")
-                : (false, "", "Không thể gửi OTP. Vui lòng thử lại.");
-        }
+        public static Task<(bool Success, string Message)> SendOtpAsync(string email)
+            => AuthDAL.GenerateOtpAsync(email);
+
+        public static Task<(bool Success, string? ResetToken, string Message)> VerifyOtpAsync(string email, string code)
+            => AuthDAL.VerifyOtpAsync(email, code);
     }
 }

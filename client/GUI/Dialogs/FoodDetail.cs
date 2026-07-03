@@ -20,6 +20,7 @@ namespace GUI
         public FoodDetail(FoodDTO food)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             _currentFood = food;
             BindData(food);
         }

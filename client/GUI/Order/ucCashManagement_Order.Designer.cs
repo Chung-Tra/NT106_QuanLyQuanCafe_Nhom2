@@ -36,6 +36,10 @@ namespace GUI
             pnlGrid = new Guna2Panel();
             lblLogTitle = new Label();
             dgvTransactions = new Guna2DataGridView();
+            colTime = new DataGridViewTextBoxColumn();
+            colType = new DataGridViewTextBoxColumn();
+            colAmount = new DataGridViewTextBoxColumn();
+            colNote = new DataGridViewTextBoxColumn();
             pnlHeader.SuspendLayout();
             pnlSummary.SuspendLayout();
             pnlGrid.SuspendLayout();
@@ -50,13 +54,14 @@ namespace GUI
             pnlHeader.Controls.Add(btnStartShift);
             pnlHeader.Controls.Add(btnEndShift);
             pnlHeader.Location = new Point(20, 15);
-            pnlHeader.Size = new Size(764, 70);
+            pnlHeader.Size = new Size(960, 70);
+            pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(18, 22);
-            lblTitle.Text = "💵  Quản lý tiền mặt";
+            lblTitle.Text = "Quản lý tiền mặt";
 
             btnReport.BorderRadius = 8;
             btnReport.Cursor = Cursors.Hand;
@@ -66,7 +71,7 @@ namespace GUI
             btnReport.HoverState.FillColor = Color.FromArgb(90, 150, 200);
             btnReport.Location = new Point(320, 20);
             btnReport.Size = new Size(95, 32);
-            btnReport.Text = "📊 Báo cáo";
+            btnReport.Text = "Báo cáo";
 
             btnStartShift.BorderRadius = 10;
             btnStartShift.Cursor = Cursors.Hand;
@@ -105,7 +110,8 @@ namespace GUI
             pnlSummary.Controls.Add(lblDifferenceTitle);
             pnlSummary.Controls.Add(lblDifference);
             pnlSummary.Location = new Point(20, 95);
-            pnlSummary.Size = new Size(764, 90);
+            pnlSummary.Size = new Size(960, 90);
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             lblOpenCashTitle.AutoSize = true;
             lblOpenCashTitle.Font = new Font("Segoe UI", 9F);
@@ -161,13 +167,14 @@ namespace GUI
             pnlGrid.Controls.Add(lblLogTitle);
             pnlGrid.Controls.Add(dgvTransactions);
             pnlGrid.Location = new Point(20, 195);
-            pnlGrid.Size = new Size(764, 320);
+            pnlGrid.Size = new Size(960, 450);
+            pnlGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             lblLogTitle.AutoSize = true;
             lblLogTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblLogTitle.ForeColor = Color.White;
             lblLogTitle.Location = new Point(18, 14);
-            lblLogTitle.Text = "📋  Lịch sử giao dịch";
+            lblLogTitle.Text = "Lịch sử giao dịch";
 
             dgvTransactions.BackgroundColor = Color.FromArgb(24, 24, 27);
             dgvTransactions.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(31, 31, 34);
@@ -182,9 +189,14 @@ namespace GUI
             dgvTransactions.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvTransactions.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvTransactions.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvTransactions);
+            ConfigureGrid(dgvTransactions);            dgvTransactions.Columns.AddRange(new DataGridViewColumn[] { colTime, colType, colAmount, colNote });
+            colTime.HeaderText = "Thời gian"; colTime.Name = "Thời gian"; colTime.DataPropertyName = "Thời gian";
+            colType.HeaderText = "Loại"; colType.Name = "Loại"; colType.DataPropertyName = "Loại";
+            colAmount.HeaderText = "Số tiền"; colAmount.Name = "Số tiền"; colAmount.DataPropertyName = "Số tiền";
+            colNote.HeaderText = "Ghi chú"; colNote.Name = "Ghi chú"; colNote.DataPropertyName = "Ghi chú";
             dgvTransactions.Location = new Point(18, 44);
-            dgvTransactions.Size = new Size(728, 258);
+            dgvTransactions.Size = new Size(924, 388);
+            dgvTransactions.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             // ====== ucCashManagement_Order ======
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -194,7 +206,7 @@ namespace GUI
             Controls.Add(pnlSummary);
             Controls.Add(pnlGrid);
             Name = "ucCashManagement_Order";
-            Size = new Size(804, 530);
+            Size = new Size(1000, 665);
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
             pnlSummary.ResumeLayout(false);
@@ -202,11 +214,13 @@ namespace GUI
             pnlGrid.ResumeLayout(false);
             pnlGrid.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTransactions).EndInit();
+            btnReport.Click += btnReport_Click;
             ResumeLayout(false);
         }
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -258,5 +272,9 @@ namespace GUI
         private Guna2Panel pnlGrid;
         private Label lblLogTitle;
         private Guna2DataGridView dgvTransactions;
+        private DataGridViewTextBoxColumn colTime;
+        private DataGridViewTextBoxColumn colType;
+        private DataGridViewTextBoxColumn colAmount;
+        private DataGridViewTextBoxColumn colNote;
     }
 }

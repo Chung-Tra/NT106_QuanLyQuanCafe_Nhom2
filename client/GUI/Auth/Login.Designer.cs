@@ -52,7 +52,6 @@ namespace GUI
             lblRememberMe = new Label();
             lblForgotPass = new LinkLabel();
             btnSignIn = new Guna2Button();
-            btnClose = new Guna2Button();
             shadow = new Guna2ShadowForm(components);
             pnlLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -74,7 +73,7 @@ namespace GUI
             // 
             // pictureBox1
             // 
-            pictureBox1.BackColor = Color.FromArgb(40, 30, 25);
+            pictureBox1.BackColor = Color.FromArgb(24, 24, 27);
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
             pictureBox1.Location = new Point(-221, -3);
             pictureBox1.Name = "pictureBox1";
@@ -87,7 +86,6 @@ namespace GUI
             // 
             pnlRight.BackColor = Color.FromArgb(24, 24, 27);
             pnlRight.Controls.Add(pnlCard);
-            pnlRight.Controls.Add(btnClose);
             pnlRight.Dock = DockStyle.Fill;
             pnlRight.Location = new Point(380, 0);
             pnlRight.Name = "pnlRight";
@@ -108,7 +106,7 @@ namespace GUI
             pnlCard.Controls.Add(lblForgotPass);
             pnlCard.Controls.Add(btnSignIn);
             pnlCard.CustomizableEdges = customizableEdges13;
-            pnlCard.ForeColor = SystemColors.WindowText;
+            pnlCard.ForeColor = Color.FromArgb(220, 220, 225);
             pnlCard.Location = new Point(70, 70);
             pnlCard.Name = "pnlCard";
             pnlCard.ShadowDecoration.CustomizableEdges = customizableEdges14;
@@ -124,7 +122,7 @@ namespace GUI
             lblWelcome.Name = "lblWelcome";
             lblWelcome.Size = new Size(279, 36);
             lblWelcome.TabIndex = 0;
-            lblWelcome.Text = "Chào mừng trở lại 👋";
+            lblWelcome.Text = "Chào mừng trở lại";
             // 
             // lblSubtitle
             // 
@@ -156,7 +154,7 @@ namespace GUI
             txtEmail.Name = "txtEmail";
             txtEmail.PasswordChar = '\0';
             txtEmail.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtEmail.PlaceholderText = "📧  Email nhân viên";
+            txtEmail.PlaceholderText = "Email nhân viên";
             txtEmail.SelectedText = "";
             txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges6;
             txtEmail.Size = new Size(360, 46);
@@ -181,7 +179,7 @@ namespace GUI
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '●';
             txtPassword.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtPassword.PlaceholderText = "🔒  Mật khẩu";
+            txtPassword.PlaceholderText = "Mật khẩu";
             txtPassword.SelectedText = "";
             txtPassword.ShadowDecoration.CustomizableEdges = customizableEdges8;
             txtPassword.Size = new Size(297, 46);
@@ -273,25 +271,7 @@ namespace GUI
             btnSignIn.TabIndex = 4;
             btnSignIn.Text = "Đăng nhập";
             btnSignIn.Click += BtnSignIn_Click;
-            // 
-            // btnClose
-            // 
-            btnClose.BorderRadius = 8;
-            btnClose.Cursor = Cursors.Hand;
-            btnClose.CustomizableEdges = customizableEdges15;
-            btnClose.FillColor = Color.Transparent;
-            btnClose.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnClose.ForeColor = Color.FromArgb(220, 220, 225);
-            btnClose.HoverState.FillColor = Color.FromArgb(180, 60, 60);
-            btnClose.HoverState.ForeColor = Color.White;
-            btnClose.Location = new Point(536, 14);
-            btnClose.Name = "btnClose";
-            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges16;
-            btnClose.Size = new Size(30, 32);
-            btnClose.TabIndex = 10;
-            btnClose.Text = "✕";
-            btnClose.Click += BtnClose_Click;
-            // 
+            //
             // shadow
             // 
             shadow.TargetForm = this;
@@ -332,6 +312,5 @@ namespace GUI
         private LinkLabel lblForgotPass;
         private Guna2Button btnSignIn;
         private Guna2ShadowForm shadow;
-        private Guna2Button btnClose;
     }
 }

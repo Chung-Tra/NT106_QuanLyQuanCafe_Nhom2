@@ -64,10 +64,16 @@ namespace GUI
             pnlStatLate = new Guna2Panel();
             lblLateTitle = new Label();
             lblLateValue = new Label();
-            btnReport = new Guna2Button();
             pnlGrid = new Guna2Panel();
             lblGridTitle = new Label();
             dgvAttendance = new Guna2DataGridView();
+            colAttEmployee = new DataGridViewTextBoxColumn();
+            colAttDate = new DataGridViewTextBoxColumn();
+            colAttCheckIn = new DataGridViewTextBoxColumn();
+            colAttCheckOut = new DataGridViewTextBoxColumn();
+            colAttHours = new DataGridViewTextBoxColumn();
+            colAttStatus = new DataGridViewTextBoxColumn();
+            colAttNote = new DataGridViewTextBoxColumn();
             pnlHeader.SuspendLayout();
             pnlFilter.SuspendLayout();
             pnlSummary.SuspendLayout();
@@ -80,15 +86,15 @@ namespace GUI
             // 
             // pnlHeader
             // 
+            pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlHeader.BackColor = Color.FromArgb(31, 31, 34);
             pnlHeader.BorderRadius = 14;
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.CustomizableEdges = customizableEdges1;
-            pnlHeader.Location = new Point(23, 27);
-            pnlHeader.Margin = new Padding(3, 4, 3, 4);
+            pnlHeader.Location = new Point(20, 20);
             pnlHeader.Name = "pnlHeader";
             pnlHeader.ShadowDecoration.CustomizableEdges = customizableEdges2;
-            pnlHeader.Size = new Size(1051, 77);
+            pnlHeader.Size = new Size(835, 58);
             pnlHeader.TabIndex = 0;
             // 
             // lblTitle
@@ -96,14 +102,15 @@ namespace GUI
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(21, 21);
+            lblTitle.Location = new Point(18, 16);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(246, 30);
+            lblTitle.Size = new Size(205, 25);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "📅  Lịch sử chấm công";
+            lblTitle.Text = "Lịch sử chấm công";
             // 
             // pnlFilter
             // 
+            pnlFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlFilter.BackColor = Color.FromArgb(31, 31, 34);
             pnlFilter.BorderRadius = 14;
             pnlFilter.Controls.Add(lblEmpFilter);
@@ -115,11 +122,10 @@ namespace GUI
             pnlFilter.Controls.Add(dtpTo);
             pnlFilter.Controls.Add(btnFilter);
             pnlFilter.CustomizableEdges = customizableEdges11;
-            pnlFilter.Location = new Point(23, 117);
-            pnlFilter.Margin = new Padding(3, 4, 3, 4);
+            pnlFilter.Location = new Point(20, 88);
             pnlFilter.Name = "pnlFilter";
             pnlFilter.ShadowDecoration.CustomizableEdges = customizableEdges12;
-            pnlFilter.Size = new Size(1051, 83);
+            pnlFilter.Size = new Size(835, 62);
             pnlFilter.TabIndex = 1;
             // 
             // lblEmpFilter
@@ -127,9 +133,9 @@ namespace GUI
             lblEmpFilter.AutoSize = true;
             lblEmpFilter.Font = new Font("Segoe UI", 9F);
             lblEmpFilter.ForeColor = Color.FromArgb(160, 160, 166);
-            lblEmpFilter.Location = new Point(21, 13);
+            lblEmpFilter.Location = new Point(18, 10);
             lblEmpFilter.Name = "lblEmpFilter";
-            lblEmpFilter.Size = new Size(78, 20);
+            lblEmpFilter.Size = new Size(64, 15);
             lblEmpFilter.TabIndex = 0;
             lblEmpFilter.Text = "Nhân viên:";
             // 
@@ -148,20 +154,19 @@ namespace GUI
             cboEmployee.ForeColor = Color.White;
             cboEmployee.HoverState.BorderColor = Color.FromArgb(80, 80, 90);
             cboEmployee.ItemHeight = 26;
-            cboEmployee.Location = new Point(21, 40);
-            cboEmployee.Margin = new Padding(3, 4, 3, 4);
+            cboEmployee.Location = new Point(18, 30);
             cboEmployee.Name = "cboEmployee";
             cboEmployee.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            cboEmployee.Size = new Size(239, 32);
+            cboEmployee.Size = new Size(210, 32);
             cboEmployee.TabIndex = 1;
             // 
             // lblEmployeeName
             // 
             lblEmployeeName.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             lblEmployeeName.ForeColor = Color.White;
-            lblEmployeeName.Location = new Point(21, 40);
+            lblEmployeeName.Location = new Point(18, 30);
             lblEmployeeName.Name = "lblEmployeeName";
-            lblEmployeeName.Size = new Size(240, 29);
+            lblEmployeeName.Size = new Size(210, 22);
             lblEmployeeName.TabIndex = 7;
             lblEmployeeName.Visible = false;
             // 
@@ -170,9 +175,9 @@ namespace GUI
             lblFrom.AutoSize = true;
             lblFrom.Font = new Font("Segoe UI", 9F);
             lblFrom.ForeColor = Color.FromArgb(160, 160, 166);
-            lblFrom.Location = new Point(283, 11);
+            lblFrom.Location = new Point(248, 24);
             lblFrom.Name = "lblFrom";
-            lblFrom.Size = new Size(65, 20);
+            lblFrom.Size = new Size(53, 15);
             lblFrom.TabIndex = 2;
             lblFrom.Text = "Từ ngày:";
             // 
@@ -186,13 +191,12 @@ namespace GUI
             dtpFrom.Font = new Font("Segoe UI", 9.5F);
             dtpFrom.ForeColor = Color.White;
             dtpFrom.Format = DateTimePickerFormat.Short;
-            dtpFrom.Location = new Point(283, 17);
-            dtpFrom.Margin = new Padding(3, 4, 3, 4);
+            dtpFrom.Location = new Point(308, 13);
             dtpFrom.MaxDate = new DateTime(9998, 12, 31, 0, 0, 0, 0);
             dtpFrom.MinDate = new DateTime(1753, 1, 1, 0, 0, 0, 0);
             dtpFrom.Name = "dtpFrom";
             dtpFrom.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            dtpFrom.Size = new Size(160, 48);
+            dtpFrom.Size = new Size(140, 36);
             dtpFrom.TabIndex = 3;
             dtpFrom.Value = new DateTime(2026, 5, 24, 9, 33, 32, 284);
             // 
@@ -201,9 +205,9 @@ namespace GUI
             lblTo.AutoSize = true;
             lblTo.Font = new Font("Segoe UI", 9F);
             lblTo.ForeColor = Color.FromArgb(160, 160, 166);
-            lblTo.Location = new Point(462, 11);
+            lblTo.Location = new Point(464, 24);
             lblTo.Name = "lblTo";
-            lblTo.Size = new Size(75, 20);
+            lblTo.Size = new Size(60, 15);
             lblTo.TabIndex = 4;
             lblTo.Text = "Đến ngày:";
             // 
@@ -217,13 +221,12 @@ namespace GUI
             dtpTo.Font = new Font("Segoe UI", 9.5F);
             dtpTo.ForeColor = Color.White;
             dtpTo.Format = DateTimePickerFormat.Short;
-            dtpTo.Location = new Point(462, 17);
-            dtpTo.Margin = new Padding(3, 4, 3, 4);
+            dtpTo.Location = new Point(530, 13);
             dtpTo.MaxDate = new DateTime(9998, 12, 31, 0, 0, 0, 0);
             dtpTo.MinDate = new DateTime(1753, 1, 1, 0, 0, 0, 0);
             dtpTo.Name = "dtpTo";
             dtpTo.ShadowDecoration.CustomizableEdges = customizableEdges8;
-            dtpTo.Size = new Size(160, 48);
+            dtpTo.Size = new Size(140, 36);
             dtpTo.TabIndex = 5;
             dtpTo.Value = new DateTime(2026, 5, 24, 9, 33, 32, 308);
             // 
@@ -236,27 +239,26 @@ namespace GUI
             btnFilter.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnFilter.ForeColor = Color.White;
             btnFilter.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnFilter.Location = new Point(642, 19);
-            btnFilter.Margin = new Padding(3, 4, 3, 4);
+            btnFilter.Location = new Point(690, 14);
             btnFilter.Name = "btnFilter";
             btnFilter.ShadowDecoration.CustomizableEdges = customizableEdges10;
-            btnFilter.Size = new Size(126, 45);
+            btnFilter.Size = new Size(110, 34);
             btnFilter.TabIndex = 6;
-            btnFilter.Text = "🔍  Lọc";
+            btnFilter.Text = "Lọc";
+            btnFilter.Click += btnFilter_Click;
             // 
             // pnlSummary
             // 
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlSummary.BackColor = Color.Transparent;
             pnlSummary.Controls.Add(pnlStatShifts);
             pnlSummary.Controls.Add(pnlStatAbsent);
             pnlSummary.Controls.Add(pnlStatLate);
-            pnlSummary.Controls.Add(btnReport);
             pnlSummary.CustomizableEdges = customizableEdges21;
-            pnlSummary.Location = new Point(23, 213);
-            pnlSummary.Margin = new Padding(3, 4, 3, 4);
+            pnlSummary.Location = new Point(20, 160);
             pnlSummary.Name = "pnlSummary";
             pnlSummary.ShadowDecoration.CustomizableEdges = customizableEdges22;
-            pnlSummary.Size = new Size(1051, 128);
+            pnlSummary.Size = new Size(835, 96);
             pnlSummary.TabIndex = 2;
             // 
             // pnlStatShifts
@@ -267,10 +269,9 @@ namespace GUI
             pnlStatShifts.Controls.Add(lblShiftsValue);
             pnlStatShifts.CustomizableEdges = customizableEdges13;
             pnlStatShifts.Location = new Point(0, 0);
-            pnlStatShifts.Margin = new Padding(3, 4, 3, 4);
             pnlStatShifts.Name = "pnlStatShifts";
             pnlStatShifts.ShadowDecoration.CustomizableEdges = customizableEdges14;
-            pnlStatShifts.Size = new Size(251, 128);
+            pnlStatShifts.Size = new Size(220, 96);
             pnlStatShifts.TabIndex = 0;
             // 
             // lblShiftsTitle
@@ -278,9 +279,9 @@ namespace GUI
             lblShiftsTitle.AutoSize = true;
             lblShiftsTitle.Font = new Font("Segoe UI", 9F);
             lblShiftsTitle.ForeColor = Color.FromArgb(160, 160, 166);
-            lblShiftsTitle.Location = new Point(21, 21);
+            lblShiftsTitle.Location = new Point(18, 16);
             lblShiftsTitle.Name = "lblShiftsTitle";
-            lblShiftsTitle.Size = new Size(81, 20);
+            lblShiftsTitle.Size = new Size(65, 15);
             lblShiftsTitle.TabIndex = 0;
             lblShiftsTitle.Text = "Ngày công";
             // 
@@ -289,9 +290,9 @@ namespace GUI
             lblShiftsValue.AutoSize = true;
             lblShiftsValue.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
             lblShiftsValue.ForeColor = Color.FromArgb(34, 197, 94);
-            lblShiftsValue.Location = new Point(21, 51);
+            lblShiftsValue.Location = new Point(18, 38);
             lblShiftsValue.Name = "lblShiftsValue";
-            lblShiftsValue.Size = new Size(127, 46);
+            lblShiftsValue.Size = new Size(103, 37);
             lblShiftsValue.TabIndex = 1;
             lblShiftsValue.Text = "0 ngày";
             // 
@@ -302,11 +303,10 @@ namespace GUI
             pnlStatAbsent.Controls.Add(lblAbsentTitle);
             pnlStatAbsent.Controls.Add(lblAbsentValue);
             pnlStatAbsent.CustomizableEdges = customizableEdges15;
-            pnlStatAbsent.Location = new Point(263, 0);
-            pnlStatAbsent.Margin = new Padding(3, 4, 3, 4);
+            pnlStatAbsent.Location = new Point(230, 0);
             pnlStatAbsent.Name = "pnlStatAbsent";
             pnlStatAbsent.ShadowDecoration.CustomizableEdges = customizableEdges16;
-            pnlStatAbsent.Size = new Size(251, 128);
+            pnlStatAbsent.Size = new Size(220, 96);
             pnlStatAbsent.TabIndex = 1;
             // 
             // lblAbsentTitle
@@ -314,9 +314,9 @@ namespace GUI
             lblAbsentTitle.AutoSize = true;
             lblAbsentTitle.Font = new Font("Segoe UI", 9F);
             lblAbsentTitle.ForeColor = Color.FromArgb(160, 160, 166);
-            lblAbsentTitle.Location = new Point(21, 21);
+            lblAbsentTitle.Location = new Point(18, 16);
             lblAbsentTitle.Name = "lblAbsentTitle";
-            lblAbsentTitle.Size = new Size(79, 20);
+            lblAbsentTitle.Size = new Size(63, 15);
             lblAbsentTitle.TabIndex = 0;
             lblAbsentTitle.Text = "Nghỉ phép";
             // 
@@ -324,10 +324,10 @@ namespace GUI
             // 
             lblAbsentValue.AutoSize = true;
             lblAbsentValue.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblAbsentValue.ForeColor = Color.FromArgb(56, 139, 204);
-            lblAbsentValue.Location = new Point(21, 51);
+            lblAbsentValue.ForeColor = Color.FromArgb(70, 130, 180);
+            lblAbsentValue.Location = new Point(18, 38);
             lblAbsentValue.Name = "lblAbsentValue";
-            lblAbsentValue.Size = new Size(127, 46);
+            lblAbsentValue.Size = new Size(103, 37);
             lblAbsentValue.TabIndex = 1;
             lblAbsentValue.Text = "0 ngày";
             // 
@@ -338,11 +338,10 @@ namespace GUI
             pnlStatLate.Controls.Add(lblLateTitle);
             pnlStatLate.Controls.Add(lblLateValue);
             pnlStatLate.CustomizableEdges = customizableEdges17;
-            pnlStatLate.Location = new Point(526, 0);
-            pnlStatLate.Margin = new Padding(3, 4, 3, 4);
+            pnlStatLate.Location = new Point(460, 0);
             pnlStatLate.Name = "pnlStatLate";
             pnlStatLate.ShadowDecoration.CustomizableEdges = customizableEdges18;
-            pnlStatLate.Size = new Size(251, 128);
+            pnlStatLate.Size = new Size(220, 96);
             pnlStatLate.TabIndex = 2;
             // 
             // lblLateTitle
@@ -350,9 +349,9 @@ namespace GUI
             lblLateTitle.AutoSize = true;
             lblLateTitle.Font = new Font("Segoe UI", 9F);
             lblLateTitle.ForeColor = Color.FromArgb(160, 160, 166);
-            lblLateTitle.Location = new Point(21, 21);
+            lblLateTitle.Location = new Point(18, 16);
             lblLateTitle.Name = "lblLateTitle";
-            lblLateTitle.Size = new Size(66, 20);
+            lblLateTitle.Size = new Size(53, 15);
             lblLateTitle.TabIndex = 0;
             lblLateTitle.Text = "Đi muộn";
             // 
@@ -360,44 +359,25 @@ namespace GUI
             // 
             lblLateValue.AutoSize = true;
             lblLateValue.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
-            lblLateValue.ForeColor = Color.FromArgb(234, 179, 8);
-            lblLateValue.Location = new Point(21, 51);
+            lblLateValue.ForeColor = Color.FromArgb(245, 158, 11);
+            lblLateValue.Location = new Point(18, 38);
             lblLateValue.Name = "lblLateValue";
-            lblLateValue.Size = new Size(98, 46);
+            lblLateValue.Size = new Size(79, 37);
             lblLateValue.TabIndex = 1;
             lblLateValue.Text = "0 lần";
-            // 
-            // btnReport
-            // 
-            btnReport.BorderRadius = 10;
-            btnReport.Cursor = Cursors.Hand;
-            btnReport.CustomizableEdges = customizableEdges19;
-            btnReport.FillColor = Color.FromArgb(127, 29, 29);
-            btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
-            btnReport.ForeColor = Color.FromArgb(252, 165, 165);
-            btnReport.HoverState.FillColor = Color.FromArgb(185, 28, 28);
-            btnReport.HoverState.ForeColor = Color.White;
-            btnReport.Location = new Point(789, 37);
-            btnReport.Margin = new Padding(3, 4, 3, 4);
-            btnReport.Name = "btnReport";
-            btnReport.ShadowDecoration.CustomizableEdges = customizableEdges20;
-            btnReport.Size = new Size(240, 53);
-            btnReport.TabIndex = 3;
-            btnReport.Text = "⚠  Báo cáo sai sót";
-            btnReport.Click += BtnReport_Click;
-            // 
+            //
             // pnlGrid
-            // 
+            //
+            pnlGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
             pnlGrid.BorderRadius = 14;
             pnlGrid.Controls.Add(lblGridTitle);
             pnlGrid.Controls.Add(dgvAttendance);
             pnlGrid.CustomizableEdges = customizableEdges23;
-            pnlGrid.Location = new Point(23, 355);
-            pnlGrid.Margin = new Padding(3, 4, 3, 4);
+            pnlGrid.Location = new Point(20, 266);
             pnlGrid.Name = "pnlGrid";
             pnlGrid.ShadowDecoration.CustomizableEdges = customizableEdges24;
-            pnlGrid.Size = new Size(1051, 483);
+            pnlGrid.Size = new Size(835, 215);
             pnlGrid.TabIndex = 3;
             // 
             // lblGridTitle
@@ -405,11 +385,11 @@ namespace GUI
             lblGridTitle.AutoSize = true;
             lblGridTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblGridTitle.ForeColor = Color.White;
-            lblGridTitle.Location = new Point(21, 19);
+            lblGridTitle.Location = new Point(18, 14);
             lblGridTitle.Name = "lblGridTitle";
-            lblGridTitle.Size = new Size(204, 25);
+            lblGridTitle.Size = new Size(169, 20);
             lblGridTitle.TabIndex = 0;
-            lblGridTitle.Text = "📋  Chi tiết chấm công";
+            lblGridTitle.Text = "Chi tiết chấm công";
             // 
             // dgvAttendance
             // 
@@ -418,6 +398,8 @@ namespace GUI
             dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(31, 138, 154);
             dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvAttendance.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dgvAttendance.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            dgvAttendance.BackgroundColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 31, 34);
             dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -427,6 +409,7 @@ namespace GUI
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             dgvAttendance.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvAttendance.ColumnHeadersHeight = 32;
+            dgvAttendance.Columns.AddRange(new DataGridViewColumn[] { colAttEmployee, colAttDate, colAttCheckIn, colAttCheckOut, colAttHours, colAttStatus, colAttNote });
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.FromArgb(24, 24, 27);
             dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
@@ -436,12 +419,13 @@ namespace GUI
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             dgvAttendance.DefaultCellStyle = dataGridViewCellStyle3;
             dgvAttendance.GridColor = Color.FromArgb(45, 45, 48);
-            dgvAttendance.Location = new Point(21, 61);
-            dgvAttendance.Margin = new Padding(3, 4, 3, 4);
+            dgvAttendance.Location = new Point(18, 46);
             dgvAttendance.Name = "dgvAttendance";
+            dgvAttendance.ReadOnly = true;
             dgvAttendance.RowHeadersVisible = false;
             dgvAttendance.RowHeadersWidth = 51;
-            dgvAttendance.Size = new Size(1010, 400);
+            dgvAttendance.RowTemplate.Height = 29;
+            dgvAttendance.Size = new Size(798, 154);
             dgvAttendance.TabIndex = 1;
             dgvAttendance.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvAttendance.ThemeStyle.AlternatingRowsStyle.Font = null;
@@ -465,18 +449,73 @@ namespace GUI
             dgvAttendance.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
             dgvAttendance.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             // 
+            // colAttEmployee
+            // 
+            colAttEmployee.DataPropertyName = "Nhân viên";
+            colAttEmployee.FillWeight = 18F;
+            colAttEmployee.HeaderText = "Nhân viên";
+            colAttEmployee.Name = "colAttEmployee";
+            colAttEmployee.ReadOnly = true;
+            // 
+            // colAttDate
+            // 
+            colAttDate.DataPropertyName = "Ngày";
+            colAttDate.FillWeight = 12F;
+            colAttDate.HeaderText = "Ngày";
+            colAttDate.Name = "colAttDate";
+            colAttDate.ReadOnly = true;
+            // 
+            // colAttCheckIn
+            // 
+            colAttCheckIn.DataPropertyName = "Giờ vào";
+            colAttCheckIn.FillWeight = 10F;
+            colAttCheckIn.HeaderText = "Giờ vào";
+            colAttCheckIn.Name = "colAttCheckIn";
+            colAttCheckIn.ReadOnly = true;
+            // 
+            // colAttCheckOut
+            // 
+            colAttCheckOut.DataPropertyName = "Giờ ra";
+            colAttCheckOut.FillWeight = 10F;
+            colAttCheckOut.HeaderText = "Giờ ra";
+            colAttCheckOut.Name = "colAttCheckOut";
+            colAttCheckOut.ReadOnly = true;
+            // 
+            // colAttHours
+            // 
+            colAttHours.DataPropertyName = "Số giờ";
+            colAttHours.FillWeight = 9F;
+            colAttHours.HeaderText = "Số giờ";
+            colAttHours.Name = "colAttHours";
+            colAttHours.ReadOnly = true;
+            // 
+            // colAttStatus
+            // 
+            colAttStatus.DataPropertyName = "Trạng thái";
+            colAttStatus.FillWeight = 14F;
+            colAttStatus.HeaderText = "Trạng thái";
+            colAttStatus.Name = "colAttStatus";
+            colAttStatus.ReadOnly = true;
+            // 
+            // colAttNote
+            // 
+            colAttNote.DataPropertyName = "Ghi chú";
+            colAttNote.FillWeight = 27F;
+            colAttNote.HeaderText = "Ghi chú";
+            colAttNote.Name = "colAttNote";
+            colAttNote.ReadOnly = true;
+            // 
             // ucAttendanceHistory
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(39, 39, 42);
             Controls.Add(pnlGrid);
             Controls.Add(pnlSummary);
             Controls.Add(pnlFilter);
             Controls.Add(pnlHeader);
-            Margin = new Padding(3, 4, 3, 4);
             Name = "ucAttendanceHistory";
-            Size = new Size(1097, 864);
+            Size = new Size(875, 499);
             Load += ucAttendanceHistory_Load;
             pnlHeader.ResumeLayout(false);
             pnlHeader.PerformLayout();
@@ -549,9 +588,15 @@ namespace GUI
         private Guna2Panel        pnlStatLate;
         private Label             lblLateTitle;
         private Label             lblLateValue;
-        private Guna2Button       btnReport;
         private Guna2Panel        pnlGrid;
         private Label             lblGridTitle;
         private Guna2DataGridView dgvAttendance;
+        private DataGridViewTextBoxColumn colAttEmployee;
+        private DataGridViewTextBoxColumn colAttDate;
+        private DataGridViewTextBoxColumn colAttCheckIn;
+        private DataGridViewTextBoxColumn colAttCheckOut;
+        private DataGridViewTextBoxColumn colAttHours;
+        private DataGridViewTextBoxColumn colAttStatus;
+        private DataGridViewTextBoxColumn colAttNote;
     }
 }

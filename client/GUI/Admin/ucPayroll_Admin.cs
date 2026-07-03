@@ -20,6 +20,34 @@ namespace GUI
         public ucPayroll_Admin()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvPayroll);
+            DgvRefresh.Attach(dgvPayroll, LoadMockPayroll);
+        }
+
+        // Double-click 1 dòng -> form chi tiết read-only đủ field
+        private void DgvPayroll_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvPayroll.Rows[e.RowIndex], "Chi tiết bảng lương")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa dòng lương đang chọn (khoá Mã NV)
+        private void BtnEditPayroll_Click(object? sender, EventArgs e)
+        {
+            if (dgvPayroll.CurrentRow == null || dgvPayroll.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một nhân viên để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            if (RecordEdit.EditRow(dgvPayroll.CurrentRow, "Sửa bảng lương", MsgBox.OwnerWindow(this))
+                && dgvPayroll.DataSource is DataTable dt)
+            {
+                decimal total = 0;
+                foreach (DataRow r in dt.Rows)
+                    total += Convert.ToDecimal(r["Tổng lương"]);
+                lblTotalSalary.Text = total.ToString("N0") + " đ";
+            }
         }
 
         private void ucPayroll_Admin_Load(object? sender, EventArgs e)
@@ -72,8 +100,9 @@ namespace GUI
             dgvPayroll.Columns["Thưởng FB"].FillWeight = 8;
             dgvPayroll.Columns["Thưởng lễ"].FillWeight = 8;
             dgvPayroll.Columns["Trừ lương"].FillWeight = 8;
-            dgvPayroll.Columns["Lý do trừ"].FillWeight = 16;
-            dgvPayroll.Columns["Tổng lương"].FillWeight = 10;
+            dgvPayroll.Columns["Lý do trừ"].FillWeight = 14;
+            // Cột cuối chừa chỗ cho chip 🔄 trong header -> cần rộng hơn để "Tổng lương" không xuống 2 dòng
+            dgvPayroll.Columns["Tổng lương"].FillWeight = 12;
 
             foreach (string col in new[] { "Lương CB", "Phụ cấp", "Thưởng FB", "Thưởng lễ", "Trừ lương", "Tổng lương" })
             {

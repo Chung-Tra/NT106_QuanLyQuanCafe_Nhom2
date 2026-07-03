@@ -38,6 +38,12 @@ namespace GUI
             btnRefresh = new Guna2Button();
             pnlGrid = new Guna2Panel();
             dgvHistory = new Guna2DataGridView();
+            colTime = new DataGridViewTextBoxColumn();
+            colReceiver = new DataGridViewTextBoxColumn();
+            colTitle = new DataGridViewTextBoxColumn();
+            colLevel = new DataGridViewTextBoxColumn();
+            colRead = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
 
             pnlHeader.SuspendLayout();
             pnlGrid.SuspendLayout();
@@ -67,7 +73,7 @@ namespace GUI
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(18, 16);
             lblTitle.Name = "lblTitle";
-            lblTitle.Text = "📢  Trung tâm phát thông báo";
+            lblTitle.Text = "Trung tâm phát thông báo";
 
             // ------ lblTotal ------
             lblTotal.AutoSize = true;
@@ -105,7 +111,7 @@ namespace GUI
             txtSearch.Name = "txtSearch";
             txtSearch.PasswordChar = '\0';
             txtSearch.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtSearch.PlaceholderText = "🔍  Tìm theo tiêu đề / nội dung...";
+            txtSearch.PlaceholderText = "Tìm theo mọi trường...";
             txtSearch.SelectedText = "";
             txtSearch.ShadowDecoration.CustomizableEdges = ce4;
             txtSearch.Size = new Size(360, 34);
@@ -170,7 +176,13 @@ namespace GUI
             dgvHistory.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvHistory.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvHistory.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvHistory);
+            ConfigureGrid(dgvHistory);            dgvHistory.Columns.AddRange(new DataGridViewColumn[] { colTime, colReceiver, colTitle, colLevel, colRead, colStatus });
+            colTime.HeaderText = "Thời gian"; colTime.Name = "Thời gian"; colTime.DataPropertyName = "Thời gian";
+            colReceiver.HeaderText = "Người nhận"; colReceiver.Name = "Người nhận"; colReceiver.DataPropertyName = "Người nhận";
+            colTitle.HeaderText = "Tiêu đề"; colTitle.Name = "Tiêu đề"; colTitle.DataPropertyName = "Tiêu đề";
+            colLevel.HeaderText = "Mức độ"; colLevel.Name = "Mức độ"; colLevel.DataPropertyName = "Mức độ";
+            colRead.HeaderText = "Đã đọc"; colRead.Name = "Đã đọc"; colRead.DataPropertyName = "Đã đọc";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
             dgvHistory.Location = new Point(18, 18);
             dgvHistory.Name = "dgvHistory";
             dgvHistory.Size = new Size(924, 454);
@@ -197,6 +209,7 @@ namespace GUI
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -240,5 +253,11 @@ namespace GUI
         private Guna2Button btnRefresh;
         private Guna2Panel pnlGrid;
         private Guna2DataGridView dgvHistory;
+        private DataGridViewTextBoxColumn colTime;
+        private DataGridViewTextBoxColumn colReceiver;
+        private DataGridViewTextBoxColumn colTitle;
+        private DataGridViewTextBoxColumn colLevel;
+        private DataGridViewTextBoxColumn colRead;
+        private DataGridViewTextBoxColumn colStatus;
     }
 }

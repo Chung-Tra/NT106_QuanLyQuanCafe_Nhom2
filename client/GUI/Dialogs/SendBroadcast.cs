@@ -4,15 +4,13 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Dialog gửi thông báo hàng loạt tới toàn bộ nhân viên
-    /// hoặc nhắn riêng cho một người.
-    /// </summary>
+    // Dialog gửi thông báo hàng loạt hoặc nhắn riêng cho một nhân viên.
     public partial class SendBroadcast : Form
     {
         public SendBroadcast()
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             cboPriority.SelectedIndex = 0;
         }
 

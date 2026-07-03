@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
@@ -13,7 +13,17 @@ namespace GUI
         {
             InitializeComponent();
             FormCorners.Round(this);
-            AppFonts.ApplyTo(lblWelcome, lblSubtitle);
+            // Chỉ nút đóng (đóng = thoát app); không cho thu nhỏ / phóng to
+            WindowChrome.Apply(this, close: true,
+                               host: pnlRight, dragHandle: pnlCard, onClose: () => Application.Exit());
+
+            // Làm nóng HttpClient + JSON + kết nối backend ở nền trong lúc người dùng
+            // nhập thông tin — lần gọi HTTP đầu tiên tốn thêm cả giây do JIT/khởi tạo,
+            // trả trước ở đây thì sau đăng nhập các màn hình dữ liệu load nhanh hơn.
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try { await BUS.EmployeeBUS.GetAllEmployeesAsync(); } catch { }
+            });
         }
 
         protected override void OnLoad(EventArgs e)
@@ -37,9 +47,7 @@ namespace GUI
             btnShowPass.BringToFront();
         }
 
-        // ──────────────────────────────────────────────
         // DPAPI — mã hóa/giải mã mật khẩu
-        // ──────────────────────────────────────────────
         private static string Encrypt(string plainText)
         {
             try
@@ -66,9 +74,7 @@ namespace GUI
             catch { return ""; }
         }
 
-        // ──────────────────────────────────────────────
         // Sự kiện hiện/ẩn mật khẩu
-        // ──────────────────────────────────────────────
         private void BtnShowPass_MouseDown(object sender, MouseEventArgs e)
         {
             txtPassword.PasswordChar          = '\0';
@@ -83,9 +89,7 @@ namespace GUI
             btnShowPass.Text                  = "Hiện";
         }
 
-        // ──────────────────────────────────────────────
         // Sự kiện click "Quên mật khẩu"
-        // ──────────────────────────────────────────────
         private void LblForgotPass_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ConfirmEmail frmConfirm = new();
@@ -93,9 +97,7 @@ namespace GUI
             frmConfirm.ShowDialog(this);
         }
 
-        // ──────────────────────────────────────────────
         // Sự kiện click "Đăng nhập"
-        // ──────────────────────────────────────────────
         private async void BtnSignIn_Click(object sender, EventArgs e)
         {
             string email    = txtEmail.Text;
@@ -148,11 +150,6 @@ namespace GUI
             MsgBox.Show(this, "\n" + result.Message, "Đăng nhập thất bại", MsgBox.MessageBoxType.Error);
             btnSignIn.Enabled = true;
             btnSignIn.Text    = "Đăng nhập";
-        }
-
-        private void BtnClose_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
         }
     }
 }

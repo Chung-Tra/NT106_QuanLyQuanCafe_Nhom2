@@ -34,6 +34,10 @@ namespace GUI
             pnlLog = new Guna2Panel();
             lblLogTitle = new Label();
             dgvWorkTracking = new Guna2DataGridView();
+            colTime = new DataGridViewTextBoxColumn();
+            colType = new DataGridViewTextBoxColumn();
+            colContent = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlSummary.SuspendLayout();
             pnlLog.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvWorkTracking).BeginInit();
@@ -54,7 +58,8 @@ namespace GUI
             pnlSummary.Controls.Add(dtpFilterMonth);
             pnlSummary.Controls.Add(btnReport);
             pnlSummary.Location = new Point(20, 20);
-            pnlSummary.Size = new Size(900, 130);
+            pnlSummary.Size = new Size(960, 130);
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             lblTotalShiftsTitle.AutoSize = true;
             lblTotalShiftsTitle.Font = new Font("Segoe UI", 9F);
@@ -127,9 +132,10 @@ namespace GUI
             btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnReport.ForeColor = Color.White;
             btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnReport.Location = new Point(740, 86);
+            btnReport.Location = new Point(800, 86);
             btnReport.Size = new Size(140, 36);
-            btnReport.Text = "📊 Báo cáo";
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReport.Text = "Báo cáo";
 
             // ====== pnlLog ======
             pnlLog.BackColor = Color.FromArgb(31, 31, 34);
@@ -137,7 +143,8 @@ namespace GUI
             pnlLog.Controls.Add(lblLogTitle);
             pnlLog.Controls.Add(dgvWorkTracking);
             pnlLog.Location = new Point(20, 165);
-            pnlLog.Size = new Size(900, 475);
+            pnlLog.Size = new Size(960, 480);
+            pnlLog.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             lblLogTitle.AutoSize = true;
             lblLogTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
@@ -158,9 +165,14 @@ namespace GUI
             dgvWorkTracking.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvWorkTracking.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvWorkTracking.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvWorkTracking);
+            ConfigureGrid(dgvWorkTracking);            dgvWorkTracking.Columns.AddRange(new DataGridViewColumn[] { colTime, colType, colContent, colStatus });
+            colTime.HeaderText = "Thời gian"; colTime.Name = "Thời gian"; colTime.DataPropertyName = "Thời gian";
+            colType.HeaderText = "Loại"; colType.Name = "Loại"; colType.DataPropertyName = "Loại";
+            colContent.HeaderText = "Nội dung"; colContent.Name = "Nội dung"; colContent.DataPropertyName = "Nội dung";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
             dgvWorkTracking.Location = new Point(18, 52);
-            dgvWorkTracking.Size = new Size(864, 405);
+            dgvWorkTracking.Size = new Size(924, 410);
+            dgvWorkTracking.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             // ====== ucWorkTracking ======
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -169,17 +181,19 @@ namespace GUI
             Controls.Add(pnlSummary);
             Controls.Add(pnlLog);
             Name = "ucWorkTracking";
-            Size = new Size(940, 660);
+            Size = new Size(1000, 665);
             pnlSummary.ResumeLayout(false);
             pnlSummary.PerformLayout();
             pnlLog.ResumeLayout(false);
             pnlLog.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvWorkTracking).EndInit();
+            btnReport.Click += btnReport_Click;
             ResumeLayout(false);
         }
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -229,5 +243,9 @@ namespace GUI
         private Guna2Panel pnlLog;
         private Label lblLogTitle;
         private Guna2DataGridView dgvWorkTracking;
+        private DataGridViewTextBoxColumn colTime;
+        private DataGridViewTextBoxColumn colType;
+        private DataGridViewTextBoxColumn colContent;
+        private DataGridViewTextBoxColumn colStatus;
     }
 }

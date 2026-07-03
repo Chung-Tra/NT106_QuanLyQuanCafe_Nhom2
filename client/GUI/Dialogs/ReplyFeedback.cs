@@ -11,6 +11,7 @@ namespace GUI
         public ReplyFeedback(string customerName, string originalContent)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             lblCustomer.Text = $"Khách hàng: {customerName}";
             txtOriginalContent.Text = originalContent;
         }

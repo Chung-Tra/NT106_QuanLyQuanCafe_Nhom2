@@ -1,0 +1,2450 @@
+{
+  "bai_xe": {
+    "bx_001": {
+      "bien_so": "59A-12345",
+      "gio_ra": 0,
+      "gio_vao": 1783040400000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_009",
+      "phi_gui": 5000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_002": {
+      "bien_so": "51G-11111",
+      "gio_ra": 0,
+      "gio_vao": 1783042200000,
+      "loai_xe": "o_to",
+      "nhanvien_id": "nv_009",
+      "phi_gui": 20000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_003": {
+      "bien_so": "59B-22222",
+      "gio_ra": 0,
+      "gio_vao": 1783044000000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_009",
+      "phi_gui": 5000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_004": {
+      "bien_so": "XD-001",
+      "gio_ra": 0,
+      "gio_vao": 1783044900000,
+      "loai_xe": "xe_dap",
+      "nhanvien_id": "nv_016",
+      "phi_gui": 2000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_005": {
+      "bien_so": "59C-67890",
+      "gio_ra": 0,
+      "gio_vao": 1783045800000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_017",
+      "phi_gui": 5000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_006": {
+      "bien_so": "50F-88888",
+      "gio_ra": 0,
+      "gio_vao": 1783047600000,
+      "loai_xe": "o_to",
+      "nhanvien_id": "nv_017",
+      "phi_gui": 20000,
+      "trang_thai": "dang_gui"
+    },
+    "bx_007": {
+      "bien_so": "59A-33333",
+      "gio_ra": 1783041300000,
+      "gio_vao": 1783035000000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_016",
+      "phi_gui": 5000,
+      "trang_thai": "da_ra"
+    },
+    "bx_008": {
+      "bien_so": "59D-44444",
+      "gio_ra": 1783045800000,
+      "gio_vao": 1783036800000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_009",
+      "phi_gui": 5000,
+      "trang_thai": "da_ra"
+    },
+    "bx_009": {
+      "bien_so": "51H-55555",
+      "gio_ra": 1783048800000,
+      "gio_vao": 1783039500000,
+      "loai_xe": "o_to",
+      "nhanvien_id": "nv_017",
+      "phi_gui": 20000,
+      "trang_thai": "da_ra"
+    },
+    "bx_010": {
+      "bien_so": "59E-66666",
+      "gio_ra": 1783051200000,
+      "gio_vao": 1783041600000,
+      "loai_xe": "xe_may",
+      "nhanvien_id": "nv_016",
+      "phi_gui": 5000,
+      "trang_thai": "da_ra"
+    }
+  },
+  "ban": {
+    "ban_001": {
+      "so_cho": 2,
+      "ten_ban": "Bàn 1",
+      "trang_thai": "co_khach",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_002": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 2",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_003": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 3",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_004": {
+      "so_cho": 6,
+      "ten_ban": "Bàn 4",
+      "trang_thai": "co_khach",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_005": {
+      "so_cho": 2,
+      "ten_ban": "Bàn 5",
+      "trang_thai": "dat_truoc",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_006": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 6",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_007": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 7",
+      "trang_thai": "co_khach",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_008": {
+      "so_cho": 6,
+      "ten_ban": "Bàn 8",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 1"
+    },
+    "ban_009": {
+      "so_cho": 2,
+      "ten_ban": "Bàn 9",
+      "trang_thai": "co_khach",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_010": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 10",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_011": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 11",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_012": {
+      "so_cho": 6,
+      "ten_ban": "Bàn 12",
+      "trang_thai": "co_khach",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_013": {
+      "so_cho": 2,
+      "ten_ban": "Bàn 13",
+      "trang_thai": "dat_truoc",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_014": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 14",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_015": {
+      "so_cho": 2,
+      "ten_ban": "Bàn 15",
+      "trang_thai": "co_khach",
+      "vi_tri": "Sân vườn"
+    },
+    "ban_016": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 16",
+      "trang_thai": "trong",
+      "vi_tri": "Sân vườn"
+    },
+    "ban_017": {
+      "so_cho": 4,
+      "ten_ban": "Bàn 17",
+      "trang_thai": "co_khach",
+      "vi_tri": "Sân vườn"
+    },
+    "ban_018": {
+      "so_cho": 6,
+      "ten_ban": "Bàn 18",
+      "trang_thai": "trong",
+      "vi_tri": "Sân vườn"
+    },
+    "ban_019": {
+      "so_cho": 8,
+      "ten_ban": "Bàn VIP 1",
+      "trang_thai": "dat_truoc",
+      "vi_tri": "Tầng 2"
+    },
+    "ban_020": {
+      "so_cho": 8,
+      "ten_ban": "Bàn VIP 2",
+      "trang_thai": "trong",
+      "vi_tri": "Tầng 2"
+    }
+  },
+  "canh_bao": {
+    "cb_001": {
+      "loai": "het_nguyen_lieu",
+      "nguoi_gui_id": "nv_008",
+      "nguyen_lieu_id": "nl_002",
+      "noi_dung": "Sữa tươi đã hết, cần bổ sung gấp",
+      "thoi_gian": 1783042200000,
+      "trang_thai": "cho_xu_ly"
+    },
+    "cb_002": {
+      "loai": "sap_het",
+      "nguoi_gui_id": "nv_008",
+      "nguyen_lieu_id": "nl_006",
+      "noi_dung": "Bột cacao còn dưới 500g",
+      "thoi_gian": 1782982800000,
+      "trang_thai": "cho_xu_ly"
+    },
+    "cb_003": {
+      "loai": "sap_het",
+      "nguoi_gui_id": "nv_004",
+      "nguyen_lieu_id": "nl_016",
+      "noi_dung": "Dâu tây Đà Lạt gần chạm mức tối thiểu",
+      "thoi_gian": 1782991800000,
+      "trang_thai": "da_xu_ly"
+    },
+    "cb_004": {
+      "loai": "thiet_bi_hong",
+      "nguoi_gui_id": "nv_008",
+      "nguyen_lieu_id": "",
+      "noi_dung": "Máy xay sinh tố #2 bị kẹt",
+      "thoi_gian": 1782890400000,
+      "trang_thai": "da_xu_ly"
+    },
+    "cb_005": {
+      "loai": "thiet_bi_hong",
+      "nguoi_gui_id": "nv_004",
+      "nguyen_lieu_id": "",
+      "noi_dung": "Máy pha espresso rò nước",
+      "thoi_gian": 1783039800000,
+      "trang_thai": "cho_xu_ly"
+    },
+    "cb_006": {
+      "loai": "khac",
+      "nguoi_gui_id": "nv_008",
+      "nguyen_lieu_id": "",
+      "noi_dung": "Tủ lạnh quầy bar kêu to bất thường",
+      "thoi_gian": 1782871800000,
+      "trang_thai": "da_xu_ly"
+    },
+    "cb_007": {
+      "loai": "sap_het",
+      "nguoi_gui_id": "nv_004",
+      "nguyen_lieu_id": "nl_010",
+      "noi_dung": "Đào ngâm chỉ còn 3 hộp",
+      "thoi_gian": 1782806400000,
+      "trang_thai": "da_xu_ly"
+    }
+  },
+  "cham_cong": {
+    "cc_001": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782894600000,
+      "gio_vao": 1782865800000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_001",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_002": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782894600000,
+      "gio_vao": 1782865800000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_004",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_003": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1782919800000,
+      "gio_vao": 1782894600000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_006",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_004": {
+      "ghi_chu": "Đã duyệt nghỉ phép",
+      "gio_ra": 0,
+      "gio_vao": 0,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_007",
+      "so_gio_lam": 0,
+      "trang_thai": "nghi_phep"
+    },
+    "cc_005": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1782919800000,
+      "gio_vao": 1782894600000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_008",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_006": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782894600000,
+      "gio_vao": 1782865800000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_009",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_007": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1782919800000,
+      "gio_vao": 1782894600000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_016",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_008": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782894600000,
+      "gio_vao": 1782865800000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_017",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_009": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1782919800000,
+      "gio_vao": 1782894600000,
+      "ngay": "2026-07-01",
+      "nhanvien_id": "nv_018",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_010": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782981000000,
+      "gio_vao": 1782952200000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_001",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_011": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782981000000,
+      "gio_vao": 1782952200000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_004",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_012": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783006200000,
+      "gio_vao": 1782981000000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_006",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_013": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782981000000,
+      "gio_vao": 1782952200000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_007",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_014": {
+      "ghi_chu": "Muộn 35 phút",
+      "gio_ra": 1783006200000,
+      "gio_vao": 1782983100000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_008",
+      "so_gio_lam": 7.4,
+      "trang_thai": "di_muon"
+    },
+    "cc_015": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782981000000,
+      "gio_vao": 1782952200000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_009",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_016": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783006200000,
+      "gio_vao": 1782981000000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_016",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_017": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1782981000000,
+      "gio_vao": 1782952200000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_017",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_018": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783006200000,
+      "gio_vao": 1782981000000,
+      "ngay": "2026-07-02",
+      "nhanvien_id": "nv_018",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_019": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1783067400000,
+      "gio_vao": 1783038600000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_001",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_020": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1783067400000,
+      "gio_vao": 1783038600000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_004",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_021": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783092600000,
+      "gio_vao": 1783067400000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_006",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_022": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1783067400000,
+      "gio_vao": 1783038600000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_007",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_023": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783092600000,
+      "gio_vao": 1783067400000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_008",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_024": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1783067400000,
+      "gio_vao": 1783038600000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_009",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_025": {
+      "ghi_chu": "Ca tối",
+      "gio_ra": 1783092600000,
+      "gio_vao": 1783067400000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_016",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_026": {
+      "ghi_chu": "Ca sáng",
+      "gio_ra": 1783067400000,
+      "gio_vao": 1783038600000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_017",
+      "so_gio_lam": 8.0,
+      "trang_thai": "du_gio"
+    },
+    "cc_027": {
+      "ghi_chu": "Xin về sớm",
+      "gio_ra": 1783081800000,
+      "gio_vao": 1783067400000,
+      "ngay": "2026-07-03",
+      "nhanvien_id": "nv_018",
+      "so_gio_lam": 4.0,
+      "trang_thai": "nua_ca"
+    }
+  },
+  "cong_thuc": {
+    "ct_001": {
+      "cac_buoc": "1. Pha cà phê phin với 25g cà phê\n2. Cho 20ml sữa đặc vào ly\n3. Thêm đá viên\n4. Rót cà phê vào, khuấy đều",
+      "loai": "ca_phe",
+      "mon_id": "mon_002",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "25g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_001",
+          "ten": "Cà phê hạt"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "20ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_003",
+          "ten": "Sữa đặc"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "200g",
+          "loai": "phu",
+          "nguyen_lieu_id": "",
+          "ten": "Đá viên"
+        }
+      },
+      "ten_mon": "Cà phê sữa đá"
+    },
+    "ct_002": {
+      "cac_buoc": "1. Chiết xuất 30ml espresso\n2. Đánh bọt sữa tươi (60-65°C)\n3. Rót espresso vào ly\n4. Đổ sữa bọt lên trên\n5. Rắc bột cacao trang trí",
+      "loai": "ca_phe",
+      "mon_id": "mon_006",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "18g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_001",
+          "ten": "Cà phê hạt"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "150ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "2g",
+          "loai": "trang_tri",
+          "nguyen_lieu_id": "nl_006",
+          "ten": "Bột cacao"
+        }
+      },
+      "ten_mon": "Cappuccino"
+    },
+    "ct_003": {
+      "cac_buoc": "1. Ủ trà đen 200ml\n2. Vắt 50ml nước cam\n3. Đập dập 2 cây sả\n4. Trộn trà + cam + sả\n5. Thêm đá và đào ngâm",
+      "loai": "tra",
+      "mon_id": "mon_009",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "200ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_004",
+          "ten": "Trà đen"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "50ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_012",
+          "ten": "Cam sành"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "2 cây",
+          "loai": "phu",
+          "nguyen_lieu_id": "",
+          "ten": "Sả"
+        },
+        "nl_ct_04": {
+          "dinh_luong": "3 miếng",
+          "loai": "topping",
+          "nguyen_lieu_id": "nl_010",
+          "ten": "Đào ngâm"
+        }
+      },
+      "ten_mon": "Trà đào cam sả"
+    },
+    "ct_004": {
+      "cac_buoc": "1. Ủ hồng trà 150ml\n2. Pha 30ml sữa đặc + 50ml sữa tươi\n3. Luộc trân châu 20 phút, ủ 15 phút\n4. Trộn trà sữa, thêm trân châu + đá",
+      "loai": "tra",
+      "mon_id": "mon_014",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "150ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_004",
+          "ten": "Trà đen"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "30ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_003",
+          "ten": "Sữa đặc"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "50ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        },
+        "nl_ct_04": {
+          "dinh_luong": "50g",
+          "loai": "topping",
+          "nguyen_lieu_id": "nl_008",
+          "ten": "Trân châu đen"
+        }
+      },
+      "ten_mon": "Trà sữa trân châu"
+    },
+    "ct_005": {
+      "cac_buoc": "1. Nạo 1/2 quả bơ sáp\n2. Cho bơ + 30ml sữa đặc + 100ml sữa tươi + đá vào máy xay\n3. Xay mịn 45 giây\n4. Rót ly, trang trí lát bơ",
+      "loai": "sinh_to",
+      "mon_id": "mon_023",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "150g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_014",
+          "ten": "Bơ sáp"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "30ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_003",
+          "ten": "Sữa đặc"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "100ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        }
+      },
+      "ten_mon": "Sinh tố bơ"
+    },
+    "ct_006": {
+      "cac_buoc": "1. Vắt 3 quả cam sành\n2. Lọc bã, thêm 10ml đường nước\n3. Thêm đá viên, khuấy đều",
+      "loai": "sinh_to",
+      "mon_id": "mon_019",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "3 quả",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_012",
+          "ten": "Cam sành"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "10g",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_009",
+          "ten": "Đường trắng"
+        }
+      },
+      "ten_mon": "Nước cam tươi"
+    },
+    "ct_007": {
+      "cac_buoc": "1. Chiết xuất 30ml espresso\n2. Hòa 20g sô cô la với sữa nóng\n3. Rót espresso + sữa sô cô la\n4. Phủ kem tươi, rắc cacao",
+      "loai": "ca_phe",
+      "mon_id": "mon_008",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "18g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_001",
+          "ten": "Cà phê hạt"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "20g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_006",
+          "ten": "Bột cacao"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "120ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        }
+      },
+      "ten_mon": "Mocha"
+    },
+    "ct_008": {
+      "cac_buoc": "1. Chiết xuất 30ml espresso\n2. Đánh sữa mịn (55-60°C)\n3. Rót sữa tạo hình latte art",
+      "loai": "ca_phe",
+      "mon_id": "mon_007",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "18g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_001",
+          "ten": "Cà phê hạt"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "180ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        }
+      },
+      "ten_mon": "Latte"
+    },
+    "ct_009": {
+      "cac_buoc": "1. Đánh tan 5g matcha với nước nóng 80°C\n2. Pha 40ml sữa đặc + 100ml sữa tươi\n3. Trộn matcha + sữa, thêm đá",
+      "loai": "tra",
+      "mon_id": "mon_016",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "5g",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_007",
+          "ten": "Bột matcha"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "40ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_003",
+          "ten": "Sữa đặc"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "100ml",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        }
+      },
+      "ten_mon": "Trà sữa matcha"
+    },
+    "ct_010": {
+      "cac_buoc": "1. Cho 30ml sữa đặc + 60ml sữa tươi nóng\n2. Thêm 20ml cà phê phin\n3. Khuấy đều, thêm đá",
+      "loai": "ca_phe",
+      "mon_id": "mon_003",
+      "nguyen_lieu": {
+        "nl_ct_01": {
+          "dinh_luong": "30ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_003",
+          "ten": "Sữa đặc"
+        },
+        "nl_ct_02": {
+          "dinh_luong": "60ml",
+          "loai": "chinh",
+          "nguyen_lieu_id": "nl_002",
+          "ten": "Sữa tươi"
+        },
+        "nl_ct_03": {
+          "dinh_luong": "12g",
+          "loai": "phu",
+          "nguyen_lieu_id": "nl_001",
+          "ten": "Cà phê hạt"
+        }
+      },
+      "ten_mon": "Bạc xỉu"
+    }
+  },
+  "danh_sach_chat": {
+    "nv_001": {
+      "chat_nv_001_nv_008": {
+        "da_doc": true,
+        "nguoi_nhan_id": "nv_008",
+        "thoi_gian_cuoi": 1782961320000,
+        "tin_nhan_cuoi": "Dạ sắp hết sữa tươi rồi anh ạ"
+      }
+    },
+    "nv_003": {
+      "chat_nv_003_nv_006": {
+        "da_doc": true,
+        "nguoi_nhan_id": "nv_006",
+        "thoi_gian_cuoi": 1782957900000,
+        "tin_nhan_cuoi": "Dạ em đang tổng hợp, chiều nay có ạ"
+      }
+    },
+    "nv_006": {
+      "chat_nv_003_nv_006": {
+        "da_doc": false,
+        "nguoi_nhan_id": "nv_003",
+        "thoi_gian_cuoi": 1782957900000,
+        "tin_nhan_cuoi": "Dạ em đang tổng hợp, chiều nay có ạ"
+      }
+    },
+    "nv_008": {
+      "chat_nv_001_nv_008": {
+        "da_doc": true,
+        "nguoi_nhan_id": "nv_001",
+        "thoi_gian_cuoi": 1782961320000,
+        "tin_nhan_cuoi": "Dạ sắp hết sữa tươi rồi anh ạ"
+      }
+    }
+  },
+  "don_hang": {
+    "dh_001": {
+      "ban_id": "ban_001",
+      "chi_tiet_don": {
+        "ctd_001": {
+          "don_gia": 30000,
+          "ghi_chu_mon": "Ít đá",
+          "mon_id": "mon_002",
+          "so_luong": 2,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_002": {
+          "don_gia": 20000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_027",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1783041300000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_002": {
+      "ban_id": "ban_004",
+      "chi_tiet_don": {
+        "ctd_003": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_006",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_004": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "Nóng",
+          "mon_id": "mon_007",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1783042800000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_003": {
+      "ban_id": "ban_002",
+      "chi_tiet_don": {
+        "ctd_005": {
+          "don_gia": 40000,
+          "ghi_chu_mon": "50% đường",
+          "mon_id": "mon_014",
+          "so_luong": 2,
+          "trang_thai_che_bien": "dang_lam"
+        },
+        "ctd_006": {
+          "don_gia": 35000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_028",
+          "so_luong": 1,
+          "trang_thai_che_bien": "cho"
+        }
+      },
+      "ghi_chu": "Khách quen",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1783044300000,
+      "trang_thai": "dang_phuc_vu"
+    },
+    "dh_004": {
+      "ban_id": "ban_007",
+      "chi_tiet_don": {
+        "ctd_007": {
+          "don_gia": 35000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_019",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_008": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "Không sữa đặc",
+          "mon_id": "mon_023",
+          "so_luong": 1,
+          "trang_thai_che_bien": "dang_lam"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_018",
+      "thoi_gian_tao": 1783045200000,
+      "trang_thai": "dang_phuc_vu"
+    },
+    "dh_005": {
+      "ban_id": "ban_012",
+      "chi_tiet_don": {
+        "ctd_009": {
+          "don_gia": 25000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_001",
+          "so_luong": 1,
+          "trang_thai_che_bien": "cho"
+        },
+        "ctd_010": {
+          "don_gia": 35000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_005",
+          "so_luong": 1,
+          "trang_thai_che_bien": "cho"
+        }
+      },
+      "ghi_chu": "Mang ra nhanh giúp em",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1783046700000,
+      "trang_thai": "pending"
+    },
+    "dh_006": {
+      "ban_id": "ban_019",
+      "chi_tiet_don": {
+        "ctd_011": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_016",
+          "so_luong": 2,
+          "trang_thai_che_bien": "cho"
+        },
+        "ctd_012": {
+          "don_gia": 30000,
+          "ghi_chu_mon": "Thêm sốt",
+          "mon_id": "mon_029",
+          "so_luong": 1,
+          "trang_thai_che_bien": "cho"
+        }
+      },
+      "ghi_chu": "Bàn VIP",
+      "nhanvien_id": "nv_018",
+      "thoi_gian_tao": 1783047600000,
+      "trang_thai": "pending"
+    },
+    "dh_007": {
+      "ban_id": "ban_003",
+      "chi_tiet_don": {
+        "ctd_013": {
+          "don_gia": 40000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_010",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_014": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_024",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_015": {
+          "don_gia": 20000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_027",
+          "so_luong": 2,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1782981000000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_008": {
+      "ban_id": "ban_005",
+      "chi_tiet_don": {
+        "ctd_016": {
+          "don_gia": 42000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_013",
+          "so_luong": 2,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_018",
+      "thoi_gian_tao": 1782983400000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_009": {
+      "ban_id": "ban_009",
+      "chi_tiet_don": {
+        "ctd_017": {
+          "don_gia": 50000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_008",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_018": {
+          "don_gia": 25000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_030",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1782986400000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_010": {
+      "ban_id": "ban_011",
+      "chi_tiet_don": {
+        "ctd_019": {
+          "don_gia": 35000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_020",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_020": {
+          "don_gia": 32000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_021",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_018",
+      "thoi_gian_tao": 1782876600000,
+      "trang_thai": "hoan_thanh"
+    },
+    "dh_011": {
+      "ban_id": "ban_006",
+      "chi_tiet_don": {
+        "ctd_021": {
+          "don_gia": 45000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_009",
+          "so_luong": 1,
+          "trang_thai_che_bien": "cho"
+        }
+      },
+      "ghi_chu": "Khách đổi ý",
+      "nhanvien_id": "nv_007",
+      "thoi_gian_tao": 1782879300000,
+      "trang_thai": "huy"
+    },
+    "dh_012": {
+      "ban_id": "ban_015",
+      "chi_tiet_don": {
+        "ctd_022": {
+          "don_gia": 42000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_015",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_023": {
+          "don_gia": 38000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_018",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        },
+        "ctd_024": {
+          "don_gia": 25000,
+          "ghi_chu_mon": "",
+          "mon_id": "mon_026",
+          "so_luong": 1,
+          "trang_thai_che_bien": "hoan_thanh"
+        }
+      },
+      "ghi_chu": "",
+      "nhanvien_id": "nv_018",
+      "thoi_gian_tao": 1782891900000,
+      "trang_thai": "hoan_thanh"
+    }
+  },
+  "feedback": {
+    "fb_001": {
+      "da_xu_ly": true,
+      "don_hang_id": "dh_001",
+      "nguoi_xu_ly_id": "nv_006",
+      "noi_dung": "Cà phê rất ngon, phục vụ tận tình!",
+      "phan_hoi": "Cảm ơn quý khách đã ủng hộ!",
+      "so_sao": 5,
+      "ten_khach": "Nguyễn Thị Lan",
+      "thoi_gian": 1782962100000,
+      "thoi_gian_phan_hoi": 1782965700000
+    },
+    "fb_002": {
+      "da_xu_ly": false,
+      "don_hang_id": "dh_002",
+      "nguoi_xu_ly_id": "",
+      "noi_dung": "Đồ uống hơi ngọt, cần giảm đường",
+      "phan_hoi": "",
+      "so_sao": 3,
+      "ten_khach": "Trần Văn Minh",
+      "thoi_gian": 1783052100000,
+      "thoi_gian_phan_hoi": 0
+    },
+    "fb_003": {
+      "da_xu_ly": true,
+      "don_hang_id": "dh_007",
+      "nguoi_xu_ly_id": "nv_006",
+      "noi_dung": "Chờ hơi lâu vào giờ cao điểm",
+      "phan_hoi": "Xin lỗi quý khách, quán sẽ bổ sung nhân sự giờ cao điểm",
+      "so_sao": 2,
+      "ten_khach": "Lê Hồng Phúc",
+      "thoi_gian": 1782882900000,
+      "thoi_gian_phan_hoi": 1782886500000
+    },
+    "fb_004": {
+      "da_xu_ly": true,
+      "don_hang_id": "",
+      "nguoi_xu_ly_id": "nv_001",
+      "noi_dung": "Không gian đẹp, wifi mạnh",
+      "phan_hoi": "Cảm ơn góp ý của quý khách!",
+      "so_sao": 4,
+      "ten_khach": "Phạm Thanh Hà",
+      "thoi_gian": 1782972900000,
+      "thoi_gian_phan_hoi": 1782976500000
+    },
+    "fb_005": {
+      "da_xu_ly": false,
+      "don_hang_id": "",
+      "nguoi_xu_ly_id": "",
+      "noi_dung": "Ly bị vỡ, nhân viên thái độ",
+      "phan_hoi": "",
+      "so_sao": 1,
+      "ten_khach": "Đỗ Minh Quân",
+      "thoi_gian": 1783062900000,
+      "thoi_gian_phan_hoi": 0
+    },
+    "fb_006": {
+      "da_xu_ly": true,
+      "don_hang_id": "dh_008",
+      "nguoi_xu_ly_id": "nv_006",
+      "noi_dung": "Trà sữa trân châu ngon nhất khu này",
+      "phan_hoi": "Cảm ơn quý khách!",
+      "so_sao": 5,
+      "ten_khach": "Võ Thị Hương",
+      "thoi_gian": 1782893700000,
+      "thoi_gian_phan_hoi": 1782897300000
+    },
+    "fb_007": {
+      "da_xu_ly": false,
+      "don_hang_id": "dh_004",
+      "nguoi_xu_ly_id": "",
+      "noi_dung": "Sinh tố bơ béo, đáng tiền",
+      "phan_hoi": "",
+      "so_sao": 4,
+      "ten_khach": "Hoàng Văn Tùng",
+      "thoi_gian": 1782983700000,
+      "thoi_gian_phan_hoi": 0
+    },
+    "fb_008": {
+      "da_xu_ly": true,
+      "don_hang_id": "dh_012",
+      "nguoi_xu_ly_id": "nv_001",
+      "noi_dung": "Bánh tiramisu chuẩn vị, sẽ quay lại",
+      "phan_hoi": "Hẹn gặp lại quý khách!",
+      "so_sao": 5,
+      "ten_khach": "Đặng Thu Trang",
+      "thoi_gian": 1783073700000,
+      "thoi_gian_phan_hoi": 1783077300000
+    },
+    "fb_009": {
+      "da_xu_ly": false,
+      "don_hang_id": "dh_010",
+      "nguoi_xu_ly_id": "",
+      "noi_dung": "Nước cam hơi chua, ít đá",
+      "phan_hoi": "",
+      "so_sao": 2,
+      "ten_khach": "Bùi Quốc Bảo",
+      "thoi_gian": 1782904500000,
+      "thoi_gian_phan_hoi": 0
+    },
+    "fb_010": {
+      "da_xu_ly": true,
+      "don_hang_id": "dh_009",
+      "nguoi_xu_ly_id": "nv_006",
+      "noi_dung": "Nhân viên order dễ thương",
+      "phan_hoi": "Cảm ơn quý khách đã khen ngợi!",
+      "so_sao": 4,
+      "ten_khach": "Lý Mỹ Duyên",
+      "thoi_gian": 1782994500000,
+      "thoi_gian_phan_hoi": 1782998100000
+    }
+  },
+  "khach_hang": {
+    "kh_001": {
+      "diem_tich_luy": 1520,
+      "email": "lan.nguyen@email.com",
+      "ngay_tao": 1772330400000,
+      "so_dien_thoai": "0901234567",
+      "ten_khach_hang": "Nguyễn Thị Lan",
+      "tong_don": 45
+    },
+    "kh_002": {
+      "diem_tich_luy": 850,
+      "email": "minh.tran@email.com",
+      "ngay_tao": 1772938800000,
+      "so_dien_thoai": "0912345678",
+      "ten_khach_hang": "Trần Văn Minh",
+      "tong_don": 28
+    },
+    "kh_003": {
+      "diem_tich_luy": 2100,
+      "email": "phuc.le@email.com",
+      "ngay_tao": 1773558000000,
+      "so_dien_thoai": "0923456789",
+      "ten_khach_hang": "Lê Hồng Phúc",
+      "tong_don": 62
+    },
+    "kh_004": {
+      "diem_tich_luy": 3200,
+      "email": "quan.do@email.com",
+      "ngay_tao": 1771549200000,
+      "so_dien_thoai": "0945678901",
+      "ten_khach_hang": "Đỗ Minh Quân",
+      "tong_don": 95
+    },
+    "kh_005": {
+      "diem_tich_luy": 450,
+      "email": "ha.pham@email.com",
+      "ngay_tao": 1775120400000,
+      "so_dien_thoai": "0934567890",
+      "ten_khach_hang": "Phạm Thanh Hà",
+      "tong_don": 15
+    },
+    "kh_006": {
+      "diem_tich_luy": 680,
+      "email": "huong.vo@email.com",
+      "ngay_tao": 1775966400000,
+      "so_dien_thoai": "0956789012",
+      "ten_khach_hang": "Võ Thị Hương",
+      "tong_don": 22
+    },
+    "kh_007": {
+      "diem_tich_luy": 120,
+      "email": "tung.hoang@email.com",
+      "ngay_tao": 1777946400000,
+      "so_dien_thoai": "0967890123",
+      "ten_khach_hang": "Hoàng Văn Tùng",
+      "tong_don": 6
+    },
+    "kh_008": {
+      "diem_tich_luy": 1980,
+      "email": "trang.dang@email.com",
+      "ngay_tao": 1774425600000,
+      "so_dien_thoai": "0978901234",
+      "ten_khach_hang": "Đặng Thu Trang",
+      "tong_don": 58
+    },
+    "kh_009": {
+      "diem_tich_luy": 310,
+      "email": "bao.bui@email.com",
+      "ngay_tao": 1779073200000,
+      "so_dien_thoai": "0989012345",
+      "ten_khach_hang": "Bùi Quốc Bảo",
+      "tong_don": 12
+    },
+    "kh_010": {
+      "diem_tich_luy": 75,
+      "email": "duyen.ly@email.com",
+      "ngay_tao": 1781085600000,
+      "so_dien_thoai": "0990123456",
+      "ten_khach_hang": "Lý Mỹ Duyên",
+      "tong_don": 3
+    }
+  },
+  "luong": {
+    "luong_001": {
+      "luong_co_ban": 12000000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_001",
+      "phu_cap": 2000000,
+      "thang": 6,
+      "thuong_feedback": 800000,
+      "thuong_le": 500000,
+      "tong_luong": 15300000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_002": {
+      "luong_co_ban": 15000000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_003",
+      "phu_cap": 2000000,
+      "thang": 6,
+      "thuong_feedback": 600000,
+      "thuong_le": 500000,
+      "tong_luong": 18100000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_003": {
+      "luong_co_ban": 7500000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_004",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 0,
+      "thuong_le": 500000,
+      "tong_luong": 8500000,
+      "trang_thai": "chua_duyet",
+      "tru_luong": 0
+    },
+    "luong_004": {
+      "luong_co_ban": 12000000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_006",
+      "phu_cap": 2000000,
+      "thang": 6,
+      "thuong_feedback": 400000,
+      "thuong_le": 500000,
+      "tong_luong": 14900000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_005": {
+      "luong_co_ban": 7000000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_007",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 1500000,
+      "thuong_le": 500000,
+      "tong_luong": 9500000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_006": {
+      "luong_co_ban": 7500000,
+      "ly_do_tru": "Nghỉ 5 ngày (vượt 2 ngày)",
+      "nam": 2026,
+      "ngay_cong": 21,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_008",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 800000,
+      "thuong_le": 500000,
+      "tong_luong": 8600000,
+      "trang_thai": "chua_duyet",
+      "tru_luong": -700000
+    },
+    "luong_007": {
+      "luong_co_ban": 6500000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_009",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 600000,
+      "thuong_le": 500000,
+      "tong_luong": 8100000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_008": {
+      "luong_co_ban": 6500000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_016",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 0,
+      "thuong_le": 500000,
+      "tong_luong": 7500000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    },
+    "luong_009": {
+      "luong_co_ban": 6500000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_017",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 400000,
+      "thuong_le": 500000,
+      "tong_luong": 7900000,
+      "trang_thai": "chua_duyet",
+      "tru_luong": 0
+    },
+    "luong_010": {
+      "luong_co_ban": 7000000,
+      "ly_do_tru": "",
+      "nam": 2026,
+      "ngay_cong": 26,
+      "ngay_tinh": 1782871200000,
+      "nhanvien_id": "nv_018",
+      "phu_cap": 500000,
+      "thang": 6,
+      "thuong_feedback": 1500000,
+      "thuong_le": 500000,
+      "tong_luong": 9500000,
+      "trang_thai": "da_duyet",
+      "tru_luong": 0
+    }
+  },
+  "mon_uong": {
+    "mon_001": {
+      "con_hang": true,
+      "gia": 25000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Cà phê phin truyền thống, đậm đà",
+      "ten_mon": "Cà phê đen"
+    },
+    "mon_002": {
+      "con_hang": true,
+      "gia": 30000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Cà phê phin pha sữa đặc, đá viên",
+      "ten_mon": "Cà phê sữa đá"
+    },
+    "mon_003": {
+      "con_hang": true,
+      "gia": 32000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Sữa nhiều cà phê ít, vị ngọt dịu",
+      "ten_mon": "Bạc xỉu"
+    },
+    "mon_004": {
+      "con_hang": true,
+      "gia": 40000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Chiết xuất đậm 30ml chuẩn Ý",
+      "ten_mon": "Espresso"
+    },
+    "mon_005": {
+      "con_hang": true,
+      "gia": 35000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Espresso pha loãng với nước nóng",
+      "ten_mon": "Americano"
+    },
+    "mon_006": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Espresso + sữa nóng + bọt sữa dày",
+      "ten_mon": "Cappuccino"
+    },
+    "mon_007": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Espresso + sữa nóng, nghệ thuật latte art",
+      "ten_mon": "Latte"
+    },
+    "mon_008": {
+      "con_hang": true,
+      "gia": 50000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "cafe",
+      "mo_ta": "Espresso + sô cô la + sữa",
+      "ten_mon": "Mocha"
+    },
+    "mon_009": {
+      "con_hang": false,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà đào kết hợp cam tươi và sả",
+      "ten_mon": "Trà đào cam sả"
+    },
+    "mon_010": {
+      "con_hang": true,
+      "gia": 40000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà đen ủ lạnh với vải ngâm",
+      "ten_mon": "Trà vải"
+    },
+    "mon_011": {
+      "con_hang": true,
+      "gia": 30000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà tắc chua ngọt, mật ong nguyên chất",
+      "ten_mon": "Trà tắc mật ong"
+    },
+    "mon_012": {
+      "con_hang": true,
+      "gia": 35000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà gừng ấm bụng ngày mưa",
+      "ten_mon": "Trà gừng nóng"
+    },
+    "mon_013": {
+      "con_hang": true,
+      "gia": 42000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Ô long thượng hạng pha sữa tươi",
+      "ten_mon": "Trà ô long sữa"
+    },
+    "mon_014": {
+      "con_hang": true,
+      "gia": 40000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà sữa truyền thống, trân châu dai",
+      "ten_mon": "Trà sữa trân châu"
+    },
+    "mon_015": {
+      "con_hang": true,
+      "gia": 42000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Vị khoai môn béo bùi",
+      "ten_mon": "Trà sữa khoai môn"
+    },
+    "mon_016": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Matcha Nhật Bản nguyên chất",
+      "ten_mon": "Trà sữa matcha"
+    },
+    "mon_017": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Trà sữa kết hợp sô cô la",
+      "ten_mon": "Trà sữa socola"
+    },
+    "mon_018": {
+      "con_hang": true,
+      "gia": 38000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "tea",
+      "mo_ta": "Hồng trà Ceylon pha sữa",
+      "ten_mon": "Hồng trà sữa"
+    },
+    "mon_019": {
+      "con_hang": true,
+      "gia": 35000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Cam sành vắt nguyên chất",
+      "ten_mon": "Nước cam tươi"
+    },
+    "mon_020": {
+      "con_hang": true,
+      "gia": 35000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Dứa tươi ép lạnh",
+      "ten_mon": "Nước ép dứa"
+    },
+    "mon_021": {
+      "con_hang": true,
+      "gia": 32000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Cà rốt Đà Lạt ép nguyên chất",
+      "ten_mon": "Nước ép cà rốt"
+    },
+    "mon_022": {
+      "con_hang": true,
+      "gia": 30000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Ổi ruột hồng ép lạnh",
+      "ten_mon": "Nước ép ổi"
+    },
+    "mon_023": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Bơ sáp dẻo xay cùng sữa đặc",
+      "ten_mon": "Sinh tố bơ"
+    },
+    "mon_024": {
+      "con_hang": true,
+      "gia": 45000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Xoài cát chín xay mịn",
+      "ten_mon": "Sinh tố xoài"
+    },
+    "mon_025": {
+      "con_hang": true,
+      "gia": 48000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "juice",
+      "mo_ta": "Dâu Đà Lạt tươi xay cùng sữa chua",
+      "ten_mon": "Sinh tố dâu"
+    },
+    "mon_026": {
+      "con_hang": false,
+      "gia": 25000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "food",
+      "mo_ta": "Bánh sừng bò bơ Pháp nướng giòn",
+      "ten_mon": "Bánh croissant"
+    },
+    "mon_027": {
+      "con_hang": true,
+      "gia": 20000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "food",
+      "mo_ta": "Flan trứng sữa caramel mềm mịn",
+      "ten_mon": "Bánh flan"
+    },
+    "mon_028": {
+      "con_hang": true,
+      "gia": 35000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "food",
+      "mo_ta": "Tiramisu cà phê chuẩn vị Ý",
+      "ten_mon": "Bánh tiramisu"
+    },
+    "mon_029": {
+      "con_hang": true,
+      "gia": 30000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "food",
+      "mo_ta": "Khoai tây chiên giòn, sốt cà chua",
+      "ten_mon": "Khoai tây chiên"
+    },
+    "mon_030": {
+      "con_hang": true,
+      "gia": 25000,
+      "hien_thi": true,
+      "hinh_anh_url": "",
+      "loai": "other",
+      "mo_ta": "Sữa chua nhà làm đánh đá",
+      "ten_mon": "Sữa chua đá"
+    }
+  },
+  "nguyen_lieu": {
+    "nl_001": {
+      "don_vi": "kg",
+      "gia_nhap": 180000,
+      "ten_nguyen_lieu": "Cà phê hạt",
+      "ton_kho": 15,
+      "ton_kho_toi_thieu": 5
+    },
+    "nl_002": {
+      "don_vi": "lít",
+      "gia_nhap": 32000,
+      "ten_nguyen_lieu": "Sữa tươi",
+      "ton_kho": 0,
+      "ton_kho_toi_thieu": 10
+    },
+    "nl_003": {
+      "don_vi": "hộp",
+      "gia_nhap": 25000,
+      "ten_nguyen_lieu": "Sữa đặc",
+      "ton_kho": 24,
+      "ton_kho_toi_thieu": 6
+    },
+    "nl_004": {
+      "don_vi": "kg",
+      "gia_nhap": 120000,
+      "ten_nguyen_lieu": "Trà đen",
+      "ton_kho": 8,
+      "ton_kho_toi_thieu": 2
+    },
+    "nl_005": {
+      "don_vi": "kg",
+      "gia_nhap": 260000,
+      "ten_nguyen_lieu": "Trà ô long",
+      "ton_kho": 4,
+      "ton_kho_toi_thieu": 1
+    },
+    "nl_006": {
+      "don_vi": "kg",
+      "gia_nhap": 210000,
+      "ten_nguyen_lieu": "Bột cacao",
+      "ton_kho": 0.4,
+      "ton_kho_toi_thieu": 0.5
+    },
+    "nl_007": {
+      "don_vi": "kg",
+      "gia_nhap": 450000,
+      "ten_nguyen_lieu": "Bột matcha",
+      "ton_kho": 1.2,
+      "ton_kho_toi_thieu": 0.5
+    },
+    "nl_008": {
+      "don_vi": "kg",
+      "gia_nhap": 60000,
+      "ten_nguyen_lieu": "Trân châu đen",
+      "ton_kho": 6,
+      "ton_kho_toi_thieu": 2
+    },
+    "nl_009": {
+      "don_vi": "kg",
+      "gia_nhap": 22000,
+      "ten_nguyen_lieu": "Đường trắng",
+      "ton_kho": 30,
+      "ton_kho_toi_thieu": 10
+    },
+    "nl_010": {
+      "don_vi": "hộp",
+      "gia_nhap": 85000,
+      "ten_nguyen_lieu": "Đào ngâm",
+      "ton_kho": 9,
+      "ton_kho_toi_thieu": 3
+    },
+    "nl_011": {
+      "don_vi": "hộp",
+      "gia_nhap": 78000,
+      "ten_nguyen_lieu": "Vải ngâm",
+      "ton_kho": 7,
+      "ton_kho_toi_thieu": 3
+    },
+    "nl_012": {
+      "don_vi": "kg",
+      "gia_nhap": 35000,
+      "ten_nguyen_lieu": "Cam sành",
+      "ton_kho": 12,
+      "ton_kho_toi_thieu": 5
+    },
+    "nl_013": {
+      "don_vi": "kg",
+      "gia_nhap": 25000,
+      "ten_nguyen_lieu": "Dứa",
+      "ton_kho": 8,
+      "ton_kho_toi_thieu": 3
+    },
+    "nl_014": {
+      "don_vi": "kg",
+      "gia_nhap": 70000,
+      "ten_nguyen_lieu": "Bơ sáp",
+      "ton_kho": 5,
+      "ton_kho_toi_thieu": 2
+    },
+    "nl_015": {
+      "don_vi": "kg",
+      "gia_nhap": 55000,
+      "ten_nguyen_lieu": "Xoài cát",
+      "ton_kho": 6,
+      "ton_kho_toi_thieu": 2
+    },
+    "nl_016": {
+      "don_vi": "kg",
+      "gia_nhap": 150000,
+      "ten_nguyen_lieu": "Dâu tây Đà Lạt",
+      "ton_kho": 1.5,
+      "ton_kho_toi_thieu": 1
+    },
+    "nl_017": {
+      "don_vi": "kg",
+      "gia_nhap": 40000,
+      "ten_nguyen_lieu": "Khoai môn",
+      "ton_kho": 7,
+      "ton_kho_toi_thieu": 2
+    },
+    "nl_018": {
+      "don_vi": "cái",
+      "gia_nhap": 800,
+      "ten_nguyen_lieu": "Ly nhựa 500ml",
+      "ton_kho": 220,
+      "ton_kho_toi_thieu": 100
+    }
+  },
+  "nhan_vien": {
+    "nv_001": {
+      "AuthUid": "49NYVZki9WRxK6Ds7gfpnuk5MGy2",
+      "email": "ga644376@gmail.com",
+      "ho_ten": "Nguyễn Văn A",
+      "so_dien_thoai": "0901234567",
+      "trang_thai": "active",
+      "vai_tro": "manager"
+    },
+    "nv_003": {
+      "AuthUid": "",
+      "avatar_url": "",
+      "email": "kirak7264@gmail.com",
+      "ho_ten": "Tên Của Người Này",
+      "ngay_vao_lam": "06/04/2026",
+      "so_dien_thoai": "0987654321",
+      "trang_thai": "active",
+      "vai_tro": "admin"
+    },
+    "nv_004": {
+      "AuthUid": "",
+      "avatar_url": "",
+      "email": "wocinex657@nazisat.com",
+      "ho_ten": "Nguyen Van Chien",
+      "ngay_vao_lam": "2026-04-08",
+      "so_dien_thoai": "0948756312",
+      "trang_thai": "active",
+      "vai_tro": "barista"
+    },
+    "nv_006": {
+      "AuthUid": "ShHB63YzMtartZUfl0EA8S5lwnY2",
+      "avatar_url": "",
+      "email": "trachichung9a5@gmail.com",
+      "ho_ten": "Trương Cao Nguyên",
+      "ngay_vao_lam": "2026-04-14T18:17:12.937Z",
+      "so_dien_thoai": "0966298073",
+      "trang_thai": "active",
+      "vai_tro": "manager"
+    },
+    "nv_007": {
+      "AuthUid": "",
+      "avatar_url": "",
+      "email": "orderstaff@gmail.com",
+      "ho_ten": "Nhân viên Order",
+      "ngay_vao_lam": "2026-04-15",
+      "so_dien_thoai": "0911111111",
+      "trang_thai": "active",
+      "vai_tro": "order staff"
+    },
+    "nv_008": {
+      "AuthUid": "",
+      "avatar_url": "",
+      "email": "barista@gmail.com",
+      "ho_ten": "Nhân viên Pha chế",
+      "ngay_vao_lam": "2026-04-15",
+      "so_dien_thoai": "0922222222",
+      "trang_thai": "active",
+      "vai_tro": "barista"
+    },
+    "nv_009": {
+      "AuthUid": "",
+      "avatar_url": "",
+      "email": "security@gmail.com",
+      "ho_ten": "Nhân viên Bảo vệ",
+      "ngay_vao_lam": "2026-04-15",
+      "so_dien_thoai": "0933333333",
+      "trang_thai": "active",
+      "vai_tro": "security"
+    },
+    "nv_016": {
+      "AuthUid": "Sa66MajsBWOCMyxG7rQspJYYh5F3",
+      "avatar_url": "",
+      "email": "toronto@gmail.com",
+      "ho_ten": "Trà Chí Chung",
+      "ngay_vao_lam": "2026-04-05",
+      "so_dien_thoai": "0911455789",
+      "trang_thai": "active",
+      "vai_tro": "security"
+    },
+    "nv_017": {
+      "AuthUid": "Ns3zkk90JCgrAKu2P15qJ9SfuZv1",
+      "avatar_url": "",
+      "email": "tech.wizard_99@mockmail.io",
+      "ho_ten": "Nguyễn Văn Công Nghệ",
+      "ngay_vao_lam": "2026-05-07",
+      "so_dien_thoai": "0966298788",
+      "trang_thai": "active",
+      "vai_tro": "security"
+    },
+    "nv_018": {
+      "AuthUid": "a0FnmlUw89e6utmxPT6HyJPGjqi2",
+      "avatar_url": "",
+      "email": "saggsaas@gmail.com",
+      "ho_ten": "Nguyên",
+      "ngay_vao_lam": "2026-05-20",
+      "so_dien_thoai": "0993283282",
+      "trang_thai": "active",
+      "vai_tro": "staff"
+    }
+  },
+  "nhap_kho": {
+    "nk_001": {
+      "ds_nl": {
+        "nl_001": {
+          "gia_nhap": 180000,
+          "so_luong": 10,
+          "thanh_tien": 1800000
+        },
+        "nl_004": {
+          "gia_nhap": 120000,
+          "so_luong": 5,
+          "thanh_tien": 600000
+        }
+      },
+      "ghi_chu": "Nhập giữa tháng 6",
+      "ngay_nhap": 20260615,
+      "nhanvien_id": "nv_006",
+      "thanh_tien": 2400000
+    },
+    "nk_002": {
+      "ds_nl": {
+        "nl_002": {
+          "gia_nhap": 32000,
+          "so_luong": 30,
+          "thanh_tien": 960000
+        },
+        "nl_003": {
+          "gia_nhap": 25000,
+          "so_luong": 24,
+          "thanh_tien": 600000
+        },
+        "nl_009": {
+          "gia_nhap": 22000,
+          "so_luong": 20,
+          "thanh_tien": 440000
+        }
+      },
+      "ghi_chu": "Bổ sung sữa + đường",
+      "ngay_nhap": 20260620,
+      "nhanvien_id": "nv_001",
+      "thanh_tien": 2000000
+    },
+    "nk_003": {
+      "ds_nl": {
+        "nl_012": {
+          "gia_nhap": 35000,
+          "so_luong": 15,
+          "thanh_tien": 525000
+        },
+        "nl_014": {
+          "gia_nhap": 70000,
+          "so_luong": 6,
+          "thanh_tien": 420000
+        },
+        "nl_015": {
+          "gia_nhap": 55000,
+          "so_luong": 8,
+          "thanh_tien": 440000
+        }
+      },
+      "ghi_chu": "Nhập trái cây tuần",
+      "ngay_nhap": 20260624,
+      "nhanvien_id": "nv_006",
+      "thanh_tien": 1385000
+    },
+    "nk_004": {
+      "ds_nl": {
+        "nl_006": {
+          "gia_nhap": 210000,
+          "so_luong": 3,
+          "thanh_tien": 630000
+        },
+        "nl_007": {
+          "gia_nhap": 450000,
+          "so_luong": 2,
+          "thanh_tien": 900000
+        }
+      },
+      "ghi_chu": "Nhập matcha + cacao",
+      "ngay_nhap": 20260628,
+      "nhanvien_id": "nv_001",
+      "thanh_tien": 1530000
+    },
+    "nk_005": {
+      "ds_nl": {
+        "nl_001": {
+          "gia_nhap": 180000,
+          "so_luong": 8,
+          "thanh_tien": 1440000
+        },
+        "nl_008": {
+          "gia_nhap": 60000,
+          "so_luong": 6,
+          "thanh_tien": 360000
+        },
+        "nl_018": {
+          "gia_nhap": 800,
+          "so_luong": 200,
+          "thanh_tien": 160000
+        }
+      },
+      "ghi_chu": "Nhập đầu tháng 7",
+      "ngay_nhap": 20260701,
+      "nhanvien_id": "nv_006",
+      "thanh_tien": 1960000
+    },
+    "nk_006": {
+      "ds_nl": {
+        "nl_010": {
+          "gia_nhap": 85000,
+          "so_luong": 6,
+          "thanh_tien": 510000
+        },
+        "nl_011": {
+          "gia_nhap": 78000,
+          "so_luong": 5,
+          "thanh_tien": 390000
+        }
+      },
+      "ghi_chu": "Nhập bổ sung topping",
+      "ngay_nhap": 20260703,
+      "nhanvien_id": "nv_006",
+      "thanh_tien": 900000
+    }
+  },
+  "su_co": {
+    "sc_001": {
+      "ghi_chu_xu_ly": "Đã mời khách ra ngoài, báo công an phường",
+      "loai_su_co": "an_ninh",
+      "mo_ta": "Khách hàng gây rối tại quầy bar",
+      "muc_do": "khan_cap",
+      "nguoi_bao_id": "nv_009",
+      "thoi_gian": 1782915000000,
+      "trang_thai": "da_xu_ly"
+    },
+    "sc_002": {
+      "ghi_chu_xu_ly": "Sơ cứu tại chỗ, đưa đi bệnh viện",
+      "loai_su_co": "y_te",
+      "mo_ta": "Nhân viên bị bỏng nước nóng",
+      "muc_do": "nghiem_trong",
+      "nguoi_bao_id": "nv_008",
+      "thoi_gian": 1782894600000,
+      "trang_thai": "da_xu_ly"
+    },
+    "sc_003": {
+      "ghi_chu_xu_ly": "Ngắt cầu dao, gọi thợ điện kiểm tra",
+      "loai_su_co": "chay_no",
+      "mo_ta": "Chập điện nhẹ khu vực bếp",
+      "muc_do": "khan_cap",
+      "nguoi_bao_id": "nv_016",
+      "thoi_gian": 1782963900000,
+      "trang_thai": "da_xu_ly"
+    },
+    "sc_004": {
+      "ghi_chu_xu_ly": "",
+      "loai_su_co": "an_ninh",
+      "mo_ta": "Mất mũ bảo hiểm của khách ở bãi xe",
+      "muc_do": "thuong",
+      "nguoi_bao_id": "nv_017",
+      "thoi_gian": 1782987600000,
+      "trang_thai": "dang_xu_ly"
+    },
+    "sc_005": {
+      "ghi_chu_xu_ly": "Kiểm tra camera, xác nhận nhầm lẫn",
+      "loai_su_co": "sos_khan_cap",
+      "mo_ta": "Bảo vệ kích hoạt SOS — nghi trộm xe",
+      "muc_do": "khan_cap",
+      "nguoi_bao_id": "nv_016",
+      "thoi_gian": 1782915300000,
+      "trang_thai": "da_xu_ly"
+    },
+    "sc_006": {
+      "ghi_chu_xu_ly": "",
+      "loai_su_co": "y_te",
+      "mo_ta": "Khách bị dị ứng topping trân châu",
+      "muc_do": "thuong",
+      "nguoi_bao_id": "nv_007",
+      "thoi_gian": 1783047000000,
+      "trang_thai": "dang_xu_ly"
+    }
+  },
+  "thanh_toan": {
+    "tt_001": {
+      "don_hang_id": "dh_001",
+      "nhanvien_id": "nv_007",
+      "phuong_thuc": "tien_mat",
+      "thoi_gian": 1783044000000,
+      "tien_giam": 0,
+      "tien_thuc_thu": 80000,
+      "tong_tien": 80000
+    },
+    "tt_002": {
+      "don_hang_id": "dh_002",
+      "nhanvien_id": "nv_007",
+      "phuong_thuc": "momo",
+      "thoi_gian": 1783045500000,
+      "tien_giam": 0,
+      "tien_thuc_thu": 90000,
+      "tong_tien": 90000
+    },
+    "tt_003": {
+      "don_hang_id": "dh_007",
+      "nhanvien_id": "nv_007",
+      "phuong_thuc": "vietqr",
+      "thoi_gian": 1782983700000,
+      "tien_giam": 12500,
+      "tien_thuc_thu": 112500,
+      "tong_tien": 125000
+    },
+    "tt_004": {
+      "don_hang_id": "dh_008",
+      "nhanvien_id": "nv_018",
+      "phuong_thuc": "the",
+      "thoi_gian": 1782986100000,
+      "tien_giam": 0,
+      "tien_thuc_thu": 84000,
+      "tong_tien": 84000
+    },
+    "tt_005": {
+      "don_hang_id": "dh_009",
+      "nhanvien_id": "nv_007",
+      "phuong_thuc": "tien_mat",
+      "thoi_gian": 1782989100000,
+      "tien_giam": 0,
+      "tien_thuc_thu": 75000,
+      "tong_tien": 75000
+    },
+    "tt_006": {
+      "don_hang_id": "dh_010",
+      "nhanvien_id": "nv_018",
+      "phuong_thuc": "chuyen_khoan",
+      "thoi_gian": 1782879300000,
+      "tien_giam": 6700,
+      "tien_thuc_thu": 60300,
+      "tong_tien": 67000
+    },
+    "tt_007": {
+      "don_hang_id": "dh_012",
+      "nhanvien_id": "nv_018",
+      "phuong_thuc": "tien_mat",
+      "thoi_gian": 1782894600000,
+      "tien_giam": 0,
+      "tien_thuc_thu": 105000,
+      "tong_tien": 105000
+    }
+  },
+  "thong_bao": {
+    "tb_001": {
+      "da_doc": false,
+      "don_hang_id": "dh_005",
+      "loai": "don_moi",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_007",
+      "noi_dung": "Có đơn hàng mới tại Bàn 12",
+      "thoi_gian": 1783046700000,
+      "trang_lien_quan": "order"
+    },
+    "tb_002": {
+      "da_doc": false,
+      "don_hang_id": "dh_006",
+      "loai": "don_moi",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_018",
+      "noi_dung": "Có đơn hàng mới tại Bàn VIP 1",
+      "thoi_gian": 1783047600000,
+      "trang_lien_quan": "order"
+    },
+    "tb_003": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "xin_nghi",
+      "nguoi_gui_id": "nv_006",
+      "nguoi_nhan_id": "nv_003",
+      "noi_dung": "QL Trương Cao Nguyên xin nghỉ ngày 05/07/2026. Lý do: Việc gia đình",
+      "thoi_gian": 1782954600000,
+      "trang_lien_quan": "leave"
+    },
+    "tb_004": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "xin_nghi",
+      "nguoi_gui_id": "nv_008",
+      "nguoi_nhan_id": "nv_006",
+      "noi_dung": "NV Pha chế xin nghỉ ngày 05/07/2026. Lý do: Đi thi",
+      "thoi_gian": 1782997500000,
+      "trang_lien_quan": "leave"
+    },
+    "tb_005": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "sua_nguyen_lieu",
+      "nguoi_gui_id": "nv_006",
+      "nguoi_nhan_id": "nv_003",
+      "noi_dung": "QL Trương Cao Nguyên đã sửa giá 'Cà phê hạt' 150,000đ → 180,000đ. Lý do: NCC tăng giá",
+      "thoi_gian": 1782889200000,
+      "trang_lien_quan": "stock"
+    },
+    "tb_006": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "feedback_xau",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_003",
+      "noi_dung": "Khách hàng Đỗ Minh Quân đánh giá 1★: 'Ly bị vỡ, nhân viên thái độ'. QL CHƯA XỬ LÝ.",
+      "thoi_gian": 1782966000000,
+      "trang_lien_quan": "feedback"
+    },
+    "tb_007": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "feedback_xau",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_006",
+      "noi_dung": "Khách hàng Bùi Quốc Bảo đánh giá 2★: 'Nước cam hơi chua, ít đá'.",
+      "thoi_gian": 1782898800000,
+      "trang_lien_quan": "feedback"
+    },
+    "tb_008": {
+      "da_doc": false,
+      "don_hang_id": "",
+      "loai": "sos",
+      "nguoi_gui_id": "nv_016",
+      "nguoi_nhan_id": "nv_003",
+      "noi_dung": "Bảo vệ Trà Chí Chung kích hoạt SOS khẩn cấp!",
+      "thoi_gian": 1782915300000,
+      "trang_lien_quan": "security"
+    },
+    "tb_009": {
+      "da_doc": true,
+      "don_hang_id": "",
+      "loai": "cham_cong",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_006",
+      "noi_dung": "NV Pha chế đi muộn 35 phút ngày 02/07/2026",
+      "thoi_gian": 1782954600000,
+      "trang_lien_quan": "attendance"
+    },
+    "tb_010": {
+      "da_doc": true,
+      "don_hang_id": "dh_003",
+      "loai": "don_moi",
+      "nguoi_gui_id": "system",
+      "nguoi_nhan_id": "nv_008",
+      "noi_dung": "Bếp: 2x Trà sữa trân châu (Bàn 2) chờ pha chế",
+      "thoi_gian": 1783044360000,
+      "trang_lien_quan": "order"
+    },
+    "tb_011": {
+      "da_doc": true,
+      "don_hang_id": "",
+      "loai": "sua_nguyen_lieu",
+      "nguoi_gui_id": "nv_001",
+      "nguoi_nhan_id": "nv_003",
+      "noi_dung": "QL Nguyễn Văn A thêm nguyên liệu mới 'Bột matcha'. Lý do: Bổ sung menu",
+      "thoi_gian": 1782615600000,
+      "trang_lien_quan": "stock"
+    },
+    "tb_012": {
+      "da_doc": true,
+      "don_hang_id": "",
+      "loai": "xin_nghi",
+      "nguoi_gui_id": "nv_018",
+      "nguoi_nhan_id": "nv_006",
+      "noi_dung": "NV Nguyên xin nghỉ ngày 10/07/2026. Lý do: Khám sức khỏe định kỳ",
+      "thoi_gian": 1783037100000,
+      "trang_lien_quan": "leave"
+    }
+  },
+  "tin_nhan": {
+    "chat_nv_001_nv_008": {
+      "msg_1782961200000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_001",
+        "noi_dung": "Quầy pha chế dạo này ổn không em?",
+        "ten_nguoi_gui": "Nguyễn Văn A",
+        "thoi_gian": 1782961200000
+      },
+      "msg_1782961320000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_008",
+        "noi_dung": "Dạ sắp hết sữa tươi rồi anh ạ",
+        "ten_nguoi_gui": "Nhân viên Pha chế",
+        "thoi_gian": 1782961320000
+      }
+    },
+    "chat_nv_003_nv_006": {
+      "msg_1782957600000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_003",
+        "noi_dung": "Báo cáo doanh thu tháng 6 gửi anh trước thứ 6 nhé",
+        "ten_nguoi_gui": "Tên Của Người Này",
+        "thoi_gian": 1782957600000
+      },
+      "msg_1782957900000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_006",
+        "noi_dung": "Dạ em đang tổng hợp, chiều nay có ạ",
+        "ten_nguoi_gui": "Trương Cao Nguyên",
+        "thoi_gian": 1782957900000
+      }
+    },
+    "room_global": {
+      "msg_1783036800000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_001",
+        "noi_dung": "Chào mọi người, chúc ca làm việc hôm nay đắt khách nhé!",
+        "ten_nguoi_gui": "Nguyễn Văn A",
+        "thoi_gian": 1783036800000
+      },
+      "msg_1783042500000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_008",
+        "noi_dung": "Sữa tươi hết rồi mọi người ơi, em đã gửi cảnh báo",
+        "ten_nguoi_gui": "Nhân viên Pha chế",
+        "thoi_gian": 1783042500000
+      },
+      "msg_1783042800000": {
+        "loai_tin_nhan": "text",
+        "nguoi_gui_id": "nv_006",
+        "noi_dung": "Anh đã đặt NCC giao trong sáng nay nhé",
+        "ten_nguoi_gui": "Trương Cao Nguyên",
+        "thoi_gian": 1783042800000
+      }
+    }
+  },
+  "xin_nghi": {
+    "xn_001": {
+      "den_ngay": "16/04/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Việc gia đình",
+      "nguoi_duyet_id": "nv_006",
+      "nhanvien_id": "nv_007",
+      "so_ngay": 2,
+      "thoi_gian_duyet": 1776142800000,
+      "thoi_gian_gui": 1776135600000,
+      "trang_thai": "da_duyet",
+      "tu_ngay": "15/04/2026"
+    },
+    "xn_002": {
+      "den_ngay": "20/03/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Khám bệnh",
+      "nguoi_duyet_id": "nv_001",
+      "nhanvien_id": "nv_007",
+      "so_ngay": 1,
+      "thoi_gian_duyet": 1773892800000,
+      "thoi_gian_gui": 1773885600000,
+      "trang_thai": "da_duyet",
+      "tu_ngay": "20/03/2026"
+    },
+    "xn_003": {
+      "den_ngay": "05/07/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Đi thi",
+      "nguoi_duyet_id": "",
+      "nhanvien_id": "nv_008",
+      "so_ngay": 1,
+      "thoi_gian_duyet": 0,
+      "thoi_gian_gui": 1782997200000,
+      "trang_thai": "cho_duyet",
+      "tu_ngay": "05/07/2026"
+    },
+    "xn_004": {
+      "den_ngay": "06/07/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Việc gia đình cần giải quyết gấp",
+      "nguoi_duyet_id": "",
+      "nhanvien_id": "nv_006",
+      "so_ngay": 2,
+      "thoi_gian_duyet": 0,
+      "thoi_gian_gui": 1782954000000,
+      "trang_thai": "cho_duyet",
+      "tu_ngay": "05/07/2026"
+    },
+    "xn_005": {
+      "den_ngay": "28/06/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Đám cưới người thân",
+      "nguoi_duyet_id": "nv_006",
+      "nhanvien_id": "nv_004",
+      "so_ngay": 1,
+      "thoi_gian_duyet": 1782378000000,
+      "thoi_gian_gui": 1782370800000,
+      "trang_thai": "da_duyet",
+      "tu_ngay": "28/06/2026"
+    },
+    "xn_006": {
+      "den_ngay": "01/07/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Về quê có việc đột xuất",
+      "nguoi_duyet_id": "nv_001",
+      "nhanvien_id": "nv_009",
+      "so_ngay": 2,
+      "thoi_gian_duyet": 1782615600000,
+      "thoi_gian_gui": 1782612000000,
+      "trang_thai": "tu_choi",
+      "tu_ngay": "30/06/2026"
+    },
+    "xn_007": {
+      "den_ngay": "10/07/2026",
+      "ghi_chu_duyet": "",
+      "ly_do": "Khám sức khỏe định kỳ",
+      "nguoi_duyet_id": "",
+      "nhanvien_id": "nv_018",
+      "so_ngay": 1,
+      "thoi_gian_duyet": 0,
+      "thoi_gian_gui": 1783036800000,
+      "trang_thai": "cho_duyet",
+      "tu_ngay": "10/07/2026"
+    }
+  }
+}

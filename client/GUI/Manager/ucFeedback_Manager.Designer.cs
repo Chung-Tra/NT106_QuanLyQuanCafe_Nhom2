@@ -23,6 +23,12 @@ namespace GUI
             lblTitle = new Label();
             pnlGrid = new Guna2Panel();
             dgvFeedback = new Guna2DataGridView();
+            colCode = new DataGridViewTextBoxColumn();
+            colCustomer = new DataGridViewTextBoxColumn();
+            colDate = new DataGridViewTextBoxColumn();
+            colRating = new DataGridViewTextBoxColumn();
+            colContent = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlDetail = new Guna2Panel();
             lblDetailTitle = new Label();
             lblCustomerName = new Label();
@@ -30,6 +36,7 @@ namespace GUI
             lblRating = new Label();
             txtContent = new Guna2TextBox();
             btnReply = new Guna2Button();
+            btnEditFeedback = new Guna2Button();
             pnlHeader.SuspendLayout();
             pnlGrid.SuspendLayout();
             pnlDetail.SuspendLayout();
@@ -37,6 +44,7 @@ namespace GUI
             SuspendLayout();
 
             // ====== pnlHeader ======
+            pnlHeader.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlHeader.BackColor = Color.FromArgb(31, 31, 34);
             pnlHeader.BorderRadius = 14;
             pnlHeader.Controls.Add(lblTitle);
@@ -46,9 +54,10 @@ namespace GUI
             lblTitle.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.Location = new Point(18, 16);
-            lblTitle.Text = "💬  Phản hồi khách hàng";
+            lblTitle.Text = "Phản hồi khách hàng";
 
             // ====== pnlGrid ======
+            pnlGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
             pnlGrid.BorderRadius = 14;
             pnlGrid.Controls.Add(dgvFeedback);
@@ -69,11 +78,19 @@ namespace GUI
             dgvFeedback.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvFeedback.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvFeedback.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvFeedback);
+            ConfigureGrid(dgvFeedback);            dgvFeedback.Columns.AddRange(new DataGridViewColumn[] { colCode, colCustomer, colDate, colRating, colContent, colStatus });
+            colCode.HeaderText = "Mã"; colCode.Name = "Mã"; colCode.DataPropertyName = "Mã";
+            colCustomer.HeaderText = "Khách hàng"; colCustomer.Name = "Khách hàng"; colCustomer.DataPropertyName = "Khách hàng";
+            colDate.HeaderText = "Ngày"; colDate.Name = "Ngày"; colDate.DataPropertyName = "Ngày";
+            colRating.HeaderText = "Đánh giá"; colRating.Name = "Đánh giá"; colRating.DataPropertyName = "Đánh giá";
+            colContent.HeaderText = "Nội dung"; colContent.Name = "Nội dung"; colContent.DataPropertyName = "Nội dung";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
             dgvFeedback.AllowUserToDeleteRows = false;
+            dgvFeedback.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvFeedback.Location = new Point(18, 18);
             dgvFeedback.Size = new Size(924, 284);
             dgvFeedback.SelectionChanged += dgvFeedback_SelectionChanged;
+            dgvFeedback.CellDoubleClick += DgvFeedback_CellDoubleClick;
 
             // ====== pnlDetail ======
             pnlDetail.BackColor = Color.FromArgb(31, 31, 34);
@@ -84,6 +101,8 @@ namespace GUI
             pnlDetail.Controls.Add(lblRating);
             pnlDetail.Controls.Add(txtContent);
             pnlDetail.Controls.Add(btnReply);
+            pnlDetail.Controls.Add(btnEditFeedback);
+            pnlDetail.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlDetail.Location = new Point(20, 430);
             pnlDetail.Size = new Size(960, 220);
 
@@ -91,7 +110,7 @@ namespace GUI
             lblDetailTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
             lblDetailTitle.ForeColor = Color.White;
             lblDetailTitle.Location = new Point(18, 14);
-            lblDetailTitle.Text = "📝  Chi tiết phản hồi";
+            lblDetailTitle.Text = "Chi tiết phản hồi";
 
             lblCustomerName.AutoSize = true;
             lblCustomerName.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -120,6 +139,7 @@ namespace GUI
             txtContent.Font = new Font("Segoe UI", 10F);
             txtContent.ForeColor = Color.White;
             txtContent.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
+            txtContent.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtContent.Location = new Point(18, 84);
             txtContent.Multiline = true;
             txtContent.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
@@ -133,10 +153,27 @@ namespace GUI
             btnReply.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnReply.ForeColor = Color.White;
             btnReply.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReply.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnReply.Location = new Point(760, 84);
             btnReply.Size = new Size(180, 50);
-            btnReply.Text = "💬  Trả lời";
+            btnReply.Text = "Trả lời";
             btnReply.Click += btnReply_Click;
+
+            // btnEditFeedback
+            btnEditFeedback.BorderColor = Color.FromArgb(80, 80, 90);
+            btnEditFeedback.BorderRadius = 10;
+            btnEditFeedback.BorderThickness = 1;
+            btnEditFeedback.Cursor = Cursors.Hand;
+            btnEditFeedback.FillColor = Color.Transparent;
+            btnEditFeedback.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnEditFeedback.ForeColor = Color.FromArgb(220, 220, 225);
+            btnEditFeedback.HoverState.FillColor = Color.FromArgb(45, 45, 50);
+            btnEditFeedback.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnEditFeedback.Location = new Point(760, 144);
+            btnEditFeedback.Name = "btnEditFeedback";
+            btnEditFeedback.Size = new Size(180, 44);
+            btnEditFeedback.Text = "Sửa dòng chọn";
+            btnEditFeedback.Click += BtnEditFeedback_Click;
 
             // ====== ucFeedback_Manager ======
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -158,6 +195,7 @@ namespace GUI
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -196,6 +234,12 @@ namespace GUI
         private Label lblTitle;
         private Guna2Panel pnlGrid;
         private Guna2DataGridView dgvFeedback;
+        private DataGridViewTextBoxColumn colCode;
+        private DataGridViewTextBoxColumn colCustomer;
+        private DataGridViewTextBoxColumn colDate;
+        private DataGridViewTextBoxColumn colRating;
+        private DataGridViewTextBoxColumn colContent;
+        private DataGridViewTextBoxColumn colStatus;
         private Guna2Panel pnlDetail;
         private Label lblDetailTitle;
         private Label lblCustomerName;
@@ -203,5 +247,6 @@ namespace GUI
         private Label lblRating;
         private Guna2TextBox txtContent;
         private Guna2Button btnReply;
+        private Guna2Button btnEditFeedback;
     }
 }

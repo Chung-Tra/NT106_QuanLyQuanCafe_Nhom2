@@ -9,9 +9,10 @@ namespace GUI
 
     public partial class LeaveRequestDetail : Form
     {
-        public LeaveRequestDetail(IEnumerable<LeaveItem> items, string title = "🏖  Danh sách đơn xin nghỉ")
+        public LeaveRequestDetail(IEnumerable<LeaveItem> items, string title = "Danh sách đơn xin nghỉ")
         {
             InitializeComponent();
+            WindowChrome.Apply(this);
             lblTitle.Text = title;
             foreach (var item in items)
                 flpLeaves.Controls.Add(BuildCard(item));
@@ -23,15 +24,15 @@ namespace GUI
 
             var card = new Panel
             {
-                BackColor = Color.FromArgb(38, 38, 42),
+                BackColor = Color.FromArgb(39, 39, 42),
                 Width     = flpLeaves.ClientSize.Width - 10,
                 Height    = 90,
                 Margin    = new Padding(0, 0, 0, 8),
             };
 
-            var lblName   = new Label { Text = "👤  " + item.Name,                     Font = new Font("Segoe UI", 10F, FontStyle.Bold), ForeColor = Color.White,                     AutoSize = true, Location = new Point(14, 10) };
-            var lblDate   = new Label { Text = $"📅  {item.From} → {item.To}",          Font = new Font("Segoe UI", 8.5F),               ForeColor = Color.FromArgb(160, 160, 166),   AutoSize = true, Location = new Point(14, 34) };
-            var lblReason = new Label { Text = "💬  " + item.Reason,                    Font = new Font("Segoe UI", 8.5F),               ForeColor = Color.FromArgb(200, 200, 205),   AutoSize = true, Location = new Point(14, 54) };
+            var lblName   = new Label { Text = item.Name,                Font = new Font("Segoe UI", 10F, FontStyle.Bold), ForeColor = Color.White,                     AutoSize = true, Location = new Point(14, 10) };
+            var lblDate   = new Label { Text = $"{item.From} → {item.To}",          Font = new Font("Segoe UI", 8.5F),               ForeColor = Color.FromArgb(160, 160, 166),   AutoSize = true, Location = new Point(14, 34) };
+            var lblReason = new Label { Text = item.Reason,                 Font = new Font("Segoe UI", 8.5F),               ForeColor = Color.FromArgb(200, 200, 205),   AutoSize = true, Location = new Point(14, 54) };
             var lblStatus = new Label { Text = item.Status,                             Font = new Font("Segoe UI", 8.5F, FontStyle.Bold), ForeColor = pending ? Color.FromArgb(245, 158, 11) : Color.MediumSeaGreen, AutoSize = true, Location = new Point(card.Width - 100, 10) };
 
             card.Controls.AddRange(new Control[] { lblName, lblDate, lblReason, lblStatus });
@@ -40,7 +41,7 @@ namespace GUI
             {
                 var btn = new Guna.UI2.WinForms.Guna2Button
                 {
-                    Text = "✔ Duyệt", Size = new Size(80, 28),
+                    Text = "Duyệt", Size = new Size(80, 28),
                     Location = new Point(card.Width - 100, 52),
                     FillColor = Color.FromArgb(34, 197, 94), ForeColor = Color.White,
                     Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),

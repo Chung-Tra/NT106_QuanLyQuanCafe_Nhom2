@@ -19,9 +19,7 @@ namespace GUI
         {
             _prefillLines = prefillLines;
             InitializeComponent();
-            this.Load += AddInventoryImport_Load;
-            btnLuu.Click += BtnLuu_Click;
-            dgvChiTietNhap.CellEndEdit += DgvChiTietNhap_CellEndEdit;
+            WindowChrome.Apply(this);
             dgvChiTietNhap.RowsRemoved += (_, _) => CapNhatTongTien();
             dgvChiTietNhap.UserDeletedRow += (_, _) => CapNhatTongTien();
         }

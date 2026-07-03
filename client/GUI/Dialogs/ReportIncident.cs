@@ -3,10 +3,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Dialog báo cáo sự cố / sai sót từ bất kỳ trang nào.
-    /// Sau khi gửi, có nút chuyển thẳng sang chat với Manager để duyệt nhanh.
-    /// </summary>
+    // Dialog báo cáo sự cố / sai sót; sau khi gửi có nút chuyển sang chat với Manager.
     public partial class ReportIncident : Form
     {
         private readonly string _sourcePage;
@@ -15,6 +12,7 @@ namespace GUI
         {
             _sourcePage = sourcePage;
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
 
             if (string.IsNullOrEmpty(sourcePage))
                 lblPage.Visible = false;

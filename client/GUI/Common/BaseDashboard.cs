@@ -1,4 +1,4 @@
-﻿using DTO;
+using DTO;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -30,10 +30,10 @@ namespace GUI
             }
         }
 
-        /// <summary>Gắn drag vào tất cả control — gọi sau khi form Load xong.</summary>
+        // Gắn drag vào tất cả control — gọi sau khi form Load xong.
         public void ApplyDrag() => ApplyDragToAllControls(_targetForm);
 
-        //HÀM KÉO THẢ FORM 
+        // Hàm kéo thả form
         private void HandleFormDrag_MouseDown(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -97,7 +97,6 @@ namespace GUI
             }
         }
 
-        // --- HỆ THỐNG TIMER BẢO MẬT ---
         private void SetupSessionTimer()
         {
             _sessionTimer.Interval = 1000;

@@ -21,15 +21,10 @@ namespace BUS
                 {
                     return (false, "Vui lòng nhập địa chỉ email của bạn.", null);
                 }
-                // Kiểm tra độ mạnh của mật khẩu nếu người dùng nhập
-                if (!Validation.IsAnyEmpty(password))
-                {
-                    if (!Validation.IsValidPassword(password))
-                    {
-                        return (false, "Mật khẩu phải dài ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, chữ số và một ký tự đặc biệt.", null);
-                    }
-                }
-                else
+                // Đăng nhập chỉ kiểm tra CÓ NHẬP mật khẩu hay không — KHÔNG kiểm tra độ mạnh.
+                // (Độ mạnh chỉ áp khi ĐẶT mật khẩu: đăng ký / reset. Nếu chặn ở đây, tài khoản
+                //  có mật khẩu không đạt quy tắc sẽ không đăng nhập được dù gõ đúng.)
+                if (Validation.IsAnyEmpty(password))
                 {
                     return (false, "Vui lòng nhập mật khẩu của bạn.", null);
                 }
@@ -61,10 +56,13 @@ namespace BUS
             }
         }
         // Hàm xử lý nghiệp vụ đặt lại mật khẩu, trả về 2 giá trị: Thành công hay không, Thông báo lỗi (nếu có)
-        public static async Task<(bool IsValid, string Message)> HandlePasswordReset(string email, string newPass, string confirmPass)
+        public static async Task<(bool IsValid, string Message)> HandlePasswordReset(string email, string newPass, string confirmPass, string resetToken)
         {
             if (Validation.IsAnyEmpty(newPass, confirmPass))
                 return (false, "Vui lòng nhập đầy đủ mật khẩu mới và xác nhận mật khẩu.");
+
+            if (Validation.IsAnyEmpty(resetToken))
+                return (false, "Phiên đặt lại mật khẩu không hợp lệ. Vui lòng xác thực OTP lại.");
 
             if (!Validation.IsValidPassword(newPass))
                 return (false, "Mật khẩu phải dài ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, chữ số và một ký tự đặc biệt.");
@@ -74,8 +72,8 @@ namespace BUS
                 return (false, "Mật khẩu không khớp.\nVui lòng thử lại.");
             }
             else
-                // Nếu mọi thứ ổn ở GUI, gọi xuống DAL để thực thi đẩy lên Cloud
-                return await AuthDAL.UpdatePasswordAsync(email, newPass);
+                // Kèm reset-token (đã xác thực OTP ở server) để được phép đổi mật khẩu
+                return await AuthDAL.UpdatePasswordAsync(email, newPass, resetToken);
         }
     }
 }

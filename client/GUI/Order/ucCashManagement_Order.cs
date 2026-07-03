@@ -12,8 +12,17 @@ namespace GUI
         public ucCashManagement_Order()
         {
             InitializeComponent();
-            btnReport.Click += btnReport_Click;
+            GridColumnGuard.SyncColumnNames(dgvTransactions);
+            DgvRefresh.Attach(dgvTransactions, LoadMockData);
             this.Load += (s, e) => LoadMockData();
+
+            // Double-click 1 giao dịch -> form chi tiết read-only (log tiền, chỉ xem)
+            dgvTransactions.CellDoubleClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                RecordDetail.FromRow(dgvTransactions.Rows[e.RowIndex], "Chi tiết giao dịch tiền mặt")
+                            .ShowDialog(MsgBox.OwnerWindow(this));
+            };
         }
 
         private void LoadMockData()
@@ -44,7 +53,13 @@ namespace GUI
 
             dgvTransactions.Columns["Số tiền"].DefaultCellStyle.Format = "N0";
             dgvTransactions.Columns["Số tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dgvTransactions.Columns["Ghi chú"].FillWeight = 35;
+            // Cân lại bề rộng cột (FillWeight): đặt cho MỌI cột vì nếu chỉ set 1 cột thì
+            // các cột còn lại giữ mặc định 100 → cột vừa set hoá ra hẹp nhất. "Ghi chú" là
+            // cột dài nhất nên chiếm nhiều nhất; "Số tiền" vừa phải để không trôi xa tiêu đề.
+            dgvTransactions.Columns["Thời gian"].FillWeight = 22;
+            dgvTransactions.Columns["Loại"].FillWeight     = 13;
+            dgvTransactions.Columns["Số tiền"].FillWeight  = 22;
+            dgvTransactions.Columns["Ghi chú"].FillWeight  = 43;
         }
 
         private void btnReport_Click(object? sender, EventArgs e)

@@ -4,9 +4,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Chiều cao ô nhập / form theo độ dài nội dung (WordWrap); form scroll khi cao quá màn hình.
-    /// </summary>
+    // Chiều cao ô nhập / form theo độ dài nội dung (WordWrap); form scroll khi cao quá màn hình.
     internal static class DialogAutosizeHelper
     {
         private static readonly TextFormatFlags WrapFlags =
@@ -23,7 +21,7 @@ namespace GUI
             return Math.Max(sz.Height + 10, TextRenderer.MeasureText("Mg", font).Height + 8);
         }
 
-        /// <summary>Với nội dung dài: khóa chiều cao tối đa và bật scrollbar trên TextBox.</summary>
+        // Với nội dung dài: khóa chiều cao tối đa và bật scrollbar trên TextBox.
         internal static void SetWrappedTextBoxHeight(TextBox tb, int minHeight, int maxHeight)
         {
             int w = tb.ClientSize.Width > 0 ? tb.ClientSize.Width : tb.Width - SystemInformation.VerticalScrollBarWidth;
@@ -41,7 +39,7 @@ namespace GUI
             }
         }
 
-        /// <summary>Giới hạn chiều cao form; phần layout dài hơn được cuộn bằng thanh dọc của form.</summary>
+        // Giới hạn chiều cao form; phần layout dài hơn được cuộn bằng thanh dọc của form.
         internal static void CapFormHeightWithAutoScroll(Form form, int layoutBottomY, int preferredWidth, int maxClientHeight)
         {
             preferredWidth = Math.Max(preferredWidth, 320);

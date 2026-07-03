@@ -6,32 +6,22 @@ namespace GUI
 {
     public partial class VerifyCode : Form
     {
-        // ──────────────────────────────────────────────
-        // Biên đếm thời gian cho phép gửi lại mã (60s)
-        // ──────────────────────────────────────────────
-        private DateTime _expiryTime; // Biến lưu thời điểm mã sẽ hết hạn
+        // Bộ đếm thời gian cho phép gửi lại mã (60s)
         private int timeLeft = 60;
 
-        // ──────────────────────────────────────────────
-        // Biến lấy giá trị từ form ConfirmEmail
-        // ──────────────────────────────────────────────
-        private string _systemCode;
+        // Email nhận từ form ConfirmEmail (mã KHÔNG còn nằm ở client — server giữ và tự so sánh)
         private readonly string _userEmail;
 
-        public VerifyCode(string systemCode, string userEmail)
+        public VerifyCode(string userEmail)
         {
             InitializeComponent();
             FormCorners.Round(this);
-            AppFonts.ApplyTo(lblTitle, lblDescription);
+            WindowChrome.Apply(this, close: false, host: pnlCard);
 
-            _systemCode = systemCode;
             _userEmail = userEmail;
-            _expiryTime = DateTime.Now.AddSeconds(60);
         }
 
-        // ──────────────────────────────────────────────
         // Quay lại form ConfirmEmail
-        // ──────────────────────────────────────────────
         private void lblBackToLogin_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Form ConfirmForm = new ConfirmEmail();
@@ -39,56 +29,25 @@ namespace GUI
             this.Close();
         }
 
-        // ──────────────────────────────────────────────
-        // Kiểm tra mã xác nhận
-        // ──────────────────────────────────────────────
-        private void btnVerify_Click(object sender, EventArgs e)
+        // Kiểm tra mã xác nhận — gửi mã lên SERVER để so sánh (server kiểm hạn dùng + số lần thử)
+        private async void btnVerify_Click(object sender, EventArgs e)
         {
             string userCode = txtCode.Text;
 
-            if (!Validation.IsAnyEmpty(userCode))
-            {
-                if (!Validation.IsValidVerificationCode(userCode))
-                {
-                    MsgBox.Show(
-                        this,
-                        "Mã xác nhận không hợp lệ!\nMã phải có đúng 8 ký tự, bao gồm cả chữ và số.",
-                        "Sai định dạng", MsgBox.MessageBoxType.Warning);
-                    return;
-                }
-            }
-            else
-            {
-                MsgBox.Show(this, "Vui lòng nhập mã xác nhận!", "Cảnh báo", MsgBox.MessageBoxType.Warning);
-                return;
-            }
+            btnVerify.Enabled = false;
+            var (success, resetToken, message) = await EmailBUS.VerifyOtpAsync(_userEmail, userCode);
+            btnVerify.Enabled = true;
 
-            // Kiểm tra thời gian hết hạn
-            if (DateTime.Now > _expiryTime)
+            if (success)
             {
-                MsgBox.Show(
-                    this,
-                    "Mã xác nhận đã hết hạn (60s).\nVui lòng nhấn 'Gửi lại mã' để nhận mã mới.",
-                    "Mã hết hạn", MsgBox.MessageBoxType.Warning);
-
-                //Reset về mã trống để tránh nhầm lẫn nếu người dùng cố gắng nhập mã cũ
-                _systemCode = "";
-                return;
-            }
-
-            if (userCode == _systemCode)
-            {
-                ResetPassword reset = new(_userEmail);
+                // Mang theo reset-token sang bước đặt mật khẩu
+                ResetPassword reset = new(_userEmail, resetToken ?? string.Empty);
                 reset.Show();
                 this.Close();
             }
             else
             {
-                MsgBox.Show(
-                    this,
-                    "Mã xác nhận không đúng.\nVui lòng thử lại!",
-                    "Lỗi",
-                    MsgBox.MessageBoxType.Error);
+                MsgBox.Show(this, message, "Lỗi", MsgBox.MessageBoxType.Error);
             }
         }
 
@@ -100,15 +59,12 @@ namespace GUI
 
             try
             {
-    
+
                 var result = await EmailBUS.ProcessPasswordResetAsync(_userEmail);
 
                 if (result.IsSuccess)
                 {
-                    // Cập nhật mã mới + reset thời hạn
-                    _systemCode  = result.Code ?? string.Empty;
-                    _expiryTime  = DateTime.Now.AddSeconds(60);
-
+                    // Server đã tạo + lưu mã mới; client chỉ khởi động lại bộ đếm
                     MsgBox.Show(this, "Một mã mới đã được gửi đến email của bạn.", "Thành công",
                                     MsgBox.MessageBoxType.Success);
 

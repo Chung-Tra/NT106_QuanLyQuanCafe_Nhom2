@@ -15,6 +15,7 @@ namespace GUI
         public EditFood(FoodDTO food)
         {
             InitializeComponent();
+            WindowChrome.Apply(this, host: panel1);
             LoadCategories();
             BindData(food);
         }

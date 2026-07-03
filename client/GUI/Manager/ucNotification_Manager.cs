@@ -10,6 +10,10 @@ namespace GUI
         public ucNotification_Manager()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvPendingLeave);
+            GridColumnGuard.SyncColumnNames(dgvSchedule);
+            DgvRefresh.Attach(dgvPendingLeave, LoadMockData);
+            DgvRefresh.Attach(dgvSchedule, LoadMockData);
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -32,7 +36,12 @@ namespace GUI
             dgvPendingLeave.RowHeadersVisible = false;
             dgvPendingLeave.ReadOnly = true;
             dgvPendingLeave.AllowUserToAddRows = false;
-            dgvPendingLeave.Columns["Lý do"].FillWeight = 30;
+            // Cân bề rộng mọi cột: "Ngày nghỉ" chứa khoảng ngày dài, "Lý do" cần đủ rộng.
+            dgvPendingLeave.Columns["Nhân viên"].FillWeight  = 20;
+            dgvPendingLeave.Columns["Chức vụ"].FillWeight    = 15;
+            dgvPendingLeave.Columns["Ngày nghỉ"].FillWeight  = 25;
+            dgvPendingLeave.Columns["Lý do"].FillWeight      = 22;
+            dgvPendingLeave.Columns["Trạng thái"].FillWeight = 18;
 
             // Schedule grid
             DataTable dtSchedule = new();
@@ -55,7 +64,11 @@ namespace GUI
             dgvSchedule.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvSchedule.RowHeadersVisible = false;
             dgvSchedule.AllowUserToAddRows = false;
-            dgvSchedule.Columns["Nhân viên"].FillWeight = 25;
+            // Cột "Nhân viên" cần đủ rộng cho họ tên (nếu để 25 trong khi 7 cột ngày mặc định
+            // 100 thì tên bị bóp còn 1 chữ "T..."). Các cột ngày chỉ chứa S/C/OFF nên hẹp.
+            dgvSchedule.Columns["Nhân viên"].FillWeight = 30;
+            foreach (string day in new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" })
+                dgvSchedule.Columns[day].FillWeight = 10;
             dgvSchedule.Columns["Nhân viên"].ReadOnly = true;
 
             // Color schedule cells
@@ -70,6 +83,25 @@ namespace GUI
                     else if (val == "OFF") cell.Style.ForeColor = Color.IndianRed;
                 }
             }
+        }
+
+        // Double-click 1 đơn -> form chi tiết read-only đủ field
+        private void DgvPendingLeave_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvPendingLeave.Rows[e.RowIndex], "Chi tiết đơn xin nghỉ")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa đơn đang chọn
+        private void BtnEditLeave_Click(object? sender, EventArgs e)
+        {
+            if (dgvPendingLeave.CurrentRow == null || dgvPendingLeave.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một đơn để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            RecordEdit.EditRow(dgvPendingLeave.CurrentRow, "Sửa đơn xin nghỉ", MsgBox.OwnerWindow(this));
         }
 
         private void btnApprove_Click(object sender, EventArgs e)

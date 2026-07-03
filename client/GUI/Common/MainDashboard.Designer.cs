@@ -51,14 +51,13 @@ namespace GUI
             lblUserName = new Label();
             lblUserRole = new Label();
             lblSubtitle = new Label();
+            btnReport = new Guna2Button();
             pnlHeader = new Guna2Panel();
             pnlLogoBlock = new Panel();
             pictureBox2 = new PictureBox();
             lblBrand = new Label();
             lblTagline = new Label();
             lblDate = new Label();
-            btnMinimize = new Guna2Button();
-            btnClose = new Guna2Button();
             pnlSidebar.SuspendLayout();
             pnlLogoutWrap.SuspendLayout();
             pnlMainContent.SuspendLayout();
@@ -123,7 +122,7 @@ namespace GUI
             btnLogout.ShadowDecoration.CustomizableEdges = customizableEdges2;
             btnLogout.Size = new Size(212, 50);
             btnLogout.TabIndex = 0;
-            btnLogout.Text = "🚪  Đăng xuất";
+            btnLogout.Text = "Đăng xuất";
             btnLogout.Click += BtnLogout_Click;
             // 
             // pnlMainContent
@@ -168,6 +167,7 @@ namespace GUI
             // 
             pnlSubHeader.BackColor = Color.FromArgb(39, 39, 42);
             pnlSubHeader.Controls.Add(lblTitle);
+            pnlSubHeader.Controls.Add(btnReport);
             pnlSubHeader.Controls.Add(pnlUserCard);
             pnlSubHeader.Controls.Add(lblSubtitle);
             pnlSubHeader.Dock = DockStyle.Top;
@@ -249,14 +249,30 @@ namespace GUI
             lblSubtitle.Size = new Size(134, 15);
             lblSubtitle.TabIndex = 1;
             lblSubtitle.Text = "Bảng điều khiển QLCafe";
-            // 
+            //
+            // btnReport
+            //
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReport.BorderRadius = 10;
+            btnReport.CustomizableEdges = customizableEdges20;
+            btnReport.Cursor = Cursors.Hand;
+            btnReport.FillColor = Color.FromArgb(31, 138, 154);
+            btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnReport.ForeColor = Color.White;
+            btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
+            btnReport.Location = new Point(600, 18);
+            btnReport.Name = "btnReport";
+            btnReport.ShadowDecoration.CustomizableEdges = customizableEdges21;
+            btnReport.Size = new Size(148, 40);
+            btnReport.TabIndex = 4;
+            btnReport.Text = "Báo lỗi";
+            btnReport.Click += BtnReport_Click;
+            //
             // pnlHeader
-            // 
+            //
             pnlHeader.BackColor = Color.FromArgb(39, 39, 42);
             pnlHeader.Controls.Add(pnlLogoBlock);
             pnlHeader.Controls.Add(lblDate);
-            pnlHeader.Controls.Add(btnMinimize);
-            pnlHeader.Controls.Add(btnClose);
             pnlHeader.CustomizableEdges = customizableEdges16;
             pnlHeader.Dock = DockStyle.Top;
             pnlHeader.Location = new Point(0, 0);
@@ -319,50 +335,15 @@ namespace GUI
             lblDate.TabIndex = 1;
             lblDate.Text = "Thứ Năm, 08 tháng 05";
             //
-            // btnMinimize
-            //
-            btnMinimize.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnMinimize.BorderRadius = 8;
-            btnMinimize.Cursor = Cursors.Hand;
-            btnMinimize.CustomizableEdges = customizableEdges20;
-            btnMinimize.FillColor = Color.Transparent;
-            btnMinimize.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnMinimize.ForeColor = Color.FromArgb(220, 220, 225);
-            btnMinimize.HoverState.FillColor = Color.FromArgb(60, 60, 65);
-            btnMinimize.HoverState.ForeColor = Color.White;
-            btnMinimize.Location = new Point(920, 24);
-            btnMinimize.Name = "btnMinimize";
-            btnMinimize.ShadowDecoration.CustomizableEdges = customizableEdges21;
-            btnMinimize.Size = new Size(30, 32);
-            btnMinimize.TabIndex = 6;
-            btnMinimize.Text = "—";
-            btnMinimize.Click += BtnMinimize_Click;
-            //
-            // btnClose
-            //
-            btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnClose.BorderRadius = 8;
-            btnClose.Cursor = Cursors.Hand;
-            btnClose.CustomizableEdges = customizableEdges14;
-            btnClose.FillColor = Color.Transparent;
-            btnClose.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-            btnClose.ForeColor = Color.FromArgb(220, 220, 225);
-            btnClose.HoverState.FillColor = Color.FromArgb(180, 60, 60);
-            btnClose.HoverState.ForeColor = Color.White;
-            btnClose.Location = new Point(956, 24);
-            btnClose.Name = "btnClose";
-            btnClose.ShadowDecoration.CustomizableEdges = customizableEdges15;
-            btnClose.Size = new Size(30, 32);
-            btnClose.TabIndex = 7;
-            btnClose.Text = "✕";
-            btnClose.Click += BtnClose_Click;
-            // 
             // MainDashboard
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(39, 39, 42);
             ClientSize = new Size(1240, 820);
+            // Không cho thu nhỏ quá mức: các màn thiết kế tuyệt đối sẽ bị cắt đáy
+            // (vd. thẻ "Đổi mật khẩu" của ucProfile) nếu vùng nội dung < ~660px cao.
+            MinimumSize = new Size(1150, 800);
             Controls.Add(pnlMainContent);
             Controls.Add(pnlSidebar);
             FormBorderStyle = FormBorderStyle.None;
@@ -404,11 +385,10 @@ namespace GUI
         private Guna2CirclePictureBox picAvatar;
         private Label lblUserName;
         private Label lblUserRole;
-        private Guna2Button btnMinimize;
-        private Guna2Button btnClose;
         private Panel pnlSubHeader;
         private Label lblTitle;
         private Label lblSubtitle;
+        private Guna2Button btnReport;
         private Panel pnlContentHost;
         private Label lblWelcome;
         private PictureBox pictureBox2;

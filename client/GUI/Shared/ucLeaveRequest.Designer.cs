@@ -39,6 +39,11 @@ namespace GUI
             pnlHistory = new Guna2Panel();
             lblHistoryTitle = new Label();
             dgvHistory = new Guna2DataGridView();
+            colFrom = new DataGridViewTextBoxColumn();
+            colTo = new DataGridViewTextBoxColumn();
+            colDays = new DataGridViewTextBoxColumn();
+            colReason = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlSummary.SuspendLayout();
             pnlNewRequest.SuspendLayout();
             pnlHistory.SuspendLayout();
@@ -56,7 +61,8 @@ namespace GUI
             pnlSummary.Controls.Add(btnManager);
             pnlSummary.Controls.Add(btnReport);
             pnlSummary.Location = new Point(20, 20);
-            pnlSummary.Size = new Size(900, 100);
+            pnlSummary.Size = new Size(960, 100);
+            pnlSummary.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             lblRemainingTitle.AutoSize = true;
             lblRemainingTitle.Font = new Font("Segoe UI", 9F);
@@ -92,10 +98,11 @@ namespace GUI
             btnManager.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnManager.ForeColor = Color.White;
             btnManager.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnManager.Location = new Point(572, 32);
+            btnManager.Location = new Point(632, 32);
             btnManager.Size = new Size(150, 36);
+            btnManager.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnManager.Text = "Quản lý nghỉ";
-            btnManager.Click += btnManager_Click;
+            btnManager.Click += BtnManager_Click;
 
             btnReport.BorderRadius = 10;
             btnReport.Cursor = Cursors.Hand;
@@ -103,9 +110,10 @@ namespace GUI
             btnReport.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnReport.ForeColor = Color.White;
             btnReport.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnReport.Location = new Point(732, 32);
+            btnReport.Location = new Point(792, 32);
             btnReport.Size = new Size(150, 36);
-            btnReport.Text = "📊 Báo cáo";
+            btnReport.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnReport.Text = "Báo cáo";
 
             // ====== pnlNewRequest ======
             pnlNewRequest.BackColor = Color.FromArgb(31, 31, 34);
@@ -119,7 +127,8 @@ namespace GUI
             pnlNewRequest.Controls.Add(txtReason);
             pnlNewRequest.Controls.Add(btnSubmit);
             pnlNewRequest.Location = new Point(20, 135);
-            pnlNewRequest.Size = new Size(340, 505);
+            pnlNewRequest.Size = new Size(340, 510);
+            pnlNewRequest.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 
             lblNewRequestTitle.AutoSize = true;
             lblNewRequestTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
@@ -192,7 +201,8 @@ namespace GUI
             pnlHistory.Controls.Add(lblHistoryTitle);
             pnlHistory.Controls.Add(dgvHistory);
             pnlHistory.Location = new Point(380, 135);
-            pnlHistory.Size = new Size(540, 505);
+            pnlHistory.Size = new Size(600, 510);
+            pnlHistory.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             lblHistoryTitle.AutoSize = true;
             lblHistoryTitle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
@@ -213,9 +223,15 @@ namespace GUI
             dgvHistory.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvHistory.AlternatingRowsDefaultCellStyle.ForeColor = Color.FromArgb(220, 220, 225);
             dgvHistory.GridColor = Color.FromArgb(45, 45, 48);
-            ConfigureGrid(dgvHistory);
+            ConfigureGrid(dgvHistory);            dgvHistory.Columns.AddRange(new DataGridViewColumn[] { colFrom, colTo, colDays, colReason, colStatus });
+            colFrom.HeaderText = "Từ ngày"; colFrom.Name = "Từ ngày"; colFrom.DataPropertyName = "Từ ngày";
+            colTo.HeaderText = "Đến ngày"; colTo.Name = "Đến ngày"; colTo.DataPropertyName = "Đến ngày";
+            colDays.HeaderText = "Số ngày"; colDays.Name = "Số ngày"; colDays.DataPropertyName = "Số ngày";
+            colReason.HeaderText = "Lý do"; colReason.Name = "Lý do"; colReason.DataPropertyName = "Lý do";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
             dgvHistory.Location = new Point(18, 56);
-            dgvHistory.Size = new Size(504, 432);
+            dgvHistory.Size = new Size(564, 436);
+            dgvHistory.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             // ====== ucLeaveRequest ======
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -225,7 +241,7 @@ namespace GUI
             Controls.Add(pnlNewRequest);
             Controls.Add(pnlHistory);
             Name = "ucLeaveRequest";
-            Size = new Size(940, 660);
+            Size = new Size(1000, 665);
             pnlSummary.ResumeLayout(false);
             pnlSummary.PerformLayout();
             pnlNewRequest.ResumeLayout(false);
@@ -233,11 +249,15 @@ namespace GUI
             pnlHistory.ResumeLayout(false);
             pnlHistory.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvHistory).EndInit();
+            this.Load += UcLeaveRequest_Load;
+            btnSubmit.Click += BtnSubmit_Click;
+            btnReport.Click += BtnReport_Click;
             ResumeLayout(false);
         }
 
         private static void ConfigureGrid(Guna2DataGridView dgv)
         {
+            dgv.AutoGenerateColumns = false;
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.BackgroundColor = Color.FromArgb(24, 24, 27);
@@ -292,5 +312,10 @@ namespace GUI
         private Guna2Panel pnlHistory;
         private Label lblHistoryTitle;
         private Guna2DataGridView dgvHistory;
+        private DataGridViewTextBoxColumn colFrom;
+        private DataGridViewTextBoxColumn colTo;
+        private DataGridViewTextBoxColumn colDays;
+        private DataGridViewTextBoxColumn colReason;
+        private DataGridViewTextBoxColumn colStatus;
     }
 }

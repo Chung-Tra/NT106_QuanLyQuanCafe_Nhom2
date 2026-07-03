@@ -5,14 +5,41 @@ using System.Windows.Forms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucCRM_Order : UserControl
+#pragma warning restore IDE1006
     {
         public ucCRM_Order()
         {
             InitializeComponent();
-            btnReport.Click += btnReport_Click;
-            this.Load += (s, e) => LoadMockData();
+            GridColumnGuard.SyncColumnNames(dgvCustomers);
+
+            // Lọc trực tiếp khi gõ, không cần bấm nút Tìm
+            txtSearch.TextChanged += BtnSearch_Click;
+
+            DgvRefresh.Attach(dgvCustomers, LoadMockData);
         }
+
+        // Double-click 1 dòng -> form chi tiết read-only đủ field
+        private void DgvCustomers_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvCustomers.Rows[e.RowIndex], "Chi tiết khách hàng")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa khách hàng đang chọn (khoá Mã KH)
+        private void BtnEditCustomer_Click(object? sender, EventArgs e)
+        {
+            if (dgvCustomers.CurrentRow == null || dgvCustomers.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một khách hàng để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            RecordEdit.EditRow(dgvCustomers.CurrentRow, "Sửa khách hàng", MsgBox.OwnerWindow(this));
+        }
+
+        private void UcCRM_Order_Load(object? sender, EventArgs e) => LoadMockData();
 
         private void LoadMockData()
         {
@@ -35,25 +62,26 @@ namespace GUI
             dgvCustomers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvCustomers.RowHeadersVisible = false;
 
-            dgvCustomers.Columns["Mã KH"].FillWeight = 10;
-            dgvCustomers.Columns["Tên khách hàng"].FillWeight = 25;
+            // Cân bề rộng cho MỌI cột (nếu chỉ set vài cột, các cột còn lại giữ mặc định 100
+            // và nuốt hết chỗ → Mã KH / Tên khách bị bóp, tên bị cắt "Nguyễn T...").
+            dgvCustomers.Columns["Mã KH"].FillWeight          = 9;
+            dgvCustomers.Columns["Tên khách hàng"].FillWeight = 24;
+            dgvCustomers.Columns["Số điện thoại"].FillWeight  = 17;
+            dgvCustomers.Columns["Email"].FillWeight          = 32;
+            dgvCustomers.Columns["Điểm tích lũy"].FillWeight  = 10;
+            dgvCustomers.Columns["Tổng đơn"].FillWeight       = 8;
             dgvCustomers.Columns["Điểm tích lũy"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dgvCustomers.Columns["Tổng đơn"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
-        private void btnSearch_Click(object sender, EventArgs e)
+        private void BtnSearch_Click(object? sender, EventArgs e)
         {
+            // Quét mọi cột: mã KH, tên, SĐT, email, điểm tích lũy, tổng đơn
             if (dgvCustomers.DataSource is DataTable dt)
-            {
-                string keyword = txtSearch.Text.Trim().Replace("'", "''");
-                if (string.IsNullOrEmpty(keyword))
-                    dt.DefaultView.RowFilter = "";
-                else
-                    dt.DefaultView.RowFilter = $"[Tên khách hàng] LIKE '%{keyword}%' OR [Số điện thoại] LIKE '%{keyword}%'";
-            }
+                dt.DefaultView.RowFilter = SearchFilter.AllColumnsFilter(dt, txtSearch.Text);
         }
 
-        private void btnAddCustomer_Click(object sender, EventArgs e)
+        private void BtnAddCustomer_Click(object sender, EventArgs e)
         {
             txtName.Clear();
             txtPhone.Clear();
@@ -62,7 +90,7 @@ namespace GUI
             txtName.Focus();
         }
 
-        private void btnReport_Click(object? sender, EventArgs e)
+        private void BtnReport_Click(object? sender, EventArgs e)
         {
             int totalCustomers = 0;
             if (dgvCustomers.DataSource is DataTable dt)
@@ -88,7 +116,7 @@ namespace GUI
             }
         }
 
-        private void btnSaveCustomer_Click(object sender, EventArgs e)
+        private void BtnSaveCustomer_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtName.Text) || string.IsNullOrWhiteSpace(txtPhone.Text))
             {

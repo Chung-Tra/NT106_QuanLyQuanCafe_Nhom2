@@ -11,6 +11,8 @@ namespace GUI
         public ManagerProfileDetail()
         {
             InitializeComponent();
+            dgvManagers.AutoGenerateColumns = false; // cột khai trong Designer; tắt auto-gen ở .cs cho an toàn round-trip
+            WindowChrome.Apply(this);
             LoadData();
             AutoFadeScroll.Attach(dgvManagers);
         }

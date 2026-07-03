@@ -5,10 +5,7 @@ using System.Windows.Forms;
 
 namespace GUI
 {
-    /// <summary>
-    /// Bo góc form (FormBorderStyle.None). Gọi 1 dòng trong constructor:
-    ///   FormCorners.Round(this);
-    /// </summary>
+    // Bo góc form (FormBorderStyle.None) — gọi FormCorners.Round(this) trong constructor.
     internal static class FormCorners
     {
         public static void Round(Form form, int radius = 18)

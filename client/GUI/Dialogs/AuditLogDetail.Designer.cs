@@ -23,7 +23,7 @@ namespace GUI
             SuspendLayout();
 
             // lblTitle
-            lblTitle.Text      = "🔔  Lịch sử thao tác của Quản lý";
+            lblTitle.Text      = "Lịch sử thao tác của Quản lý";
             lblTitle.Font      = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(245, 158, 11);
             lblTitle.AutoSize  = true;

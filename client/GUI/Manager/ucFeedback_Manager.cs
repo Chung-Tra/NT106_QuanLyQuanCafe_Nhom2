@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
@@ -10,6 +10,8 @@ namespace GUI
         public ucFeedback_Manager()
         {
             InitializeComponent();
+            GridColumnGuard.SyncColumnNames(dgvFeedback);
+            DgvRefresh.Attach(dgvFeedback, LoadMockData);
             this.Load += (s, e) => LoadMockData();
         }
 
@@ -32,10 +34,17 @@ namespace GUI
             dgvFeedback.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvFeedback.RowHeadersVisible = false;
 
-            if (dgvFeedback.Columns.Contains("Mã"))
-                dgvFeedback.Columns["Mã"].FillWeight = 10;
-            if (dgvFeedback.Columns.Contains("Nội dung"))
-                dgvFeedback.Columns["Nội dung"].FillWeight = 35;
+            dgvFeedback.Columns["Mã"].FillWeight         = 7;
+            dgvFeedback.Columns["Khách hàng"].FillWeight = 18;
+            dgvFeedback.Columns["Ngày"].FillWeight       = 11;
+            dgvFeedback.Columns["Đánh giá"].FillWeight   = 13;
+            dgvFeedback.Columns["Nội dung"].FillWeight   = 35;
+            dgvFeedback.Columns["Trạng thái"].FillWeight = 16;
+
+            dgvFeedback.Columns["Mã"].DefaultCellStyle.Alignment         = DataGridViewContentAlignment.MiddleCenter;
+            dgvFeedback.Columns["Ngày"].DefaultCellStyle.Alignment       = DataGridViewContentAlignment.MiddleCenter;
+            dgvFeedback.Columns["Đánh giá"].DefaultCellStyle.Alignment   = DataGridViewContentAlignment.MiddleCenter;
+            dgvFeedback.Columns["Trạng thái"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
         private void dgvFeedback_SelectionChanged(object sender, EventArgs e)
@@ -46,6 +55,26 @@ namespace GUI
             lblDate.Text = "Ngày: " + (row.Cells["Ngày"].Value?.ToString() ?? "---");
             lblRating.Text = row.Cells["Đánh giá"].Value?.ToString() ?? "---";
             txtContent.Text = row.Cells["Nội dung"].Value?.ToString() ?? "";
+        }
+
+        // Double-click 1 dòng -> form chi tiết read-only đủ field
+        private void DgvFeedback_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvFeedback.Rows[e.RowIndex], "Chi tiết phản hồi")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
+        // Sửa dòng đang chọn (khoá cột Mã)
+        private void BtnEditFeedback_Click(object? sender, EventArgs e)
+        {
+            if (dgvFeedback.CurrentRow == null || dgvFeedback.CurrentRow.Index < 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng chọn một phản hồi để sửa!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            if (RecordEdit.EditRow(dgvFeedback.CurrentRow, "Sửa phản hồi", MsgBox.OwnerWindow(this)))
+                dgvFeedback_SelectionChanged(dgvFeedback, EventArgs.Empty);
         }
 
         private void btnReply_Click(object sender, EventArgs e)

@@ -105,7 +105,7 @@ namespace GUI
             txtFullName.Name = "txtFullName";
             txtFullName.PasswordChar = '\0';
             txtFullName.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtFullName.PlaceholderText = "👤  Họ và tên";
+            txtFullName.PlaceholderText = "Họ và tên";
             txtFullName.SelectedText = "";
             txtFullName.ShadowDecoration.CustomizableEdges = customizableEdges2;
             txtFullName.Size = new Size(365, 46);
@@ -130,7 +130,7 @@ namespace GUI
             txtEmail.Name = "txtEmail";
             txtEmail.PasswordChar = '\0';
             txtEmail.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtEmail.PlaceholderText = "📧  Email";
+            txtEmail.PlaceholderText = "Email";
             txtEmail.SelectedText = "";
             txtEmail.ShadowDecoration.CustomizableEdges = customizableEdges4;
             txtEmail.Size = new Size(365, 46);
@@ -155,7 +155,7 @@ namespace GUI
             txtPhone.Name = "txtPhone";
             txtPhone.PasswordChar = '\0';
             txtPhone.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtPhone.PlaceholderText = "📱  Số điện thoại";
+            txtPhone.PlaceholderText = "Số điện thoại";
             txtPhone.SelectedText = "";
             txtPhone.ShadowDecoration.CustomizableEdges = customizableEdges6;
             txtPhone.Size = new Size(365, 46);
@@ -218,7 +218,7 @@ namespace GUI
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '●';
             txtPassword.PlaceholderForeColor = Color.FromArgb(110, 110, 120);
-            txtPassword.PlaceholderText = "🔒  Mật khẩu đăng nhập";
+            txtPassword.PlaceholderText = "Mật khẩu đăng nhập";
             txtPassword.SelectedText = "";
             txtPassword.ShadowDecoration.CustomizableEdges = customizableEdges12;
             txtPassword.Size = new Size(365, 46);

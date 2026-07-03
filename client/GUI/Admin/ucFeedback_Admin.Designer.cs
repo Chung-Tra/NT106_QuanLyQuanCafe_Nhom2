@@ -42,6 +42,12 @@ namespace GUI
             cmbFilterStatus = new Guna2ComboBox();
             pnlGrid = new Guna2Panel();
             dgvFeedback = new Guna2DataGridView();
+            colCode = new DataGridViewTextBoxColumn();
+            colCustomer = new DataGridViewTextBoxColumn();
+            colDate = new DataGridViewTextBoxColumn();
+            colRating = new DataGridViewTextBoxColumn();
+            colContent = new DataGridViewTextBoxColumn();
+            colStatus = new DataGridViewTextBoxColumn();
             pnlDetail = new Guna2Panel();
             lblDetailTitle = new Label();
             lblCustomerName = new Label();
@@ -51,6 +57,7 @@ namespace GUI
             btnReply = new Guna2Button();
             btnMarkResolved = new Guna2Button();
             btnDeleteFeedback = new Guna2Button();
+            btnEditFeedbackAdmin = new Guna2Button();
             pnlFilter.SuspendLayout();
             pnlGrid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvFeedback).BeginInit();
@@ -64,11 +71,13 @@ namespace GUI
             pnlFilter.Controls.Add(lblTitle);
             pnlFilter.Controls.Add(lblFilterStatus);
             pnlFilter.Controls.Add(cmbFilterStatus);
+            pnlFilter.Controls.Add(btnEditFeedbackAdmin);
             pnlFilter.CustomizableEdges = customizableEdges3;
             pnlFilter.Location = new Point(20, 20);
             pnlFilter.Name = "pnlFilter";
             pnlFilter.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            pnlFilter.Size = new Size(920, 60);
+            pnlFilter.Size = new Size(960, 60);
+            pnlFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             pnlFilter.TabIndex = 0;
             // 
             // lblTitle
@@ -80,16 +89,17 @@ namespace GUI
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(227, 25);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "💬  Phản hồi khách hàng";
+            lblTitle.Text = "Phản hồi khách hàng";
             // 
             // lblFilterStatus
             // 
             lblFilterStatus.AutoSize = true;
             lblFilterStatus.Font = new Font("Segoe UI", 9.5F);
             lblFilterStatus.ForeColor = Color.FromArgb(160, 160, 166);
-            lblFilterStatus.Location = new Point(620, 22);
+            lblFilterStatus.Location = new Point(660, 22);
             lblFilterStatus.Name = "lblFilterStatus";
             lblFilterStatus.Size = new Size(69, 17);
+            lblFilterStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblFilterStatus.TabIndex = 1;
             lblFilterStatus.Text = "Trạng thái:";
             // 
@@ -108,13 +118,31 @@ namespace GUI
             cmbFilterStatus.ForeColor = Color.White;
             cmbFilterStatus.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
             cmbFilterStatus.ItemHeight = 26;
-            cmbFilterStatus.Location = new Point(700, 16);
+            cmbFilterStatus.Location = new Point(740, 16);
             cmbFilterStatus.Name = "cmbFilterStatus";
             cmbFilterStatus.ShadowDecoration.CustomizableEdges = customizableEdges2;
             cmbFilterStatus.Size = new Size(200, 32);
+            cmbFilterStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             cmbFilterStatus.TabIndex = 2;
             cmbFilterStatus.SelectedIndexChanged += cmbFilterStatus_SelectedIndexChanged;
-            // 
+            //
+            // btnEditFeedbackAdmin
+            //
+            btnEditFeedbackAdmin.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnEditFeedbackAdmin.BorderColor = Color.FromArgb(80, 80, 90);
+            btnEditFeedbackAdmin.BorderRadius = 8;
+            btnEditFeedbackAdmin.BorderThickness = 1;
+            btnEditFeedbackAdmin.Cursor = Cursors.Hand;
+            btnEditFeedbackAdmin.FillColor = Color.Transparent;
+            btnEditFeedbackAdmin.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            btnEditFeedbackAdmin.ForeColor = Color.FromArgb(220, 220, 225);
+            btnEditFeedbackAdmin.HoverState.FillColor = Color.FromArgb(45, 45, 50);
+            btnEditFeedbackAdmin.Location = new Point(440, 14);
+            btnEditFeedbackAdmin.Name = "btnEditFeedbackAdmin";
+            btnEditFeedbackAdmin.Size = new Size(150, 32);
+            btnEditFeedbackAdmin.Text = "Sửa dòng chọn";
+            btnEditFeedbackAdmin.Click += BtnEditFeedbackAdmin_Click;
+            //
             // pnlGrid
             // 
             pnlGrid.BackColor = Color.FromArgb(31, 31, 34);
@@ -124,7 +152,8 @@ namespace GUI
             pnlGrid.Location = new Point(20, 95);
             pnlGrid.Name = "pnlGrid";
             pnlGrid.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            pnlGrid.Size = new Size(920, 280);
+            pnlGrid.Size = new Size(960, 285);
+            pnlGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlGrid.TabIndex = 1;
             // 
             // dgvFeedback
@@ -150,11 +179,18 @@ namespace GUI
             dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             dgvFeedback.DefaultCellStyle = dataGridViewCellStyle3;
-            dgvFeedback.GridColor = Color.FromArgb(45, 45, 48);
+            dgvFeedback.GridColor = Color.FromArgb(45, 45, 48);            dgvFeedback.Columns.AddRange(new DataGridViewColumn[] { colCode, colCustomer, colDate, colRating, colContent, colStatus });
+            colCode.HeaderText = "Mã"; colCode.Name = "Mã"; colCode.DataPropertyName = "Mã";
+            colCustomer.HeaderText = "Khách hàng"; colCustomer.Name = "Khách hàng"; colCustomer.DataPropertyName = "Khách hàng";
+            colDate.HeaderText = "Ngày"; colDate.Name = "Ngày"; colDate.DataPropertyName = "Ngày";
+            colRating.HeaderText = "Đánh giá"; colRating.Name = "Đánh giá"; colRating.DataPropertyName = "Đánh giá";
+            colContent.HeaderText = "Nội dung"; colContent.Name = "Nội dung"; colContent.DataPropertyName = "Nội dung";
+            colStatus.HeaderText = "Trạng thái"; colStatus.Name = "Trạng thái"; colStatus.DataPropertyName = "Trạng thái";
             dgvFeedback.Location = new Point(18, 18);
             dgvFeedback.Name = "dgvFeedback";
             dgvFeedback.RowHeadersVisible = false;
-            dgvFeedback.Size = new Size(884, 244);
+            dgvFeedback.Size = new Size(924, 249);
+            dgvFeedback.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvFeedback.TabIndex = 0;
             dgvFeedback.ThemeStyle.AlternatingRowsStyle.BackColor = Color.FromArgb(24, 24, 27);
             dgvFeedback.ThemeStyle.AlternatingRowsStyle.Font = null;
@@ -178,7 +214,8 @@ namespace GUI
             dgvFeedback.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(31, 138, 154);
             dgvFeedback.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(240, 240, 245);
             dgvFeedback.SelectionChanged += dgvFeedback_SelectionChanged;
-            // 
+            dgvFeedback.CellDoubleClick += DgvFeedback_CellDoubleClick;
+            //
             // pnlDetail
             // 
             pnlDetail.BackColor = Color.FromArgb(31, 31, 34);
@@ -192,10 +229,11 @@ namespace GUI
             pnlDetail.Controls.Add(btnMarkResolved);
             pnlDetail.Controls.Add(btnDeleteFeedback);
             pnlDetail.CustomizableEdges = customizableEdges13;
-            pnlDetail.Location = new Point(20, 390);
+            pnlDetail.Location = new Point(20, 395);
             pnlDetail.Name = "pnlDetail";
             pnlDetail.ShadowDecoration.CustomizableEdges = customizableEdges14;
-            pnlDetail.Size = new Size(920, 250);
+            pnlDetail.Size = new Size(960, 250);
+            pnlDetail.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlDetail.TabIndex = 2;
             // 
             // lblDetailTitle
@@ -207,7 +245,7 @@ namespace GUI
             lblDetailTitle.Name = "lblDetailTitle";
             lblDetailTitle.Size = new Size(154, 20);
             lblDetailTitle.TabIndex = 0;
-            lblDetailTitle.Text = "📝  Chi tiết phản hồi";
+            lblDetailTitle.Text = "Chi tiết phản hồi";
             // 
             // lblCustomerName
             // 
@@ -254,7 +292,8 @@ namespace GUI
             txtFeedbackContent.Name = "txtFeedbackContent";
             txtFeedbackContent.PasswordChar = '\0';
             txtFeedbackContent.ReadOnly = true;
-            txtFeedbackContent.Size = new Size(660, 145);
+            txtFeedbackContent.Size = new Size(700, 145);
+            txtFeedbackContent.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             txtFeedbackContent.TabIndex = 4;
             // 
             // btnReply
@@ -266,12 +305,13 @@ namespace GUI
             btnReply.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnReply.ForeColor = Color.White;
             btnReply.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnReply.Location = new Point(700, 84);
+            btnReply.Location = new Point(740, 84);
             btnReply.Name = "btnReply";
             btnReply.ShadowDecoration.CustomizableEdges = customizableEdges8;
             btnReply.Size = new Size(200, 38);
+            btnReply.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnReply.TabIndex = 5;
-            btnReply.Text = "💬  Trả lời";
+            btnReply.Text = "Trả lời";
             btnReply.Click += btnReply_Click;
             // 
             // btnMarkResolved
@@ -283,12 +323,13 @@ namespace GUI
             btnMarkResolved.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnMarkResolved.ForeColor = Color.White;
             btnMarkResolved.HoverState.FillColor = Color.FromArgb(50, 217, 110);
-            btnMarkResolved.Location = new Point(700, 132);
+            btnMarkResolved.Location = new Point(740, 132);
             btnMarkResolved.Name = "btnMarkResolved";
             btnMarkResolved.ShadowDecoration.CustomizableEdges = customizableEdges10;
             btnMarkResolved.Size = new Size(200, 38);
+            btnMarkResolved.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnMarkResolved.TabIndex = 6;
-            btnMarkResolved.Text = "✓  Đã xử lý";
+            btnMarkResolved.Text = "Đã xử lý";
             btnMarkResolved.Click += btnMarkResolved_Click;
             // 
             // btnDeleteFeedback
@@ -303,12 +344,13 @@ namespace GUI
             btnDeleteFeedback.ForeColor = Color.FromArgb(220, 80, 80);
             btnDeleteFeedback.HoverState.FillColor = Color.FromArgb(180, 60, 60);
             btnDeleteFeedback.HoverState.ForeColor = Color.White;
-            btnDeleteFeedback.Location = new Point(700, 180);
+            btnDeleteFeedback.Location = new Point(740, 180);
             btnDeleteFeedback.Name = "btnDeleteFeedback";
             btnDeleteFeedback.ShadowDecoration.CustomizableEdges = customizableEdges12;
             btnDeleteFeedback.Size = new Size(200, 38);
+            btnDeleteFeedback.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnDeleteFeedback.TabIndex = 7;
-            btnDeleteFeedback.Text = "🗑  Xóa";
+            btnDeleteFeedback.Text = "Xóa";
             btnDeleteFeedback.Click += btnDeleteFeedback_Click;
             // 
             // ucFeedback_Admin
@@ -320,7 +362,7 @@ namespace GUI
             Controls.Add(pnlGrid);
             Controls.Add(pnlDetail);
             Name = "ucFeedback_Admin";
-            Size = new Size(960, 660);
+            Size = new Size(1000, 665);
             pnlFilter.ResumeLayout(false);
             pnlFilter.PerformLayout();
             pnlGrid.ResumeLayout(false);
@@ -372,6 +414,12 @@ namespace GUI
         private Label lblFilterStatus;
         private Guna2Panel pnlGrid;
         private Guna2DataGridView dgvFeedback;
+        private DataGridViewTextBoxColumn colCode;
+        private DataGridViewTextBoxColumn colCustomer;
+        private DataGridViewTextBoxColumn colDate;
+        private DataGridViewTextBoxColumn colRating;
+        private DataGridViewTextBoxColumn colContent;
+        private DataGridViewTextBoxColumn colStatus;
         private Guna2Panel pnlDetail;
         private Label lblDetailTitle;
         private Label lblCustomerName;
@@ -381,5 +429,6 @@ namespace GUI
         private Guna2Button btnReply;
         private Guna2Button btnMarkResolved;
         private Guna2Button btnDeleteFeedback;
+        private Guna2Button btnEditFeedbackAdmin;
     }
 }

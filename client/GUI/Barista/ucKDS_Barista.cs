@@ -1,30 +1,51 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace GUI
 {
+#pragma warning disable IDE1006
     public partial class ucKDS_Barista : UserControl
+#pragma warning restore IDE1006
     {
         public ucKDS_Barista()
         {
             InitializeComponent();
-            this.Load += (s, e) => LoadMockOrders();
-            btnReport.Click += (s, e) =>
-            {
-                string report =
-                    "BÁO CÁO KDS\n" +
-                    $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                    "──────────────────\n" +
-                    $"• {lblPending.Text}\n" +
-                    $"• {lblInProgress.Text}\n" +
-                    $"• {lblDone.Text}\n" +
-                    "──────────────────\n" +
-                    "Gửi báo cáo cho quản lý?";
+        }
 
-                if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo KDS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
-            };
+        private void UcKDS_Barista_Load(object? sender, EventArgs e)
+        {
+            LoadMockOrders();
+
+            // Thẻ đơn rộng theo cột kanban (cột giãn % khi phóng to cửa sổ)
+            foreach (var flp in new[] { flpPendingOrders, flpInProgressOrders, flpDoneOrders })
+            {
+                var panel = flp;
+                void FitCards(object? s, EventArgs ev)
+                {
+                    int w = Math.Max(220, panel.ClientSize.Width - 10);
+                    foreach (Control c in panel.Controls) c.Width = w;
+                }
+                panel.ClientSizeChanged += FitCards;
+                FitCards(null, EventArgs.Empty);
+            }
+        }
+
+        private void BtnReport_Click(object? sender, EventArgs e)
+        {
+            string report =
+                "BÁO CÁO KDS\n" +
+                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
+                "──────────────────\n" +
+                $"• {lblPending.Text}\n" +
+                $"• {lblInProgress.Text}\n" +
+                $"• {lblDone.Text}\n" +
+                "──────────────────\n" +
+                "Gửi báo cáo cho quản lý?";
+
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo KDS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
         }
 
         private void LoadMockOrders()
@@ -49,7 +70,7 @@ namespace GUI
             Panel card = new()
             {
                 Size = new Size(220, 120),
-                BackColor = Color.FromArgb(50, 50, 55),
+                BackColor = Color.FromArgb(45, 45, 50),
                 Margin = new Padding(5),
                 Cursor = Cursors.Hand
             };
@@ -69,7 +90,8 @@ namespace GUI
                 Font = new Font("Segoe UI", 8F),
                 ForeColor = Color.Gray,
                 Location = new Point(170, 8),
-                AutoSize = true
+                AutoSize = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
 
             Label lblItems = new()
@@ -79,21 +101,21 @@ namespace GUI
                 ForeColor = Color.White,
                 Location = new Point(8, 30),
                 Size = new Size(210, 60),
-                AutoSize = false
+                AutoSize = false,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
             };
 
-            Button btnAction = new()
+            Guna2Button btnAction = new()
             {
                 Text = panel == flpPendingOrders ? "Bắt đầu pha" : panel == flpInProgressOrders ? "Hoàn thành" : "✓",
                 Font = new Font("Segoe UI", 8F, FontStyle.Bold),
                 ForeColor = Color.White,
-                BackColor = accentColor,
-                FlatStyle = FlatStyle.Flat,
+                FillColor = accentColor,
+                BorderRadius = 6,
                 Size = new Size(panel == flpDoneOrders ? 30 : 90, 22),
                 Location = new Point(8, 92),
                 Cursor = Cursors.Hand
             };
-            btnAction.FlatAppearance.BorderSize = 0;
             btnAction.Click += (s, e) =>
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã cập nhật trạng thái đơn {orderId}!", "Thành công", MsgBox.MessageBoxType.Success);
