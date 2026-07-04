@@ -49,6 +49,9 @@ namespace GUI
             {
                 _originalTableData = new();
                 dgvTableStatus.DataSource = _originalTableData;
+                lblEmptyTablesValue.Text = "0 / 0 bàn";
+                lblPendingValue.Text = "0 bàn";
+                lblSoldOutValue.Text = "0 món";
                 return;
             }
 
@@ -117,6 +120,15 @@ namespace GUI
                 lstSoldOut.Items.Add($"{f.Name} — tạm hết");
             if (lstSoldOut.Items.Count == 0)
                 lstSoldOut.Items.Add("(Không có món nào hết hàng)");
+
+            int totalTables = tables.Count;
+            int emptyTables = tables.Values.Count(t => t.Status == "trong");
+            int pendingTables = list.Count(x => x.Status == "Chờ lên món");
+            int soldOutCount = foods.Count(f => !f.InStock);
+
+            lblEmptyTablesValue.Text = $"{emptyTables} / {totalTables} bàn";
+            lblPendingValue.Text = $"{pendingTables} bàn";
+            lblSoldOutValue.Text = $"{soldOutCount} món";
         }
 
         // Double-click 1 bàn -> form chi tiết read-only đủ field (kể cả TableId ẩn)

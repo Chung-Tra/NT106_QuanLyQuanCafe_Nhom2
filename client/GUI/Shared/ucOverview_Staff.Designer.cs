@@ -105,7 +105,7 @@ namespace GUI
             lblUnreadMsgValue.Name = "lblUnreadMsgValue";
             lblUnreadMsgValue.Size = new Size(75, 37);
             lblUnreadMsgValue.TabIndex = 1;
-            lblUnreadMsgValue.Text = "5 tin";
+            lblUnreadMsgValue.Text = "0 tin";
             // 
             // btnDetailMsg
             // 
@@ -160,7 +160,7 @@ namespace GUI
             lblWorkingDaysValue.Name = "lblWorkingDaysValue";
             lblWorkingDaysValue.Size = new Size(119, 37);
             lblWorkingDaysValue.TabIndex = 1;
-            lblWorkingDaysValue.Text = "23 ngày";
+            lblWorkingDaysValue.Text = "0 ngày";
             // 
             // btnDetailWorkingDays
             // 
@@ -215,7 +215,7 @@ namespace GUI
             lblDaysOffValue.Name = "lblDaysOffValue";
             lblDaysOffValue.Size = new Size(103, 37);
             lblDaysOffValue.TabIndex = 1;
-            lblDaysOffValue.Text = "7 ngày";
+            lblDaysOffValue.Text = "0 ngày";
             // 
             // btnDetailDaysOff
             // 

@@ -2,6 +2,7 @@ using DTO;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -18,6 +19,9 @@ namespace DAL
         /// <summary>Đọc toàn bộ node, gán Id cho mỗi phần tử nếu DTO có thuộc tính Id.</summary>
         public static async Task<Dictionary<string, T>> GetAllAsync<T>(string path)
         {
+            // #region agent log
+            var sw = Stopwatch.StartNew();
+            // #endregion
             try
             {
                 var response = await DalHelper.Client.SendAsync(
@@ -33,9 +37,22 @@ namespace DAL
                     foreach (var kv in dict)
                         if (kv.Value != null) idProp.SetValue(kv.Value, kv.Key);
 
+                // #region agent log
+                sw.Stop();
+                AgentDebugLog.Write("A", "ResourceDAL.GetAllAsync", "http_get_done",
+                    new { path, ms = sw.ElapsedMilliseconds, count = dict.Count });
+                // #endregion
                 return dict;
             }
-            catch { return []; }
+            catch
+            {
+                // #region agent log
+                sw.Stop();
+                AgentDebugLog.Write("A", "ResourceDAL.GetAllAsync", "http_get_failed",
+                    new { path, ms = sw.ElapsedMilliseconds });
+                // #endregion
+                return [];
+            }
         }
 
         /// <summary>Thêm bản ghi mới; trả về Id do server sinh (nếu thành công).</summary>

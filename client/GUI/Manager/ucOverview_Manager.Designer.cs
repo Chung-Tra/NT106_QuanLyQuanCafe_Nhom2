@@ -76,7 +76,7 @@ namespace GUI
             lblDailyRevValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblDailyRevValue.ForeColor = Color.White;
             lblDailyRevValue.Location = new Point(18, 50);
-            lblDailyRevValue.Text = "5,200,000 đ";
+            lblDailyRevValue.Text = "0 đ";
             lblDailyRevValue.Click += lblDailyRevValue_Click;
 
             // ====== pnlMonthlyRev ======
@@ -95,7 +95,7 @@ namespace GUI
             lblMonthlyRevValue.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             lblMonthlyRevValue.ForeColor = Color.FromArgb(31, 138, 154);
             lblMonthlyRevValue.Location = new Point(18, 50);
-            lblMonthlyRevValue.Text = "142,500,000 đ";
+            lblMonthlyRevValue.Text = "0 đ";
 
             // ====== pnlDailyFeed ======
             pnlDailyFeed.BackColor = Color.FromArgb(31, 31, 34);
@@ -113,7 +113,7 @@ namespace GUI
             lblDailyFeedValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblDailyFeedValue.ForeColor = Color.FromArgb(34, 197, 94);
             lblDailyFeedValue.Location = new Point(18, 50);
-            lblDailyFeedValue.Text = "15";
+            lblDailyFeedValue.Text = "0";
 
             // ====== pnlMonthlyFeed ======
             pnlMonthlyFeed.BackColor = Color.FromArgb(31, 31, 34);
@@ -131,7 +131,7 @@ namespace GUI
             lblMonthlyFeedValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblMonthlyFeedValue.ForeColor = Color.FromArgb(34, 197, 94);
             lblMonthlyFeedValue.Location = new Point(18, 50);
-            lblMonthlyFeedValue.Text = "342";
+            lblMonthlyFeedValue.Text = "0";
 
             // ====== pnlNotif ======
             pnlNotif.BackColor = Color.FromArgb(31, 31, 34);

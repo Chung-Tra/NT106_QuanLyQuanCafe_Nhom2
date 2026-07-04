@@ -184,7 +184,7 @@ namespace GUI
             lblShiftValue.Name = "lblShiftValue";
             lblShiftValue.Size = new Size(60, 20);
             lblShiftValue.TabIndex = 7;
-            lblShiftValue.Text = "Ca sáng";
+            lblShiftValue.Text = "—";
             //
             // btnChangeAvatar
             //

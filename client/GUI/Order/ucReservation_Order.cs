@@ -51,7 +51,26 @@ namespace GUI
             }
             catch { /* offline */ }
 
+            UpdateStatCards();
             ApplyFilter();
+        }
+
+        private void UpdateStatCards()
+        {
+            if (_dt == null) return;
+            string today = DateTime.Today.ToString("dd/MM/yyyy");
+            int todayCount = 0, pending = 0, done = 0;
+            foreach (DataRow r in _dt.Rows)
+            {
+                string status = r["Trạng thái"]?.ToString() ?? "";
+                string when = r["Ngày & Giờ"]?.ToString() ?? "";
+                if (when.Contains(today)) todayCount++;
+                if (status == "Chờ xác nhận") pending++;
+                if (status == "Đã đến") done++;
+            }
+            lblToday.Text = $"{todayCount} bàn";
+            lblPending.Text = $"{pending} bàn";
+            lblDone.Text = $"{done} bàn";
         }
 
         private void ApplyFilter()

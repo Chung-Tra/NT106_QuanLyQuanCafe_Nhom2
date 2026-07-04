@@ -265,7 +265,7 @@ namespace GUI
             lblHappyInfoBody.Name = "lblHappyInfoBody";
             lblHappyInfoBody.Size = new Size(360, 17);
             lblHappyInfoBody.TabIndex = 1;
-            lblHappyInfoBody.Text = "14:00 – 16:00  ·  Giảm 20% toàn thực đơn  ·  Áp dụng: T2–T6";
+            lblHappyInfoBody.Text = "Đang tải…";
             // 
             // btnHappyEdit
             // 
@@ -739,6 +739,18 @@ namespace GUI
             Controls.Add(pnlVoucher);
             Name = "ucPromotion_Manager";
             Size = new Size(1000, 665);
+            // Khai báo sự kiện tại Designer — phần xử lý nằm ở ucPromotion_Manager.cs
+            Load += ucPromotion_Manager_Load;
+            btnHappy.Click += BtnHappy_Click;
+            btnCombo.Click += BtnCombo_Click;
+            btnVoucher.Click += BtnVoucher_Click;
+            btnHappyAdd.Click += BtnHappyAdd_Click;
+            btnHappyEdit.Click += BtnHappyEdit_Click;
+            btnComboAdd.Click += BtnComboAdd_Click;
+            btnVoucherGen.Click += BtnVoucherGen_Click;
+            dgvHappy.CellDoubleClick += DgvHappy_CellDoubleClick;
+            dgvCombo.CellDoubleClick += DgvCombo_CellDoubleClick;
+            dgvVoucher.CellDoubleClick += DgvVoucher_CellDoubleClick;
             pnlTabBar.ResumeLayout(false);
             pnlHappy.ResumeLayout(false);
             pnlHappyInfo.ResumeLayout(false);

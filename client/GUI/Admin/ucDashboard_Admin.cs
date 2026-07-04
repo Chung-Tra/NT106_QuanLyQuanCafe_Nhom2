@@ -2,6 +2,7 @@ using BUS;
 using DTO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,12 @@ namespace GUI
         // --- Đổ dữ liệu THẬT từ Firebase vào 2 bảng tổng hợp ---
         private async Task LoadRealAsync()
         {
-            decimal sales = 0, parkingFee = 0;
+            // #region agent log
+            var sw = Stopwatch.StartNew();
+            AgentDebugLog.Write("C", "ucDashboard_Admin.LoadRealAsync", "start", null);
+            // #endregion
+            decimal sales = 0, parkingFee = 0, expenses = 0;
+            long lossTotal = 0;
             int good = 0, bad = 0, totalFb = 0;
             try
             {
@@ -45,12 +51,27 @@ namespace GUI
                 var parking = await ParkingBUS.GetAll();
                 parkingFee = parking.Values.Where(p => p.Status == "da_ra").Sum(p => p.Fee);
 
+                expenses = (await ExpenseBUS.GetAll()).Values.Sum(x => x.SoTien);
+                lossTotal = (long)(await LossBUS.GetAll()).Values.Sum(l => l.GiaTri);
+
                 var fbs = await FeedbackBUS.GetAll();
                 totalFb = fbs.Count;
                 good = fbs.Values.Count(f => f.Rating >= 4);
                 bad = fbs.Values.Count(f => f.Rating <= 2);
             }
             catch { /* offline */ }
+
+            long revenue = (long)(sales + parkingFee);
+            long exp = (long)expenses;
+            lblRevenueValue.Text = Theme.Vnd(revenue);
+            lblProfitValue.Text = Theme.Vnd(revenue - exp - lossTotal);
+            lblExpensesValue.Text = Theme.Vnd(exp);
+            lblLossValue.Text = Theme.Vnd(lossTotal);
+
+            int pctGood = totalFb > 0 ? (int)Math.Round(100.0 * good / totalFb) : 0;
+            int pctBad = totalFb > 0 ? (int)Math.Round(100.0 * bad / totalFb) : 0;
+            lblGoodFeedback.Text = $"● Tốt: {good} ({pctGood}%)";
+            lblBadFeedback.Text = $"● Xấu: {bad} ({pctBad}%)";
 
             dgvRevenue.Rows.Clear();
             dgvRevenue.Rows.Add("Bán hàng (đơn)", Theme.Vnd((long)sales));
@@ -66,6 +87,16 @@ namespace GUI
             dgvFeedback.Rows[rB].Cells[0].Style.ForeColor = Theme.Red;
             int rT = dgvFeedback.Rows.Add("Tổng", totalFb.ToString());
             dgvFeedback.Rows[rT].DefaultCellStyle.Font = Theme.F(9.5F, FontStyle.Bold);
+
+            // #region agent log
+            sw.Stop();
+            AgentDebugLog.Write("C", "ucDashboard_Admin.LoadRealAsync", "done", new
+            {
+                ms = sw.ElapsedMilliseconds,
+                lblRevenue = lblRevenueValue.Text,
+                dgvRevenueRows = dgvRevenue.Rows.Count
+            });
+            // #endregion
         }
 
         // --- "Chi tiết →" cạnh tiêu đề bảng → biểu đồ cột 12 tháng gần nhất (dữ liệu THẬT) ---

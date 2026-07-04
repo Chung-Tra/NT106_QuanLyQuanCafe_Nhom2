@@ -254,7 +254,7 @@ namespace GUI
             lblPayrollValue.Name = "lblPayrollValue";
             lblPayrollValue.Size = new Size(137, 28);
             lblPayrollValue.TabIndex = 1;
-            lblPayrollValue.Text = "42,500,000 đ";
+            lblPayrollValue.Text = "0 đ";
             // 
             // pnlStaffList
             // 

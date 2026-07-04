@@ -328,7 +328,7 @@ namespace GUI
             lblPoints.Name = "lblPoints";
             lblPoints.Size = new Size(94, 41);
             lblPoints.TabIndex = 1;
-            lblPoints.Text = "1 250";
+            lblPoints.Text = "—";
             // 
             // lblPointUnit
             // 
@@ -352,7 +352,7 @@ namespace GUI
             lblVisits.Name = "lblVisits";
             lblVisits.Size = new Size(97, 15);
             lblVisits.TabIndex = 3;
-            lblVisits.Text = "28 lượt ghé thăm";
+            lblVisits.Text = "—";
             // 
             // btnAddPoints
             // 
