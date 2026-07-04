@@ -188,7 +188,7 @@ namespace GUI
             lblRevenueValue.Name = "lblRevenueValue";
             lblRevenueValue.Size = new Size(149, 30);
             lblRevenueValue.TabIndex = 1;
-            lblRevenueValue.Text = "45,800,000 đ";
+            lblRevenueValue.Text = "0 đ";
             // 
             // btnRevenueMore
             // 
@@ -247,7 +247,7 @@ namespace GUI
             lblProfitValue.Name = "lblProfitValue";
             lblProfitValue.Size = new Size(149, 30);
             lblProfitValue.TabIndex = 1;
-            lblProfitValue.Text = "18,200,000 đ";
+            lblProfitValue.Text = "0 đ";
             // 
             // btnProfitMore
             // 
@@ -306,7 +306,7 @@ namespace GUI
             lblExpensesValue.Name = "lblExpensesValue";
             lblExpensesValue.Size = new Size(149, 30);
             lblExpensesValue.TabIndex = 1;
-            lblExpensesValue.Text = "25,100,000 đ";
+            lblExpensesValue.Text = "0 đ";
             // 
             // btnExpenseMore
             // 
@@ -365,7 +365,7 @@ namespace GUI
             lblLossValue.Name = "lblLossValue";
             lblLossValue.Size = new Size(136, 30);
             lblLossValue.TabIndex = 1;
-            lblLossValue.Text = "2,500,000 đ";
+            lblLossValue.Text = "0 đ";
             // 
             // btnLossMore
             // 
@@ -679,7 +679,7 @@ namespace GUI
             lblGoodFeedback.Name = "lblGoodFeedback";
             lblGoodFeedback.Size = new Size(109, 19);
             lblGoodFeedback.TabIndex = 4;
-            lblGoodFeedback.Text = "● Tốt: 42 (84%)";
+            lblGoodFeedback.Text = "● Tốt: 0 (0%)";
             // 
             // lblBadFeedback
             // 
@@ -690,7 +690,7 @@ namespace GUI
             lblBadFeedback.Name = "lblBadFeedback";
             lblBadFeedback.Size = new Size(104, 19);
             lblBadFeedback.TabIndex = 5;
-            lblBadFeedback.Text = "● Xấu: 8 (16%)";
+            lblBadFeedback.Text = "● Xấu: 0 (0%)";
             // 
             // ucDashboard_Admin
             // 

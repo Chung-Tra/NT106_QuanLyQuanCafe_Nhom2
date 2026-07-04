@@ -21,14 +21,15 @@ namespace GUI
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvTransactions);
             DgvRefresh.Attach(dgvTransactions, () => _ = LoadRealData());
-            this.Load += (s, e) => _ = LoadRealData();
+        }
 
-            dgvTransactions.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex < 0) return;
-                RecordDetail.FromRow(dgvTransactions.Rows[e.RowIndex], "Chi tiết giao dịch tiền mặt")
-                            .ShowDialog(MsgBox.OwnerWindow(this));
-            };
+        private void ucCashManagement_Order_Load(object? sender, EventArgs e) => _ = LoadRealData();
+
+        private void dgvTransactions_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvTransactions.Rows[e.RowIndex], "Chi tiết giao dịch tiền mặt")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
         private static string MethodVi(string? code) => code switch

@@ -74,7 +74,7 @@ namespace GUI
             lblRemainingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblRemainingValue.ForeColor = Color.FromArgb(34, 197, 94);
             lblRemainingValue.Location = new Point(20, 42);
-            lblRemainingValue.Text = "12 ngày";
+            lblRemainingValue.Text = "0 ngày";
 
             pnlDivider1.BackColor = Color.FromArgb(63, 63, 70);
             pnlDivider1.Location = new Point(270, 22);
@@ -90,7 +90,7 @@ namespace GUI
             lblPendingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblPendingValue.ForeColor = Color.FromArgb(245, 158, 11);
             lblPendingValue.Location = new Point(300, 42);
-            lblPendingValue.Text = "2 đơn";
+            lblPendingValue.Text = "0 đơn";
 
             btnManager.BorderRadius = 10;
             btnManager.Cursor = Cursors.Hand;
@@ -252,6 +252,7 @@ namespace GUI
             this.Load += UcLeaveRequest_Load;
             btnSubmit.Click += BtnSubmit_Click;
             btnReport.Click += BtnReport_Click;
+            dgvHistory.CellDoubleClick += dgvHistory_CellDoubleClick;
             ResumeLayout(false);
         }
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,51 @@ namespace GUI
             InitializeComponent();
             DgvRefresh.Attach(dgvMenu, LoadRealData);
             DgvRefresh.Attach(dgvInventory, () => _ = LoadInventory());
-            this.Load += async (s, e) => { await LoadRealData(); await LoadInventory(); };
+            this.Load += async (s, e) =>
+            {
+                // #region agent log
+                var sw = Stopwatch.StartNew();
+                AgentDebugLog.Write("B", "ucProducts_Manager.Load", "start", null);
+                // #endregion
+                await LoadRealData();
+                await LoadInventory();
+                await LoadSummaryStats();
+                // #region agent log
+                sw.Stop();
+                AgentDebugLog.Write("B", "ucProducts_Manager.Load", "done", new
+                {
+                    ms = sw.ElapsedMilliseconds,
+                    lblExpense = lblExpenseValue.Text,
+                    lblIncome = lblIncomeValue.Text,
+                    menuRows = dgvMenu.Rows.Count
+                });
+                // #endregion
+            };
+        }
+
+        private async Task LoadSummaryStats()
+        {
+            int monthKey = DateTime.Now.Year * 100 + DateTime.Now.Month;
+            long expense = 0, income = 0;
+            try
+            {
+                foreach (var imp in await InventoryImportBUS.GetAllImports())
+                {
+                    int d = imp.ImportDate;
+                    if (d / 100 == monthKey) expense += imp.TotalAmount;
+                }
+
+                foreach (var p in (await PaymentBUS.GetAll()).Values.Where(p => p.Timestamp > 0))
+                {
+                    var dt = DateTimeOffset.FromUnixTimeMilliseconds(p.Timestamp).LocalDateTime;
+                    if (dt.Year == DateTime.Now.Year && dt.Month == DateTime.Now.Month)
+                        income += (long)p.ActualReceived;
+                }
+            }
+            catch { /* offline */ }
+
+            lblExpenseValue.Text = "- " + Theme.Vnd(expense);
+            lblIncomeValue.Text = "+ " + Theme.Vnd(income);
         }
 
         // Đổ tồn kho nguyên liệu thật (node nguyen_lieu) vào bảng bên phải.
@@ -133,6 +178,7 @@ namespace GUI
             if (frmAdd.ShowDialog(MsgBox.OwnerWindow(this)) == DialogResult.OK)
             {
                 await LoadRealData();
+                await LoadSummaryStats();
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Món ăn mới đã được thêm vào thực đơn!", "Thành công", MsgBox.MessageBoxType.Success);
             }
         }
@@ -191,7 +237,8 @@ namespace GUI
         {
             using WarehouseManager frm = new();
             frm.ShowDialog(MsgBox.OwnerWindow(this));
-            _ = LoadInventory();   // nhập kho xong -> cập nhật tồn kho
+            _ = LoadInventory();
+            _ = LoadSummaryStats();
         }
 
         private void BtnFilter_Click(object sender, EventArgs e)

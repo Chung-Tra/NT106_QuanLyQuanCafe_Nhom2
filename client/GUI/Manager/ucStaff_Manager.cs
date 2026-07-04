@@ -132,6 +132,17 @@ namespace GUI
                 lblTotalStaffValue.Text = $"{staffList.Count} người";
                 lblPresentValue.Text    = $"{activeList.Count} người";
                 lblLeaveValue.Text      = $"{leaveList.Count} người";
+
+                decimal payrollTotal = 0;
+                try
+                {
+                    int month = DateTime.Now.Month;
+                    payrollTotal = (await SalaryBUS.GetAll()).Values
+                        .Where(s => s.Month == month)
+                        .Sum(s => s.TotalSalary);
+                }
+                catch { /* offline */ }
+                lblPayrollValue.Text = payrollTotal.ToString("N0") + " đ";
             }
             catch (Exception ex)
             {

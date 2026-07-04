@@ -4,7 +4,7 @@
 > **Nhóm 2:** Đào Quốc Huy (24520655) · Trà Chí Chung (24520229)
 > **Loại sản phẩm:** Ứng dụng desktop WinForms (.NET 8) + REST API (Node/Express) + Realtime Chat (ASP.NET Core SignalR) + Firebase.
 
-Tài liệu này là bản tổng hợp toàn bộ đề tài: hướng giải quyết, công nghệ, các sơ đồ thiết kế (BFD/FDD, Use Case, tuần tự, kiến trúc, luồng dữ liệu, CSDL), schema cơ sở dữ liệu, và liệt kê **chi tiết tất cả tính năng** kèm ý tưởng – cách triển khai – đoạn code thực tế. Phần cuối là **chẩn đoán lỗi sự kiện (events) gây `NullReferenceException`** mà nhóm gặp khi chạy cùng cách khắc phục, và **đợt tối ưu giao diện & hiệu năng client** (mục 12): sửa lỗi ký tự `&` hiển thị thành `_`, thay scrollbar trắng bằng thanh teal hợp theme, cache màn hình + đưa tải dữ liệu xuống luồng nền (màn Chat từ ~20 giây xuống dưới 50 ms).
+Tài liệu này là bản tổng hợp toàn bộ đề tài: hướng giải quyết, công nghệ, các sơ đồ thiết kế (BFD/FDD, Use Case, tuần tự, kiến trúc, luồng dữ liệu, CSDL), schema cơ sở dữ liệu, và liệt kê **chi tiết tất cả tính năng** kèm ý tưởng – cách triển khai – đoạn code thực tế. Ba phần cuối ghi lại ba "chiến dịch" hoàn thiện trước khi nộp: **chẩn đoán lỗi sự kiện (events) gây `NullReferenceException`** cùng cách khắc phục (mục 11); **đợt tối ưu giao diện & hiệu năng client** (mục 12): sửa lỗi ký tự `&` hiển thị thành `_`, thay scrollbar trắng bằng thanh teal hợp theme, cache màn hình + đưa tải dữ liệu xuống luồng nền (màn Chat từ ~20 giây xuống dưới 50 ms); và **đợt nối dữ liệu thật toàn hệ thống — nhánh `final-backend`** (mục 13): dựng **Generic Resource API** phủ 23 nhóm tài nguyên (92 endpoint sinh từ một factory ~100 dòng), tầng `ResourceDAL`/`ResourceBUS` generic phía client, **upload ảnh lên Firebase Storage**, mã **VietQR chuẩn EMVCo quét được thật**, và wire **100% màn hình** của cả 5 vai trò vào Firebase — nâng tổng số endpoint REST của hệ thống lên **116**.
 
 ---
 
@@ -24,8 +24,10 @@ Tài liệu này là bản tổng hợp toàn bộ đề tài: hướng giải q
     - [10.2. Tính năng RIÊNG theo Role](#102-tính-năng-riêng-theo-role)
 11. [Chẩn đoán sự kiện (events) & lỗi NullReferenceException](#11-chẩn-đoán-sự-kiện-events--lỗi-nullreferenceexception)
 12. [Tối ưu giao diện & hiệu năng client (đợt rà soát 07/2026)](#12-tối-ưu-giao-diện--hiệu-năng-client-đợt-rà-soát-072026)
-13. [Kiểm thử (Testing)](#13-kiểm-thử-testing)
-14. [Phụ lục A — API Reference đầy đủ](#14-phụ-lục-a--api-reference-đầy-đủ)
+13. [Đợt nối dữ liệu thật toàn hệ thống — nhánh final-backend](#13-đợt-nối-dữ-liệu-thật-toàn-hệ-thống--nhánh-final-backend)
+14. [Kiểm thử (Testing)](#14-kiểm-thử-testing)
+15. [Phụ lục A — API Reference đầy đủ](#15-phụ-lục-a--api-reference-đầy-đủ)
+16. [Tổng kết số liệu đồ án](#16-tổng-kết-số-liệu-đồ-án)
 
 ---
 
@@ -65,20 +67,25 @@ Nhóm chọn kiến trúc **client – server tách lớp**, vận dụng đúng
 | --- | --- | --- |
 | Client desktop | C# **WinForms**, **.NET 8** (`net8.0-windows7.0`) | UI chính cho mọi vai trò |
 | Thư viện UI | **Guna.UI2.WinForms** 2.0.4.4 | Control bo góc, dark theme, DataGridView đẹp |
-| Biểu đồ | **Guna.Charts.WinForms** (bản free) | Dashboard doanh thu, thống kê |
-| HTTP client | `System.Net.Http.HttpClient` + **Newtonsoft.Json** | Gọi REST API |
-| Realtime client | **Microsoft.AspNetCore.SignalR.Client** | Kết nối ChatHub |
-| Backend API | **Node.js ≥ 18**, **Express** | REST API |
+| Biểu đồ | **Guna.Charts.WinForms** 1.1.0 (bản free) | Dashboard doanh thu, thống kê |
+| HTTP client | `System.Net.Http.HttpClient` + **Newtonsoft.Json** | Gọi REST API (1 `HttpClient` static dùng chung) |
+| Realtime client | **Microsoft.AspNetCore.SignalR.Client** 10.0.6 | Kết nối ChatHub |
+| Xuất/đọc Excel | **ClosedXML** 0.104.2 | Xuất báo cáo `.xlsx` thật; đọc Excel/CSV để prefill phiếu nhập kho |
+| Mã QR | **QRCoder** 1.6.0 | Sinh **VietQR chuẩn EMVCo/Napas 247** (thanh toán quét được thật) + QR link tự đặt món |
+| Backend API | **Node.js 20**, **Express** ^4.21 | REST API — 116 endpoint (24 chuyên biệt + 92 generic) |
+| Upload file | **multer** ^2.2 (memoryStorage, ≤ 5 MB, chỉ `image/*`) | Nhận ảnh multipart rồi đẩy lên Firebase Storage |
 | Bảo mật HTTP | **helmet**, **cors**, **morgan** | Header an toàn, CORS, log request |
-| Firebase SDK | **firebase-admin** | Truy cập Auth + Realtime DB |
-| Gửi email | **nodemailer** (Gmail SMTP) | Gửi OTP đặt lại mật khẩu |
-| Logging | **winston** | `combined.log`, `error.log` |
-| Realtime server | **ASP.NET Core** + **SignalR** | Chat server (`/chathub`) |
-| CSDL | **Firebase Realtime Database** (NoSQL JSON) | Toàn bộ dữ liệu nghiệp vụ |
+| Firebase SDK | **firebase-admin** ^13.8 | Truy cập Auth + Realtime DB + **Storage** |
+| Deploy cloud | **firebase-functions** ^7.2 (v2, region `asia-southeast1`) | Deploy nguyên app Express lên Cloud Functions |
+| Gửi email | **nodemailer** ^8.0 (Gmail SMTP) | Gửi OTP đặt lại mật khẩu |
+| Logging | **winston** ^3.19 | `combined.log`, `error.log` |
+| Realtime server | **ASP.NET Core** + **SignalR** | Chat server (`/chathub`) — KeepAlive 15s, timeout 60s, message ≤ 64KB |
+| CSDL | **Firebase Realtime Database** (NoSQL JSON) | Toàn bộ dữ liệu nghiệp vụ (30 node) |
+| Lưu file | **Firebase Storage** | Ảnh món ăn (`mon_uong/`), avatar nhân viên (`avatar/`) |
 | Xác thực | **Firebase Authentication** (Email/Password) | Phát ID Token (JWT) |
 | Mã hóa cục bộ | **DPAPI** (`ProtectedData`) | Mã hóa mật khẩu "Ghi nhớ đăng nhập" |
-| Test backend | **Jest** | Unit test controller/service |
-| Test client | **xUnit** | Unit test lớp BUS |
+| Test backend | **Jest** ^29.7 (`--runInBand --forceExit`) | 5 file test controller/middleware + `mockFirebase.js` |
+| Test client | Kiểm thử thủ công theo `HUONG_DAN_TEST_UI.md` + harness `DrawToBitmap` | Kịch bản theo role; đo render/thời gian mở màn |
 
 ### 2.2. Bố cục mã nguồn (3 service)
 
@@ -99,6 +106,7 @@ NT106_QuanLyQuanCafe_Nhom2/
 | Chat Server SignalR | **8080** | WebSocket | `http://localhost:8080/chathub` |
 | Firebase RTDB | 443 | HTTPS (Admin SDK) | `…asia-southeast1.firebasedatabase.app` |
 | Firebase Auth | 443 | HTTPS REST | `identitytoolkit.googleapis.com` |
+| Firebase Storage | 443 | HTTPS (Admin SDK) | `firebasestorage.googleapis.com/v0/b/<bucket>` — chứa ảnh món/avatar |
 | Gmail SMTP | 587 | SMTP (Nodemailer) | gửi OTP |
 
 > Client cấu hình URL qua `App.config`: `ApiBaseUrl` (mặc định `http://localhost:3000/api/`) và `ChatServerIP` (mặc định `localhost` → `http://{IP}:8080/chathub`). Đổi IP để chạy nhiều máy trong LAN.
@@ -110,7 +118,8 @@ NT106_QuanLyQuanCafe_Nhom2/
 | `PORT` | Không | Cổng backend (mặc định 3000) |
 | `FIREBASE_DATABASE_URL` | Có | URL Realtime Database |
 | `FIREBASE_API_KEY` | Có | Web API Key (cho `signInWithPassword`) |
-| `APP_SECRET_KEY` | Có | Bí mật bảo vệ endpoint đổi mật khẩu + `X-Server-Secret` (ChatServer ↔ Backend) |
+| `FIREBASE_STORAGE_BUCKET` | Không | Bucket Storage cho upload ảnh; bỏ trống sẽ tự suy `{project_id}.appspot.com` từ service account |
+| `APP_SECRET_KEY` | Có | Bí mật 3-trong-1: bảo vệ endpoint đổi mật khẩu, "pepper" khi băm OTP, và `X-Server-Secret` (ChatServer ↔ Backend) |
 | `EMAIL_USER` / `EMAIL_PASS` | Có | Gmail + App Password để gửi OTP |
 | `NODE_ENV` | Không | `development` / `production` |
 
@@ -633,6 +642,135 @@ function verifyServerSecret(req, res, next) {
 }
 ```
 
+### 6.4. Generic Resource API — một controller factory phục vụ 23 nhóm endpoint
+
+**Bài toán:** hệ thống có ~30 node dữ liệu; ngoài các nghiệp vụ đặc thù (auth, employees có rollback, inventory có cộng tồn…), phần lớn node chỉ cần đúng 4 thao tác GET/POST/PUT/DELETE **giống hệt nhau**. Nếu viết tay mỗi node một cặp controller + route thì backend sẽ phình thêm ~40 file lặp code — khó bảo trì, dễ lệch contract.
+
+**Giải pháp:** một **factory** `makeResource(node, prefix)` sinh trọn bộ 4 handler cho một node, và một **bảng khai báo** `RESOURCES` ánh xạ `endpoint → [node RTDB, prefix id]`. Route được sinh bằng vòng lặp:
+
+```js
+// backend/src/controllers/resources.controller.js
+function makeResource(node, prefix) {
+    const nextId = (val) => {                     // id mới = "prefixNNN" với NNN = max hiện có + 1
+        let max = 0;
+        for (const key of Object.keys(val || {})) {
+            if (!key.startsWith(prefix)) continue;
+            const n = parseInt(key.slice(prefix.length), 10);
+            if (!Number.isNaN(n) && n > max) max = n;
+        }
+        return `${prefix}${(max + 1).toString().padStart(3, '0')}`;
+    };
+    return {
+        getAll: async (req, res, next) => { /* trả nguyên object {id: {...}} */ },
+        add:    async (req, res, next) => { /* sinh id -> set -> 201 {success, id} */ },
+        update: async (req, res, next) => { delete req.body.Id;   // chặn field kỹ thuật của client
+                                            await db.ref(`${node}/${id}`).update(req.body); },
+        remove: async (req, res, next) => { await db.ref(`${node}/${id}`).remove(); },
+    };
+}
+```
+
+```js
+// backend/src/routes/resources.routes.js — muốn thêm node mới chỉ cần thêm MỘT dòng vào bảng này
+const RESOURCES = {
+    'tables':          ['ban', 'ban_'],           'orders':         ['don_hang', 'dh_'],
+    'payments':        ['thanh_toan', 'tt_'],     'customers':      ['khach_hang', 'kh_'],
+    'feedback':        ['feedback', 'fb_'],       'attendance':     ['cham_cong', 'cc_'],
+    'salaries':        ['luong', 'luong_'],       'leave-requests': ['xin_nghi', 'xn_'],
+    'notifications':   ['thong_bao', 'tb_'],      'parking':        ['bai_xe', 'bx_'],
+    'incidents':       ['su_co', 'sc_'],          'warnings':       ['canh_bao', 'cb_'],
+    'recipes':         ['cong_thuc', 'ct_'],
+    // Node MỚI cho các màn phụ (thêm ở nhánh final-backend):
+    'promotions':      ['khuyen_mai', 'km_'],     'expenses':       ['chi_phi', 'cp_'],
+    'losses':          ['that_thoat', 'loss_'],   'reservations':   ['dat_ban', 'db_'],
+    'audit-logs':      ['nhat_ky', 'log_'],       'broadcasts':     ['thong_bao_chung', 'bc_'],
+    'schedules':       ['lich_lam_viec', 'sch_'], 'shift-registers':['dang_ky_ca', 'sr_'],
+    'bug-reports':     ['bao_loi', 'bug_'],       'point-logs':     ['diem_log', 'pl_'],
+};
+for (const [path, [node, prefix]] of Object.entries(RESOURCES)) {
+    const ctrl = makeResource(node, prefix);
+    const r = express.Router();
+    r.get('/', verifyAndGetUser, ctrl.getAll);    r.post('/', verifyAndGetUser, ctrl.add);
+    r.put('/:id', verifyAndGetUser, ctrl.update); r.delete('/:id', verifyAndGetUser, ctrl.remove);
+    router.use(`/${path}`, r);
+}
+```
+
+Kết quả: **23 nhóm × 4 = 92 endpoint** sinh từ ~100 dòng code; endpoint nào cũng bắt buộc Bearer token; contract thống nhất với nhóm `foods` viết tay trước đó (`GET` trả `{id: {...}}`, `POST` trả `{success, id}` với id server tự sinh, `PUT` là partial update, `DELETE` trả `{success}`).
+
+**Phía client đối xứng — `ResourceDAL` + `ResourceBUS`:** vì mọi endpoint generic cùng contract nên client chỉ cần **một** DAL dùng generics:
+
+```csharp
+// client/DAL/ResourceDAL.cs
+public static async Task<Dictionary<string, T>> GetAllAsync<T>(string path) {
+    var response = await DalHelper.Client.SendAsync(DalHelper.Build(HttpMethod.Get, path));
+    if (!response.IsSuccessStatusCode) return [];
+    var dict = JsonConvert.DeserializeObject<Dictionary<string, T>>(json) ?? [];
+    var idProp = typeof(T).GetProperty("Id");            // gán key node vào DTO.Id (reflection)
+    if (idProp != null && idProp.CanWrite)
+        foreach (var kv in dict) if (kv.Value != null) idProp.SetValue(kv.Value, kv.Key);
+    return dict;                                          // lỗi mạng -> catch -> trả [] (không crash)
+}
+public static Task<(bool, string, string? Id)> AddAsync<T>(string path, T dto);       // đọc id server sinh
+public static Task<(bool, string)> UpdateAsync(string path, string id, object data);  // data = DTO hoặc
+                       // object ẩn danh chỉ chứa field cần đổi: new { trang_thai = "trong" }
+public static Task<(bool, string)> DeleteAsync(string path, string id);
+```
+
+`client/BUS/ResourceBUS.cs` chứa **23 lớp BUS mỏng** (TableBUS, OrderBUS, PaymentBUS, CustomerBUS, FeedbackBUS, AttendanceBUS, PointLogBUS, SalaryBUS, LeaveRequestBUS, NotificationBUS, ParkingBUS, IncidentBUS, WarningBUS, RecipeBUS, PromotionBUS, ExpenseBUS, LossBUS, ReservationBUS, AuditLogBUS, BroadcastBUS, ScheduleBUS, ShiftBUS, BugReportBUS) — mỗi lớp chỉ khai `const string P = "<path>"` rồi ủy quyền 4 method cho `ResourceDAL`:
+
+```csharp
+public static class TableBUS {
+    const string P = "tables";
+    public static Task<Dictionary<string, TableDTO>> GetAll() => ResourceDAL.GetAllAsync<TableDTO>(P);
+    public static Task<(bool, string, string?)> Add(TableDTO d) => ResourceDAL.AddAsync(P, d);
+    public static Task<(bool, string)> Update(string id, object d) => ResourceDAL.UpdateAsync(P, id, d);
+    public static Task<(bool, string)> Delete(string id) => ResourceDAL.DeleteAsync(P, id);
+}
+```
+
+- **💡 Tâm đắc 1 — DRY hai đầu dây:** thêm một node dữ liệu mới giờ chỉ tốn *1 dòng* trong `RESOURCES` (backend) + *1 DTO* + *1 lớp BUS 6 dòng* (client). Trước đây mỗi node như vậy là ~4 file backend + 2 file client.
+- **💡 Tâm đắc 2 — Reflection gán `Id`:** key của node không nằm trong body JSON; `GetAllAsync` gán key vào thuộc tính `Id` (đánh dấu `[JsonIgnore]`) để GUI có sẵn id khi cần `Update`/`Delete`, mà DTO không phải viết thêm code nào.
+- **💡 Tâm đắc 3 — Partial update tự nhiên:** tham số `object data` cho phép GUI truyền object ẩn danh đúng những field muốn sửa; kết hợp `update()` của Firebase (chỉ chạm field gửi lên) là hết hẳn lỗi "ghi đè `null` mất dữ liệu cũ".
+- **💡 Tâm đắc 4 — Chịu lỗi offline:** `GetAllAsync` nuốt exception trả `[]` — backend chưa bật thì màn hình trống/fallback dữ liệu mẫu chứ không văng, rất hợp bối cảnh demo.
+
+### 6.5. Upload ảnh lên Firebase Storage (`POST /api/upload`)
+
+**Ý tưởng:** ảnh món ăn và avatar không nên nhét base64 vào RTDB (phình DB, chậm). Chuẩn hơn: file lên **Firebase Storage**, DB chỉ lưu **URL**. Client không nói chuyện trực tiếp với Storage mà đi qua backend — backend giữ quyền admin, kiểm soát loại file và cấp URL tải.
+
+**Backend (`upload.routes.js` + `upload.controller.js`):**
+
+```js
+const upload = multer({
+    storage: multer.memoryStorage(),               // giữ trong RAM, không ghi đĩa tạm
+    limits: { fileSize: 5 * 1024 * 1024 },         // 5 MB
+    fileFilter: (req, file, cb) => /^image\//.test(file.mimetype)
+        ? cb(null, true) : cb(new Error('Chỉ chấp nhận file ảnh (jpg, png, gif, webp...)'))
+});
+router.post('/', verifyAndGetUser, upload.single('file'), uploadImage);
+```
+
+```js
+// upload.controller.js — phát hành URL bằng DOWNLOAD TOKEN của Firebase
+const folder = String(req.body.folder || 'misc').replace(/[^a-zA-Z0-9_-]/g, '') || 'misc';
+const token = crypto.randomUUID();
+const objectPath = `${folder}/${Date.now()}_${crypto.randomBytes(4).toString('hex')}.${ext}`;
+await bucket.file(objectPath).save(req.file.buffer, {
+    resumable: false,
+    metadata: { contentType: req.file.mimetype,
+                metadata: { firebaseStorageDownloadTokens: token } }
+});
+const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}` +
+            `/o/${encodeURIComponent(objectPath)}?alt=media&token=${token}`;
+res.status(201).json({ success: true, url });
+```
+
+**Client (`UploadDAL` → `UploadBUS`):** dựng `MultipartFormDataContent` (bytes file + content-type đoán theo đuôi + field `folder`), POST kèm Bearer, đọc `{ url }` trả về rồi lưu vào `hinh_anh_url` (món — dialog `AddFood`/`EditFood`, folder `mon_uong`) hoặc `avatar_url` (hồ sơ — `ucProfile`, folder `avatar`). Hiển thị ngược lại qua helper `ImageLoader` (tải URL bất đồng bộ + cache cho PictureBox).
+
+- **💡 Tâm đắc 1 — Download token thay vì `makePublic()`:** bucket bật *Uniform bucket-level access* thì mọi thao tác ACL per-file (`makePublic`) đều bị từ chối. Firebase có cơ chế riêng: đặt metadata `firebaseStorageDownloadTokens` rồi tự ghép URL `?alt=media&token=` — hoạt động ở mọi chế độ bucket, và thu hồi được (xóa token là link chết).
+- **💡 Tâm đắc 2 — Sanitize `folder`:** tên thư mục do client gửi bị lọc trắng ký tự ngoài `[a-zA-Z0-9_-]` — chặn kiểu `../` ghi đè chỗ khác trong bucket (path traversal).
+- **💡 Tâm đắc 3 — multer memoryStorage:** đồ án chạy cả trên Cloud Functions (filesystem chỉ đọc); giữ buffer trong RAM + giới hạn 5 MB là lựa chọn an toàn cho cả hai môi trường local/cloud.
+
 ---
 
 ## 7. Thiết kế luồng dữ liệu (DFD)
@@ -1067,31 +1205,42 @@ erDiagram
     }
 ```
 
-### 8.3. Danh mục thực thể (đang có vs sẽ có)
+### 8.3. Danh mục thực thể (30 node) & trạng thái dữ liệu
 
-> Một số node được dựng cho các tính năng **mở rộng** (CRM, lương, nghỉ phép, bãi xe, sự cố, công thức) — đánh dấu 🆕. Các node lõi đã có dữ liệu thật đánh dấu 🟢.
+> **Tất cả node dưới đây đều đã được wire thật** (đọc/ghi qua REST) sau nhánh `final-backend`. Cột trạng thái chỉ phân biệt **có sẵn dữ liệu mẫu hay chưa**: 🟢 = có bản ghi trong `qlcafe-rtdb-import-full.json` (19 node); 🆕 = node sinh **tự động khi dùng** (chưa nạp seed, phục vụ màn phụ). Không còn node nào ở trạng thái "sẽ làm".
 
-| Node Firebase | Tiền tố key | Trạng thái | DTO ánh xạ (client) | Phục vụ màn |
+| Node Firebase | Tiền tố key | Dữ liệu mẫu | DTO ánh xạ (client) | Phục vụ màn |
 | --- | --- | --- | --- | --- |
-| `/nhan_vien` | `nv_` | 🟢 Đang có | `EmployeeDTO` | Đăng nhập, Nhân viên |
-| `/mon_uong` | `mon_` | 🟢 Đang có | `FoodDTO` | Thực đơn, POS |
-| `/ban` | `ban_` | 🟢 Đang có | `TableDTO` | Sơ đồ bàn (POS) |
-| `/don_hang` (+`chi_tiet_don`) | `dh_` / `ctd_` | 🟢 Đang có | `OrderDTO` / `OrderItemDTO` | POS, KDS, Đơn hàng |
-| `/thanh_toan` | `tt_` | 🟢 Đang có | `PaymentDTO` | Thanh toán, Tiền mặt |
-| `/nguyen_lieu` | `nl_` | 🟢 Đang có | `IngredientDTO` | Kho, Cảnh báo NL |
-| `/nhap_kho` (+`ds_nl`) | `nk_` | 🟢 Đang có | `InventoryImportDTO` / `…ItemDTO` | Nhập kho |
-| `/cham_cong` | `cc_` | 🟢 Đang có | `AttendanceDTO` | Chấm công, Lịch sử |
-| `/thong_bao` | `tb_` | 🟢 Đang có | `NotificationDTO` | Thông báo |
-| `/tin_nhan` | room/`msg_` | 🟢 Đang có | `ChatMessageDTO` | Chat nội bộ |
-| `/danh_sach_chat` | `nv_` | 🟢 Đang có | (index hội thoại) | Danh sách chat |
-| `/canh_bao` | `cb_` | 🟢 Đang có | `WarningDTO` | Báo động NL (Barista) |
-| `/luong` | `luong_` | 🆕 Mới | `SalaryDTO` | Tiền lương (Admin) |
-| `/xin_nghi` | `xn_` | 🆕 Mới | `LeaveRequestDTO` | Xin nghỉ / Duyệt |
-| `/feedback` | `fb_` | 🆕 Mới | `FeedbackDTO` | Feedback |
-| `/khach_hang` | `kh_` | 🆕 Mới | `CustomerDTO` | CRM, Loyalty |
-| `/bai_xe` | `bx_` | 🆕 Mới | `ParkingDTO` | Bãi xe (Security) |
-| `/su_co` | `sc_` | 🆕 Mới | `IncidentDTO` | SOS (Security) |
-| `/cong_thuc` (+`nguyen_lieu`) | `ct_` | 🆕 Mới | `RecipeDTO` / `RecipeIngredientDTO` | Cẩm nang pha chế |
+| `/nhan_vien` | `nv_` | 🟢 10 bản ghi | `EmployeeDTO` | Đăng nhập, Nhân viên |
+| `/mon_uong` | `mon_` | 🟢 30 | `FoodDTO` | Thực đơn, POS |
+| `/ban` | `ban_` | 🟢 20 | `TableDTO` | Sơ đồ bàn (POS) |
+| `/don_hang` (+`chi_tiet_don`) | `dh_` / `ctd_` | 🟢 12 | `OrderDTO` / `OrderItemDTO` | POS, KDS, Đơn hàng, Self-order |
+| `/thanh_toan` | `tt_` | 🟢 7 | `PaymentDTO` | Thanh toán, Tiền mặt, Dashboard |
+| `/nguyen_lieu` | `nl_` | 🟢 18 | `IngredientDTO` | Kho, Cảnh báo NL |
+| `/nhap_kho` (+`ds_nl`) | `nk_` | 🟢 6 | `InventoryImportDTO` / `…ItemDTO` | Nhập kho |
+| `/cham_cong` | `cc_` | 🟢 27 | `AttendanceDTO` | Chấm công, Lịch sử |
+| `/thong_bao` | `tb_` | 🟢 12 | `NotificationDTO` | Thông báo |
+| `/tin_nhan` | room/`msg_` | 🟢 3 phòng | `ChatMessageDTO` | Chat nội bộ |
+| `/danh_sach_chat` | `nv_` | 🟢 4 | (index hội thoại) | Danh sách chat |
+| `/canh_bao` | `cb_` | 🟢 7 | `WarningDTO` | Báo động NL (Barista) |
+| `/luong` | `luong_` | 🟢 10 | `SalaryDTO` | Tiền lương (Admin) |
+| `/xin_nghi` | `xn_` | 🟢 7 | `LeaveRequestDTO` | Xin nghỉ / Duyệt |
+| `/feedback` | `fb_` | 🟢 10 | `FeedbackDTO` | Feedback |
+| `/khach_hang` | `kh_` | 🟢 10 | `CustomerDTO` | CRM, Loyalty |
+| `/bai_xe` | `bx_` | 🟢 10 | `ParkingDTO` | Bãi xe (Security) |
+| `/su_co` | `sc_` | 🟢 6 | `IncidentDTO` | SOS (Security) |
+| `/cong_thuc` (+`nguyen_lieu`) | `ct_` | 🟢 10 | `RecipeDTO` / `RecipeIngredientDTO` | Cẩm nang pha chế |
+| `/khuyen_mai` | `km_` | 🆕 tự sinh | `PromotionDTO` | Khuyến mãi (happy_hour/combo/voucher) |
+| `/chi_phi` | `cp_` | 🆕 tự sinh | `ExpenseDTO` | Tiền chi (Admin) |
+| `/that_thoat` | `loss_` | 🆕 tự sinh | `LossDTO` | Thất thoát (Manager) |
+| `/dat_ban` | `db_` | 🆕 tự sinh | `ReservationDTO` | Đặt bàn trước (Order) |
+| `/nhat_ky` | `log_` | 🆕 tự sinh | `AuditLogDTO` | Nhật ký kiểm toán |
+| `/thong_bao_chung` | `bc_` | 🆕 tự sinh | `BroadcastDTO` | Gửi thông báo (Broadcast) |
+| `/lich_lam_viec` | `sch_` | 🆕 tự sinh | `ScheduleDTO` | Lịch ca tuần (Manager) |
+| `/dang_ky_ca` | `sr_` | 🆕 tự sinh | `ShiftDTO` | Chọn ca / Đổi ca |
+| `/bao_loi` | `bug_` | 🆕 tự sinh | `BugReportDTO` | Báo lỗi ứng dụng (nút header) |
+| `/diem_log` | `pl_` | 🆕 tự sinh | `PointLogDTO` | Nhật ký tích/đổi điểm (Loyalty) |
+| `/password_reset` | `sha256(email)` | (kỹ thuật) | — (client không đọc) | Hạ tầng OTP/reset-token (mục 10.1.3) |
 
 ---
 
@@ -1245,13 +1394,14 @@ erDiagram
 "tt_001": {
   "don_hang_id": "dh_001",
   "nhanvien_id": "nv_001",
-  "phuong_thuc": "tien_mat",       // "tien_mat" | "momo" | "vnpay" | "chuyen_khoan"
-  "thoi_gian": 1711903600000,
+  "phuong_thuc": "tien_mat",       // POS hiện tại: "tien_mat" | "the" | "vietqr"
+  "thoi_gian": 1711903600000,      // (dữ liệu seed cũ còn "momo" | "vnpay" | "chuyen_khoan")
   "tong_tien": 50000,
   "tien_giam": 0,
   "tien_thuc_thu": 50000           // = tong_tien − tien_giam
 }
 ```
+> `ucPOS_Order.MapMethod` ánh xạ nhãn hiển thị → giá trị lưu: `Tiền mặt→tien_mat`, `Thẻ→the`, `VietQR→vietqr`. Chọn VietQR thì `PaymentDialog` sinh **mã QR chuyển khoản quét được thật** (payload EMVCo/Napas 247 — xem [mục 13.4](#134-vietqr--qr-tự-đặt-món-sinh-mã-quét-được-thật)).
 
 ---
 
@@ -1457,7 +1607,7 @@ Phần này tách rõ **tính năng dùng chung** (mọi/nhiều vai trò) và *
 | --- | --- | --- | --- | --- | --- |
 | CHÍNH | Tổng quan, Quản trị viên, Nhân viên, Tiền lương, Tiền chi, Xuất báo cáo | Tổng quan, Sản phẩm & Thực đơn, Đơn hàng & Hóa đơn, Nhân viên, Lịch ca, Khuyến mãi, Thất thoát | Tổng quan, POS, CRM, Loyalty, Đặt bàn, QR Self-Order, Tiền mặt | Tổng quan, Màn hình Bếp, Cẩm nang Pha chế, Báo động NL | Tổng quan, Bãi xe, SOS |
 | KHÁCH HÀNG | Feedback, Thông báo, Gửi thông báo | Feedback, Thông báo, Gửi thông báo | — | — | — |
-| CÁ NHÂN | Điểm danh, Audit log, Chat, Profile | Xin nghỉ, Điểm danh, Audit log, Chat, Profile | Chấm công, Xin nghỉ, Chat, Profile | Chấm công, Xin nghỉ, Chat, Profile | Chấm công, Xin nghỉ, Chat, Profile |
+| CÁ NHÂN | Điểm danh, Nhật ký, Chat, Profile | Xin nghỉ, Điểm danh, Nhật ký, Chat, Profile | Lịch sử chấm công, Xin nghỉ, Chọn ca/Đổi ca, Chat, Profile | Lịch sử chấm công, Xin nghỉ, Chọn ca/Đổi ca, Chat, Profile | Lịch sử chấm công, Xin nghỉ, Chọn ca/Đổi ca, Chat, Profile |
 
 > **CHUNG** = ô nằm ở **mọi cột** (Đăng nhập, Chat, Profile, Chấm công, Xin nghỉ) + hạ tầng kỹ thuật dùng lại khắp nơi.
 > **RIÊNG** = các màn đặc thù chỉ 1 (hoặc 1–2) role có.
@@ -1622,12 +1772,23 @@ foreach (DataGridViewRow row in dgvWorkTracking.Rows) {
 ```
 - **💡 Tâm đắc (★ chính là lỗi trong ảnh chụp):** lưới đặt `AutoGenerateColumns=false` + cột khai sẵn trong Designer; nếu tên cột Designer **không khớp** tên cột `DataTable` thì `Columns["Ngày"]` trả **null** → `NullReferenceException`. Quy tắc vàng rút ra: *với `AutoGenerateColumns=false`, `Name` cột phải == tên cột dữ liệu*; nếu schema đổi động thì `Columns.Clear()` + bật auto-gen. Chi tiết & cách sửa ở **[mục 11](#11-chẩn-đoán-sự-kiện-events--lỗi-nullreferenceexception)**.
 
-### 10.1.9. Đơn xin nghỉ (`ucLeaveRequest`) — gửi (mọi NV) / duyệt (Manager)
-- **Ý tưởng:** NV gửi đơn; Manager duyệt. Cùng 1 UserControl, hành vi đổi theo vai trò.
-- **Cột:** `Từ ngày/Đến ngày/Số ngày/Lý do/Trạng thái`; luồng trạng thái `cho_duyet → da_duyet/tu_choi` (`LeaveRequestDetail` để xem & quyết định).
+### 10.1.9. Đơn xin nghỉ (`ucLeaveRequest`) — gửi (mọi NV) / duyệt (Manager, Admin)
+- **Ý tưởng:** **một** UserControl phục vụ hai vai trò trái ngược nhau — nhân viên thường **gửi** đơn, còn lãnh đạo **duyệt** đơn — thay vì viết 2 màn. Hành vi đổi theo `GlobalSession.CurrentUser.Role`.
+- **Cách làm:**
+  - Khi mở màn: `LeaveRequestBUS.GetAll()` (node `xin_nghi`) → lọc: NV thường chỉ thấy đơn của **chính mình**, Manager/Admin thấy **toàn bộ** đơn để duyệt.
+  - **Gửi đơn:** chọn Từ ngày/Đến ngày (`dd/MM/yyyy`) + lý do → BUS tính `so_ngay` → `LeaveRequestBUS.Add` với `trang_thai = "cho_duyet"`, `thoi_gian_gui = now`.
+  - **Duyệt:** double-click 1 dòng mở `LeaveRequestDetail`; nếu là người có quyền, dialog hiện 2 nút **Duyệt / Từ chối** → `LeaveRequestBUS.Update(id, new { trang_thai, nguoi_duyet_id, thoi_gian_duyet, ghi_chu_duyet })`.
+- **Cột lưới:** `Từ ngày / Đến ngày / Số ngày / Lý do / Trạng thái`; vòng đời `cho_duyet → da_duyet | tu_choi`.
+- **Liên kết chéo:** khi Manager duyệt đơn ngay trong màn **Thông báo** (`ucNotification_Manager`), hệ thống còn tự cập nhật **lịch ca** (`ScheduleBUS`) — đánh dấu ngày nghỉ đã duyệt là "OFF" để không xếp trùng.
+- **💡 Tâm đắc:** trạng thái tiếng Việt hiển thị (`Chờ duyệt/Đã duyệt/Từ chối`) tách khỏi giá trị lưu (`cho_duyet/da_duyet/tu_choi`) — dùng helper dịch ở tầng hiển thị, còn dialog thao tác vẫn đọc giá trị thô để cập nhật đúng.
 
 ### 10.1.10. Hồ sơ cá nhân (`ucProfile`)
-- **Ý tưởng:** xem/sửa thông tin bản thân, đổi avatar; dùng chung cho mọi role.
+- **Ý tưởng:** mỗi người tự xem/sửa thông tin của mình, đổi avatar, xem lịch ca tuần của bản thân — dùng chung cho cả 5 vai trò.
+- **Cách làm:**
+  - Đổ sẵn thông tin từ `GlobalSession.CurrentUser`; sửa xong gọi `EmployeeBUS.Update(id, {...})` **partial** (chỉ field đổi — họ tên, SĐT…; **không** cho sửa email/vai trò).
+  - **Đổi avatar:** chọn ảnh → `UploadBUS.UploadImage(file, "avatar")` (Firebase Storage) → nhận URL → `EmployeeBUS.Update(id, new { avatar_url = url })`; hiển thị ảnh qua `ImageLoader` (tải URL async + cache).
+  - **Lịch của tôi:** `ScheduleBUS.GetAll()` lọc theo `nhanvien_id` của mình → hiện 7 ca T2..CN của tuần hiện tại.
+- **💡 Tâm đắc — Partial update là "phao cứu sinh":** vì `ucProfile` chỉ gửi những field người dùng đổi, nên dù DTO nhân viên có nhiều field (AuthUid, vai trò, ngày vào làm…), thao tác sửa hồ sơ **không bao giờ vô tình ghi đè** các field nhạy cảm đó — hoàn toàn dựa vào cơ chế `update()` chỉ chạm field gửi lên (đối chiếu [mục 10.1.6](#1016-tầng-gọi-api-gui--bus--dal-dalhelper)).
 
 ### 10.1.11. Hạ tầng UI/kỹ thuật dùng chung (Common)
 | Thành phần | Vai trò |
@@ -1656,16 +1817,16 @@ public static void SyncColumnNames(DataGridView dgv) {
 
 ### 10.2.1. ADMIN — Quản trị tổng
 
-| Màn | Mô tả nhanh |
-| --- | --- |
-| `ucDashboard_Admin` | Thẻ KPI + biểu đồ (Guna.Charts) doanh thu ngày/tháng, món bán chạy |
-| `ucManagers_Admin` | Quản trị riêng nhóm **Manager** (CRUD + khóa), kèm lưới đơn nghỉ/audit của manager |
-| `ucPayroll_Admin` | Tính lương tự động |
-| `ucExpenses_Admin` | Tiền chi: `Ngày/Danh mục/Mô tả/Số tiền/Người chi/Chứng từ/Ghi chú` |
-| `ucReport_Admin` | Xuất báo cáo Excel/PDF, lưới đổi schema theo loại |
-| `ucFeedback_Admin` | Kiểm soát feedback toàn hệ thống |
-| `ucNotification_Admin` · `ucBroadcastCenter` | Trung tâm thông báo + phát thông báo nội bộ |
-| `ucAuditLog` | Nhật ký kiểm toán `Thời gian/Nhân viên/Vai trò/Thao tác/Đối tượng/Lý do/IP` |
+| Màn | Node đọc → ghi | Mô tả nhanh |
+| --- | --- | --- |
+| `ucDashboard_Admin` | `thanh_toan`,`bai_xe`,`chi_phi`,`that_thoat`,`feedback` → — | Thẻ KPI (doanh thu/lợi nhuận/chi phí/thất thoát) tính **từ dữ liệu thật**; nút "Chi tiết →" mở biểu đồ cột 12 tháng (Guna.Charts) gom nhóm client-side |
+| `ucManagers_Admin` | `nhan_vien`,`xin_nghi`,`nhat_ky` → `xin_nghi` | Quản trị riêng nhóm **Manager** (hồ sơ + khóa), kèm lưới đơn nghỉ/nhật ký của manager; duyệt đơn |
+| `ucPayroll_Admin` | `luong`,`nhan_vien` → `luong` | Tính lương tự động: lương cứng suy theo bộ phận, sửa 1 dòng → tổng quỹ lương tính lại |
+| `ucExpenses_Admin` | `chi_phi`,`nhan_vien` → `chi_phi` | Tiền chi: `Ngày/Danh mục/Mô tả/Số tiền/Người chi/Chứng từ/Ghi chú` |
+| `ucReport_Admin` | `thanh_toan`,`luong`,`nguyen_lieu`,`feedback` → (file) | 1 lưới đổi 4 schema báo cáo; **xuất Excel/PDF thật** (`GridExporter`) |
+| `ucFeedback_Admin` | `feedback` → `feedback` | Kiểm soát feedback toàn hệ thống, gắn cờ đã xử lý, phản hồi, xóa |
+| `ucNotification_Admin` · `ucBroadcastCenter` | `thong_bao` / `thong_bao_chung` → như đọc | Trung tâm thông báo + phát thông báo nội bộ |
+| `ucAuditLog` | `nhat_ky` → — | Nhật ký kiểm toán `Thời gian/Nhân viên/Vai trò/Thao tác/Đối tượng/Lý do/IP` (ghi qua `Audit.Log`) |
 
 **(a) Tính lương tự động (`ucPayroll_Admin`)**
 - **Ý tưởng:** Admin **không gõ** lương cơ bản — suy ra theo **bộ phận**, cộng phụ cấp + thưởng − trừ; tô màu dòng bị trừ/thưởng lớn.
@@ -1701,15 +1862,15 @@ private void ShowPreview(string type) {
 
 ### 10.2.2. MANAGER — Vận hành
 
-| Màn | Mô tả nhanh |
-| --- | --- |
-| `ucProducts_Manager` (+ `WarehouseManager`, `AddInventoryImport`) | Quản lý món + kho + phiếu nhập (tay/Excel) |
-| `ucOrders_Manager` | Đơn hàng & hóa đơn (bàn/tiến độ món/tạm tính) |
-| `ucSchedule_Manager` | Xếp lịch ca tuần `Nhân viên/T2..CN` |
-| `ucPromotion_Manager` | Happy hour · Combo · Voucher (3 lưới) |
-| `ucLoss_Manager` | Thất thoát & hao phí `Khoản mục/Số lượng/Giá trị/Nguyên nhân/Người phát hiện` |
-| `ucFeedback_Manager` · `ucNotification_Manager` | Chăm sóc KH + xử lý thông báo |
-| `ucStaff_Manager` | **Quản lý nhân viên (dùng chung với Admin)** |
+| Màn | Node đọc → ghi | Mô tả nhanh |
+| --- | --- | --- |
+| `ucProducts_Manager` (+ `WarehouseManager`, `AddInventoryImport`) | `mon_uong`,`nguyen_lieu`,`nhap_kho`,`thanh_toan` → `mon_uong`,`nhap_kho` | Card món theo danh mục; thêm/sửa món **kèm upload ảnh** (`mon_uong/` Storage); nút "Quản lý kho" lập phiếu nhập (tay hoặc **đọc Excel/CSV**) |
+| `ucOrders_Manager` | `ban`,`don_hang`,`mon_uong` → — | Join 3 nguồn: đơn + món + bàn, tiến độ chế biến từng dòng, tạm tính |
+| `ucSchedule_Manager` | `lich_lam_viec`,`nhan_vien`,`xin_nghi` → `lich_lam_viec` | Ma trận `Nhân viên × T2..CN`; cảnh báo trùng người đã duyệt nghỉ |
+| `ucPromotion_Manager` | `khuyen_mai` → `khuyen_mai` | 3 tab Happy hour · Combo · Voucher trên **cùng 1 node** (phân biệt field `loai`) |
+| `ucLoss_Manager` | `that_thoat`,`nhan_vien` → `that_thoat` | Thất thoát & hao phí `Khoản mục/Số lượng/Giá trị/Nguyên nhân/Người phát hiện` |
+| `ucFeedback_Manager` · `ucNotification_Manager` | `feedback` / `xin_nghi`,`lich_lam_viec`,`nhan_vien` → tương ứng | Chăm sóc KH + xử lý thông báo (duyệt nghỉ ngay trong màn thông báo, tự cập nhật lịch ca) |
+| `ucStaff_Manager` | `nhan_vien`,`luong`,`xin_nghi` → `nhan_vien`,`xin_nghi` | **Quản lý nhân viên (dùng chung với Admin)** — CRUD kèm Auth user, khóa, xem lương & duyệt nghỉ |
 
 **(a) CRUD nhân viên 3 lớp (`EmployeeBUS/DAL` + `employees.controller.js`)** — *Admin & Manager đều dùng `ucStaff_Manager`.*
 - **Ý tưởng:** tạo NV phải tạo **đồng thời** Firebase Auth user (để đăng nhập) + node `nhan_vien` (hồ sơ); khóa = vô hiệu Auth + `trang_thai=inactive`.
@@ -1747,14 +1908,14 @@ it.thanh_tien = (it.gia_nhap || 0) * (it.so_luong || 0);   // server TÍNH LẠI
 
 ### 10.2.3. ORDER STAFF — Bán hàng (POS)
 
-| Màn | Mô tả nhanh |
-| --- | --- |
-| `ucPOS_Order` | Lên đơn: card món + giỏ + giảm giá + tách hóa đơn |
-| `PaymentDialog` | Thanh toán tiền mặt / QR (Momo,VNPay) / thẻ |
-| `ucCRM_Order` · `ucLoyalty_Order` | Hồ sơ KH + tích điểm/hạng |
-| `ucReservation_Order` | Đặt bàn trước |
-| `ucSelfOrder_Order` | QR Self-Order tại bàn (đơn đẩy realtime) |
-| `ucCashManagement_Order` | Quỹ tiền mặt đầu/cuối ca |
+| Màn | Node đọc → ghi | Mô tả nhanh |
+| --- | --- | --- |
+| `ucPOS_Order` | `mon_uong`,`ban`,`thanh_toan`,`don_hang`,`nhan_vien` → `don_hang`,`thanh_toan`,`ban` | Lên đơn: card món + giỏ (`Dictionary` cộng dồn) + giảm giá + tách hóa đơn; thanh toán → ghi đơn + phiếu thu + giải phóng bàn |
+| `PaymentDialog` | (nhận dữ liệu từ POS) | Thanh toán tiền mặt / thẻ / **VietQR sinh mã thật quét được** |
+| `ucCRM_Order` · `ucLoyalty_Order` | `khach_hang`,`diem_log` → `khach_hang`,`diem_log` | Hồ sơ KH (tìm kiếm `RowFilter`) + tích/đổi điểm (mỗi giao dịch ghi 1 dòng nhật ký điểm) |
+| `ucReservation_Order` | `dat_ban` → `dat_ban` | Đặt bàn trước: khách/SĐT/ngày giờ/bàn/số khách/trạng thái |
+| `ucSelfOrder_Order` | `don_hang`,`ban`,`mon_uong` → `don_hang` | Sinh **QR link** theo bàn; bảng đơn tự đặt lọc `nguon="qr"`; nút giả lập tạo đơn thật chảy sang POS + KDS |
+| `ucCashManagement_Order` | `thanh_toan` → — | Quỹ tiền mặt: tổng thu tiền mặt thật, nhập quỹ đầu/cuối ca, đối soát chênh lệch |
 
 **(a) POS (`ucPOS_Order`)**
 - **Ý tưởng:** bấm card món → cộng vào giỏ → tính tiền realtime → thanh toán. Menu **tải động** từ DB, lỗi thì **fallback mock**.
@@ -1783,11 +1944,11 @@ dt.DefaultView.RowFilter = string.IsNullOrEmpty(kw) ? ""
 
 ### 10.2.4. BARISTA — Pha chế
 
-| Màn | Mô tả nhanh |
-| --- | --- |
-| `ucKDS_Barista` | Kitchen Display: Kanban **Chờ / Đang pha / Hoàn thành** |
-| `ucRecipe_Barista` | Cẩm nang công thức `Nguyên liệu/Định lượng/Loại` (chính/phụ/topping) |
-| `ucAlert_Barista` | Báo động NL sắp/đã hết (`/canh_bao`) |
+| Màn | Node đọc → ghi | Mô tả nhanh |
+| --- | --- | --- |
+| `ucKDS_Barista` | `don_hang`,`ban`,`mon_uong` → `don_hang` | Kitchen Display: Kanban **Chờ / Đang pha / Hoàn thành**; bấm nút đổi `trang_thai_che_bien` |
+| `ucRecipe_Barista` | `cong_thuc` → — | Cẩm nang công thức: các bước + `Nguyên liệu/Định lượng/Loại` (chính/phụ/topping/trang trí) |
+| `ucAlert_Barista` | `canh_bao`,`nhan_vien` → `canh_bao`,`thong_bao` | Báo động NL sắp/đã hết → ghi `canh_bao` **và** bắn `thong_bao` cho Manager |
 
 **Màn hình bếp KDS (`ucKDS_Barista`)**
 - **Ý tưởng:** 3 cột Kanban; mỗi đơn là 1 card, bấm nút đẩy đơn sang cột kế (`cho → dang_lam → hoan_thanh`).
@@ -1803,10 +1964,10 @@ private void AddOrderCard(FlowLayoutPanel panel, string orderId, string table, s
 
 ### 10.2.5. SECURITY — An ninh
 
-| Màn | Mô tả nhanh |
-| --- | --- |
-| `ucParking_Security` | Bãi xe: vào/ra, đếm chỗ trống, cảnh báo sắp đầy |
-| `ucSOS_Security` (`ReportIncident`) | Báo sự cố an ninh/y tế/kỹ thuật theo mức độ |
+| Màn | Node đọc → ghi | Mô tả nhanh |
+| --- | --- | --- |
+| `ucParking_Security` | `bai_xe` → `bai_xe` | Bãi xe: xe vào (`Add`) / xe ra (`Update` giờ ra + phí), đếm chỗ trống realtime, nhãn đỏ khi ≤ 5 chỗ |
+| `ucSOS_Security` (`ReportIncident`) | `su_co`,`nhan_vien` → `su_co`,`thong_bao` | Báo sự cố an ninh/y tế/kỹ thuật theo mức độ; SOS khẩn bắn `thong_bao` cho quản lý |
 
 **Bãi xe (`ucParking_Security`)**
 ```csharp
@@ -2022,37 +2183,162 @@ _ = Task.Run(async () => { try { await BUS.EmployeeBUS.GetAllEmployeesAsync(); }
 
 ---
 
-## 13. Kiểm thử (Testing)
+## 13. Đợt nối dữ liệu thật toàn hệ thống — nhánh `final-backend`
 
-| Lớp | Công cụ | Phạm vi |
+Ở các giai đoạn đầu, phần lớn màn hình chạy **dữ liệu mock** (mảng cứng trong code, thao tác chỉ bật `MsgBox`) — đủ để trình diễn UI nhưng chưa phải "hệ thống mạng". Nhánh `final-backend` là đợt lớn nhất: **wire 100% màn hình của cả 5 vai trò vào Firebase qua REST**, đồng thời bổ sung 3 mảng hạ tầng còn thiếu. Đây là phần trả lời trực tiếp cho câu hỏi *"tất cả mọi thứ trong đồ án là gì"*.
+
+### 13.1. Ba trụ hạ tầng mới
+
+| Trụ | Vấn đề trước đó | Giải pháp | Chi tiết |
+| --- | --- | --- | --- |
+| **Generic Resource API** | ~23 node chỉ CRUD phẳng mà phải viết tay từng controller/route (~40 file lặp) | 1 factory `makeResource` + bảng `RESOURCES` → **92 endpoint** sinh tự động; client 1 `ResourceDAL` generic + 23 BUS mỏng | Xem **[mục 6.4](#64-generic-resource-api--một-controller-factory-phục-vụ-23-nhóm-endpoint)** |
+| **Upload ảnh Firebase Storage** | Ảnh món/avatar không có chỗ lưu file, chỉ URL rỗng | `POST /api/upload` (multer + download token); client `UploadBUS` | Xem **[mục 6.5](#65-upload-ảnh-lên-firebase-storage-post-apiupload)** |
+| **VietQR & QR self-order thật** | QR trước đây là ảnh giả, không quét được | `Qr.cs` dựng payload EMVCo/Napas 247 + CRC-16, render QRCoder | Xem **[mục 13.4](#134-vietqr--qr-tự-đặt-món-sinh-mã-quét-được-thật)** |
+
+### 13.2. Phạm vi wire — trước / sau
+
+| Vai trò | Màn còn mock (giai đoạn trước) | Sau nhánh `final-backend` |
 | --- | --- | --- |
-| Backend | **Jest** (`backend/tests`) | Controller/Service: auth, validate input, OTP, RBAC |
-| Client BUS | **xUnit** (`client/Tests`) | `Validation`, `AuthBUS`, các BUS CRUD |
+| Admin | Dashboard (biểu đồ), Payroll, Expenses, Report, Feedback, Notification, AuditLog | **Tất cả REAL** — KPI tính từ payments/parking/expenses/losses/feedback; báo cáo xuất Excel/PDF thật |
+| Manager | Overview, Schedule, Promotion, Loss, Orders, Notification | **Tất cả REAL** — kể cả lịch ca (`lich_lam_viec`) và khuyến mãi (`khuyen_mai`) từng chỉ là mock |
+| Order Staff | POS (thanh toán mock), CRM, Loyalty, Reservation, SelfOrder, CashManagement | **Tất cả REAL** — POS ghi `don_hang`+`thanh_toan`, giải phóng bàn; loyalty ghi `khach_hang`+`diem_log` |
+| Barista | KDS, Recipe, Alert | **Tất cả REAL** — KDS đọc/ghi `don_hang`, Alert bắn `canh_bao`+`thong_bao` |
+| Security | Parking, SOS | **Tất cả REAL** — `bai_xe`, `su_co`+`thong_bao` |
 
-Chạy test:
-```bash
-# Backend
-cd backend && npm test
-# Client
-cd client && dotnet test Tests/Tests.csproj
+> Kiểm chứng bằng grep: mọi `uc*.cs` đều gọi `*BUS.GetAll/Add/Update/Delete` (bảng đối chiếu đầy đủ trong [tong hop.md §8.6](../tong%20hop.md)).
+
+### 13.3. 10 DTO + 10 node mới (màn phụ)
+
+Nhánh này thêm `client/DTO/SecondaryDTOs.cs` gom **10 DTO** map với 10 node mới. Điểm thiết kế đáng nói: các node "3-trong-1" gộp nhiều biến thể vào một node, phân biệt bằng field `loai`/`loai_tin` để **không phình số node**:
+
+```csharp
+/// <summary>/khuyen_mai/{km_id} — gộp 3 loại: happy_hour, combo, voucher (phân biệt bằng "loai").</summary>
+public class PromotionDTO {
+    [JsonProperty("loai")] public string? Loai { get; set; } // happy_hour | combo | voucher
+    [JsonProperty("ten")]  public string? Ten { get; set; }
+    // Happy hour: khung_gio, ngay_ap_dung, giam_pct
+    // Combo:      bao_gom, gia_goc, gia_combo, tiet_kiem
+    // Voucher:    ma, giam, han_su_dung, da_dung, con_lai, trang_thai
+}
 ```
 
-Gợi ý kịch bản kiểm thử quan trọng:
-- Đăng nhập sai mật khẩu → 401; tài khoản khóa → chặn ở BUS.
-- OTP: mã sai → 400; reset-token đã tiêu → không đổi được mật khẩu lần 2.
-- RBAC: Barista gọi `POST /employees` → 403.
-- Nhập kho: tồn kho phải tăng đúng `Σ so_luong`.
+| DTO | Node | Đặc thù thiết kế |
+| --- | --- | --- |
+| `PromotionDTO` | `khuyen_mai` | 1 node cho 3 loại KM (happy_hour/combo/voucher) |
+| `ShiftDTO` | `dang_ky_ca` | `loai` = open (ca trống) / mine (ca của tôi) / swap (xin đổi ca) |
+| `ScheduleDTO` | `lich_lam_viec` | 1 dòng/NV/tuần với 7 cột `t2..cn` — bản chất là "bảng con" dựng phẳng |
+| `ExpenseDTO` | `chi_phi` | ngày, danh mục, số tiền, người chi, chứng từ |
+| `LossDTO` | `that_thoat` | khoản mục, số lượng, giá trị, nguyên nhân, người phát hiện |
+| `ReservationDTO` | `dat_ban` | họ tên, SĐT, ngày giờ, bàn, số khách, trạng thái |
+| `AuditLogDTO` | `nhat_ky` | thời gian, NV, vai trò, thao tác, đối tượng, lý do, IP |
+| `BroadcastDTO` | `thong_bao_chung` | tiêu đề, nội dung, mức độ, người nhận, đã đọc |
+| `BugReportDTO` | `bao_loi` | tiêu đề, mô tả, loại, mức độ, màn hình phát sinh |
+| `PointLogDTO` | `diem_log` | `delta` (+tích / −đổi), ghi chú, thời gian |
+
+### 13.4. VietQR & QR tự đặt món — sinh mã quét được thật
+
+`GUI/Common/Qr.cs` **không** dùng ảnh QR có sẵn — nó tự dựng payload chuẩn **EMVCo / VietQR (Napas 247)** rồi render bằng QRCoder, nên app ngân hàng quét sẽ điền sẵn **số tài khoản + số tiền + nội dung**:
+
+```csharp
+public static string VietQrPayload(string bankBin, string accountNo, long amount, string addInfo) {
+    string merchant = Tlv("00", "A000000727")                              // GUID Napas
+                    + Tlv("01", Tlv("00", bankBin) + Tlv("01", accountNo)) // BIN + số TK
+                    + Tlv("02", "QRIBFTTA");                               // chuyển khoản tới tài khoản
+    var sb = new StringBuilder();
+    sb.Append(Tlv("00", "01"));                     // Payload Format Indicator
+    sb.Append(Tlv("01", amount > 0 ? "12" : "11")); // 12 = QR động (kèm số tiền)
+    sb.Append(Tlv("38", merchant));
+    sb.Append(Tlv("53", "704"));                    // tiền tệ VND
+    if (amount > 0) sb.Append(Tlv("54", amount.ToString()));
+    sb.Append(Tlv("58", "VN"));
+    if (info.Length > 0) sb.Append(Tlv("62", Tlv("08", info)));  // nội dung CK (bỏ dấu tiếng Việt)
+    sb.Append("6304");                              // id+len của CRC
+    sb.Append(Crc16(sb.ToString()).ToString("X4")); // CRC-16/CCITT-FALSE — checksum chuẩn EMVCo
+    return sb.ToString();
+}
+```
+
+- **💡 Tâm đắc 1 — TLV + CRC-16 là "linh hồn" của VietQR:** mã QR chuyển khoản là chuỗi TLV (Tag-Length-Value) lồng nhau, kết thúc bằng 4 ký tự CRC-16/CCITT-FALSE (poly `0x1021`, init `0xFFFF`). Sai CRC 1 bit là app ngân hàng báo "mã không hợp lệ". Đây là phần mất công dò chuẩn nhất.
+- **💡 Tâm đắc 2 — Nội dung phải ASCII không dấu:** trường `62.08` (nội dung CK) được chuẩn hóa `FormD` + bỏ dấu thanh + `đ→d` để tránh app ngân hàng hiển thị lỗi ký tự.
+- **💡 Tâm đắc 3 — QR self-order dùng lại đúng bộ máy:** `Qr.Url(url)` render QR chứa link `SelfOrderBaseUrl?table=<tên bàn>`; nút "Giả lập khách quét" trong `ucSelfOrder_Order` tạo **đơn thật** (`don_hang.nguon = "qr"`, `trang_thai = "pending"`) vào Firebase → đơn hiện đồng thời ở lịch sử POS **và** màn hình Bếp KDS của Barista, chứng minh luồng realtime end-to-end xuyên nhiều máy/nhiều vai trò.
+
+### 13.5. Dashboard Admin — KPI tính từ dữ liệu thật (ví dụ tiêu biểu)
+
+Trước đây dashboard là số cứng; nay `ucDashboard_Admin.LoadRealAsync` gom 5 node để tính KPI, và các nút "Chi tiết →" mở biểu đồ 12 tháng **gom nhóm client-side theo timestamp**:
+
+```csharp
+var payments = await PaymentBUS.GetAll();
+sales = payments.Values.Sum(p => p.ActualReceived);                       // doanh thu bán hàng
+var parking = await ParkingBUS.GetAll();
+parkingFee = parking.Values.Where(p => p.Status == "da_ra").Sum(p => p.Fee); // + phí gửi xe đã ra
+expenses = (await ExpenseBUS.GetAll()).Values.Sum(x => x.SoTien);
+lossTotal = (long)(await LossBUS.GetAll()).Values.Sum(l => l.GiaTri);
+// Lợi nhuận ròng = doanh thu − chi phí − thất thoát
+lblProfitValue.Text = Theme.Vnd(revenue - exp - lossTotal);
+```
+
+- **💡 Tâm đắc — Không có "báo cáo" riêng ở server, gom nhóm ngay tại client:** RTDB không có `GROUP BY`. Client `GET` toàn bộ payments/expenses/losses rồi tự gom theo tháng (`MonthIdx` map timestamp → chỉ số 12 tháng gần nhất). Chấp nhận được ở quy mô quán; muốn scale mới cần aggregation phía server.
+
+### 13.6. Xuất Excel / PDF thật (`GridExporter`)
+
+Nút "Xuất báo cáo" không còn báo giả "đã lưu ở Desktop": `GridExporter` mở `SaveFileDialog` cho người dùng chọn nơi lưu, rồi ghi file thật.
+- **Excel:** ClosedXML — header in đậm nền teal (`31,138,154`), tự canh độ rộng cột, ghi đúng kiểu số/chuỗi từng ô.
+- **PDF:** vẽ lưới ra `Bitmap` rồi **tự dựng một file PDF tối giản** nhúng ảnh đó — không cần thư viện PDF ngoài, và tiếng Việt hiển thị đúng 100% vì bản chất là ảnh render sẵn.
+
+### 13.7. Nhập kho từ Excel/CSV (`InventoryImportExcelReader`)
+
+Phiếu nhập kho có thể hàng chục dòng nguyên liệu — gõ tay rất lâu. `InventoryImportExcelReader` đọc file `.xlsx` (ClosedXML) hoặc `.csv` thành danh sách `InventoryImportPrefillLine` để **điền sẵn** dialog `AddInventoryImport`; người dùng chỉ rà lại rồi bấm lưu. Sau đó BUS tính tiền lớp 1, server tính lại lớp 2 và cộng tồn (đối chiếu [mục 10.2.2b](#102-tính-năng-riêng-theo-role)).
+
+---
+
+## 14. Kiểm thử (Testing)
+
+### 14.1. Backend — Jest
+
+`backend/tests/` gồm **5 file test + 1 mock**, chạy bằng `npm test` (script `jest --runInBand --forceExit`):
+
+| File test | Phủ gì |
+| --- | --- |
+| `auth.controller.test.js` | login (đúng/sai mật khẩu, tài khoản khóa), check-email (200/404), luồng OTP generate→verify, updatePassword (mật khẩu yếu → 400, token sai → 403) |
+| `employees.controller.test.js` | CRUD; **rollback** khi tạo Auth xong ghi DB lỗi; lọc danh sách theo quyền (NV thường chỉ thấy lãnh đạo) |
+| `foods.controller.test.js` | CRUD món; sinh id `mon_XXX = max+1` |
+| `chat.controller.test.js` | lịch sử sort theo `thoi_gian`; thiếu `roomId` → 400; lưu tin qua `X-Server-Secret` |
+| `auth.middleware.test.js` | thiếu Bearer → 401; role không đủ → 403; `verifyServerSecret` |
+| `mockFirebase.js` | giả lập Admin SDK (db.ref/once/set/update/remove, auth.createUser/verifyIdToken) để test **không chạm Firebase thật** |
+
+```bash
+cd backend && npm test              # chạy toàn bộ
+cd backend && npm run test:coverage # kèm báo cáo độ phủ
+```
+
+### 14.2. Client — kiểm thử thủ công + harness đo hiệu năng
+
+- Kịch bản UI theo từng vai trò/màn ghi trong [`HUONG_DAN_TEST_UI.md`](../HUONG_DAN_TEST_UI.md) (đánh dấu thao tác kỳ vọng). *Lưu ý:* file này viết ở giai đoạn còn mock nên nhãn REAL/MOCK trong đó đã cũ — sau nhánh `final-backend` **mọi màn đều REAL**.
+- Kiểm layout/hiệu năng bằng **harness tự động**: host `MainDashboard` off-screen, `DrawToBitmap` chụp render để phát hiện control chồng/lệch, stopwatch quanh `PerformClick` + timer 30 ms đo "khoảng đơ" luồng UI (số liệu ở [mục 12.5](#125-số-đo-trước--sau)).
+- Thư mục test xUnit của client (`client/Tests`) đã được gỡ khỏi repo trong đợt tái cấu trúc; kiểm thử logic BUS hiện dựa vào review + kịch bản thủ công.
+
+### 14.3. Kịch bản hồi quy quan trọng (checklist trước khi nộp)
+
+- Đăng nhập sai mật khẩu → **401**; tài khoản `inactive` → chặn ngay ở BUS trước khi mở dashboard.
+- OTP: mã sai → **400**; nhập sai > 5 lần → **429**; reset-token đã dùng 1 lần → lần 2 **403**.
+- RBAC: đăng nhập Barista rồi gọi `POST /employees` → **403**; NV thường `GET /employees` chỉ nhận nhóm lãnh đạo.
+- Nhập kho: sau khi lập phiếu, `ton_kho` từng nguyên liệu tăng đúng `Σ so_luong`; `thanh_tien` khớp server tính lại.
+- POS: thanh toán xong → có bản ghi `thanh_toan`, `don_hang.trang_thai = hoan_thanh`, `ban.trang_thai = trong`.
+- Chat: 2 client vào cùng room nhận tin realtime; rớt mạng → `Reconnected` tự `JoinRoom` lại, vẫn nhận tin.
+- Upload: chọn ảnh > 5 MB hoặc file không phải ảnh → backend **400**; ảnh hợp lệ → trả URL mở được trên trình duyệt.
 - **Lưới chấm công:** mở màn "Điểm danh" không còn ném `NullReferenceException` (regression cho mục 11).
 
 ---
 
-## 14. Phụ lục A — API Reference đầy đủ
+## 15. Phụ lục A — API Reference đầy đủ
 
 **Base URL:** local `http://localhost:3000/api` · production `https://asia-southeast1-<project>.cloudfunctions.net/api`
 **Xác thực:** header `Authorization: Bearer <Firebase ID Token>` cho mọi endpoint **trừ** nhóm Auth & `/health`. Riêng `/chat/messages` chấp nhận **thêm** header `X-Server-Secret: <APP_SECRET_KEY>` (ChatServer gọi nội bộ).
 **Content-Type:** `application/json`. Lỗi trả `{ "error": "..." }` (đôi khi `{ "message": "..." }`).
 
-### 14.1. Bảng tổng hợp endpoint
+Toàn hệ thống có **116 endpoint**: **24 endpoint chuyên biệt** (có logic riêng — bảng dưới) và **92 endpoint generic** (23 tài nguyên × 4 thao tác — [mục 15.10](#1510-nhóm-generic-resource-api-92-endpoint)).
+
+### 15.1. Bảng tổng hợp endpoint chuyên biệt (24)
 
 | # | Method | Endpoint | Quyền | Mô tả |
 | --- | --- | --- | --- | --- |
@@ -2063,7 +2349,7 @@ Gợi ý kịch bản kiểm thử quan trọng:
 | 5 | POST | `/auth/otp/verify` | Không | Xác thực OTP → cấp reset-token |
 | 6 | PUT | `/auth/password` | reset-token | Đổi mật khẩu |
 | 7 | GET | `/employees` | Bearer | Danh sách nhân viên |
-| 8 | POST | `/employees` | Manager+ | Thêm nhân viên |
+| 8 | POST | `/employees` | Manager+ | Thêm nhân viên (tạo kèm Auth user, rollback nếu lỗi) |
 | 9 | PUT | `/employees/:id` | Manager+ | Cập nhật (partial) |
 | 10 | DELETE | `/employees/:id` | Manager+ | Xóa (Auth + DB) |
 | 11 | PATCH | `/employees/:id/lock` | Manager+ | Khóa tài khoản |
@@ -2076,15 +2362,16 @@ Gợi ý kịch bản kiểm thử quan trọng:
 | 18 | PUT | `/ingredients/:id` | Manager+ | Cập nhật nguyên liệu |
 | 19 | DELETE | `/ingredients/:id` | Manager+ | Xóa nguyên liệu |
 | 20 | GET | `/inventory` | Bearer | Danh sách phiếu nhập |
-| 21 | POST | `/inventory` | Manager+ | Tạo phiếu nhập kho |
+| 21 | POST | `/inventory` | Manager+ | Tạo phiếu nhập kho (server tính tiền + cộng tồn) |
 | 22 | GET | `/chat/messages?roomId=` | Bearer / Secret | Lịch sử chat |
 | 23 | POST | `/chat/messages` | Bearer / Secret | Lưu tin nhắn |
+| 24 | POST | `/upload` | Bearer | Upload ảnh (multipart) → Firebase Storage → `{ url }` |
 
-### 14.2. Health
+### 15.2. Health
 
 `GET /health` → `200 { "status": "ok" }`
 
-### 14.3. Auth (không cần token)
+### 15.3. Auth (không cần token)
 
 **`POST /auth/login`**
 ```jsonc
@@ -2116,7 +2403,7 @@ Gợi ý kịch bản kiểm thử quan trọng:
 
 > **Bảo mật OTP (otp.service.js):** mã 8 số được **băm SHA-256 + "pepper" `APP_SECRET_KEY`** rồi mới lưu `password_reset/{hash(email)}`; TTL **60 giây**, tối đa **5 lần** nhập sai. Sau khi đúng, cấp **reset-token** (32 byte ngẫu nhiên, lưu hash, TTL **1 phút, dùng 1 lần**). Đổi mật khẩu kiểm độ mạnh **trước** rồi mới tiêu token.
 
-### 14.4. Employees (Bearer; ghi cần Manager/Admin)
+### 15.4. Employees (Bearer; ghi cần Manager/Admin)
 
 **`GET /employees`** → `200 { "nv_001": { ...EmployeeDTO }, ... }`
 > Admin/Manager: toàn bộ. Vai trò khác: **chỉ** trả nhóm `manager`/`admin`.
@@ -2131,19 +2418,19 @@ Gợi ý kịch bản kiểm thử quan trọng:
 **`DELETE /employees/:id`** *(Manager+)* — `{ "authUid": "<uid>" }` → `200 { "success": true }`
 **`PATCH /employees/:id/lock`** *(Manager+)* — `{ "authUid": "<uid>" }` → `200 { "success": true }`
 
-### 14.5. Foods (Bearer; ghi cần Manager/Admin)
+### 15.5. Foods (Bearer; ghi cần Manager/Admin)
 
 `GET /foods` → `200 { "mon_001": { ...FoodDTO } }`
 `POST /foods` *(Manager+)* → `{ "ten_mon":"Bạc xỉu","gia":30000,"loai":"cafe","mo_ta":"...","con_hang":true }` ⇒ `201 { "success": true, "foodId": "mon_003" }`
 `PUT /foods/:id` *(Manager+)* → `200 { "success": true }` · `DELETE /foods/:id` *(Manager+)* → `200 { "success": true }`
 
-### 14.6. Ingredients (Bearer; ghi cần Manager/Admin)
+### 15.6. Ingredients (Bearer; ghi cần Manager/Admin)
 
 `GET /ingredients` → `200 { "nl_001": { ...IngredientDTO } }`
 `POST /ingredients` *(Manager+)* → `{ "ten_nguyen_lieu":"Sữa tươi","don_vi":"lit","gia_nhap":30000,"ton_kho":20,"ton_kho_toi_thieu":5 }` ⇒ `201 { "success": true, "id": "nl_005" }`
 `PUT /ingredients/:id` → `200` · `DELETE /ingredients/:id` → `200`
 
-### 14.7. Inventory (Bearer; tạo cần Manager/Admin)
+### 15.7. Inventory (Bearer; tạo cần Manager/Admin)
 
 `GET /inventory` → `200 { "nk_001": { ...InventoryImportDTO } }`
 **`POST /inventory`** *(Manager+)*
@@ -2153,7 +2440,7 @@ Gợi ý kịch bản kiểm thử quan trọng:
 // 201 { "success": true, "id": "nk_002" }   — server tự tính thanh_tien từng dòng + tổng phiếu
 ```
 
-### 14.8. Chat (Bearer **hoặc** `X-Server-Secret`)
+### 15.8. Chat (Bearer **hoặc** `X-Server-Secret`)
 
 **`GET /chat/messages?roomId=room_global`** → `200`
 ```jsonc
@@ -2168,15 +2455,76 @@ Gợi ý kịch bản kiểm thử quan trọng:
 // 201 { "success": true }   — key lưu = msg_{serverTime}; chấp nhận cả alias senderId/message
 ```
 
-### 14.9. Mã trạng thái HTTP
+### 15.9. Upload ảnh (Bearer)
+
+**`POST /upload`** — `Content-Type: multipart/form-data`
+```
+file:   <ảnh, bắt buộc, ≤ 5 MB, chỉ image/*>
+folder: "mon_uong" | "avatar" | ... (tùy chọn, mặc định "misc"; bị sanitize còn [a-zA-Z0-9_-])
+```
+```jsonc
+// 201
+{ "success": true,
+  "url": "https://firebasestorage.googleapis.com/v0/b/<bucket>/o/mon_uong%2F1746..._a1b2.jpg?alt=media&token=<uuid>" }
+// 400 không có file / file không phải ảnh / vượt 5 MB
+```
+> Client lưu `url` này vào `mon_uong.hinh_anh_url` (dialog thêm/sửa món) hoặc `nhan_vien.avatar_url` (hồ sơ). Xem [mục 6.5](#65-upload-ảnh-lên-firebase-storage-post-apiupload).
+
+### 15.10. Nhóm Generic Resource API (92 endpoint)
+
+23 tài nguyên dưới đây **cùng contract**, mỗi tài nguyên có 4 endpoint (đều cần `Authorization: Bearer`):
+```jsonc
+GET    /api/<resource>          → 200 { "<id_001>": {...}, "<id_002>": {...} }
+POST   /api/<resource> {body}   → 201 { "success": true, "id": "<id_mới>" }   // id = prefix + (max+1)
+PUT    /api/<resource>/:id {…}  → 200 { "success": true }                     // partial update
+DELETE /api/<resource>/:id      → 200 { "success": true }
+```
+
+| Endpoint gốc | Node RTDB | Prefix | | Endpoint gốc | Node RTDB | Prefix |
+| --- | --- | --- | --- | --- | --- | --- |
+| `/tables` | `ban` | `ban_` | | `/promotions` | `khuyen_mai` | `km_` |
+| `/orders` | `don_hang` | `dh_` | | `/expenses` | `chi_phi` | `cp_` |
+| `/payments` | `thanh_toan` | `tt_` | | `/losses` | `that_thoat` | `loss_` |
+| `/customers` | `khach_hang` | `kh_` | | `/reservations` | `dat_ban` | `db_` |
+| `/feedback` | `feedback` | `fb_` | | `/audit-logs` | `nhat_ky` | `log_` |
+| `/attendance` | `cham_cong` | `cc_` | | `/broadcasts` | `thong_bao_chung` | `bc_` |
+| `/salaries` | `luong` | `luong_` | | `/schedules` | `lich_lam_viec` | `sch_` |
+| `/leave-requests` | `xin_nghi` | `xn_` | | `/shift-registers` | `dang_ky_ca` | `sr_` |
+| `/notifications` | `thong_bao` | `tb_` | | `/bug-reports` | `bao_loi` | `bug_` |
+| `/parking` | `bai_xe` | `bx_` | | `/point-logs` | `diem_log` | `pl_` |
+| `/incidents` | `su_co` | `sc_` | | `/warnings` | `canh_bao` | `cb_` |
+| `/recipes` | `cong_thuc` | `ct_` | | | | |
+
+> Cơ chế sinh các endpoint này: [mục 6.4](#64-generic-resource-api--một-controller-factory-phục-vụ-23-nhóm-endpoint).
+
+### 15.11. Mã trạng thái HTTP
 
 | Code | Ý nghĩa | | Code | Ý nghĩa |
 | --- | --- | --- | --- | --- |
 | 200 | Thành công | | 403 | Không đủ quyền / token reset sai |
 | 201 | Tạo mới thành công | | 404 | Không tìm thấy |
-| 400 | Thiếu/sai dữ liệu | | 429 | Nhập OTP sai quá số lần |
+| 400 | Thiếu/sai dữ liệu / file upload sai | | 429 | Nhập OTP sai quá số lần |
 | 401 | Chưa đăng nhập / token sai | | 500 | Lỗi server |
 
 ---
 
-> *Tài liệu tổng hợp tự sinh từ mã nguồn thực tế của repo (client WinForms, backend Express, ChatServer SignalR) và bộ tài liệu `docs/`. Một số sơ đồ (Use Case/FDD/Sequence) được vẽ lại cho mạch lạc nhưng bám sát code đang triển khai.*
+## 16. Tổng kết số liệu đồ án
+
+| Hạng mục | Con số | Ghi chú |
+| --- | --- | --- |
+| Tiến trình mạng độc lập | **3** | Backend Express (3000) · Chat Server SignalR (8080) · Client WinForms |
+| Endpoint REST | **116** | 24 chuyên biệt + 92 generic (23 tài nguyên × 4) |
+| Node dữ liệu Firebase | **30** | 19 node có seed + 10 node màn phụ + 1 node kỹ thuật `password_reset` |
+| Vai trò (RBAC) | **5** | admin · manager · order staff · barista · security |
+| Màn hình (UserControl) | **36** | + 20 dialog + 5 form Auth/khung; **57 mục menu** tổng cộng |
+| DTO client | **32** | 22 file DTO chính + 10 DTO màn phụ (`SecondaryDTOs.cs`) |
+| Lớp BUS | **~33** | 10 BUS chuyên biệt + 23 BUS generic (`ResourceBUS.cs`) |
+| Mã nguồn client C# | ~37.000 dòng / 198 file | trong đó 64 file `.Designer.cs` |
+| Mã nguồn backend JS | ~1.800 dòng / 48 file | gồm 5 file test Jest |
+| Mã nguồn Chat Server C# | ~157 dòng / 2 file | Program + ChatHub |
+
+**Ba "chiến dịch" hoàn thiện được ghi lại trong báo cáo:** (11) sửa lỗi lệch cột lưới gây `NullReferenceException`; (12) tối ưu giao diện + hiệu năng (màn Chat 20s → ~40ms); (13) nối dữ liệu thật toàn hệ thống trên nhánh `final-backend` (Generic Resource API, upload Storage, VietQR thật, wire 100% màn hình).
+
+---
+
+> *Tài liệu tổng hợp tự sinh từ mã nguồn thực tế của repo trên nhánh `final-backend` (client WinForms, backend Express, ChatServer SignalR) và bộ tài liệu `docs/`, đối chiếu từng con số với route/DTO/seed. Một số sơ đồ (Use Case/FDD/Sequence/DFD/ERD) được vẽ lại cho mạch lạc nhưng bám sát code đang triển khai. Bản tổng hợp gọn hơn cho người mới đọc: [`tong hop.md`](../tong%20hop.md) ở thư mục gốc repo.*

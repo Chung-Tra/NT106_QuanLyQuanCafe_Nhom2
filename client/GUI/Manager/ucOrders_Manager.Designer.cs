@@ -96,7 +96,7 @@ namespace GUI
             lblEmptyTablesValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblEmptyTablesValue.ForeColor = Color.FromArgb(34, 197, 94);
             lblEmptyTablesValue.Location = new Point(18, 40);
-            lblEmptyTablesValue.Text = "12 / 20 bàn";
+            lblEmptyTablesValue.Text = "0 / 0 bàn";
 
             // pnlStatPending
             pnlStatPending.BackColor = Color.FromArgb(31, 31, 34);
@@ -114,7 +114,7 @@ namespace GUI
             lblPendingValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblPendingValue.ForeColor = Color.FromArgb(245, 158, 11);
             lblPendingValue.Location = new Point(18, 40);
-            lblPendingValue.Text = "3 bàn";
+            lblPendingValue.Text = "0 bàn";
 
             // pnlStatSoldOut
             pnlStatSoldOut.BackColor = Color.FromArgb(31, 31, 34);
@@ -132,7 +132,7 @@ namespace GUI
             lblSoldOutValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblSoldOutValue.ForeColor = Color.FromArgb(220, 80, 80);
             lblSoldOutValue.Location = new Point(18, 40);
-            lblSoldOutValue.Text = "2 món";
+            lblSoldOutValue.Text = "0 món";
 
             // ====== tblMain — 2 cột: bảng bàn (trái, chiếm 2 hàng) + 2 panel phải ======
             tblMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;

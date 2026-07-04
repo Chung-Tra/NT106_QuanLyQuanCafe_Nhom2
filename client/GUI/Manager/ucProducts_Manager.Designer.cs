@@ -151,7 +151,7 @@ namespace GUI
             lblExpenseValue.Name = "lblExpenseValue";
             lblExpenseValue.Size = new Size(132, 30);
             lblExpenseValue.TabIndex = 1;
-            lblExpenseValue.Text = "- 850,000 đ";
+            lblExpenseValue.Text = "- 0 đ";
             // 
             // lblExpenseTitle
             // 
@@ -173,7 +173,7 @@ namespace GUI
             lblIncomeValue.Name = "lblIncomeValue";
             lblIncomeValue.Size = new Size(158, 30);
             lblIncomeValue.TabIndex = 3;
-            lblIncomeValue.Text = "+ 5,200,000 đ";
+            lblIncomeValue.Text = "+ 0 đ";
             // 
             // lblIncomeTitle
             // 

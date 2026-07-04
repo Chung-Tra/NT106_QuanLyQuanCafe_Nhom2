@@ -71,7 +71,7 @@ namespace GUI
             lblTotalShiftsValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblTotalShiftsValue.ForeColor = Color.FromArgb(34, 197, 94);
             lblTotalShiftsValue.Location = new Point(20, 36);
-            lblTotalShiftsValue.Text = "22 ca";
+            lblTotalShiftsValue.Text = "0 ca";
 
             lblTotalHoursTitle.AutoSize = true;
             lblTotalHoursTitle.Font = new Font("Segoe UI", 9F);
@@ -83,7 +83,7 @@ namespace GUI
             lblTotalHoursValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblTotalHoursValue.ForeColor = Color.FromArgb(245, 158, 11);
             lblTotalHoursValue.Location = new Point(170, 36);
-            lblTotalHoursValue.Text = "176h";
+            lblTotalHoursValue.Text = "0h";
 
             lblLateTitle.AutoSize = true;
             lblLateTitle.Font = new Font("Segoe UI", 9F);
@@ -95,7 +95,7 @@ namespace GUI
             lblLateValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblLateValue.ForeColor = Color.FromArgb(220, 80, 80);
             lblLateValue.Location = new Point(330, 36);
-            lblLateValue.Text = "2 lần";
+            lblLateValue.Text = "0 lần";
 
             lblAbsentTitle.AutoSize = true;
             lblAbsentTitle.Font = new Font("Segoe UI", 9F);
@@ -107,7 +107,7 @@ namespace GUI
             lblAbsentValue.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
             lblAbsentValue.ForeColor = Color.FromArgb(31, 138, 154);
             lblAbsentValue.Location = new Point(480, 36);
-            lblAbsentValue.Text = "1 ngày";
+            lblAbsentValue.Text = "0 ngày";
 
             lblFilterTitle.AutoSize = true;
             lblFilterTitle.Font = new Font("Segoe UI", 9.5F);

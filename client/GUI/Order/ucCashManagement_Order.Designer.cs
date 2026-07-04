@@ -123,7 +123,7 @@ namespace GUI
             lblOpenCash.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblOpenCash.ForeColor = Color.FromArgb(31, 138, 154);
             lblOpenCash.Location = new Point(22, 40);
-            lblOpenCash.Text = "2,000,000 đ";
+            lblOpenCash.Text = "0 đ";
 
             lblCurrentCashTitle.AutoSize = true;
             lblCurrentCashTitle.Font = new Font("Segoe UI", 9F);
@@ -135,7 +135,7 @@ namespace GUI
             lblCurrentCash.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblCurrentCash.ForeColor = Color.FromArgb(34, 197, 94);
             lblCurrentCash.Location = new Point(212, 40);
-            lblCurrentCash.Text = "5,350,000 đ";
+            lblCurrentCash.Text = "0 đ";
 
             lblRevenueTitle.AutoSize = true;
             lblRevenueTitle.Font = new Font("Segoe UI", 9F);
@@ -147,7 +147,7 @@ namespace GUI
             lblRevenue.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblRevenue.ForeColor = Color.FromArgb(245, 158, 11);
             lblRevenue.Location = new Point(402, 40);
-            lblRevenue.Text = "3,350,000 đ";
+            lblRevenue.Text = "0 đ";
 
             lblDifferenceTitle.AutoSize = true;
             lblDifferenceTitle.Font = new Font("Segoe UI", 9F);
@@ -215,6 +215,8 @@ namespace GUI
             pnlGrid.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTransactions).EndInit();
             btnReport.Click += btnReport_Click;
+            dgvTransactions.CellDoubleClick += dgvTransactions_CellDoubleClick;
+            Load += ucCashManagement_Order_Load;
             ResumeLayout(false);
         }
 

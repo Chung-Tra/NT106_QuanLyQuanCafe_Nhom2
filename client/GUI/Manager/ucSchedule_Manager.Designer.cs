@@ -148,7 +148,7 @@ namespace GUI
             lblCardStaffVal.Name = "lblCardStaffVal";
             lblCardStaffVal.Size = new Size(45, 36);
             lblCardStaffVal.TabIndex = 2;
-            lblCardStaffVal.Text = "12";
+            lblCardStaffVal.Text = "0";
             // 
             // pnlCardShortage
             // 
@@ -198,7 +198,7 @@ namespace GUI
             lblCardShortageVal.Name = "lblCardShortageVal";
             lblCardShortageVal.Size = new Size(63, 36);
             lblCardShortageVal.TabIndex = 2;
-            lblCardShortageVal.Text = "2 ca";
+            lblCardShortageVal.Text = "0 ca";
             // 
             // pnlCardLeave
             // 
@@ -248,7 +248,7 @@ namespace GUI
             lblCardLeaveVal.Name = "lblCardLeaveVal";
             lblCardLeaveVal.Size = new Size(75, 36);
             lblCardLeaveVal.TabIndex = 2;
-            lblCardLeaveVal.Text = "1 NV";
+            lblCardLeaveVal.Text = "0 NV";
             // 
             // pnlNav
             // 
@@ -393,7 +393,7 @@ namespace GUI
             lblWarn.Name = "lblWarn";
             lblWarn.Size = new Size(577, 17);
             lblWarn.TabIndex = 0;
-            lblWarn.Text = "Cảnh báo: Ca chiều Thứ 4 và Ca sáng Chủ nhật chưa đủ người — cần ít nhất 2 barista mỗi ca.";
+            lblWarn.Text = "Đang kiểm tra phân công ca…";
             // 
             // ucSchedule_Manager
             // 
@@ -410,6 +410,11 @@ namespace GUI
             Controls.Add(pnlWarn);
             Name = "ucSchedule_Manager";
             Size = new Size(1000, 665);
+            // Khai báo sự kiện tại Designer — phần xử lý nằm ở ucSchedule_Manager.cs
+            Load += ucSchedule_Manager_Load;
+            btnPrev.Click += BtnPrev_Click;
+            btnNext.Click += BtnNext_Click;
+            btnPublish.Click += BtnPublish_Click;
             pnlCardStaff.ResumeLayout(false);
             pnlCardStaff.PerformLayout();
             pnlCardShortage.ResumeLayout(false);

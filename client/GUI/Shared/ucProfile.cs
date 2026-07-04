@@ -1,5 +1,9 @@
 using BUS;
 using DTO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GUI
 {
@@ -26,19 +30,57 @@ namespace GUI
                 txtEmail.Text = user.Email ?? "";
                 txtPhone.Text = user.PhoneNumber ?? "";
                 txtAddress.Text = "";
+                lblJoinValue.Text = string.IsNullOrWhiteSpace(user.HireDate) ? "—" : user.HireDate;
+                lblShiftValue.Text = "—";
                 if (!string.IsNullOrWhiteSpace(user.AvatarUrl))
                     ImageLoader.SetImageAsync(picAvatar, user.AvatarUrl);
+                _ = LoadShiftAsync(user.EmployeeId);
             }
             else
             {
-                lblUserName.Text = "NGUYỄN VĂN AN";
-                lblUserRole.Text = "Barista / Staff";
-                txtEmployeeId.Text = "NV002";
-                txtFullName.Text = "Nguyễn Văn An";
-                txtEmail.Text = "an.nguyen@cafe.com";
-                txtPhone.Text = "0901234567";
-                txtAddress.Text = "123 Nguyễn Huệ, Q.1, TP.HCM";
+                lblUserName.Text = "—";
+                lblUserRole.Text = "—";
+                txtEmployeeId.Text = "";
+                txtFullName.Text = "";
+                txtEmail.Text = "";
+                txtPhone.Text = "";
+                txtAddress.Text = "";
+                lblJoinValue.Text = "—";
+                lblShiftValue.Text = "—";
             }
+        }
+
+        private async Task LoadShiftAsync(string? employeeId)
+        {
+            if (string.IsNullOrEmpty(employeeId)) return;
+            try
+            {
+                string weekKey = GetMonday(DateTime.Today).ToString("dd/MM/yyyy");
+                var sched = (await ScheduleBUS.GetAll()).Values
+                    .FirstOrDefault(s => s.EmployeeId == employeeId && s.Tuan == weekKey);
+                if (sched == null) return;
+
+                var parts = new List<string>();
+                string[] days = { "T2", "T3", "T4", "T5", "T6", "T7", "CN" };
+                string[] codes = { sched.T2, sched.T3, sched.T4, sched.T5, sched.T6, sched.T7, sched.CN };
+                for (int i = 0; i < days.Length; i++)
+                {
+                    string c = codes[i]?.Trim().ToUpperInvariant() ?? "";
+                    if (c == "S") parts.Add($"{days[i]} sáng");
+                    else if (c == "C") parts.Add($"{days[i]} chiều");
+                    else if (c == "N") parts.Add($"{days[i]} đêm");
+                }
+                if (parts.Count > 0 && !IsDisposed)
+                    lblShiftValue.Text = string.Join(", ", parts.Take(3)) + (parts.Count > 3 ? "…" : "");
+            }
+            catch { /* offline */ }
+        }
+
+        private static DateTime GetMonday(DateTime d)
+        {
+            int dow = (int)d.DayOfWeek;
+            int back = dow == 0 ? 6 : dow - 1;
+            return d.AddDays(-back).Date;
         }
 
         private static string RoleDisplay(string? role) => (role ?? "").ToLower() switch

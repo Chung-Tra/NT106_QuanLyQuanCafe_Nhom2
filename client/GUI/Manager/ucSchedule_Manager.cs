@@ -2,6 +2,7 @@ using BUS;
 using DTO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,14 +39,25 @@ namespace GUI
 
             // Giảm nhấp nháy/giật: lưới dựng lại toàn bộ Label mỗi lần đổi tuần.
             grid.EnableDoubleBuffer();
-
-            // Static-control event subscriptions (lambdas -> kept in code-behind)
-            btnPrev.Click   += (s, e) => { _weekStart = _weekStart.AddDays(-7); _ = ReloadWeekAsync(); };
-            btnNext.Click   += (s, e) => { _weekStart = _weekStart.AddDays(7); _ = ReloadWeekAsync(); };
-            btnPublish.Click += (s, e) => MsgBox.Show(MsgBox.OwnerWindow(this), "Lịch ca tuần này lấy trực tiếp từ dữ liệu phân ca (node schedules) — đã đồng bộ cho toàn bộ nhân viên!", "Đăng lịch", MsgBox.MessageBoxType.Success);
-
-            Load += (s, e) => _ = ReloadWeekAsync();
         }
+
+        // ---------------- Sự kiện (khai báo ở Designer, xử lý ở đây) ----------------
+        private void ucSchedule_Manager_Load(object? sender, EventArgs e) => _ = ReloadWeekAsync();
+
+        private void BtnPrev_Click(object? sender, EventArgs e)
+        {
+            _weekStart = _weekStart.AddDays(-7);
+            _ = ReloadWeekAsync();
+        }
+
+        private void BtnNext_Click(object? sender, EventArgs e)
+        {
+            _weekStart = _weekStart.AddDays(7);
+            _ = ReloadWeekAsync();
+        }
+
+        private void BtnPublish_Click(object? sender, EventArgs e) =>
+            MsgBox.Show(MsgBox.OwnerWindow(this), "Lịch ca tuần này lấy trực tiếp từ dữ liệu phân ca (node schedules) — đã đồng bộ cho toàn bộ nhân viên!", "Đăng lịch", MsgBox.MessageBoxType.Success);
 
         // Ma trận ca × ngày: _cells[shift][day] = danh sách tên NV (đã ghép chuỗi).
         // shift 0=Ca sáng(S) · 1=Ca chiều(C) · 2=Ca đêm(N).
@@ -59,6 +71,10 @@ namespace GUI
         // Nạp lịch THẬT của tuần đang xem từ node schedules, gộp NV theo (ca, ngày).
         private async Task ReloadWeekAsync()
         {
+            // #region agent log
+            var sw = Stopwatch.StartNew();
+            AgentDebugLog.Write("D", "ucSchedule_Manager.ReloadWeekAsync", "start", null);
+            // #endregion
             string weekKey = _weekStart.ToString("dd/MM/yyyy");
             var names   = new string[_shifts.Length][];
             for (int s = 0; s < _shifts.Length; s++) names[s] = new string[_days.Length];
@@ -93,7 +109,77 @@ namespace GUI
                     names[s][d] = string.Join(" + ", buckets[s, d]);
 
             _cells = names;
-            if (!IsDisposed) RenderGrid();
+            if (!IsDisposed)
+            {
+                UpdateStatCards(buckets);
+                RenderGrid();
+            }
+            // #region agent log
+            sw.Stop();
+            AgentDebugLog.Write("D", "ucSchedule_Manager.ReloadWeekAsync", "done", new
+            {
+                ms = sw.ElapsedMilliseconds,
+                lblStaff = lblCardStaffVal.Text,
+                lblShortage = lblCardShortageVal.Text
+            });
+            // #endregion
+        }
+
+        private async void UpdateStatCards(List<string>[,] buckets)
+        {
+            // #region agent log
+            AgentDebugLog.Write("A", "ucSchedule_Manager.UpdateStatCards", "start_extra_fetch", null);
+            // #endregion
+            var staffIds = new HashSet<string>();
+            int shortage = 0;
+            for (int s = 0; s < _shifts.Length; s++)
+                for (int d = 0; d < _days.Length; d++)
+                {
+                    if (buckets[s, d].Count == 0) shortage++;
+                }
+
+            string weekKey = _weekStart.ToString("dd/MM/yyyy");
+            DateTime weekEnd = _weekStart.AddDays(6);
+            try
+            {
+                foreach (var sc in (await ScheduleBUS.GetAll()).Values.Where(x => x.Tuan == weekKey))
+                    if (!string.IsNullOrEmpty(sc.EmployeeId)) staffIds.Add(sc.EmployeeId);
+            }
+            catch { /* offline */ }
+
+            int onLeave = 0;
+            try
+            {
+                var leaveIds = new HashSet<string>();
+                foreach (var l in (await LeaveRequestBUS.GetAll()).Values.Where(x => x.Status == "da_duyet"))
+                {
+                    if (string.IsNullOrEmpty(l.EmployeeId)) continue;
+                    if (!DateTime.TryParseExact(l.FromDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out var from)) continue;
+                    if (!DateTime.TryParseExact(l.ToDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out var to)) to = from;
+                    if (to.Date >= _weekStart && from.Date <= weekEnd)
+                        leaveIds.Add(l.EmployeeId);
+                }
+                onLeave = leaveIds.Count;
+            }
+            catch { /* offline */ }
+
+            lblCardStaffVal.Text = staffIds.Count.ToString();
+            lblCardShortageVal.Text = $"{shortage} ca";
+            lblCardLeaveVal.Text = $"{onLeave} NV";
+            lblCardShortageVal.ForeColor = shortage > 0 ? Theme.Red : Theme.Green;
+
+            if (shortage > 0)
+            {
+                lblWarn.Text = $"Cảnh báo: Còn {shortage} ca trong tuần chưa đủ người — vui lòng phân công thêm nhân viên.";
+                pnlWarn.Visible = true;
+            }
+            else
+            {
+                lblWarn.Text = "Tuần này các ca đã có phân công đầy đủ.";
+                pnlWarn.Visible = true;
+            }
         }
 
         private static DateTime GetMonday(DateTime d)

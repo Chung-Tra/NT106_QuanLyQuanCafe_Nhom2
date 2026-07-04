@@ -16,28 +16,61 @@ namespace GUI
         {
             InitializeComponent();
 
-            btnHappy.Click += (s, e) => SwitchTab(btnHappy, pnlHappy);
-            btnCombo.Click += (s, e) => SwitchTab(btnCombo, pnlCombo);
-            btnVoucher.Click += (s, e) => SwitchTab(btnVoucher, pnlVoucher);
-
-            btnHappyEdit.Click += (s, e) => _ = EditHappy();
-            btnHappyAdd.Click += (s, e) => _ = AddHappyHour();
-            btnComboAdd.Click += (s, e) => _ = AddCombo();
-            btnVoucherGen.Click += (s, e) => _ = AddVoucher();
-
-            _ = LoadHappyGrid();
-            _ = LoadComboGrid();
-            _ = LoadVoucherGrid();
-
+            // Chỉ giữ lại các helper (không phải khai báo sự kiện) trong constructor.
             DgvRefresh.Attach(dgvHappy, () => _ = LoadHappyGrid());
             DgvRefresh.Attach(dgvCombo, () => _ = LoadComboGrid());
             DgvRefresh.Attach(dgvVoucher, () => _ = LoadVoucherGrid());
+        }
 
-            dgvHappy.CellDoubleClick   += (s, e) => ShowDetail(dgvHappy, e, "Chi tiết Happy Hour");
-            dgvCombo.CellDoubleClick   += (s, e) => ShowDetail(dgvCombo, e, "Chi tiết Combo");
-            dgvVoucher.CellDoubleClick += (s, e) => ShowDetail(dgvVoucher, e, "Chi tiết Voucher");
+        // ---------------- Sự kiện (khai báo ở Designer, xử lý ở đây) ----------------
+        private async void ucPromotion_Manager_Load(object? sender, EventArgs e)
+        {
+            await LoadHappyInfo();
+            _ = LoadHappyGrid();
+            _ = LoadComboGrid();
+            _ = LoadVoucherGrid();
+            SwitchTab(btnHappy, pnlHappy);
+        }
 
-            Load += (s, e) => SwitchTab(btnHappy, pnlHappy);
+        private void BtnHappy_Click(object? sender, EventArgs e) => SwitchTab(btnHappy, pnlHappy);
+        private void BtnCombo_Click(object? sender, EventArgs e) => SwitchTab(btnCombo, pnlCombo);
+        private void BtnVoucher_Click(object? sender, EventArgs e) => SwitchTab(btnVoucher, pnlVoucher);
+
+        private void BtnHappyAdd_Click(object? sender, EventArgs e) => _ = AddHappyHour();
+        private void BtnHappyEdit_Click(object? sender, EventArgs e) => _ = EditHappy();
+        private void BtnComboAdd_Click(object? sender, EventArgs e) => _ = AddCombo();
+        private void BtnVoucherGen_Click(object? sender, EventArgs e) => _ = AddVoucher();
+
+        private void DgvHappy_CellDoubleClick(object? sender, DataGridViewCellEventArgs e) => ShowDetail(dgvHappy, e, "Chi tiết Happy Hour");
+        private void DgvCombo_CellDoubleClick(object? sender, DataGridViewCellEventArgs e) => ShowDetail(dgvCombo, e, "Chi tiết Combo");
+        private void DgvVoucher_CellDoubleClick(object? sender, DataGridViewCellEventArgs e) => ShowDetail(dgvVoucher, e, "Chi tiết Voucher");
+
+        // Thẻ "Happy Hour đang hoạt động" lấy chương trình happy_hour thật đầu tiên (ưu tiên đang chạy).
+        private async Task LoadHappyInfo()
+        {
+            try
+            {
+                var happy = (await PromotionBUS.GetAll()).Values
+                            .Where(p => p.Loai == "happy_hour").ToList();
+                var hh = happy.FirstOrDefault(p => (p.TrangThai ?? "").Contains("Đang"))
+                         ?? happy.FirstOrDefault();
+                if (hh != null)
+                {
+                    lblHappyInfoTitle.Text = "Happy Hour đang hoạt động:";
+                    string giam = string.IsNullOrWhiteSpace(hh.GiamPct) ? "" : $"Giảm {hh.GiamPct} toàn thực đơn  ·  ";
+                    lblHappyInfoBody.Text = $"{hh.KhungGio}  ·  {giam}Áp dụng: {hh.NgayApDung}";
+                }
+                else
+                {
+                    lblHappyInfoTitle.Text = "Happy Hour";
+                    lblHappyInfoBody.Text = "Chưa có chương trình Happy Hour nào.";
+                }
+            }
+            catch
+            {
+                lblHappyInfoTitle.Text = "Happy Hour";
+                lblHappyInfoBody.Text = "Không tải được dữ liệu Happy Hour.";
+            }
         }
 
         private void ShowDetail(Guna2DataGridView dgv, DataGridViewCellEventArgs e, string title)
@@ -96,7 +129,7 @@ namespace GUI
                 GiamPct = (string.IsNullOrWhiteSpace(disc) ? "10" : disc) + "%",
                 TrangThai = "🟢 Đang chạy"
             });
-            if (ok) { await LoadHappyGrid(); MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm Happy Hour!", "Thành công", MsgBox.MessageBoxType.Success); }
+            if (ok) { await LoadHappyGrid(); await LoadHappyInfo(); MsgBox.Show(MsgBox.OwnerWindow(this), "Đã thêm Happy Hour!", "Thành công", MsgBox.MessageBoxType.Success); }
             else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }
 
@@ -120,6 +153,7 @@ namespace GUI
                     trang_thai = r.Cells["Trạng thái"].Value?.ToString() ?? ""
                 });
                 await LoadHappyGrid();
+                await LoadHappyInfo();
             }
         }
 

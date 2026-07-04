@@ -18,16 +18,15 @@ namespace GUI
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvHistory);
-
-            // Double-click 1 đơn -> form chi tiết read-only đủ field
-            dgvHistory.CellDoubleClick += (s, e) =>
-            {
-                if (e.RowIndex < 0) return;
-                RecordDetail.FromRow(dgvHistory.Rows[e.RowIndex], "Chi tiết đơn nghỉ phép")
-                            .ShowDialog(MsgBox.OwnerWindow(this));
-            };
-
             DgvRefresh.Attach(dgvHistory, () => _ = LoadRealData());
+        }
+
+        // Double-click 1 đơn -> form chi tiết read-only đủ field
+        private void dgvHistory_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            RecordDetail.FromRow(dgvHistory.Rows[e.RowIndex], "Chi tiết đơn nghỉ phép")
+                        .ShowDialog(MsgBox.OwnerWindow(this));
         }
 
         private void UcLeaveRequest_Load(object? sender, EventArgs e)
