@@ -34,6 +34,16 @@ exports.add = async (req, res, next) => {
         data.thanh_tien = tongTien;
 
         await db.ref(`nhap_kho/${nextId}`).set(data);
+
+        // Cộng tồn kho từng nguyên liệu (key của ds_nl = id nguyên liệu).
+        // Dùng transaction để không mất số khi 2 phiếu nhập cùng lúc.
+        if (data.ds_nl) {
+            await Promise.all(Object.entries(data.ds_nl).map(([nlId, item]) =>
+                db.ref(`nguyen_lieu/${nlId}/ton_kho`)
+                    .transaction(cur => (cur || 0) + (item.so_luong || 0))
+            ));
+        }
+
         info('Inventory import added', { id: nextId, tongTien });
         res.status(201).json({ success: true, id: nextId });
     } catch (err) {

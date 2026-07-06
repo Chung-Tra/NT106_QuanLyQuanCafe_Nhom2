@@ -114,7 +114,7 @@ namespace GUI
 
         private void UpdateChange()
         {
-            long change = _received - _total;
+            long change = AppMath.ChangeDue(_received, _total);
             _lblChange.Text      = change >= 0 ? $"Tiền thối:  {Theme.Vnd(change)}" : $"Còn thiếu:  {Theme.Vnd(-change)}";
             _lblChange.ForeColor = change >= 0 ? Theme.Green : Theme.Red;
         }
@@ -130,12 +130,7 @@ namespace GUI
             Close();
         }
 
-        private static long ParseMoney(string s)
-        {
-            long v = 0;
-            foreach (char c in s) if (char.IsDigit(c)) v = v * 10 + (c - '0');
-            return v;
-        }
+        private static long ParseMoney(string s) => AppMath.ParseVndDigits(s);
 
         // Mở hộp thanh toán; trả về true nếu xác nhận, kèm phương thức đã chọn.
         public static bool Pay(IWin32Window? owner, long total, string table, string customer, out string method)

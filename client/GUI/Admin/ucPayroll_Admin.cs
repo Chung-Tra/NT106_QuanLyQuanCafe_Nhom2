@@ -51,7 +51,7 @@ namespace GUI
             {
                 var row = dgvPayroll.CurrentRow;
                 decimal D(string c) => decimal.TryParse(row.Cells[c].Value?.ToString(), out var v) ? v : 0;
-                decimal total = D("Lương CB") + D("Phụ cấp") + D("Thưởng FB") + D("Thưởng lễ") + D("Trừ lương");
+                decimal total = AppMath.PayrollTotal(D("Lương CB"), D("Phụ cấp"), D("Thưởng FB"), D("Thưởng lễ"), D("Trừ lương"));
                 int.TryParse(row.Cells["Ngày công"].Value?.ToString(), out int days);
 
                 var payload = new
@@ -175,7 +175,7 @@ namespace GUI
                 foreach (var kv in salaries.Where(s => s.Value.Month == month))
                 {
                     var s = kv.Value;
-                    decimal total = s.BaseSalary + s.Allowance + s.FeedbackBonus + s.HolidayBonus + s.Deduction;
+                    decimal total = AppMath.PayrollTotal(s.BaseSalary, s.Allowance, s.FeedbackBonus, s.HolidayBonus, s.Deduction);
                     if (total != s.TotalSalary)
                     {
                         await SalaryBUS.Update(kv.Key, new { tong_luong = total });
@@ -190,7 +190,7 @@ namespace GUI
             }
 
             MsgBox.Show(MsgBox.OwnerWindow(this),
-                $"Đã tính lại tổng lương cho tháng {month}.\nCập nhật {updated} bản ghi.\n\nTổng lương = Lương CB + Phụ cấp + Thưởng FB + Thưởng lễ + Trừ lương.",
+                $"Đã tính lại tổng lương cho tháng {month}.\nCập nhật {updated} bản ghi.\n\nTổng lương = Lương CB + Phụ cấp + Thưởng FB + Thưởng lễ − Trừ lương.",
                 "Tính lương", MsgBox.MessageBoxType.Success);
             await LoadRealPayroll();
         }

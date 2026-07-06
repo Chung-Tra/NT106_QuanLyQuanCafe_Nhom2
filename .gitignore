@@ -432,3 +432,7 @@ backend/serviceAccountKey.json
 *.msix
 *.msm
 *.msp
+
+# Microsoft Office temporary files
+*.docx
+*.pptx

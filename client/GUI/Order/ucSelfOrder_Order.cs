@@ -94,7 +94,10 @@ namespace GUI
                 var foods  = (await Task.Run(FoodBUS.GetListFoods))
                              .Where(f => f.Id != null).ToDictionary(f => f.Id!, f => f.Name ?? f.Id!);
 
-                foreach (var kv in orders.Where(o => o.Value.Source == "qr")
+                // Chỉ lấy đơn QR trong HÔM NAY — nhãn dưới bảng là "… đơn hôm nay".
+                foreach (var kv in orders.Where(o => o.Value.Source == "qr"
+                                       && o.Value.CreatedAt > 0
+                                       && DateTimeOffset.FromUnixTimeMilliseconds(o.Value.CreatedAt).LocalDateTime.Date == DateTime.Today)
                                          .OrderByDescending(o => o.Value.CreatedAt))
                 {
                     var o = kv.Value;

@@ -205,13 +205,7 @@ namespace GUI
             cboRecipient.ForeColor = Color.White;
             cboRecipient.HoverState.BorderColor = Color.FromArgb(120, 120, 130);
             cboRecipient.ItemHeight = 26;
-            cboRecipient.Items.AddRange(new object[] {
-                "NV001 - Nguyễn Văn An (Quản lý)",
-                "NV002 - Trần Thị Bích (Pha chế)",
-                "NV003 - Lê Hoàng Nam (Order Staff)",
-                "NV004 - Phạm Minh Tuấn (Bảo vệ)",
-                "NV005 - Đỗ Thị Hương (Pha chế)"
-            });
+            // Danh sách nhân viên nạp thật từ EmployeeBUS lúc mở dialog (xem SendBroadcast.cs LoadRecipients()).
             cboRecipient.Location = new Point(218, 64);
             cboRecipient.Name = "cboRecipient";
             cboRecipient.ShadowDecoration.CustomizableEdges = ce10;

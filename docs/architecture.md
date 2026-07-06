@@ -12,28 +12,30 @@
             ┌────────────┴────────────┐
             │ HTTP REST (port 3000)   │ SignalR WebSocket
             ▼                         ▼
-┌───────────────────┐    ┌──────────────────────┐
-│  BACKEND          │    │  CHAT SERVER          │
-│  Express.js       │    │  ASP.NET Core         │
-│  Node.js          │    │  SignalR              │
-│                   │    │                       │
-│  - Auth           │    │  - /chathub           │
-│  - Employees      │    │  - Broadcast message  │
-│  - Foods          │    │  - Online users       │
-│  - Chat history   │    │                       │
-└────────┬──────────┘    └──────────────────────┘
+┌────────────────────────┐    ┌──────────────────────┐
+│  BACKEND               │    │  CHAT SERVER          │
+│  Express.js / Node.js  │    │  ASP.NET Core         │
+│                        │    │  SignalR              │
+│  - Auth (OTP/token)    │    │                       │
+│  - Employees           │    │  - /chathub           │
+│  - Foods / Ingredients │    │  - Broadcast message  │
+│  - Inventory / Upload  │    │  - Online users       │
+│  - Chat history        │    │                       │
+│  - Generic CRUD (23    │    │                       │
+│    node còn lại)       │    │                       │
+└────────┬───────────────┘    └──────────────────────┘
          │
+         ├──────────────► Firebase Storage (ảnh, qua /upload)
          ▼
-┌─────────────────────┐
-│  FIREBASE           │
-│  Realtime Database  │
-│                     │
-│  /nhan_vien         │
-│  /mon_uong          │
-│  /tin_nhan          │
-│  /don_hang          │
-│  /ban               │
-└─────────────────────┘
+┌──────────────────────────────┐
+│  FIREBASE Realtime Database   │
+│  ~29 node, ví dụ:             │
+│  /nhan_vien /mon_uong /ban    │
+│  /don_hang /thanh_toan        │
+│  /nguyen_lieu /nhap_kho       │
+│  /khuyen_mai /chi_phi ...     │
+│  (đầy đủ trong database.md)   │
+└──────────────────────────────┘
 ```
 
 ## Phân chia trách nhiệm
@@ -74,7 +76,7 @@ Client                    Backend                   Firebase Auth
 | Vai trò    | Quyền truy cập                            |
 | ---------- | ----------------------------------------- |
 | Admin      | Toàn quyền                                |
-| Manager    | Quản lý nhân viên, thực đơn **và kho / phiếu nhập**, xem báo cáo (module kho trong `GUI/Warehouse/`, không role đăng nhập riêng) |
+| Manager    | Quản lý nhân viên, thực đơn **và kho / phiếu nhập**, xem báo cáo (kho quản lý qua `GUI/Dialogs/WarehouseManager.cs`, không có role đăng nhập riêng) |
 | Barista    | Xem đơn hàng (KDS), recipe                |
 | OrderStaff | Tạo đơn, thanh toán, CRM                  |
 | Security   | Bãi giữ xe, SOS                           |

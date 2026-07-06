@@ -1,5 +1,7 @@
+using BUS;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace GUI
@@ -19,6 +21,20 @@ namespace GUI
             InitializeComponent();
             WindowChrome.Apply(this, host: panel1);
             cboPriority.SelectedIndex = 0;
+            Load += async (s, e) => await LoadRecipients();
+        }
+
+        // Nạp danh sách nhân viên THẬT (thay vì tên giả cố định trong Designer).
+        private async System.Threading.Tasks.Task LoadRecipients()
+        {
+            try
+            {
+                var emps = await EmployeeBUS.GetAllEmployeesAsync();
+                cboRecipient.Items.Clear();
+                foreach (var emp in emps.Where(x => x.EmployeeId != null).OrderBy(x => x.EmployeeId))
+                    cboRecipient.Items.Add($"{emp.EmployeeId} - {emp.FullName} ({EmployeeText.RoleVi(emp.Role)})");
+            }
+            catch { /* offline → combo trống */ }
         }
 
         private void RdoIndividual_CheckedChanged(object? sender, EventArgs e)

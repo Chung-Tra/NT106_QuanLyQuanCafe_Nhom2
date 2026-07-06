@@ -97,8 +97,8 @@ namespace GUI
                 string level = row.Cells["Mức độ"].Value?.ToString() ?? "";
                 row.Cells["Mức độ"].Style.ForeColor = level switch
                 {
-                    "Khẩn cấp" => Color.IndianRed,
-                    "Quan trọng" => Color.Orange,
+                    _ when level.Contains("Khẩn cấp") => Color.IndianRed,
+                    _ when level.Contains("Quan trọng") => Color.Orange,
                     _ => Color.LightGray
                 };
                 string status = row.Cells["Trạng thái"].Value?.ToString() ?? "";

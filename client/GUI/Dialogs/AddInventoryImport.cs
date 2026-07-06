@@ -161,20 +161,14 @@ namespace GUI
             foreach (DataGridViewRow row in dgvChiTietNhap.Rows)
             {
                 if (row.IsNewRow) continue;
-                if (!TryLaySoLong(row.Cells[colSoLuong.Name].Value, out long soLuong) || soLuong <= 0) continue;
-                if (!TryLaySoLong(row.Cells[colGiaNhap.Name].Value, out long giaNhap) || giaNhap < 0) continue;
-                tongTien += soLuong * giaNhap;
+                // Số lượng: parse dạng thập phân rồi làm tròn (int) — KHÔNG strip dấu "."
+                int soLuong = AppMath.ParseQuantityToInt(row.Cells[colSoLuong.Name].Value?.ToString());
+                if (soLuong <= 0) continue;
+                // Giá nhập: là tiền, strip mọi dấu phân cách.
+                long giaNhap = AppMath.ParseVndDigits(row.Cells[colGiaNhap.Name].Value?.ToString());
+                tongTien += (long)soLuong * giaNhap;
             }
             lblTongTien.Text = $"Thành tiền: {tongTien:N0} VNĐ";
-        }
-
-        private static bool TryLaySoLong(object? value, out long so)
-        {
-            so = 0;
-            string text = value?.ToString()?.Trim() ?? string.Empty;
-            if (string.IsNullOrEmpty(text)) return false;
-            text = text.Replace(",", "").Replace(".", "");
-            return long.TryParse(text, out so);
         }
 
         private async void BtnLuu_Click(object? sender, EventArgs e)
@@ -240,19 +234,20 @@ namespace GUI
                 string nguyenLieuId = row.Cells[colMaNL.Name].Value?.ToString() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(nguyenLieuId)) continue;
 
-                if (!TryLaySoLong(row.Cells[colSoLuong.Name].Value, out long soLuong) || soLuong <= 0) continue;
-                if (!TryLaySoLong(row.Cells[colGiaNhap.Name].Value, out long giaNhap) || giaNhap < 0) continue;
+                int soLuong = AppMath.ParseQuantityToInt(row.Cells[colSoLuong.Name].Value?.ToString());
+                if (soLuong <= 0) continue;
+                long giaNhap = AppMath.ParseVndDigits(row.Cells[colGiaNhap.Name].Value?.ToString());
 
                 if (ketQua.TryGetValue(nguyenLieuId, out InventoryImportItemDTO? chiTiet))
                 {
-                    chiTiet.Quantity += (int)soLuong;
+                    chiTiet.Quantity += soLuong;
                     chiTiet.ImportPrice = giaNhap;
                 }
                 else
                 {
                     ketQua[nguyenLieuId] = new InventoryImportItemDTO
                     {
-                        Quantity = (int)soLuong,
+                        Quantity = soLuong,
                         ImportPrice = giaNhap
                     };
                 }

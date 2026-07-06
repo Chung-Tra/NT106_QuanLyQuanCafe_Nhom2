@@ -238,7 +238,7 @@ namespace GUI
                 "feedback"  => "Feedback",
                 _           => "BaoCao",
             };
-            string baseName = $"BaoCao_{type}_{DateTime.Now:yyyyMM}";
+            string baseName = $"BaoCao_{type}_{DateTime.Now.Year}{SelectedMonth():00}";
 
             // Mở hộp thoại để người dùng tự chọn nơi lưu rồi ghi file thật.
             if (format == "PDF")

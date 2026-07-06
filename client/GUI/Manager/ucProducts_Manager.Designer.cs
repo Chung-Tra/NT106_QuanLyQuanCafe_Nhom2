@@ -141,7 +141,8 @@ namespace GUI
             btnShowChart.Size = new Size(160, 34);
             btnShowChart.TabIndex = 0;
             btnShowChart.Text = "Xem Biểu Đồ";
-            // 
+            btnShowChart.Click += BtnShowChart_Click;
+            //
             // lblExpenseValue
             // 
             lblExpenseValue.AutoSize = true;

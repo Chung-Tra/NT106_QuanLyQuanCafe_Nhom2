@@ -16,7 +16,9 @@
 | `ucWorkTracking.cs`      | Admin / Manager | Điểm danh nhân viên (chấm công vào/ra).                         |
 | `ucAttendanceHistory.cs` | NV vận hành     | Lịch sử chấm công cá nhân, có filter theo ngày + xuất báo cáo.  |
 | `ucBroadcastCenter.cs`   | Admin / Manager | Trung tâm phát thông báo nội bộ tới tất cả NV hoặc cá nhân.     |
-| `ucSettings_Manager.cs`  | Admin / Manager | Cài đặt hệ thống & chat nội bộ.                                 |
+| `ucAuditLog.cs`          | Admin / Manager | Nhật ký thao tác hệ thống (`/nhat_ky`), lọc theo vai trò/thao tác. |
+| `ucShiftRegister.cs`     | NV vận hành     | Chọn ca trống / đăng ký đổi ca (`/dang_ky_ca`).                 |
+| `ucOverview_Staff.cs`    | NV vận hành     | Tổng quan ca cá nhân (Order/Barista/Security dùng chung).       |
 
 
 ---
@@ -24,19 +26,21 @@
 ## 2. Vai trò **Admin** (toàn quyền)
 
 
-| Menu              | UserControl            | Chức năng                                           |
-| ----------------- | ---------------------- | --------------------------------------------------- |
-| Tổng quan         | `ucDashboard_Admin`    | Doanh thu toàn quán, biểu đồ cột/đường, KPIs.       |
-| Quản trị viên     | `ucAdmin_Managers`     | Quản lý danh sách Manager (thêm, khóa, phân quyền). |
-| Quản lý Nhân viên | `ucStaff_Manager`      | Danh sách toàn bộ NV, thêm/sửa/khóa tài khoản.      |
-| Tiền lương        | `ucPayroll_Admin`      | Bảng lương tự tính theo công + thưởng.              |
-| Feedback          | `ucFeedback_Admin`     | Tổng hợp feedback khách hàng, gắn cờ feedback xấu.  |
-| Thông báo         | `ucNotification_Admin` | Danh sách notification từ hệ thống.                 |
-| Gửi thông báo     | `ucBroadcastCenter`    | Soạn & gửi broadcast nội bộ.                        |
-| Điểm danh         | `ucWorkTracking`       | Chấm công NV.                                       |
-| Chat nội bộ       | `ucInternalChat`       | Chat với toàn bộ nhân viên.                         |
-| Profile           | `ucProfile`            | Thông tin cá nhân.                                  |
-| Cài đặt           | `ucSettings_Manager`   | Cấu hình hệ thống.                                  |
+| Nhóm | Menu | UserControl | Chức năng |
+| ---- | ---- | ----------- | --------- |
+| CHÍNH | Tổng quan | `ucDashboard_Admin` | Doanh thu toàn quán, biểu đồ cột/đường, KPIs. |
+| CHÍNH | Quản lý | `ucManagers_Admin` | Danh sách Manager (thêm, khóa, phân quyền). |
+| CHÍNH | Nhân viên | `ucStaff_Manager` | Toàn bộ NV, thêm/sửa/khóa tài khoản. |
+| CHÍNH | Tiền lương | `ucPayroll_Admin` | Bảng lương tự tính theo công + thưởng. |
+| CHÍNH | Tiền chi | `ucExpenses_Admin` | Chi phí vận hành chi tiết (`/chi_phi`). |
+| CHÍNH | Xuất báo cáo | `ucReport_Admin` | Xuất báo cáo Excel / PDF. |
+| KHÁCH HÀNG | Feedback | `ucFeedback_Admin` | Tổng hợp feedback, gắn cờ feedback xấu. |
+| KHÁCH HÀNG | Thông báo | `ucNotification_Admin` | Danh sách notification hệ thống. |
+| KHÁCH HÀNG | Gửi thông báo | `ucBroadcastCenter` | Soạn & gửi broadcast nội bộ. |
+| CÁ NHÂN | Điểm danh | `ucAttendanceHistory` | Điểm danh / lịch sử chấm công. |
+| CÁ NHÂN | Nhật ký | `ucAuditLog` | Nhật ký thao tác hệ thống. |
+| CÁ NHÂN | Chat nội bộ | `ucInternalChat` | Chat với toàn bộ nhân viên. |
+| CÁ NHÂN | Hồ sơ cá nhân | `ucProfile` | Thông tin cá nhân. |
 
 
 ---
@@ -44,20 +48,23 @@
 ## 3. Vai trò **Manager** (quản lý ca)
 
 
-| Menu                | UserControl              | Chức năng                                                      |
-| ------------------- | ------------------------ | -------------------------------------------------------------- |
-| Tổng quan           | `ucOverview_Manager`     | Tổng quan ca làm: doanh thu, đơn hàng, NV trực.                |
-| Sản phẩm & Thực đơn | `ucProducts_Manager`     | Quản lý món; **Quản lý kho** mở `WarehouseManagerForm` (phiếu nhập tay / điền từ Excel·CSV → `AddInventoryImport`). UC trong `Warehouse/` có thể gắn thêm vào luồng Manager nếu cần. |
-| Đơn hàng & Hóa đơn  | `ucOrders_Manager`       | Lịch sử order + chi tiết hóa đơn.                              |
-| Quản lý Nhân viên   | `ucStaff_Manager`        | Danh sách NV thuộc ca quản lý.                                 |
-| Thất thoát          | `ucLoss_Manager`         | Theo dõi nguyên liệu hao hụt, biểu đồ xu hướng.                |
-| Feedback            | `ucFeedback_Manager`     | Đọc & phản hồi feedback của khách.                             |
-| Thông báo           | `ucNotification_Manager` | Xử lý thông báo (SOS, cảnh báo NL).                            |
-| Gửi thông báo       | `ucBroadcastCenter`      | Phát thông báo cho ca làm.                                     |
-| Xin nghỉ            | `ucLeaveRequest`         | Duyệt đơn xin nghỉ NV.                                         |
-| Điểm danh           | `ucWorkTracking`         | Chấm công.                                                     |
-| Chat nội bộ         | `ucInternalChat`         | Chat.                                                          |
-| Profile             | `ucProfile`              | Thông tin cá nhân.                                             |
+| Nhóm | Menu | UserControl | Chức năng |
+| ---- | ---- | ----------- | --------- |
+| CHÍNH | Tổng quan | `ucOverview_Manager` | Tổng quan ca làm: doanh thu, đơn hàng, NV trực. |
+| CHÍNH | Sản phẩm & Thực đơn | `ucProducts_Manager` | Quản lý món + tồn kho; nút **Nhập kho** mở `WarehouseManager` (phiếu nhập tay / điền từ Excel → `AddInventoryImport`). Nút **Xem Biểu Đồ** mở biểu đồ Doanh thu vs Chi phí nhập theo tháng. |
+| CHÍNH | Đơn hàng & Hóa đơn | `ucOrders_Manager` | Tình trạng bàn/bếp; nút **Cập nhật** quản lý món còn/hết hàng. |
+| CHÍNH | Nhân viên | `ucStaff_Manager` | Danh sách NV thuộc ca quản lý. |
+| CHÍNH | Lịch ca làm | `ucSchedule_Manager` | Phân ca theo tuần (`/lich_lam_viec`). |
+| CHÍNH | Khuyến mãi | `ucPromotion_Manager` | Happy hour / combo / voucher (`/khuyen_mai`). |
+| CHÍNH | Thất thoát | `ucLoss_Manager` | Theo dõi hao hụt, biểu đồ xu hướng (`/that_thoat`). |
+| KHÁCH HÀNG | Feedback | `ucFeedback_Manager` | Đọc & phản hồi feedback của khách. |
+| KHÁCH HÀNG | Thông báo | `ucNotification_Manager` | Xử lý thông báo (SOS, cảnh báo NL). |
+| KHÁCH HÀNG | Gửi thông báo | `ucBroadcastCenter` | Phát thông báo cho ca làm. |
+| CÁ NHÂN | Xin nghỉ | `ucLeaveRequest` | Duyệt đơn xin nghỉ NV. |
+| CÁ NHÂN | Điểm danh | `ucWorkTracking` | Chấm công vào/ra. |
+| CÁ NHÂN | Nhật ký | `ucAuditLog` | Nhật ký thao tác hệ thống. |
+| CÁ NHÂN | Chat nội bộ | `ucInternalChat` | Chat. |
+| CÁ NHÂN | Hồ sơ cá nhân | `ucProfile` | Thông tin cá nhân. |
 
 
 ---
@@ -65,16 +72,20 @@
 ## 4. Vai trò **Order Staff** (NV order tại quầy)
 
 
-| Menu              | UserControl                   | Chức năng                                     |
-| ----------------- | ----------------------------- | --------------------------------------------- |
-| Tổng quan         | `ucOverview_Staff`            | Tổng quan ca cá nhân: số order, hoa hồng.     |
-| Lên đơn / POS     | `ucPOS_OrderStaff`            | Màn hình POS - chọn món, in bill, thanh toán. |
-| Khách hàng (CRM)  | `ucCRM_OrderStaff`            | Quản lý khách thân thiết, tích điểm.          |
-| Tiền mặt          | `ucCashManagement_OrderStaff` | Két tiền mặt: nhập đầu ca/ca cuối, đối soát.  |
-| Lịch sử chấm công | `ucAttendanceHistory`         | Xem giờ làm, ngày làm.                        |
-| Xin nghỉ          | `ucLeaveRequest`              | Đăng ký nghỉ phép.                            |
-| Chat nội bộ       | `ucInternalChat`              | Chat.                                         |
-| Profile           | `ucProfile`                   | Thông tin cá nhân.                            |
+| Nhóm | Menu | UserControl | Chức năng |
+| ---- | ---- | ----------- | --------- |
+| CHÍNH | Tổng quan | `ucOverview_Staff` | Tổng quan ca cá nhân: số order, hoa hồng. |
+| CHÍNH | Lên đơn / POS | `ucPOS_Order` | Màn hình POS — chọn món, in bill, thanh toán. |
+| CHÍNH | Khách hàng (CRM) | `ucCRM_Order` | Quản lý khách thân thiết (`/khach_hang`). |
+| CHÍNH | Tích điểm | `ucLoyalty_Order` | Tích / đổi điểm & hạng thành viên (`/diem_log`). |
+| CHÍNH | Đặt bàn | `ucReservation_Order` | Quản lý đặt bàn trước (`/dat_ban`). |
+| CHÍNH | Đặt tại bàn QR | `ucSelfOrder_Order` | Đơn khách tự đặt qua QR, cập nhật realtime. |
+| CHÍNH | Tiền mặt | `ucCashManagement_Order` | Két tiền mặt: nhập đầu ca/cuối ca, đối soát. |
+| CÁ NHÂN | Lịch sử chấm công | `ucAttendanceHistory` | Xem giờ làm, ngày làm. |
+| CÁ NHÂN | Xin nghỉ | `ucLeaveRequest` | Đăng ký nghỉ phép. |
+| CÁ NHÂN | Chọn ca / Đổi ca | `ucShiftRegister` | Chọn ca trống / đăng ký đổi ca. |
+| CÁ NHÂN | Chat nội bộ | `ucInternalChat` | Chat. |
+| CÁ NHÂN | Hồ sơ cá nhân | `ucProfile` | Thông tin cá nhân. |
 
 
 ---
@@ -82,46 +93,51 @@
 ## 5. Vai trò **Barista** (NV pha chế)
 
 
-| Menu                 | UserControl           | Chức năng                                            |
-| -------------------- | --------------------- | ---------------------------------------------------- |
-| Tổng quan            | `ucOverview_Staff`    | Tổng quan ca.                                        |
-| Màn hình Bếp (KDS)   | `ucKDS_Barista`       | Hiển thị order chờ pha realtime, tick xong từng món. |
-| Cẩm nang Pha chế     | `ucRecipe_Barista`    | Công thức + định lượng từng món.                     |
-| Báo động Nguyên liệu | `ucAlert_Barista`     | Cảnh báo NL sắp hết / hết hạn.                       |
-| Lịch sử chấm công    | `ucAttendanceHistory` | Xem lịch sử.                                         |
-| Xin nghỉ             | `ucLeaveRequest`      | Đăng ký nghỉ.                                        |
-| Chat nội bộ          | `ucInternalChat`      | Chat.                                                |
-| Profile              | `ucProfile`           | Thông tin cá nhân.                                   |
+| Nhóm | Menu | UserControl | Chức năng |
+| ---- | ---- | ----------- | --------- |
+| CHÍNH | Tổng quan | `ucOverview_Staff` | Tổng quan ca cá nhân. |
+| CHÍNH | Màn hình Bếp | `ucKDS_Barista` | Order chờ pha realtime, tick xong từng món. |
+| CHÍNH | Công thức pha chế | `ucRecipe_Barista` | Công thức + định lượng từng món (`/cong_thuc`). |
+| CHÍNH | Cảnh báo NL | `ucAlert_Barista` | Cảnh báo nguyên liệu sắp hết (`/canh_bao`). |
+| CÁ NHÂN | Lịch sử chấm công | `ucAttendanceHistory` | Xem lịch sử chấm công. |
+| CÁ NHÂN | Xin nghỉ | `ucLeaveRequest` | Đăng ký nghỉ phép. |
+| CÁ NHÂN | Chọn ca / Đổi ca | `ucShiftRegister` | Chọn ca trống / đăng ký đổi ca. |
+| CÁ NHÂN | Chat nội bộ | `ucInternalChat` | Chat. |
+| CÁ NHÂN | Hồ sơ cá nhân | `ucProfile` | Thông tin cá nhân. |
 
 
 ---
 
-## 6. Module **Kho** (`GUI/Warehouse/`)
+## 6. Module **Kho** (dialog trong `GUI/Dialogs/`)
 
-> Không còn menu đăng nhập riêng cho “thủ kho”. Các UserControl trong thư mục **`Warehouse/`** phục vụ màn **Sản phẩm & Thực đơn** của **Manager** (hoặc gắn thêm khi phát triển).
+> Không có role đăng nhập “thủ kho” riêng, cũng **không còn** thư mục `GUI/Warehouse/`.
+> Nghiệp vụ kho được nhúng vào màn **Sản phẩm & Thực đơn** của **Manager**
+> ([`ucProducts_Manager`](../client/GUI/Manager/ucProducts_Manager.cs)): lưới bên phải hiển thị tồn kho
+> nguyên liệu (`IngredientBUS.GetAll`), nút **Nhập kho** mở dialog quản lý phiếu nhập.
 
-| UC                                | Ý nghĩa nghiệp vụ                                                       |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| `ucStockControl_Warehouse`        | Tồn kho realtime, thao tác nhập chỉnh (nếu được gọi trong luồng Manager). |
-| `ucSmartRestock_Warehouse`        | Gợi ý NL cần đặt thêm (buffer / tiêu thụ — theo shell UI).               |
-| `ucEstimatedProduction_Warehouse` | Dự báo số ly pha được từ tồn + công thức.                                |
+| Thành phần | File | Ý nghĩa nghiệp vụ |
+| ---------- | ---- | ----------------- |
+| `WarehouseManager` | [`GUI/Dialogs/WarehouseManager.cs`](../client/GUI/Dialogs/WarehouseManager.cs) | Dialog xem/thêm phiếu nhập kho, cập nhật tồn nguyên liệu. |
+| `AddInventoryImport` | [`GUI/Dialogs/AddInventoryImport.cs`](../client/GUI/Dialogs/AddInventoryImport.cs) | Form nhập chi tiết 1 phiếu (chọn NL, số lượng, giá, ghi chú). |
+| `InventoryImportExcelReader` | [`GUI/Helpers/InventoryImportExcelReader.cs`](../client/GUI/Helpers/InventoryImportExcelReader.cs) | Đọc file Excel để prefill dòng phiếu nhập. |
 
-Chúng có thể được host trong form/tab khác của Manager — không có entry riêng trên sidebar cho role riêng.
+Dữ liệu ghi vào node `/nhap_kho` (qua `/api/inventory`) và `/nguyen_lieu` (qua `/api/ingredients`).
 
 ---
 
 ## 7. Vai trò **Security** (Bảo vệ)
 
 
-| Menu              | UserControl           | Chức năng                         |
-| ----------------- | --------------------- | --------------------------------- |
-| Tổng quan         | `ucOverview_Staff`    | Tổng quan ca.                     |
-| Bãi xe            | `ucParking_Security`  | Quản lý xe vào/ra (biển số, vé).  |
-| SOS An ninh       | `ucSOS_Security`      | Nút khẩn cấp + log sự cố an ninh. |
-| Lịch sử chấm công | `ucAttendanceHistory` | Xem lịch sử.                      |
-| Xin nghỉ          | `ucLeaveRequest`      | Đăng ký nghỉ.                     |
-| Chat nội bộ       | `ucInternalChat`      | Chat.                             |
-| Profile           | `ucProfile`           | Thông tin cá nhân.                |
+| Nhóm | Menu | UserControl | Chức năng |
+| ---- | ---- | ----------- | --------- |
+| CHÍNH | Tổng quan | `ucOverview_Staff` | Tổng quan ca cá nhân. |
+| CHÍNH | Bãi xe | `ucParking_Security` | Quản lý xe vào/ra, biển số, phí gửi (`/bai_xe`). |
+| CHÍNH | SOS An ninh | `ucSOS_Security` | Nút khẩn cấp + log sự cố an ninh (`/su_co`). |
+| CÁ NHÂN | Lịch sử chấm công | `ucAttendanceHistory` | Xem lịch sử chấm công. |
+| CÁ NHÂN | Xin nghỉ | `ucLeaveRequest` | Đăng ký nghỉ phép. |
+| CÁ NHÂN | Chọn ca / Đổi ca | `ucShiftRegister` | Chọn ca trống / đăng ký đổi ca. |
+| CÁ NHÂN | Chat nội bộ | `ucInternalChat` | Chat. |
+| CÁ NHÂN | Hồ sơ cá nhân | `ucProfile` | Thông tin cá nhân. |
 
 
 ---
@@ -129,19 +145,29 @@ Chúng có thể được host trong form/tab khác của Manager — không có
 ## 8. Dialog (form bật ra khi cần)
 
 
-| File                    | Mở từ                | Chức năng                                             |
-| ----------------------- | -------------------- | ----------------------------------------------------- |
-| `Login.cs`              | App khởi động        | Đăng nhập.                                            |
-| `Register.cs`           | `Login`              | Đăng ký tài khoản mới (Manager duyệt).                |
-| `ResetPassword.cs`      | `Login`              | Quên mật khẩu - gửi OTP qua email.                    |
-| `FoodForm.cs`           | `ucProducts_Manager` | Thêm món mới.                                         |
-| `FoodEditForm.cs`       | `ucProducts_Manager` | Sửa món.                                              |
-| `FoodDetail.cs`         | `ucProducts_Manager` | Chi tiết món (hiển thị thành phần, giá).              |
-| `EmployeeDetail.cs`     | `ucStaff_Manager`    | Chi tiết nhân viên.                                   |
-| `WarehouseManagerForm.cs` | `ucProducts_Manager` (nút «Quản lý kho») | Hub: phiếu nhập tay hoặc mở `AddInventoryImport` sau khi đọc Excel/CSV. |
-| `AddInventoryImport.cs` | `WarehouseManagerForm` | **Tạo phiếu nhập kho** (nhân viên, ngày, chi tiết NL + SL + đơn giá). |
-| `BroadcastMessage.cs`   | `ucBroadcastCenter`  | Soạn 1 thông báo broadcast.                           |
-| `ReportDialog.cs`       | Sidebar / SOS        | Báo cáo sự cố cho Manager.                            |
+| File | Mở từ | Chức năng |
+| ---- | ----- | --------- |
+| `Auth/Login.cs` | App khởi động | Đăng nhập nhân viên. |
+| `Auth/ConfirmEmail.cs` | `Login` (Quên mật khẩu) | Nhập email để nhận OTP. |
+| `Auth/VerifyCode.cs` | `ConfirmEmail` | Nhập mã OTP 8 số → nhận reset-token. |
+| `Auth/ResetPassword.cs` | `VerifyCode` | Đặt mật khẩu mới bằng reset-token. |
+| `Dialogs/AddEmployee.cs` | `ucStaff_Manager` / `ucManagers_Admin` | Thêm nhân viên (tạo cả tài khoản Firebase Auth). |
+| `Dialogs/EditEmployee.cs` | `ucStaff_Manager` | Sửa thông tin nhân viên. |
+| `Dialogs/EmployeeDetail.cs` | `ucStaff_Manager` | Chi tiết nhân viên (read-only). |
+| `Dialogs/AddFood.cs` | `ucProducts_Manager` | Thêm món mới (upload ảnh qua `/api/upload`). |
+| `Dialogs/EditFood.cs` | `ucProducts_Manager` | Sửa món. |
+| `Dialogs/FoodDetail.cs` | `ucProducts_Manager` | Chi tiết món + tùy chọn xóa. |
+| `Dialogs/WarehouseManager.cs` | `ucProducts_Manager` (nút «Nhập kho») | Hub phiếu nhập kho; mở `AddInventoryImport`. |
+| `Dialogs/AddInventoryImport.cs` | `WarehouseManager` | Tạo phiếu nhập kho (NV, ngày, chi tiết NL + SL + đơn giá; điền từ Excel). |
+| `Dialogs/PaymentDialog.cs` | `ucPOS_Order` | Thanh toán hóa đơn (tiền mặt / chuyển khoản QR). |
+| `Dialogs/SendBroadcast.cs` | `ucBroadcastCenter` | Soạn & gửi 1 thông báo broadcast. |
+| `Dialogs/ReplyFeedback.cs` | `ucFeedback_Manager` | Phản hồi feedback của khách. |
+| `Dialogs/ReportIncident.cs` | `ucSOS_Security` | Báo cáo sự cố an ninh. |
+| `Dialogs/ReportBug.cs` | Sidebar | Báo lỗi / góp ý (`/bao_loi`). |
+| `Dialogs/ChartDetail.cs` | Dashboard / Manager | Biểu đồ cột 12 tháng có bộ chọn khoảng tháng. |
+| `Dialogs/MetricDetail.cs` | `ucDashboard_Admin` | Chi tiết một chỉ số (cấu thành + biểu đồ theo tháng). |
+| `Dialogs/RecordDetail.cs` · `RecordEdit.cs` | Nhiều lưới (double-click) | Xem/sửa 1 bản ghi tổng quát. |
+| `Common/InputDialog.cs` | Nhiều nơi | Hộp nhập 1 dòng theo theme app. |
 
 
 ---

@@ -178,9 +178,10 @@ namespace GUI
             }
             string? amtStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Tích điểm", "Số tiền hóa đơn (đồng)", "VD: 150000");
             if (string.IsNullOrEmpty(amtStr)) return;
-            if (!long.TryParse(amtStr.Replace(",", "").Replace(".", ""), out long amt)) return;
+            long amt = AppMath.ParseVndDigits(amtStr);
+            if (amt <= 0) return;
 
-            int pts = (int)(amt / 3000);
+            int pts = AppMath.LoyaltyPoints(amt);
             int newPoints = _currentCustomer.LoyaltyPoints + pts;
             int newOrders = _currentCustomer.TotalOrders + 1;
             var (ok, msg) = await CustomerBUS.Update(_currentCustomerId, new { diem_tich_luy = newPoints, tong_don = newOrders });

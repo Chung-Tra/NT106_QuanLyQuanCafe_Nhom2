@@ -9,6 +9,7 @@ const mockDb = {
     set: jest.fn().mockResolvedValue(undefined),
     update: jest.fn().mockResolvedValue(undefined),
     remove: jest.fn().mockResolvedValue(undefined),
+    transaction: jest.fn().mockResolvedValue(undefined),
     child: jest.fn().mockReturnThis(),
     orderByChild: jest.fn().mockReturnThis(),
     equalTo: jest.fn().mockReturnThis(),

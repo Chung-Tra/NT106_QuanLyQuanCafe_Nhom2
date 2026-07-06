@@ -1,5 +1,6 @@
 using BUS;
 using DTO;
+using Guna.UI2.WinForms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +15,8 @@ namespace GUI
 {
     public partial class ucOrders_Manager : UserControl
     {
-        private static readonly string[] TableStatusOptions = { "Tất cả", "Đang phục vụ", "Chờ lên món", "Chờ thanh toán" };
+        // Chỉ giữ các trạng thái thực sự được sinh ra ở LoadRealData ("Đang phục vụ"/"Chờ lên món").
+        private static readonly string[] TableStatusOptions = { "Tất cả", "Đang phục vụ", "Chờ lên món" };
         private List<TableModelDTO>? _originalTableData;
         private List<WarningWaitModelDTO> _kitchenWarnings = new();
 
@@ -174,6 +176,105 @@ namespace GUI
         private void lstSoldOut_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        // "Cập nhật" → mở bảng quản lý còn/hết hàng cho TOÀN BỘ món (tick = còn bán).
+        // Lưu các thay đổi qua FoodBUS.UpdateFood rồi tải lại tình trạng bàn/bếp/hết món.
+        private async void BtnUpdateSoldOut_Click(object? sender, EventArgs e)
+        {
+            List<FoodDTO> foods;
+            try { foods = await Task.Run(FoodBUS.GetListFoods); }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Không tải được danh sách món: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+            if (foods.Count == 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Chưa có món nào trong thực đơn.", "Thông báo", MsgBox.MessageBoxType.Info);
+                return;
+            }
+            foods = foods.OrderBy(f => f.Name).ToList();
+
+            var owner = MsgBox.OwnerWindow(this);
+            using var form = WindowChrome.CreateDialog("Cập nhật tình trạng món", new Size(420, 470), out var content, owner);
+
+            var clb = new CheckedListBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.FromArgb(31, 31, 34),
+                ForeColor = Color.White,
+                CheckOnClick = true,
+                IntegralHeight = false,
+                Font = Theme.F(10.5F),
+            };
+            foreach (var f in foods) clb.Items.Add(f.Name ?? f.Id ?? "(?)", f.InStock);
+
+            var lblHint = new Label
+            {
+                Text = "Tích ô = còn bán · bỏ tích = tạm hết",
+                Dock = DockStyle.Top,
+                Height = 36,
+                BackColor = Color.Transparent,
+                ForeColor = Theme.TextMuted,
+                Font = Theme.F(9F),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0),
+            };
+
+            var btnSave = new Guna2Button
+            {
+                Text = "Lưu thay đổi",
+                Size = new Size(150, 38),
+                BorderRadius = 8,
+                FillColor = Theme.Teal,
+                ForeColor = Color.White,
+                Font = Theme.F(9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+            };
+            btnSave.HoverState.FillColor = Theme.TealHover;
+            var pnlBtn = new Panel { Dock = DockStyle.Bottom, Height = 58, BackColor = Color.Transparent };
+            pnlBtn.Controls.Add(btnSave);
+
+            content.Controls.Add(clb);      // Fill trước
+            content.Controls.Add(lblHint);  // Top
+            content.Controls.Add(pnlBtn);   // Bottom
+            form.Shown += (s, ev) => btnSave.Location = new Point(pnlBtn.ClientSize.Width - btnSave.Width - 16, 10);
+
+            int changedCount = 0;
+            btnSave.Click += async (s, ev) =>
+            {
+                btnSave.Enabled = false;
+                btnSave.Text = "Đang lưu...";
+                var errors = new List<string>();
+                for (int i = 0; i < foods.Count; i++)
+                {
+                    bool inStock = clb.GetItemChecked(i);
+                    if (inStock == foods[i].InStock) continue;
+                    var food = foods[i];
+                    food.InStock = inStock;
+                    try
+                    {
+                        var (ok, msg) = await FoodBUS.UpdateFood(food);
+                        if (ok) changedCount++;
+                        else errors.Add($"• {food.Name}: {msg}");
+                    }
+                    catch (Exception ex) { errors.Add($"• {food.Name}: {ex.Message}"); }
+                }
+                if (errors.Count > 0)
+                    MsgBox.Show(form, "Một số món chưa cập nhật được:\n" + string.Join("\n", errors), "Lỗi", MsgBox.MessageBoxType.Warning);
+                form.DialogResult = DialogResult.OK;
+                form.Close();
+            };
+
+            if (form.ShowDialog(owner) == DialogResult.OK)
+            {
+                await LoadRealData();
+                if (changedCount > 0)
+                    MsgBox.Show(owner, $"Đã cập nhật tình trạng {changedCount} món.", "Thành công", MsgBox.MessageBoxType.Success);
+            }
         }
 
         private void cboTableStatus_TextChanged(object sender, EventArgs e)

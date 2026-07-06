@@ -49,10 +49,10 @@ client/ (WinForms C#)
 
 ### Thực đơn & Kho
 
-- Quản lý món (thêm, sửa, xóa theo danh mục)
-- Nhập kho & phiếu nhập (Manager: màn **Sản phẩm & Thực đơn** → **Quản lý kho**, phiếu nhập tay hoặc nhập chi tiết từ Excel/CSV)
-- Nguyên liệu / tồn kho / cảnh báo thấp — module UI trong `GUI/Warehouse/` vẫn dùng được khi gắn vào màn quản lý
-- Tự động gợi ý nhập hàng (Smart Restock) — theo thiết kế module kho
+- Quản lý món (thêm, sửa, xóa theo danh mục; upload ảnh lên Firebase Storage)
+- Nhập kho & phiếu nhập (Manager: màn **Sản phẩm & Thực đơn** → nút **Nhập kho** mở `WarehouseManager`, phiếu nhập tay hoặc điền chi tiết từ Excel)
+- Nguyên liệu / tồn kho / cảnh báo tồn thấp (lưới tồn kho trong màn **Sản phẩm & Thực đơn**)
+- Biểu đồ Doanh thu vs Chi phí nhập theo tháng; quản lý món còn/hết hàng
 
 ### Nhân sự
 
@@ -79,7 +79,10 @@ client/ (WinForms C#)
 | ------------------------------------------ | ------------------------------------------- |
 | [Kiến trúc hệ thống](docs/architecture.md) | Sơ đồ kiến trúc, luồng xác thực, phân quyền |
 | [API Reference](docs/api.md)               | Toàn bộ endpoint, request/response mẫu      |
-| [Database Schema](docs/database.md)        | Cấu trúc Firebase Realtime Database         |
+| [Database Schema](docs/database.md)        | Cấu trúc Firebase Realtime Database (29 node) |
+| [Luồng dữ liệu](docs/dataflow.md)          | Luồng end-to-end GUI → BUS → DAL → Backend  |
+| [Danh mục luồng client](docs/client-flows.md) | Toàn bộ luồng của mọi màn hình + dialog, ma trận BUS → endpoint → node |
+| [Form / UserControl](docs/forms.md)        | Menu theo vai trò, dialog, quy ước UI       |
 | [Hướng dẫn cài đặt](docs/setup.md)         | Setup môi trường, Firebase, deploy chi tiết |
 
 
@@ -116,6 +119,7 @@ cp backend/.env.example backend/.env
 PORT=3000
 FIREBASE_DATABASE_URL=https://<your-project>.firebaseio.com
 FIREBASE_API_KEY=<your-api-key>
+FIREBASE_STORAGE_BUCKET=<your-project>.appspot.com
 APP_SECRET_KEY=<your-secret-key>
 EMAIL_USER=<gmail-address>
 EMAIL_PASS=<gmail-app-password>
@@ -148,8 +152,10 @@ Base URL: `http://localhost:3000/api`
 | ------ | ------------------------ | ---------------------- | ------------ |
 | POST   | `/auth/login`            | Đăng nhập              | Không        |
 | POST   | `/auth/check-email`      | Kiểm tra email tồn tại | Không        |
-| POST   | `/auth/otp/generate`     | Tạo và gửi OTP         | Không        |
-| PUT    | `/auth/password`         | Đổi mật khẩu           | Không        |
+| POST   | `/auth/otp/generate`     | Gửi OTP (không trả mã) | Không        |
+| POST   | `/auth/otp/verify`       | Xác thực OTP → resetToken | Không     |
+| PUT    | `/auth/password`         | Đặt lại MK (cần resetToken) | Không   |
+| PUT    | `/auth/change-password`  | Đổi MK (biết MK cũ)    | Không        |
 | GET    | `/employees`             | Danh sách nhân viên    | Bearer token |
 | POST   | `/employees`             | Thêm nhân viên         | Manager+     |
 | PUT    | `/employees/:id`         | Cập nhật nhân viên     | Manager+     |
@@ -167,7 +173,11 @@ Base URL: `http://localhost:3000/api`
 | DELETE | `/ingredients/:id`       | Xóa nguyên liệu        | Manager+     |
 | GET    | `/inventory`             | Danh sách phiếu nhập   | Bearer token |
 | POST   | `/inventory`             | Tạo phiếu nhập kho     | Manager+     |
+| POST   | `/upload`                | Tải ảnh lên Firebase Storage | Bearer token |
+| CRUD   | `/<resource>`            | 23 node CRUD chung (tables, orders, payments, customers, promotions…) | Bearer token |
 
+> `/health` (đường dẫn gốc, không thuộc `/api`) dùng để kiểm tra server sống.
+> Danh sách đầy đủ endpoint + 23 generic resource: xem [docs/api.md](docs/api.md).
 
 ---
 
@@ -183,20 +193,21 @@ NT106_QuanLyQuanCafe_Nhom2/
 │   └── setup.ps1                  # Cài dependencies lần đầu
 ├── client/                        # WinForms desktop app
 │   ├── BUS/                       # Business logic layer
-│   ├── DAL/                       # Data access layer
+│   ├── DAL/                       # Data access layer (HTTP tới backend)
 │   ├── DTO/                       # Data transfer objects
-│   ├── Services/                  # HTTP & SignalR client services
 │   ├── GUI/                       # UI (WinForms)
-│   │   ├── Auth/
-│   │   ├── Admin/
-│   │   ├── Manager/
-│   │   ├── Barista/
-│   │   ├── OrderStaff/
-│   │   ├── Warehouse/
+│   │   ├── Auth/                  # Login, ConfirmEmail, VerifyCode, ResetPassword
+│   │   ├── Admin/                 # uc*_Admin
+│   │   ├── Manager/               # uc*_Manager
+│   │   ├── Barista/               # uc*_Barista
+│   │   ├── Order/                 # uc*_Order (POS, CRM, Loyalty, Reservation…)
 │   │   ├── Shared/                # UC dùng chung nhiều role
-│   │   ├── Dialogs/               # Form popup
-│   │   └── Common/                # Base classes, utilities
-│   └── Tests/                     # xUnit unit tests (BUS layer)
+│   │   ├── Dialogs/               # Form popup (Add/Edit/Detail, Payment, Chart…)
+│   │   ├── Helpers/               # Excel/Export helpers
+│   │   └── Common/                # Base classes, theme, utilities
+│   └── Tests/
+│       ├── Logic.Tests/           # xUnit unit tests (logic thuần: AppMath, Validation…)
+│       └── UI_Test_Checklist.md   # Checklist kiểm thử tay từng nút/màn hình
 ├── server/                        # SignalR chat server
 │   ├── Hubs/
 │   │   └── ChatHub.cs
@@ -223,16 +234,50 @@ NT106_QuanLyQuanCafe_Nhom2/
 
 ## Chạy Tests
 
+**157 unit test** (106 xUnit client + 51 Jest backend), tất cả chạy offline — không cần Firebase thật.
+
 ```bash
-# Backend (Jest)
+# Backend (Jest) — 51 test / 7 suite
 cd backend
 npm test
 
-# Client (xUnit) — chạy trong Visual Studio Test Explorer
-# hoặc:
+# Client (xUnit) — 106 test; chạy trong Visual Studio Test Explorer, hoặc:
 cd client
-dotnet test Tests/Tests.csproj
+dotnet test Coffee_Management.sln
+# (Logic.Tests đã nằm trong solution; có thể chạy riêng:
+#  dotnet test Tests/Logic.Tests/Logic.Tests.csproj — chạy được cả khi app đang mở)
 ```
+
+### Client — `client/Tests/Logic.Tests/` (xUnit)
+
+> Không tham chiếu `GUI.csproj` mà **link trực tiếp file logic thuần** vào assembly test
+> → test độc lập WinForms, chạy được cả khi app đang mở.
+
+| File test | Kiểm thử | Đứng sau tính năng |
+|-----------|----------|--------------------|
+| `AppMathTests.cs` | `AppMath` — parse tiền/số lượng, tổng đơn, tiền thối, chia VAT, lương, tích điểm | Thanh toán POS, phiếu nhập kho, bảng lương, tích điểm |
+| `ValidationTests.cs` | `Validation` — email, mật khẩu mạnh, OTP 8 số, SĐT VN, ngày vào làm, guard trường rỗng | Mọi form nhập liệu (Login, AddEmployee, luồng OTP…) |
+| `SearchFilterTests.cs` | `SearchFilter.AllColumnsFilter` — filter mọi cột, escape ký tự đặc biệt | Thanh tìm kiếm trên mọi DataGridView |
+| `EmployeeTextTests.cs` | `EmployeeText` — map vai trò/trạng thái ⇄ tiếng Việt 2 chiều | Hiển thị & sửa nhân viên |
+
+### Backend — `backend/tests/` (Jest)
+
+> Firebase Admin SDK được mock (`tests/helpers/mockFirebase.js`) — test thuần logic, không chạm DB thật.
+
+| File test | Kiểm thử |
+|-----------|----------|
+| `controllers/auth.controller.test.js` | Login, check-email, luồng OTP (không lộ mã ra response) |
+| `controllers/employees.controller.test.js` | CRUD nhân viên + sinh id `nv_xxx` |
+| `controllers/foods.controller.test.js` | CRUD món + sinh id max+1 (không vỡ khi có lỗ khóa) |
+| `controllers/resources.controller.test.js` | Factory CRUD chung đứng sau **23 endpoint** generic (`/tables`, `/orders`, `/payments`…): sinh id theo prefix, bỏ qua id không thuần số, loại field `Id` khỏi update, đẩy lỗi qua error middleware |
+| `controllers/chat.controller.test.js` | Lưu/đọc lịch sử chat theo room |
+| `middlewares/auth.middleware.test.js` | Bearer token, phân quyền Manager/Admin, `X-Server-Secret` |
+| `services/otp.service.test.js` | Lõi bảo mật quên-mật-khẩu: chỉ lưu **hash** mã (pepper server), hết hạn 60s, khóa sau 5 lần sai (chặn brute-force), reset-token dùng 1 lần |
+
+### Kiểm thử thủ công (UI)
+
+Checklist bấm-tay từng nút/màn hình (regression 12 lỗi đã sửa + checklist đầy đủ theo màn hình):
+[`client/Tests/UI_Test_Checklist.md`](client/Tests/UI_Test_Checklist.md).
 
 ---
 
@@ -249,6 +294,6 @@ Backend sử dụng Winston. Log được ghi tại:
 ## Lưu ý bảo mật
 
 - Không commit `backend/.env` hay `serviceAccountKey.json` vào repo (đã gitignore)
-- `APP_SECRET_KEY` dùng để bảo vệ endpoint đổi mật khẩu — đặt giá trị mạnh, không chia sẻ
+- `APP_SECRET_KEY` dùng cho xác thực server-to-server (`X-Server-Secret` từ ChatServer) và làm *pepper* băm mã OTP — đặt giá trị mạnh, không chia sẻ
 - Firebase Security Rules cần được cấu hình riêng trên Firebase Console
 

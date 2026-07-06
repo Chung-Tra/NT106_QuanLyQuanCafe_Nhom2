@@ -105,7 +105,7 @@ namespace GUI
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập lý do nghỉ phép!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
-            if (dtpToDate.Value < dtpFromDate.Value)
+            if (dtpToDate.Value.Date < dtpFromDate.Value.Date)
             {
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Ngày kết thúc phải sau ngày bắt đầu!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;

@@ -264,6 +264,7 @@ namespace GUI
             btnUpdateSoldOut.Size = new Size(112, 30);
 
             btnUpdateSoldOut.Text = "Cập nhật";
+            btnUpdateSoldOut.Click += BtnUpdateSoldOut_Click;
 
             // lstSoldOut
             lstSoldOut.BackColor = Color.FromArgb(24, 24, 27);

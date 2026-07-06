@@ -162,13 +162,14 @@ URL sau deploy: `https://asia-southeast1-<project>.cloudfunctions.net/api`
 
 | Biến                    | Bắt buộc | Mô tả                            |
 | ----------------------- | -------- | -------------------------------- |
-| `PORT`                  | Không    | Port local (default: 3000)       |
-| `FIREBASE_DATABASE_URL` | Có       | URL Realtime Database            |
-| `FIREBASE_API_KEY`      | Có       | Web API Key cho signIn           |
-| `APP_SECRET_KEY`        | Có       | Key bảo vệ endpoint đổi mật khẩu |
-| `EMAIL_USER`            | Có       | Gmail gửi OTP                    |
-| `EMAIL_PASS`            | Có       | Gmail App Password               |
-| `NODE_ENV`              | Không    | `development` / `production`     |
+| `PORT`                    | Không | Port local (default: 3000)                                  |
+| `FIREBASE_DATABASE_URL`   | Có    | URL Realtime Database                                       |
+| `FIREBASE_API_KEY`        | Có    | Web API Key cho signIn                                      |
+| `FIREBASE_STORAGE_BUCKET` | Có    | Bucket lưu ảnh (dùng cho `POST /api/upload`)                |
+| `APP_SECRET_KEY`          | Có    | Secret server-to-server (`X-Server-Secret`) + pepper hash OTP |
+| `EMAIL_USER`              | Có    | Gmail gửi OTP                                               |
+| `EMAIL_PASS`              | Có    | Gmail App Password                                          |
+| `NODE_ENV`                | Không | `development` / `production`                                |
 
 
 ---

@@ -130,9 +130,11 @@ namespace GUI
 
             decimal total = 0;
             DateTime now = DateTime.Now;
+            var lossList = new System.Collections.Generic.List<LossDTO>();
             try
             {
                 var all = await LossBUS.GetAll();
+                lossList = all.Values.ToList();
                 var emps = (await EmployeeBUS.GetAllEmployeesAsync())
                     .Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
 
@@ -172,27 +174,72 @@ namespace GUI
             foreach (DataGridViewRow row in dgvLossDetail.Rows)
                 row.DefaultCellStyle.ForeColor = Color.FromArgb(220, 80, 80);
 
-            DrawLossChart();
+            DrawLossChart(lossList);
         }
 
-        private void DrawLossChart()
+        private static string DowVi(DateTime d) => d.DayOfWeek switch
         {
-            int[] values = _mode switch
+            DayOfWeek.Monday => "T2",
+            DayOfWeek.Tuesday => "T3",
+            DayOfWeek.Wednesday => "T4",
+            DayOfWeek.Thursday => "T5",
+            DayOfWeek.Friday => "T6",
+            DayOfWeek.Saturday => "T7",
+            _ => "CN"
+        };
+
+        // Biểu đồ dựng từ DỮ LIỆU THẬT: gom giá trị thất thoát theo mốc thời gian, đơn vị nghìn đ.
+        //   day  = 7 ngày gần nhất · month = 6 tháng gần nhất · year = 4 năm gần nhất.
+        private void DrawLossChart(System.Collections.Generic.IEnumerable<LossDTO> losses)
+        {
+            DateTime now = DateTime.Now;
+            string[] labels;
+            decimal[] values;
+
+            if (_mode == "day")
             {
-                "day"  => new[] { 320, 280, 410, 190, 350, 320, 300 },
-                "year" => new[] { 18500, 22000, 25000, 28500 },
-                _      => new[] { 1800, 2100, 2800, 2200, 2500, 2300 }
-            };
-            string[] labels = _mode switch
+                var days = Enumerable.Range(0, 7).Select(i => now.Date.AddDays(-6 + i)).ToArray();
+                labels = days.Select(DowVi).ToArray();
+                values = new decimal[days.Length];
+                foreach (var l in losses)
+                {
+                    if (l.Timestamp <= 0) continue;
+                    var d = DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime.Date;
+                    int idx = Array.IndexOf(days, d);
+                    if (idx >= 0) values[idx] += l.GiaTri;
+                }
+            }
+            else if (_mode == "year")
             {
-                "day"  => new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" },
-                "year" => new[] { "2023", "2024", "2025", "2026" },
-                _      => new[] { "T10", "T11", "T12", "T1", "T2", "T3" }
-            };
+                var years = Enumerable.Range(0, 4).Select(i => now.Year - 3 + i).ToArray();
+                labels = years.Select(y => y.ToString()).ToArray();
+                values = new decimal[years.Length];
+                foreach (var l in losses)
+                {
+                    if (l.Timestamp <= 0) continue;
+                    var d = DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime;
+                    int idx = Array.IndexOf(years, d.Year);
+                    if (idx >= 0) values[idx] += l.GiaTri;
+                }
+            }
+            else
+            {
+                var months = Enumerable.Range(0, 6)
+                    .Select(i => new DateTime(now.Year, now.Month, 1).AddMonths(-5 + i)).ToArray();
+                labels = months.Select(m => $"T{m.Month}").ToArray();
+                values = new decimal[months.Length];
+                foreach (var l in losses)
+                {
+                    if (l.Timestamp <= 0) continue;
+                    var d = DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime;
+                    int idx = Array.FindIndex(months, m => m.Year == d.Year && m.Month == d.Month);
+                    if (idx >= 0) values[idx] += l.GiaTri;
+                }
+            }
 
             var ds = new GunaBarDataset { Label = "Thất thoát (nghìn đ)" };
             for (int i = 0; i < values.Length; i++)
-                ds.DataPoints.Add(labels[i], values[i]);
+                ds.DataPoints.Add(labels[i], (double)Math.Round(values[i] / 1000m, 1));
             ds.FillColors.Add(Color.FromArgb(220, 80, 80));
 
             chartLoss.Datasets.Clear();

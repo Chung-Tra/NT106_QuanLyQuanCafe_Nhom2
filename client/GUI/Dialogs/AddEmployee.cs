@@ -63,6 +63,14 @@ namespace GUI
         {
             try
             {
+                // Bắt buộc chọn vị trí — tránh lưu Role rỗng/không hợp lệ ("Staff" không phải role thật)
+                string? roleKey = cboRole.SelectedValue?.ToString();
+                if (string.IsNullOrWhiteSpace(roleKey))
+                {
+                    MsgBox.Show(this, "Vui lòng chọn vị trí/chức vụ cho nhân viên.", "Thiếu dữ liệu", MsgBox.MessageBoxType.Warning);
+                    return;
+                }
+
                 // Khóa nút để tránh spam click
                 btnSave.Enabled = false;
                 btnSave.Text = "Đang lưu...";
@@ -74,7 +82,7 @@ namespace GUI
                     HireDate = dtpHireDate.Value.ToString("yyyy-MM-dd"),
                     PhoneNumber = txtPhone.Text.Trim(),
                     // Đã sửa: Dùng SelectedValue để lấy đúng chữ tiếng Anh đem đi lưu
-                    Role = cboRole.SelectedValue?.ToString() ?? "Staff",
+                    Role = roleKey,
                     Password = txtPassword.Text.Trim(),
                     AvatarUrl = ""
                 };
@@ -85,6 +93,10 @@ namespace GUI
                     MsgBox.Show(this, $"Nhân viên {newEmp.FullName} đã được thêm thành công.", "Thông báo", MsgBox.MessageBoxType.Info);
                     this.DialogResult = DialogResult.OK;
                     this.Close();
+                }
+                else
+                {
+                    MsgBox.Show(this, "Không thể thêm nhân viên. Vui lòng kiểm tra lại thông tin và thử lại.", "Lỗi", MsgBox.MessageBoxType.Error);
                 }
             }
             catch (Exception ex)

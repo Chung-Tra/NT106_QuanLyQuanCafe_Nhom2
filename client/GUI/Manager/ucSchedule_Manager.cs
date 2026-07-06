@@ -84,6 +84,10 @@ namespace GUI
                 for (int d = 0; d < _days.Length; d++)
                     buckets[s, d] = new List<string>();
 
+            // Tập nhân viên có phân ca tuần này — thu thập ngay ở đây để UpdateStatCards
+            // không phải gọi lại ScheduleBUS.GetAll() lần nữa.
+            var staffIds = new HashSet<string>();
+
             try
             {
                 var scheds = (await ScheduleBUS.GetAll()).Values.Where(x => x.Tuan == weekKey);
@@ -93,6 +97,7 @@ namespace GUI
 
                 foreach (var sc in scheds)
                 {
+                    if (!string.IsNullOrEmpty(sc.EmployeeId)) staffIds.Add(sc.EmployeeId);
                     string who = (sc.EmployeeId != null && emps.TryGetValue(sc.EmployeeId, out var n))
                         ? n : (sc.Ten ?? sc.EmployeeId ?? "?");
                     for (int d = 0; d < _days.Length; d++)
@@ -111,7 +116,7 @@ namespace GUI
             _cells = names;
             if (!IsDisposed)
             {
-                UpdateStatCards(buckets);
+                UpdateStatCards(buckets, staffIds);
                 RenderGrid();
             }
             // #region agent log
@@ -125,12 +130,11 @@ namespace GUI
             // #endregion
         }
 
-        private async void UpdateStatCards(List<string>[,] buckets)
+        private async void UpdateStatCards(List<string>[,] buckets, HashSet<string> staffIds)
         {
             // #region agent log
             AgentDebugLog.Write("A", "ucSchedule_Manager.UpdateStatCards", "start_extra_fetch", null);
             // #endregion
-            var staffIds = new HashSet<string>();
             int shortage = 0;
             for (int s = 0; s < _shifts.Length; s++)
                 for (int d = 0; d < _days.Length; d++)
@@ -138,15 +142,7 @@ namespace GUI
                     if (buckets[s, d].Count == 0) shortage++;
                 }
 
-            string weekKey = _weekStart.ToString("dd/MM/yyyy");
             DateTime weekEnd = _weekStart.AddDays(6);
-            try
-            {
-                foreach (var sc in (await ScheduleBUS.GetAll()).Values.Where(x => x.Tuan == weekKey))
-                    if (!string.IsNullOrEmpty(sc.EmployeeId)) staffIds.Add(sc.EmployeeId);
-            }
-            catch { /* offline */ }
-
             int onLeave = 0;
             try
             {
@@ -177,8 +173,8 @@ namespace GUI
             }
             else
             {
-                lblWarn.Text = "Tuần này các ca đã có phân công đầy đủ.";
-                pnlWarn.Visible = true;
+                // Đủ người → ẩn hẳn banner cảnh báo (trước đây vẫn hiện dù không có cảnh báo).
+                pnlWarn.Visible = false;
             }
         }
 

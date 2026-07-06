@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 function createTransporter() {
@@ -13,7 +14,8 @@ function createTransporter() {
 }
 
 async function generateAndSendOTP(toEmail) {
-    const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+    // crypto.randomInt = CSPRNG — Math.random() có thể dự đoán được, không dùng cho mã bảo mật
+    const code = crypto.randomInt(10000000, 100000000).toString();
     const transporter = createTransporter();
 
     await transporter.sendMail({

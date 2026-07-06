@@ -270,7 +270,6 @@ namespace GUI
         #endregion
 
         private Guna2Panel pnlCard;
-        private Guna2CirclePictureBox picLogo;
         private Label lblTitle;
         private Label lblDescription;
         private Guna2TextBox txtNewPass;

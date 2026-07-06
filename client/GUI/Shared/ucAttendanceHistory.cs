@@ -30,6 +30,12 @@ namespace GUI
             };
 
             DgvRefresh.Attach(dgvAttendance, () => _ = LoadDataAsync());
+
+            // Đổi khoảng ngày -> tự lọc lại. Với nhân viên thường nút "Lọc" bị ẩn nên nếu
+            // không nghe ValueChanged thì đổi ngày sẽ không có tác dụng. LoadDataAsync tự bỏ
+            // qua khi _filterReady chưa sẵn sàng (lúc InitFilterAsync gán giá trị mặc định).
+            dtpFrom.ValueChanged += (s, e) => _ = LoadDataAsync();
+            dtpTo.ValueChanged += (s, e) => _ = LoadDataAsync();
         }
 
         private async void ucAttendanceHistory_Load(object sender, EventArgs e) => await InitFilterAsync();

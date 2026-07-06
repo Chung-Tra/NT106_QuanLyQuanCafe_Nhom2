@@ -16,6 +16,9 @@ Tài liệu mô tả chi tiết luồng dữ liệu của từng chức năng ch
 8. [Nhập kho](#8-nhập-kho)
 9. [Phân quyền mỗi request](#9-phân-quyền-mỗi-request)
 
+> Trên đây là sơ đồ chi tiết các luồng **lõi**. Danh mục **đầy đủ mọi luồng** của từng màn hình client
+> (30+ màn, 14 dialog, ma trận BUS → endpoint → node) xem tại **[client-flows.md](client-flows.md)**.
+
 ---
 
 ## 1. Đăng nhập
@@ -56,46 +59,36 @@ GUI
 ## 2. Quên mật khẩu (OTP)
 
 ```
-GUI (ForgotPassword.cs)
-    │
+GUI (Auth/ConfirmEmail.cs)
     │  Nhập email
     ▼
-BUS (EmailBUS.ProcessPasswordResetAsync)
-    │
-    ├─▶ DAL (EmailDAL.CheckEmailAsync)
-    │       │  POST /api/auth/check-email  { email }
-    │       ▼
-    │   Backend → Firebase DB kiểm tra /nhan_vien
-    │       │  200 OK: email tồn tại
-    │       │  404: email không tồn tại → dừng
-    │
-    └─▶ DAL (EmailDAL.SendOtpAsync)
-            │  POST /api/auth/otp/generate  { toEmail }
-            ▼
-        Backend (email.service.js)
-            │  Tạo mã OTP 8 số ngẫu nhiên
-            │  Gửi email qua SMTP (Nodemailer + Gmail)
-            │  Response: { code: "12345678" }
-            ▼
-        GUI
-            │  Hiện form nhập OTP
-            │  So sánh mã người dùng nhập với code nhận được
-            ▼
-        GUI (PasswordReset.cs)
-            │  Nhập mật khẩu mới + xác nhận
-            ▼
-        BUS (AuthBUS.HandlePasswordReset)
-            │  Validate độ mạnh, hai mật khẩu khớp nhau
-            ▼
-        DAL (AuthDAL.UpdatePasswordAsync)
-            │  PUT /api/auth/password  { email, newPassword, secretKey }
-            ▼
-        Backend
-            │  Xác thực APP_SECRET_KEY
-            │  auth.updateUser(uid, { password: newPassword })
-            ▼
-        Firebase Auth cập nhật mật khẩu
+BUS (EmailBUS) → DAL (EmailDAL)
+    ├─▶ POST /api/auth/check-email  { email }
+    │       Backend → Firebase DB /nhan_vien
+    │       200: tồn tại · 404: không tồn tại → dừng
+    └─▶ POST /api/auth/otp/generate  { toEmail }
+            Backend (email.service.js + otp.service.js)
+            │  Tạo mã OTP 8 số, gửi email (Nodemailer + Gmail)
+            │  Lưu HASH của mã ở server — KHÔNG trả mã về client
+            ▼  Response: { message: "Verification code sent!" }
+GUI (Auth/VerifyCode.cs)
+    │  Nhập mã OTP
+    ▼
+    POST /api/auth/otp/verify  { email, code }
+    │  Server so khớp hash → phát reset-token dùng 1 lần
+    ▼  Response: { resetToken }
+GUI (Auth/ResetPassword.cs)
+    │  Nhập mật khẩu mới + xác nhận (client kiểm sơ bộ)
+    ▼
+    PUT /api/auth/password  { email, newPassword, resetToken }
+    │  Backend: kiểm độ mạnh Ở SERVER → tiêu reset-token
+    │  auth.updateUser(uid, { password: newPassword })
+    ▼
+Firebase Auth cập nhật mật khẩu → quay lại Login
 ```
+
+> 🔒 Toàn bộ so khớp OTP diễn ra **ở server**; mã không bao giờ rời khỏi email của người dùng.
+> Đổi mật khẩu khi đã đăng nhập (biết mật khẩu cũ) dùng `PUT /api/auth/change-password` — xem [api.md](api.md).
 
 ---
 
@@ -183,7 +176,7 @@ Validate phía BUS:
 Luồng **GỬI** tin nhắn (phiên bản mới — server tự lưu):
 
 ```
-GUI (ChatUI.cs)
+GUI (Shared/ucInternalChat.cs)
     │  Nhập tin nhắn, nhấn Gửi
     ▼
 ChatManager.SendMessageAsync
@@ -248,7 +241,7 @@ Quy tắc tạo `roomId` (trong `ChatBUS.GetRoomId`):
 ## 7. Quản lý nguyên liệu (kho)
 
 ```
-GUI (`ucStockControl_Warehouse.cs` trong `GUI/Warehouse/` — được dùng trong luồng kho của **Manager**, không còn menu riêng role “thủ kho”)
+GUI (`ucProducts_Manager.cs` — lưới tồn kho của **Manager**; nút "Nhập kho" mở dialog `WarehouseManager`)
     │  Load → IngredientBUS.GetAll()
     ▼
 DAL (IngredientDAL.GetAllAsync)
@@ -276,7 +269,7 @@ DELETE /api/ingredients/:id     → Xóa nguyên liệu
 ## 8. Nhập kho
 
 ```
-GUI (AddIngredient.cs)
+GUI (Dialogs/AddInventoryImport.cs)
     │
     ├─ Load: InventoryImportBUS.GetIngredients()  → GET /api/ingredients
     ├─ Load: InventoryImportBUS.GetEmployees()    → GET /api/employees

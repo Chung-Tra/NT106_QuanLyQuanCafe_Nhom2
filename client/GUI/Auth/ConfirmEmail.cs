@@ -39,7 +39,7 @@ namespace GUI
             {
                 MsgBox.Show(this, "\n" + result.Message, "Thành công", MsgBox.MessageBoxType.Info);
                 new VerifyCode(email).Show();
-                this.Hide();
+                this.Close();
             }
             else
             {

@@ -92,9 +92,12 @@ namespace GUI
         // Sự kiện click "Quên mật khẩu"
         private void LblForgotPass_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            ConfirmEmail frmConfirm = new();
+            // Dùng Show() (không modal) và ẩn Login — các bước sau (VerifyCode, ResetPassword)
+            // đều Show()/Close() nhất quán rồi Show() lại Login. Trước đây dùng ShowDialog rồi
+            // Hide() khiến Login là owner của một dialog modal còn sống (chỉ bị ẩn) → khi Login
+            // hiện lại nó bị vô hiệu hóa/đơ.
             this.Hide();
-            frmConfirm.ShowDialog(this);
+            new ConfirmEmail().Show();
         }
 
         // Sự kiện click "Đăng nhập"

@@ -26,6 +26,18 @@ Base URL: `https://qlcafe-b621b-default-rtdb.asia-southeast1.firebasedatabase.ap
 | `canh_bao` | `cb_` | `cb_001` |
 | `khach_hang` | `kh_` | `kh_001` |
 | `cham_cong` | `cc_` | `cc_001` |
+| `khuyen_mai` | `km_` | `km_001` |
+| `chi_phi` | `cp_` | `cp_001` |
+| `that_thoat` | `loss_` | `loss_001` |
+| `dat_ban` | `db_` | `db_001` |
+| `nhat_ky` | `log_` | `log_001` |
+| `thong_bao_chung` | `bc_` | `bc_001` |
+| `lich_lam_viec` | `sch_` | `sch_001` |
+| `dang_ky_ca` | `sr_` | `sr_001` |
+| `bao_loi` | `bug_` | `bug_001` |
+| `diem_log` | `pl_` | `pl_001` |
+
+> Tất cả node ở nửa dưới bảng được phục vụ bởi **generic CRUD** (`backend/src/routes/resources.routes.js`) — mỗi node có đủ `GET / POST / PUT /:id / DELETE /:id`. Xem [api.md](api.md#generic-resources).
 
 ---
 
@@ -116,11 +128,11 @@ Base URL: `https://qlcafe-b621b-default-rtdb.asia-southeast1.firebasedatabase.ap
 ```json
 "nk_001": {
   "nhanvien_id": "nv_001",
-  "ngay_nhap": 1711900000000,   // Timestamp milliseconds
+  "ngay_nhap": 20260706,        // int dạng yyyyMMdd (client gửi int.Parse("yyyyMMdd"))
   "ghi_chu": "Nhập đầu tháng",
   "thanh_tien": 1500000,
   "ds_nl": {
-    "nl_001": {
+    "nl_001": {                 // key = id nguyên liệu trong /nguyen_lieu
       "gia_nhap": 150000,
       "so_luong": 10,
       "thanh_tien": 1500000
@@ -128,7 +140,9 @@ Base URL: `https://qlcafe-b621b-default-rtdb.asia-southeast1.firebasedatabase.ap
   }
 }
 ```
-> **Lưu ý:** `ngay_nhap` phải là timestamp ms, không phải DDMMYYYY.
+> **Lưu ý:** `ngay_nhap` là **int `yyyyMMdd`** (vd `20260706`) — client lọc theo tháng bằng `ngay_nhap / 100 == yyyyMM`.
+> `thanh_tien` (từng dòng + tổng phiếu) do **server tính lại**, không tin giá trị client gửi.
+> Khi tạo phiếu, server **tự cộng `so_luong` vào `ton_kho`** của từng nguyên liệu trong `/nguyen_lieu` (transaction).
 
 ### `/tin_nhan` — Tin nhắn chat
 ```json
@@ -302,9 +316,154 @@ Room ID format: `chat_nv_{id1}_nv_{id2}` (sorted), hoặc `room_global`.
 
 ---
 
+## Node cho các màn phụ (generic CRUD)
+
+> Các node dưới đây khớp 1-1 với DTO client trong [`client/DTO/SecondaryDTOs.cs`](../client/DTO/SecondaryDTOs.cs) và được phục vụ qua `resources.routes.js`.
+
+### `/khuyen_mai` — Khuyến mãi (Happy hour / Combo / Voucher)
+```json
+"km_001": {
+  "loai": "voucher",            // "happy_hour" | "combo" | "voucher"
+  "ten": "Giảm 20% cuối tuần",
+  "khung_gio": "14:00 - 17:00", // happy_hour
+  "ngay_ap_dung": "T7, CN",     // happy_hour
+  "giam_pct": "20%",            // happy_hour
+  "bao_gom": "2 cà phê + 1 bánh", // combo
+  "gia_goc": 90000,             // combo
+  "gia_combo": 75000,           // combo
+  "tiet_kiem": 15000,           // combo
+  "ma": "WEEKEND20",            // voucher
+  "giam": "20%",                // voucher
+  "han_su_dung": "31/12/2026",  // voucher
+  "da_dung": 12,                // voucher
+  "con_lai": 88,                // voucher
+  "trang_thai": "dang_ap_dung"
+}
+```
+
+### `/chi_phi` — Chi phí vận hành
+```json
+"cp_001": {
+  "ngay": "05/07/2026",         // DD/MM/YYYY
+  "danh_muc": "Nguyên liệu",
+  "mo_ta": "Nhập trà, trái cây, syrup",
+  "so_tien": 450000,
+  "nguoi_chi": "nv_006",
+  "chung_tu": "PC-07-01",
+  "ghi_chu": "",
+  "thoi_gian": 1751700000000    // Timestamp ms (để lọc theo tháng)
+}
+```
+
+### `/that_thoat` — Thất thoát / hao hụt
+```json
+"loss_001": {
+  "khoan_muc": "Vỡ ly",
+  "so_luong": "3 cái",
+  "gia_tri": 90000,
+  "nguyen_nhan": "Rơi khi bưng bê",
+  "nguoi_phat_hien": "nv_010",
+  "ngay": "04/07/2026",
+  "thoi_gian": 1751600000000
+}
+```
+
+### `/dat_ban` — Đặt bàn trước
+```json
+"db_001": {
+  "ho_ten": "Nguyễn Thị Lan",
+  "so_dien_thoai": "0901234567",
+  "ngay_gio": "06/07/2026 18:00", // DD/MM/YYYY HH:mm
+  "ban": "Bàn 5",
+  "so_khach": 4,
+  "ghi_chu": "Kỷ niệm sinh nhật",
+  "trang_thai": "Đã xác nhận",  // "Chờ xác nhận" | "Đã xác nhận" | "Đã đến" | "Hủy"
+  "thoi_gian": 1751600000000
+}
+```
+
+### `/nhat_ky` — Nhật ký thao tác (audit log)
+```json
+"log_001": {
+  "thoi_gian": 1751700000000,
+  "nhanvien_id": "nv_001",
+  "ten": "Nguyễn Văn A",
+  "vai_tro": "Quản trị viên",
+  "thao_tac": "Đăng nhập",      // "Đăng nhập" | "Thanh toán" | "Phê duyệt" | "Sửa thông tin" | "Xuất báo cáo" | "Xóa"
+  "doi_tuong": "Hệ thống",
+  "ly_do": "Đăng nhập ca sáng",
+  "ip": "192.168.1.11"
+}
+```
+
+### `/thong_bao_chung` — Thông báo phát chung (broadcast)
+```json
+"bc_001": {
+  "thoi_gian": 1751692800000,
+  "nguoi_gui_id": "nv_001",
+  "nguoi_nhan": "Tất cả nhân viên",
+  "tieu_de": "Họp giao ca cuối tuần",
+  "noi_dung": "17h chiều nay họp nhanh 15 phút tại quầy.",
+  "muc_do": "Quan trọng",       // "Bình thường" | "Quan trọng" | "Khẩn"
+  "da_doc": false,
+  "trang_thai": "Đã gửi"
+}
+```
+
+### `/lich_lam_viec` — Lịch làm việc (1 dòng / nhân viên / tuần)
+```json
+"sch_001": {
+  "nhanvien_id": "nv_007",
+  "ten": "Trần Thị B",
+  "tuan": "06/07/2026",         // Thứ Hai đầu tuần, DD/MM/YYYY
+  "t2": "S", "t3": "S", "t4": "", "t5": "C",
+  "t6": "C", "t7": "N", "cn": ""  // "S" sáng | "C" chiều | "N" đêm | "" nghỉ
+}
+```
+
+### `/dang_ky_ca` — Đăng ký / đổi ca
+```json
+"sr_001": {
+  "loai": "open",               // "open" (ca trống) | "mine" (ca của tôi) | "swap" (đổi ca)
+  "ngay": "13/07/2026",
+  "ca": "Ca sáng",
+  "gio": "06:00 – 14:00",
+  "nhanvien_id": "",
+  "doi_cho": "",
+  "trang_thai": "Mở"
+}
+```
+
+### `/bao_loi` — Báo lỗi / góp ý (bug report)
+```json
+"bug_001": {
+  "tieu_de": "Nút thanh toán không phản hồi",
+  "mo_ta": "Bấm thanh toán ở màn POS không có gì xảy ra",
+  "loai": "Lỗi chức năng",
+  "muc_do": "Cao",
+  "man_hinh": "POS - Bán hàng",
+  "nguoi_gui_id": "nv_010",
+  "thoi_gian": 1751700000000,
+  "trang_thai": "cho_xu_ly"
+}
+```
+
+### `/diem_log` — Lịch sử tích / đổi điểm khách hàng
+```json
+"pl_001": {
+  "khach_id": "kh_001",
+  "delta": 50,                  // > 0 tích điểm, < 0 đổi điểm
+  "ghi_chu": "Tích điểm hóa đơn 150.000đ",
+  "thoi_gian": 1751600000000
+}
+```
+> Quy tắc: **Σ `delta`** của mỗi khách == `diem_tich_luy` trong `/khach_hang` (AppMath: 1 điểm / 3.000đ).
+
+---
+
 ## Data Consistency Rules
 
-1. `ngay_nhap` trong `/nhap_kho` phải là **timestamp milliseconds**, không phải DDMMYYYY
+1. `ngay_nhap` trong `/nhap_kho` là **int `yyyyMMdd`** (vd `20260706`) — không phải timestamp ms hay chuỗi DD/MM/YYYY
 2. `tru_luong` trong `/luong` phải là **số dương** (số tiền trừ), không âm
 3. `AuthUid` trong `/nhan_vien` phải được điền khi tạo tài khoản Firebase Auth
 4. Room ID chat format: `chat_nv_{smaller_id}_nv_{larger_id}` để tránh trùng

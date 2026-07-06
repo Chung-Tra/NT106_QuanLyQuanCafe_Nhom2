@@ -70,6 +70,59 @@ namespace GUI
             lblIncomeValue.Text = "+ " + Theme.Vnd(income);
         }
 
+        // "Xem Biểu Đồ" → biểu đồ cột 12 tháng gần nhất: Doanh thu vs Chi phí nhập hàng
+        // (cùng nguồn dữ liệu với 2 thẻ tổng ở trên — Payment & InventoryImport thật).
+        private async void BtnShowChart_Click(object sender, EventArgs e)
+        {
+            // 12 tháng gần nhất (cũ → mới)
+            var first = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var months = new (int Year, int Month)[12];
+            for (int i = 0; i < 12; i++)
+            {
+                var d = first.AddMonths(-11 + i);
+                months[i] = (d.Year, d.Month);
+            }
+            int IdxOfYm(int year, int month)
+            {
+                for (int i = 0; i < 12; i++)
+                    if (months[i].Year == year && months[i].Month == month) return i;
+                return -1;
+            }
+
+            var income = new double[12];
+            var expense = new double[12];
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                foreach (var imp in await InventoryImportBUS.GetAllImports())
+                {
+                    int y = imp.ImportDate / 10000, m = imp.ImportDate / 100 % 100;
+                    int idx = IdxOfYm(y, m);
+                    if (idx >= 0) expense[idx] += imp.TotalAmount / 1_000_000.0;
+                }
+                foreach (var p in (await PaymentBUS.GetAll()).Values.Where(p => p.Timestamp > 0))
+                {
+                    var dt = DateTimeOffset.FromUnixTimeMilliseconds(p.Timestamp).LocalDateTime;
+                    int idx = IdxOfYm(dt.Year, dt.Month);
+                    if (idx >= 0) income[idx] += (double)p.ActualReceived / 1_000_000.0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Không tải được dữ liệu biểu đồ: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+            finally { this.Cursor = Cursors.Default; }
+
+            var data = new (int, int, double, double)[12];
+            for (int i = 0; i < 12; i++)
+                data[i] = (months[i].Year, months[i].Month, Math.Round(income[i], 1), Math.Round(expense[i], 1));
+
+            using var f = new ChartDetail("Doanh thu & Chi phí nhập theo tháng (triệu VNĐ)", Theme.Teal,
+                "Doanh thu", Color.MediumSeaGreen, "Chi phí nhập", Color.IndianRed, data);
+            f.ShowDialog(MsgBox.OwnerWindow(this));
+        }
+
         // Đổ tồn kho nguyên liệu thật (node nguyen_lieu) vào bảng bên phải.
         private async Task LoadInventory()
         {

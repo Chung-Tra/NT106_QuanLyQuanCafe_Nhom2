@@ -371,10 +371,7 @@ namespace GUI
         private void UpdateTotal()
         {
             long sub = _orderItems.Sum(kv => kv.Value.qty * kv.Value.price);
-            long disc = 0;
-            if (long.TryParse(txtDiscount.Text.Replace(",", "").Replace(".", "").Trim(), out long d))
-                disc = d;
-            long total = Math.Max(0, sub - disc);
+            long total = AppMath.OrderTotal(sub, AppMath.ParseVndDigits(txtDiscount.Text));
             lblTotalAmount.Text = Theme.Vnd(total);
         }
 
@@ -387,10 +384,8 @@ namespace GUI
             }
 
             long subtotal = _orderItems.Sum(kv => kv.Value.qty * kv.Value.price);
-            long discount = 0;
-            long.TryParse(txtDiscount.Text.Replace(",", "").Replace(".", "").Trim(), out discount);
-            discount = Math.Max(0, discount);
-            long total = Math.Max(0, subtotal - discount);
+            long discount = AppMath.ParseVndDigits(txtDiscount.Text);
+            long total = AppMath.OrderTotal(subtotal, discount);
 
             string customer = "Khách lẻ";
             bool paid = PaymentDialog.Pay(MsgBox.OwnerWindow(this), total, _currentTable, customer, out string method);

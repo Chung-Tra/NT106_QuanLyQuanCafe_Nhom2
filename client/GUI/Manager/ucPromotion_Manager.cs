@@ -246,11 +246,12 @@ namespace GUI
                 MsgBox.Show(MsgBox.OwnerWindow(this), "Vui lòng nhập mã voucher!", "Thông báo", MsgBox.MessageBoxType.Warning);
                 return;
             }
+            string giam = string.IsNullOrEmpty(disc) ? "10%" : disc + "%";
             var (ok, msg, _) = await PromotionBUS.Add(new PromotionDTO
             {
                 Loai = "voucher",
                 Ma = code,
-                Giam = string.IsNullOrEmpty(disc) ? "10%" : disc + "%",
+                Giam = giam,
                 HanSuDung = DateTime.Now.AddMonths(1).ToString("dd/MM/yyyy"),
                 DaDung = 0,
                 ConLai = 50,
@@ -261,7 +262,7 @@ namespace GUI
                 txtVoucherCode.Clear();
                 txtVoucherDiscount.Clear();
                 await LoadVoucherGrid();
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo voucher: {code} — Giảm {disc}%", "Thành công", MsgBox.MessageBoxType.Success);
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo voucher: {code} — Giảm {giam}", "Thành công", MsgBox.MessageBoxType.Success);
             }
             else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
         }

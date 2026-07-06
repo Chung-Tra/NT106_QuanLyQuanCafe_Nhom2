@@ -32,8 +32,11 @@ namespace GUI
             _cmbMonth.SelectedIndexChanged += (s, e) => _ = LoadData();
 
             btnExport.Click += (s, e) =>
+            {
+                int m = SelectedMonth();   // theo tháng đang xem, không phải tháng hiện tại
                 GridExporter.ExportExcel(_dgv, MsgBox.OwnerWindow(this),
-                    $"TienChi_{DateTime.Now:yyyyMM}", $"Tiền chi tháng {DateTime.Now.Month}");
+                    $"TienChi_{DateTime.Now.Year}{m:00}", $"Tiền chi tháng {m}");
+            };
 
             // Double-click 1 dòng -> form chi tiết read-only đủ field (kể cả cột ẩn)
             _dgv.CellDoubleClick += Dgv_CellDoubleClick;
