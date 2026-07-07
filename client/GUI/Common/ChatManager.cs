@@ -15,6 +15,14 @@ namespace GUI
     {
         private HubConnection? _connection;
         public string CurrentRoomId { get; private set; } = "room_global";
+        public string CurrentTargetId { get; private set; } = "";
+        public string CurrentTargetName { get; private set; } = "";
+
+        /// <summary>
+        /// Bắn khi có tin nhắn RIÊNG đến từ một phòng KHÁC phòng đang mở
+        /// (senderId, senderName) — để UI đánh dấu "chưa đọc" cho người gửi đó.
+        /// </summary>
+        public event Action<string, string>? BackgroundPrivateMessage;
 
         public async Task ConnectToChatServer()
         {
@@ -37,25 +45,28 @@ namespace GUI
                 _connection.On<string, string, string, string>("ReceiveMessageWithRoom",
                     (senderId, senderName, message, roomId) =>
                 {
-                    if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
+                    if (uiControl.IsDisposed || !uiControl.IsHandleCreated) return;
+                    uiControl.Invoke(new Action(() =>
                     {
-                        uiControl.Invoke(new Action(() =>
+                        string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+
+                        if (roomId == CurrentRoomId)
                         {
-                            if (roomId == CurrentRoomId)
-                            {
-                                string currentTime = DateTime.Now.ToString("dd/MM HH:mm");
-                                string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+                            string currentTime = DateTime.Now.ToString("dd/MM HH:mm");
+                            if (senderId == myId)
+                                lstChatHistory.Items.Add($"[{currentTime}] ▶ Tôi: {message}");
+                            else
+                                lstChatHistory.Items.Add($"[{currentTime}] 👤 {senderName}: {message}");
 
-                                if (senderId == myId)
-                                    lstChatHistory.Items.Add($"[{currentTime}] ▶ Tôi: {message}");
-                                else
-                                    lstChatHistory.Items.Add($"[{currentTime}] 👤 {senderName}: {message}");
-
-                                lstChatHistory.Items.Add("");
-                                lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
-                            }
-                        }));
-                    }
+                            lstChatHistory.Items.Add("");
+                            lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
+                        }
+                        // Tin riêng đến từ phòng KHÁC phòng đang mở → báo "chưa đọc" cho người gửi
+                        else if (roomId != "room_global" && senderId != myId)
+                        {
+                            BackgroundPrivateMessage?.Invoke(senderId, senderName);
+                        }
+                    }));
                 });
 
                 // Fix: sau khi mạng bị ngắt rồi reconnect, client phải JoinRoom lại
@@ -98,6 +109,25 @@ namespace GUI
             }
         }
 
+        /// <summary>
+        /// Vào sẵn TẤT CẢ phòng riêng của mình (chat_me_X với mọi đồng nghiệp) ngay sau khi
+        /// kết nối, để nhận được tin nhắn riêng kể cả khi đang mở thread khác hoặc chưa từng
+        /// mở cuộc trò chuyện đó. Groups.AddToGroup idempotent nên gọi lại nhiều lần không sao.
+        /// </summary>
+        public async Task JoinAllPrivateRoomsAsync(IEnumerable<string> otherEmployeeIds)
+        {
+            if (_connection == null || _connection.State != HubConnectionState.Connected) return;
+            string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
+            if (string.IsNullOrEmpty(myId)) return;
+
+            foreach (var otherId in otherEmployeeIds)
+            {
+                if (string.IsNullOrEmpty(otherId) || otherId == myId) continue;
+                try { await _connection.InvokeAsync("JoinRoom", ChatBUS.GetRoomId(myId, otherId)); }
+                catch { /* bỏ qua 1 phòng lỗi, tiếp tục các phòng còn lại */ }
+            }
+        }
+
         public async Task SwitchChatRoom(string targetId, string targetName)
         {
             if (GlobalSession.CurrentUser == null) return;
@@ -105,14 +135,15 @@ namespace GUI
             string myId = GlobalSession.CurrentUser.EmployeeId ?? "";
             string newRoomId = ChatBUS.GetRoomId(myId, targetId);
 
-            // Rời room cũ, join room mới trên SignalR server
-            if (_connection != null && _connection.State == HubConnectionState.Connected)
+            CurrentTargetId = targetId ?? "";
+            CurrentTargetName = targetName ?? "";
+
+            // KHÔNG rời phòng cũ nữa: ta chủ động ở lại mọi phòng riêng (đã JoinAll lúc kết nối)
+            // để luôn nhận được tin nhắn riêng. Chỉ cần đảm bảo đã ở trong phòng mới —
+            // Groups.AddToGroup idempotent nên gọi lại không sao.
+            if (_connection != null && _connection.State == HubConnectionState.Connected && CurrentRoomId != newRoomId)
             {
-                if (CurrentRoomId != newRoomId)
-                {
-                    await _connection.InvokeAsync("LeaveRoom", CurrentRoomId);
-                    await _connection.InvokeAsync("JoinRoom", newRoomId);
-                }
+                try { await _connection.InvokeAsync("JoinRoom", newRoomId); } catch { }
             }
 
             CurrentRoomId = newRoomId;
@@ -164,6 +195,23 @@ namespace GUI
                 {
                     string myName = GlobalSession.CurrentUser?.FullName ?? myId;
                     await _connection.InvokeAsync("SendMessageWithRoom", myId, myName, message, CurrentRoomId);
+
+                    // Tin RIÊNG (không phải phòng chung) → tạo 1 thông báo cho người nhận để họ
+                    // thấy trong mục "Thông báo"/"Tổng quan" dù chưa mở Chat. Best-effort (fire-and-forget).
+                    if (CurrentRoomId != "room_global" && !string.IsNullOrEmpty(CurrentTargetId))
+                    {
+                        string preview = message.Length > 60 ? message[..60] + "…" : message;
+                        _ = NotificationBUS.Add(new NotificationDTO
+                        {
+                            Type = "tin_nhan",
+                            Content = $"{myName}: {preview}",
+                            ReceiverId = CurrentTargetId,
+                            SenderId = myId,
+                            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                            IsRead = false,
+                            RelatedPage = "chat"
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -45,6 +45,11 @@ namespace QLCafe.ChatServer
             app.UseCors();
             app.MapHub<ChatHub>("/chathub");
 
+            // Trang kiểm tra nhanh: mở "/" bằng trình duyệt thấy chữ là server sống
+            // (bản thân /chathub là endpoint SignalR, mở bằng trình duyệt sẽ báo "Connection ID required")
+            app.MapGet("/", () => "QLCafe Chat Server (SignalR) — OK. Hub endpoint: /chathub");
+            app.MapGet("/health", () => Results.Json(new { status = "ok" }));
+
             // Cloud (Render/Railway/Docker): hosting cấp PORT qua env var → bind 0.0.0.0
             string? cloudPort = Environment.GetEnvironmentVariable("PORT");
             if (!string.IsNullOrEmpty(cloudPort))

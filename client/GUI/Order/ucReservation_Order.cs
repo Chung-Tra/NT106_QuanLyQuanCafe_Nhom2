@@ -1,6 +1,7 @@
 using BUS;
 using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -141,27 +142,54 @@ namespace GUI
 
             var row = dgv.CurrentRow;
             int.TryParse(row.Cells["Số khách"].Value?.ToString(), out int sk);
+            string banName = row.Cells["Bàn"].Value?.ToString() ?? "";
+            string newStatus = row.Cells["Trạng thái"].Value?.ToString() ?? "";
             await ReservationBUS.Update(code, new
             {
                 ho_ten = row.Cells["Họ tên"].Value?.ToString() ?? "",
                 so_dien_thoai = row.Cells["SĐT"].Value?.ToString() ?? "",
                 ngay_gio = row.Cells["Ngày & Giờ"].Value?.ToString() ?? "",
-                ban = row.Cells["Bàn"].Value?.ToString() ?? "",
+                ban = banName,
                 so_khach = sk,
                 ghi_chu = row.Cells["Ghi chú"].Value?.ToString() ?? "",
-                trang_thai = row.Cells["Trạng thái"].Value?.ToString() ?? ""
+                trang_thai = newStatus
             });
+
+            // Đồng bộ trạng thái bàn theo trạng thái đặt: Hủy → trả bàn Trống (nếu đang giữ đặt trước).
+            // "Đã đến" giữ nguyên — POS sẽ chuyển bàn sang co_khach khi nhận khách.
+            if (newStatus == "Hủy")
+                await SyncTableStatusByName(banName, expected: "dat_truoc", newStatus: "trong");
+
             await LoadData();
+        }
+
+        // Tra bàn theo TÊN (đặt bàn chỉ lưu tên) rồi đổi trạng thái nếu bàn đang ở trạng thái mong đợi.
+        private static async Task SyncTableStatusByName(string tableName, string expected, string newStatus)
+        {
+            if (string.IsNullOrWhiteSpace(tableName)) return;
+            try
+            {
+                var tables = await TableBUS.GetAll();
+                var match = tables.FirstOrDefault(kv =>
+                    string.Equals(kv.Value.Name?.Trim(), tableName.Trim(), StringComparison.OrdinalIgnoreCase));
+                if (match.Key != null && (match.Value.Status ?? "trong") == expected)
+                    await TableBUS.Update(match.Key, new { trang_thai = newStatus });
+            }
+            catch { }
         }
 
         private async void BtnAdd_Click(object? sender, EventArgs e)
         {
-            string? name = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Họ tên khách hàng", "VD: Nguyễn Văn A");
+            var owner = MsgBox.OwnerWindow(this);
+            string? name = InputDialog.Show(owner, "Đặt bàn mới", "Họ tên khách hàng", "VD: Nguyễn Văn A");
             if (string.IsNullOrEmpty(name)) return;
-            string? phone = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Số điện thoại", "VD: 09xxxxxxxx");
-            string? when = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Ngày & giờ (dd/MM/yyyy HH:mm)", DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm"));
-            string? ban = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Bàn", "VD: Bàn 05");
-            string? skStr = InputDialog.Show(MsgBox.OwnerWindow(this), "Đặt bàn mới", "Số khách", "2");
+            string? phone = InputDialog.Show(owner, "Đặt bàn mới", "Số điện thoại", "VD: 09xxxxxxxx");
+            string? when = InputDialog.Show(owner, "Đặt bàn mới", "Ngày & giờ (dd/MM/yyyy HH:mm)", DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm"));
+
+            // Chọn bàn từ danh sách bàn còn trống THẬT (thay vì gõ tay) để giữ bàn đặt trước
+            var picked = await PickReservableTableAsync();
+            if (picked == null) return;   // hủy chọn bàn = hủy đặt
+            string? skStr = InputDialog.Show(owner, "Đặt bàn mới", "Số khách", "2");
             int.TryParse(skStr, out int sk);
 
             var dto = new ReservationDTO
@@ -169,19 +197,67 @@ namespace GUI
                 HoTen = name,
                 SoDienThoai = phone ?? "",
                 NgayGio = string.IsNullOrWhiteSpace(when) ? DateTime.Now.AddHours(2).ToString("dd/MM/yyyy HH:mm") : when,
-                Ban = ban ?? "",
+                Ban = picked.Value.tname,
                 SoKhach = sk <= 0 ? 2 : sk,
                 GhiChu = "",
-                TrangThai = "Chờ xác nhận",
+                TrangThai = "Đã xác nhận",
                 Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
             };
             var (ok, msg, _) = await ReservationBUS.Add(dto);
             if (ok)
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã tạo đặt bàn cho {name}!", "Thành công", MsgBox.MessageBoxType.Success);
+                // Giữ bàn: chuyển sang "dat_truoc" để sơ đồ bàn POS/quản lý hiển thị Đặt trước
+                try { await TableBUS.Update(picked.Value.tid, new { trang_thai = "dat_truoc" }); } catch { }
+                MsgBox.Show(owner, $"Đã đặt {picked.Value.tname} cho {name}!\nBàn đã chuyển 'Đặt trước' trên sơ đồ bàn.", "Thành công", MsgBox.MessageBoxType.Success);
                 await LoadData();
             }
-            else MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+            else MsgBox.Show(owner, msg, "Lỗi", MsgBox.MessageBoxType.Error);
+        }
+
+        // Dialog chọn bàn còn trống để giữ đặt trước; trả về (id, tên) hoặc null nếu hủy.
+        private async Task<(string tid, string tname)?> PickReservableTableAsync()
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            Dictionary<string, TableDTO> tables;
+            try { tables = await TableBUS.GetAll(); }
+            catch { tables = new(); }
+
+            var free = tables.Where(kv => (kv.Value.Status ?? "trong") == "trong")
+                             .OrderBy(kv => kv.Key)
+                             .ToList();
+            if (free.Count == 0)
+            {
+                MsgBox.Show(owner, "Hiện không còn bàn trống để đặt trước.", "Hết bàn", MsgBox.MessageBoxType.Warning);
+                return null;
+            }
+
+            var frm = WindowChrome.CreateDialog("Chọn bàn đặt trước", new Size(480, 400), out var content, owner);
+            var flp = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = Color.Transparent, Padding = new Padding(12) };
+            content.Controls.Add(flp);
+            AutoFadeScroll.AttachAll(content);
+
+            (string, string)? result = null;
+            foreach (var kv in free)
+            {
+                string tname = kv.Value.Name ?? kv.Key;
+                var b = new Guna2Button
+                {
+                    Text         = $"{tname}\n{kv.Value.Capacity} chỗ · {kv.Value.Location}",
+                    Font         = Theme.F(9F, FontStyle.Bold),
+                    FillColor    = Theme.Fade(Theme.Green, 40),
+                    ForeColor    = Theme.Lighten(Theme.Green, 30),
+                    BorderRadius = 10,
+                    Size         = new Size(136, 62),
+                    Margin       = new Padding(5),
+                    Cursor       = Cursors.Hand,
+                };
+                b.HoverState.FillColor = Theme.Fade(Theme.Green, 80);
+                string tid = kv.Key;
+                b.Click += (s, e) => { result = (tid, tname); frm.DialogResult = DialogResult.OK; frm.Close(); };
+                flp.Controls.Add(b);
+            }
+            frm.ShowDialog(owner);
+            return result;
         }
 
         private void SendReminder()

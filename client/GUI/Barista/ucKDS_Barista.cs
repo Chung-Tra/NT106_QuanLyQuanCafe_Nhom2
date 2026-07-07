@@ -14,7 +14,25 @@ namespace GUI
     public partial class ucKDS_Barista : UserControl
 #pragma warning restore IDE1006
     {
+        // Font dùng chung cho mọi thẻ — tạo 1 lần, KHÔNG cấp phát lại mỗi lần dựng thẻ.
+        // (Trước đây mỗi thẻ new 4 Font, Controls.Clear() không dispose -> rò rỉ GDI handle,
+        //  dựng lại nhiều lần là treo/đơ.)
+        private static readonly Font FontOrder = new("Segoe UI", 10F, FontStyle.Bold);
+        private static readonly Font FontTime  = new("Segoe UI", 8F);
+        private static readonly Font FontItems = new("Segoe UI", 9F);
+        private static readonly Font FontBtn   = new("Segoe UI", 8F, FontStyle.Bold);
+
+        // Cột "Hoàn thành" chỉ giữ N đơn xong gần nhất; đơn cũ không cần nằm trên bảng bếp.
+        // (Đơn hoàn thành tích lũy mãi theo thời gian nên nếu vẽ hết sẽ phình vô hạn.)
+        private const int MaxDoneCards = 6;
+
+        // Tự làm mới (realtime): 6s/lần, chỉ dựng lại khi dữ liệu thực sự đổi.
+        private readonly System.Windows.Forms.Timer _refreshTimer = new() { Interval = 6000 };
+        private bool _loading;
+        private string _lastSignature = "";
+
         private Dictionary<string, string> _foodNames = new();
+        private Dictionary<string, TableDTO> _tables = new();
 
         public ucKDS_Barista()
         {
@@ -23,7 +41,13 @@ namespace GUI
 
         private async void UcKDS_Barista_Load(object? sender, EventArgs e)
         {
-            // Thẻ đơn giãn theo cột kanban khi phóng to cửa sổ
+            // Lưới 3 cột phải LẤP ĐẦY pnlOrders theo cả chiều cao (không chỉ Anchor +
+            // Size thiết kế — khi phóng to, Anchor giãn không đủ nên cột chỉ cao nửa
+            // trên, để trống phần đáy). Dock=Fill + Padding giữ khoảng đệm bo góc.
+            pnlOrders.Padding = new Padding(18, 14, 18, 14);
+            tblCols.Dock = DockStyle.Fill;
+
+            // Thẻ giãn theo cột kanban khi phóng to cửa sổ.
             foreach (var flp in new[] { flpPendingOrders, flpInProgressOrders, flpDoneOrders })
             {
                 var panel = flp;
@@ -35,65 +59,122 @@ namespace GUI
                 panel.ClientSizeChanged += FitCards;
             }
 
-            await LoadOrders();
+            // Realtime: chỉ fetch/dựng khi màn đang hiển thị (UC được cache khi rời màn).
+            _refreshTimer.Tick += async (s, ev) => { if (Visible) await LoadOrders(); };
+            VisibleChanged     += async (s, ev) => { if (Visible) await LoadOrders(force: true); };
+            Disposed           += (s, ev) => _refreshTimer.Dispose();
+            _refreshTimer.Start();
+
+            await LoadOrders(force: true);
         }
 
-        private async Task LoadOrders()
+        // force = true: nạp lại foods/tables và luôn dựng lại (mở màn / hiện lại / sau khi bấm nút).
+        // force = false (timer tick): chỉ fetch orders, và bỏ qua nếu không có gì đổi.
+        private async Task LoadOrders(bool force = false)
         {
-            flpPendingOrders.Controls.Clear();
-            flpInProgressOrders.Controls.Clear();
-            flpDoneOrders.Controls.Clear();
-
-            Dictionary<string, OrderDTO> orders;
-            Dictionary<string, TableDTO> tables;
+            if (_loading) return;   // chặn chồng lần tải khi timer trùng thao tác người dùng
+            _loading = true;
             try
             {
-                _foodNames = (await FoodBUS.GetListFoods())
-                    .Where(f => f.Id != null)
-                    .ToDictionary(f => f.Id!, f => f.Name ?? f.Id!);
-                orders = await OrderBUS.GetAll();
-                tables = await TableBUS.GetAll();
-            }
-            catch
-            {
-                lblPending.Text = "Không tải được đơn (kiểm tra server)";
-                return;
-            }
-
-            int pend = 0, prog = 0, done = 0;
-            foreach (var kv in orders.OrderBy(o => o.Value.CreatedAt))
-            {
-                var ord = kv.Value;
-                if (ord.Status == "huy") continue;
-
-                string table = (ord.TableId != null && tables.TryGetValue(ord.TableId, out var tb))
-                    ? (tb.Name ?? ord.TableId) : "Mang đi";
-                var items = (ord.Items?.Values ?? Enumerable.Empty<OrderItemDTO>())
-                    .Select(it => $"{it.Quantity}x {FoodName(it.FoodId)}").ToArray();
-                string time = ord.CreatedAt > 0
-                    ? DateTimeOffset.FromUnixTimeMilliseconds(ord.CreatedAt).LocalDateTime.ToString("HH:mm")
-                    : "";
-
-                switch (ord.Status)
+                Dictionary<string, OrderDTO> orders;
+                try
                 {
-                    case "hoan_thanh":
-                        AddOrderCard(flpDoneOrders, kv.Key, table, items, time, Color.MediumSeaGreen, null);
-                        done++;
-                        break;
-                    case "dang_phuc_vu":
-                        AddOrderCard(flpInProgressOrders, kv.Key, table, items, time, Color.SteelBlue, "hoan_thanh");
-                        prog++;
-                        break;
-                    default: // pending / khác
-                        AddOrderCard(flpPendingOrders, kv.Key, table, items, time, Color.Orange, "dang_phuc_vu");
-                        pend++;
-                        break;
+                    if (force || _foodNames.Count == 0 || _tables.Count == 0)
+                    {
+                        _foodNames = (await FoodBUS.GetListFoods())
+                            .Where(f => f.Id != null)
+                            .ToDictionary(f => f.Id!, f => f.Name ?? f.Id!);
+                        _tables = await TableBUS.GetAll();
+                    }
+                    orders = await OrderBUS.GetAll();
                 }
-            }
+                catch
+                {
+                    lblPending.Text = "Không tải được đơn (kiểm tra server)";
+                    return;
+                }
 
-            lblPending.Text = $"Chờ: {pend}";
-            lblInProgress.Text = $"Đang pha: {prog}";
-            lblDone.Text = $"Hoàn thành: {done}";
+                // Bỏ đơn huỷ, sắp theo thời gian tạo.
+                var active = orders.Where(o => o.Value.Status != "huy")
+                                   .OrderBy(o => o.Value.CreatedAt)
+                                   .ToList();
+
+                // Chữ ký nhẹ để phát hiện thay đổi — không đổi thì khỏi dựng lại (tránh giật, mất vị trí cuộn).
+                string sig = string.Join("|", active.Select(o => $"{o.Key}:{o.Value.Status}"));
+                if (!force && sig == _lastSignature) return;
+                _lastSignature = sig;
+
+                // Chỉ giữ N đơn "hoàn thành" mới nhất để hiển thị.
+                var doneShown = active.Where(o => o.Value.Status == "hoan_thanh")
+                                      .OrderByDescending(o => o.Value.CreatedAt)
+                                      .Take(MaxDoneCards)
+                                      .Select(o => o.Key)
+                                      .ToHashSet();
+
+                flpPendingOrders.SuspendLayout();
+                flpInProgressOrders.SuspendLayout();
+                flpDoneOrders.SuspendLayout();
+                ClearCards(flpPendingOrders);
+                ClearCards(flpInProgressOrders);
+                ClearCards(flpDoneOrders);
+
+                int pend = 0, prog = 0, done = 0;
+                foreach (var kv in active)
+                {
+                    var ord = kv.Value;
+
+                    string table = (ord.TableId != null && _tables.TryGetValue(ord.TableId, out var tb))
+                        ? (tb.Name ?? ord.TableId) : "Mang đi";
+                    var items = (ord.Items?.Values ?? Enumerable.Empty<OrderItemDTO>())
+                        .Select(it => $"{it.Quantity}x {FoodName(it.FoodId)}").ToArray();
+                    string time = ord.CreatedAt > 0
+                        ? DateTimeOffset.FromUnixTimeMilliseconds(ord.CreatedAt).LocalDateTime.ToString("HH:mm")
+                        : "";
+
+                    switch (ord.Status)
+                    {
+                        case "hoan_thanh":
+                            done++;
+                            if (doneShown.Contains(kv.Key))   // chỉ vẽ đơn xong gần nhất
+                                AddOrderCard(flpDoneOrders, kv.Key, table, items, time, Color.MediumSeaGreen, null);
+                            break;
+                        case "dang_phuc_vu":
+                            AddOrderCard(flpInProgressOrders, kv.Key, table, items, time, Color.SteelBlue, "hoan_thanh");
+                            prog++;
+                            break;
+                        default: // pending / khác
+                            AddOrderCard(flpPendingOrders, kv.Key, table, items, time, Color.Orange, "dang_phuc_vu");
+                            pend++;
+                            break;
+                    }
+                }
+
+                flpDoneOrders.ResumeLayout();
+                flpInProgressOrders.ResumeLayout();
+                flpPendingOrders.ResumeLayout();
+
+                // Mở màn / hiện lại / sau thao tác: cuộn về đầu để không cắt thẻ đầu cột.
+                // (Không reset ở tick nền để khỏi giật vị trí cuộn của người đang xem.)
+                if (force)
+                    foreach (var flp in new[] { flpPendingOrders, flpInProgressOrders, flpDoneOrders })
+                        flp.AutoScrollPosition = new Point(0, 0);
+
+                lblPending.Text = $"Chờ: {pend}";
+                lblInProgress.Text = $"Đang pha: {prog}";
+                lblDone.Text = $"Hoàn thành: {done}";
+            }
+            finally { _loading = false; }
+        }
+
+        // Controls.Clear() KHÔNG dispose control con -> phải tự dispose để trả handle/bộ nhớ.
+        private static void ClearCards(FlowLayoutPanel panel)
+        {
+            for (int i = panel.Controls.Count - 1; i >= 0; i--)
+            {
+                var c = panel.Controls[i];
+                panel.Controls.RemoveAt(i);
+                c.Dispose();
+            }
         }
 
         private string FoodName(string? id)
@@ -128,7 +209,7 @@ namespace GUI
             Label lblOrder = new()
             {
                 Text = $"{orderId} - {table}",
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Font = FontOrder,
                 ForeColor = accentColor,
                 Location = new Point(8, 5),
                 AutoSize = true
@@ -137,7 +218,7 @@ namespace GUI
             Label lblTime = new()
             {
                 Text = time,
-                Font = new Font("Segoe UI", 8F),
+                Font = FontTime,
                 ForeColor = Color.Gray,
                 Location = new Point(170, 8),
                 AutoSize = true,
@@ -147,7 +228,7 @@ namespace GUI
             Label lblItems = new()
             {
                 Text = items.Length > 0 ? string.Join("\n", items) : "(không có món)",
-                Font = new Font("Segoe UI", 9F),
+                Font = FontItems,
                 ForeColor = Color.White,
                 Location = new Point(8, 30),
                 Size = new Size(210, 60),
@@ -158,7 +239,7 @@ namespace GUI
             Guna2Button btnAction = new()
             {
                 Text = nextStatus == "dang_phuc_vu" ? "Bắt đầu pha" : nextStatus == "hoan_thanh" ? "Hoàn thành" : "✓",
-                Font = new Font("Segoe UI", 8F, FontStyle.Bold),
+                Font = FontBtn,
                 ForeColor = Color.White,
                 FillColor = accentColor,
                 BorderRadius = 6,
@@ -172,7 +253,7 @@ namespace GUI
                 if (nextStatus == null) return;
                 btnAction.Enabled = false;
                 var (ok, msg) = await OrderBUS.Update(orderId, new { trang_thai = nextStatus });
-                if (ok) await LoadOrders();
+                if (ok) await LoadOrders(force: true);
                 else
                 {
                     btnAction.Enabled = true;

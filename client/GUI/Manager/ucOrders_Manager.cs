@@ -20,21 +20,39 @@ namespace GUI
         private List<TableModelDTO>? _originalTableData;
         private List<WarningWaitModelDTO> _kitchenWarnings = new();
 
+        // Poll giống KDS: POS thanh toán / gửi bếp xong thì tình trạng bàn ở đây tự cập nhật.
+        private readonly System.Windows.Forms.Timer _pollTimer = new() { Interval = 8000 };
+        private string _lastSig = "";
+        private bool _loading;
+
         public ucOrders_Manager()
         {
             InitializeComponent();
             GridColumnGuard.SyncColumnNames(dgvTableStatus);
-            DgvRefresh.Attach(dgvTableStatus, () => _ = LoadRealData());
+            DgvRefresh.Attach(dgvTableStatus, () => _ = LoadRealData(force: true));
 
             cboTableStatus.Items.Clear();
             cboTableStatus.Items.AddRange(TableStatusOptions);
             cboTableStatus.SelectedIndex = 0;
 
-            _ = LoadRealData();
+            _pollTimer.Tick += (s, e) => { if (Visible) _ = LoadRealData(); };
+            Disposed += (s, e) => _pollTimer.Dispose();
+            _pollTimer.Start();
+
+            _ = LoadRealData(force: true);
         }
 
         // Tải tình trạng bàn/bếp thật từ Firebase: các đơn đang xử lý (pending/đang phục vụ).
-        private async Task LoadRealData()
+        // force = false (tick nền): dữ liệu không đổi thì bỏ qua, khỏi rebind làm mất chọn/cuộn.
+        private async Task LoadRealData(bool force = false)
+        {
+            if (_loading) return;
+            _loading = true;
+            try { await LoadRealDataCore(force); }
+            finally { _loading = false; }
+        }
+
+        private async Task LoadRealDataCore(bool force)
         {
             Dictionary<string, DTO.TableDTO> tables;
             Dictionary<string, DTO.OrderDTO> orders;
@@ -98,9 +116,19 @@ namespace GUI
                     });
             }
 
+            // Chữ ký dữ liệu — poll nền không đổi thì bỏ qua, khỏi rebind gây giật/mất dòng chọn
+            string sig = string.Join("|", list.Select(x => $"{x.TableName}:{x.Status}:{x.Progress}:{x.TotalAmount}"))
+                       + "#" + tables.Values.Count(t => t.Status == "trong") + "/" + tables.Count
+                       + "#" + foods.Count(f => !f.InStock);
+            if (!force && sig == _lastSig) return;
+            _lastSig = sig;
+
             _originalTableData = list;
+            // Giữ bộ lọc trạng thái đang chọn khi tự làm mới
+            string? sel = cboTableStatus.SelectedItem?.ToString();
+            var shown = (sel != null && sel != "Tất cả") ? list.Where(t => t.Status == sel).ToList() : list;
             dgvTableStatus.DataSource = null;
-            dgvTableStatus.DataSource = _originalTableData;
+            dgvTableStatus.DataSource = shown;
             if (dgvTableStatus.Columns["TableId"] != null)
             {
                 dgvTableStatus.Columns["TableId"].Visible = false;

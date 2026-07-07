@@ -436,3 +436,4 @@ backend/serviceAccountKey.json
 # Microsoft Office temporary files
 *.docx
 *.pptx
+*.pdf

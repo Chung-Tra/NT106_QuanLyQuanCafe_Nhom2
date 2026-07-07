@@ -17,11 +17,26 @@ namespace GUI
         private readonly Dictionary<string, (int qty, long price)> _orderItems = new();
         // Huy hiệu SL trên mỗi thẻ món (key = tên món) để cập nhật khi thêm vào đơn
         private readonly Dictionary<string, Guna2Button> _cardQtyBadges = new();
-        // Menu thật đã tải + tra cứu FoodDTO theo tên món (để lấy mon_id khi tạo đơn)
+        // Menu thật đã tải + tra cứu FoodDTO theo tên/id món (lấy mon_id khi tạo đơn, tên khi mở đơn cũ)
         private List<FoodDTO> _menu = new();
         private readonly Dictionary<string, FoodDTO> _foodByName = new();
-        private string _currentTable = "Bàn 01";
+        private readonly Dictionary<string, FoodDTO> _foodById = new();
+
+        // ----- Bàn & đơn đang phục vụ -----
+        // _currentTableId = null nghĩa là bán mang đi / chưa chọn bàn.
         private string? _currentTableId;
+        private string _currentTable = "Mang đi";
+        // Đơn đã "Gửi pha chế" nhưng CHƯA thanh toán (id trên node orders).
+        private string? _currentOrderId;
+        // true = chính mình vừa chuyển bàn trống → có khách (để trả bàn nếu đổi ý/hủy).
+        private bool _tableClaimed;
+
+        // ----- Sơ đồ bàn -----
+        private FlowLayoutPanel? _tableMapFlp;
+        private string _tableMapSig = "";
+        private bool _mapLoading;
+        // Poll giống KDS: bàn đổi trạng thái từ máy khác (QR, quản lý, POS khác) tự hiện lại.
+        private readonly System.Windows.Forms.Timer _tableMapTimer = new() { Interval = 7000 };
 
         public ucPOS_Order()
         {
@@ -35,8 +50,17 @@ namespace GUI
                 RecordDetail.FromRow(dgvCurrentOrder.Rows[e.RowIndex], "Chi tiết món trong đơn")
                             .ShowDialog(MsgBox.OwnerWindow(this));
             };
+            WireCartContextMenu();
 
-            lblCurrentStaff.Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}  ·  {_currentTable}";
+            _tableMapTimer.Tick += async (s, e) =>
+            {
+                if (Visible && _tableMapFlp is { IsDisposed: false, Visible: true } flp)
+                    await ReloadTableMap(flp, force: false);
+            };
+            Disposed += (s, e) => _tableMapTimer.Dispose();
+            _tableMapTimer.Start();
+
+            UpdateTableLabels();
         }
 
         private void BtnTabOrder_Click(object? sender, EventArgs e) => ShowOrderTab();
@@ -55,8 +79,12 @@ namespace GUI
 
                 _menu = menu;
                 _foodByName.Clear();
+                _foodById.Clear();
                 foreach (var f in menu)
+                {
                     if (!string.IsNullOrWhiteSpace(f.Name)) _foodByName[f.Name!] = f;
+                    if (!string.IsNullOrWhiteSpace(f.Id)) _foodById[f.Id!] = f;
+                }
 
                 flpProducts.Controls.Clear();
                 _cardQtyBadges.Clear();
@@ -327,6 +355,44 @@ namespace GUI
             dgvCurrentOrder.Columns["SL"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
         }
 
+        // Chuột phải 1 dòng trong đơn: tăng/giảm SL hoặc xóa món (POS phải sửa được lỗi bấm nhầm).
+        private void WireCartContextMenu()
+        {
+            var menu = new ContextMenuStrip
+            {
+                BackColor       = Color.FromArgb(31, 31, 34),
+                ForeColor       = Color.White,
+                ShowImageMargin = false,
+                Font            = Theme.F(9F),
+            };
+            menu.Items.Add("Tăng SL (+1)", null, (s, e) => AdjustSelectedQty(+1));
+            menu.Items.Add("Giảm SL (−1)", null, (s, e) => AdjustSelectedQty(-1));
+            menu.Items.Add("Xóa món khỏi đơn", null, (s, e) => AdjustSelectedQty(int.MinValue));
+            foreach (ToolStripItem it in menu.Items) { it.BackColor = menu.BackColor; it.ForeColor = menu.ForeColor; }
+            dgvCurrentOrder.ContextMenuStrip = menu;
+
+            // Chuột phải cũng chọn dòng dưới con trỏ (mặc định chỉ click trái mới chọn).
+            dgvCurrentOrder.MouseDown += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Right) return;
+                var hit = dgvCurrentOrder.HitTest(e.X, e.Y);
+                if (hit.RowIndex >= 0) dgvCurrentOrder.CurrentCell = dgvCurrentOrder.Rows[hit.RowIndex].Cells[0];
+            };
+        }
+
+        private void AdjustSelectedQty(int delta)
+        {
+            var row = dgvCurrentOrder.CurrentRow;
+            if (row == null || row.Index < 0) return;
+            string? name = row.Cells["Món"].Value?.ToString();
+            if (name == null || !_orderItems.TryGetValue(name, out var item)) return;
+
+            long newQty = delta == int.MinValue ? 0 : (long)item.qty + delta;
+            if (newQty <= 0) _orderItems.Remove(name);
+            else _orderItems[name] = ((int)newQty, item.price);
+            RefreshOrderGrid();
+        }
+
         private void AddToOrder(string name, long price)
         {
             if (_orderItems.ContainsKey(name))
@@ -375,6 +441,232 @@ namespace GUI
             lblTotalAmount.Text = Theme.Vnd(total);
         }
 
+        // =========================================================================
+        //  BÀN & ĐƠN HIỆN TẠI
+        // =========================================================================
+
+        // Huy hiệu bàn (góc phải panel hóa đơn) + dòng nhân viên: luôn cho biết
+        // đang order cho bàn nào và đơn đã gửi pha chế hay chưa.
+        private void UpdateTableLabels()
+        {
+            lblCurrentStaff.Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}";
+
+            bool hasTable = _currentTableId != null;
+            string sent = _currentOrderId != null ? " · đã gửi bếp" : "";
+            btnTableBadge.Text = hasTable ? _currentTable + sent : "Mang đi (chưa chọn bàn)";
+            btnTableBadge.FillColor = hasTable || _currentOrderId != null
+                ? Color.FromArgb(31, 138, 154)
+                : Color.FromArgb(45, 45, 48);
+
+            btnSendKitchen.Text = _currentOrderId == null ? "Gửi pha chế" : "Gửi bổ sung pha chế";
+        }
+
+        // Đơn CHƯA thanh toán mới nhất của một bàn (chưa có phiếu payments, chưa hủy).
+        private static async Task<(string id, OrderDTO dto)?> FindOpenOrderAsync(string tableId)
+        {
+            var orders   = await OrderBUS.GetAll();
+            var payments = await PaymentBUS.GetAll();
+            var paid = payments.Values.Select(p => p.OrderId).Where(x => x != null).ToHashSet();
+
+            var open = orders.Where(o => o.Value.TableId == tableId
+                                      && o.Value.Status != "huy"
+                                      && !paid.Contains(o.Key))
+                             .OrderByDescending(o => o.Value.CreatedAt)
+                             .FirstOrDefault();
+            return open.Key == null ? null : (open.Key, open.Value);
+        }
+
+        // Đổ món của một đơn trên server vào giỏ (mở đơn của bàn có khách để thêm món/thanh toán).
+        private void LoadOrderIntoCart(OrderDTO ord)
+        {
+            _orderItems.Clear();
+            foreach (var it in ord.Items?.Values ?? Enumerable.Empty<OrderItemDTO>())
+            {
+                string name = (it.FoodId != null && _foodById.TryGetValue(it.FoodId, out var f))
+                    ? (f.Name ?? it.FoodId) : (it.FoodId ?? "Món");
+                long price = (long)it.UnitPrice;
+                if (_orderItems.TryGetValue(name, out var cur)) _orderItems[name] = (cur.qty + it.Quantity, price);
+                else _orderItems[name] = (it.Quantity, price);
+            }
+            RefreshOrderGrid();
+        }
+
+        // Giỏ hiện tại → dict chi_tiet_don cho node orders. "cho" = chờ pha chế (KDS sẽ xử lý).
+        private Dictionary<string, OrderItemDTO> BuildItemsDict()
+        {
+            var items = new Dictionary<string, OrderItemDTO>();
+            int i = 1;
+            foreach (var (name, (qty, price)) in _orderItems)
+            {
+                _foodByName.TryGetValue(name, out var f);
+                items[$"ctd_{i:000}"] = new OrderItemDTO
+                {
+                    FoodId = f?.Id,
+                    Quantity = qty,
+                    UnitPrice = price,
+                    Note = "",
+                    CookingStatus = "cho"
+                };
+                i++;
+            }
+            return items;
+        }
+
+        // Nếu mình vừa giữ một bàn (trống → có khách) mà chưa gửi đơn nào thì trả bàn về Trống.
+        private async Task ReleaseClaimedTableAsync()
+        {
+            if (_tableClaimed && _currentTableId != null && _currentOrderId == null)
+                try { await TableBUS.Update(_currentTableId, new { trang_thai = "trong" }); } catch { }
+            _tableClaimed = false;
+        }
+
+        // Chọn bàn từ sơ đồ — có kiểm tra trạng thái + chuyển trạng thái bàn:
+        //  · Trống      → giữ bàn (co_khach) và bắt đầu order.
+        //  · Đặt trước  → xác nhận khách đã đến rồi mới nhận bàn.
+        //  · Có khách   → mở đơn chưa thanh toán của bàn (thêm món / thanh toán),
+        //                 hoặc lên đơn mới nếu bàn chưa có đơn.
+        private async Task SelectTableAsync(string tid, string tname, string status)
+        {
+            if (tid == _currentTableId) { ShowOrderTab(); return; }
+            var owner = MsgBox.OwnerWindow(this);
+            bool hadSentOrder = _currentOrderId != null;
+
+            // Đang có đơn đã gửi bếp ở bàn cũ → không mang đơn đó theo sang bàn mới.
+            if (hadSentOrder && MsgBox.Show(owner,
+                    $"{_currentTable} đang có đơn đã gửi pha chế (chưa thanh toán).\n" +
+                    $"Chuyển sang {tname}? Đơn cũ vẫn giữ ở {_currentTable} — bấm lại bàn đó để mở.",
+                    "Đổi bàn", MsgBox.MessageBoxType.Warning) != DialogResult.Yes)
+                return;
+
+            try
+            {
+                switch (status)
+                {
+                    case "co_khach":
+                    {
+                        var open = await FindOpenOrderAsync(tid);
+                        if (open != null)
+                        {
+                            int n = open.Value.dto.Items?.Values.Sum(x => x.Quantity) ?? 0;
+                            if (MsgBox.Show(owner,
+                                    $"{tname} đang có khách với đơn chưa thanh toán ({n} món).\nMở đơn này để thêm món / thanh toán?",
+                                    "Bàn có khách", MsgBox.MessageBoxType.Warning) != DialogResult.Yes)
+                                return;
+                            await ReleaseClaimedTableAsync();
+                            LoadOrderIntoCart(open.Value.dto);
+                            _currentOrderId = open.Value.id;
+                        }
+                        else
+                        {
+                            if (MsgBox.Show(owner,
+                                    $"{tname} đang có khách nhưng chưa có đơn.\nLên đơn mới cho bàn này?",
+                                    "Bàn có khách", MsgBox.MessageBoxType.Warning) != DialogResult.Yes)
+                                return;
+                            await ReleaseClaimedTableAsync();
+                            if (hadSentOrder) _orderItems.Clear();
+                            _currentOrderId = null;
+                        }
+                        _tableClaimed = false;
+                        break;
+                    }
+                    case "dat_truoc":
+                        if (MsgBox.Show(owner,
+                                $"{tname} đã được ĐẶT TRƯỚC.\nXác nhận khách đặt bàn đã đến và nhận bàn?",
+                                "Bàn đặt trước", MsgBox.MessageBoxType.Warning) != DialogResult.Yes)
+                            return;
+                        await ReleaseClaimedTableAsync();
+                        if (hadSentOrder) _orderItems.Clear();
+                        try { await TableBUS.Update(tid, new { trang_thai = "co_khach" }); } catch { }
+                        _currentOrderId = null;
+                        _tableClaimed = true;
+                        break;
+                    default: // trống — giỏ đang chọn (chưa gửi) đi theo bàn mới
+                        await ReleaseClaimedTableAsync();
+                        if (hadSentOrder) _orderItems.Clear();
+                        try { await TableBUS.Update(tid, new { trang_thai = "co_khach" }); } catch { }
+                        _currentOrderId = null;
+                        _tableClaimed = true;
+                        break;
+                }
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không cập nhật được trạng thái bàn (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+
+            _currentTableId = tid;
+            _currentTable = tname;
+            _tableMapSig = "";        // vẽ lại sơ đồ với trạng thái + highlight mới
+            RefreshOrderGrid();
+            UpdateTableLabels();
+            ShowOrderTab();
+        }
+
+        // =========================================================================
+        //  GỬI PHA CHẾ / THANH TOÁN / HỦY ĐƠN
+        // =========================================================================
+
+        // Gửi đơn cho quầy pha chế (KDS): tạo đơn "pending" (hoặc cập nhật món nếu gửi bổ sung).
+        // Đây là bước đưa đơn vào luồng Order → Barista; thanh toán có thể làm sau.
+        private async void BtnSendKitchen_Click(object? sender, EventArgs e)
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            if (_orderItems.Count == 0)
+            {
+                MsgBox.Show(owner, "Chưa có món nào để gửi pha chế.", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+
+            btnSendKitchen.Enabled = false;
+            try
+            {
+                var items = BuildItemsDict();
+                int soMon = _orderItems.Sum(kv => kv.Value.qty);
+
+                if (_currentOrderId == null)
+                {
+                    var order = new OrderDTO
+                    {
+                        TableId    = _currentTableId,
+                        EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                        CreatedAt  = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        Status     = "pending",
+                        Note       = "",
+                        Source     = "pos",
+                        Items      = items
+                    };
+                    var (ok, msg, id) = await OrderBUS.Add(order);
+                    if (!ok || id == null)
+                    {
+                        MsgBox.Show(owner, $"Không gửi được đơn: {msg}", "Lỗi", MsgBox.MessageBoxType.Error);
+                        return;
+                    }
+                    _currentOrderId = id;
+                    if (_currentTableId != null)
+                    {
+                        try { await TableBUS.Update(_currentTableId, new { trang_thai = "co_khach" }); } catch { }
+                        _tableClaimed = true;
+                        _tableMapSig = "";
+                    }
+                    MsgBox.Show(owner, $"Đã gửi {soMon} món tới quầy pha chế — {_currentTable}.",
+                                "Đã gửi pha chế", MsgBox.MessageBoxType.Success);
+                }
+                else
+                {
+                    // Gửi bổ sung: thay toàn bộ chi_tiet_don + đưa đơn về hàng chờ để pha chế thấy món mới.
+                    var (ok, msg) = await OrderBUS.Update(_currentOrderId, new { chi_tiet_don = items, trang_thai = "pending" });
+                    if (ok)
+                        MsgBox.Show(owner, "Đã cập nhật đơn — quầy pha chế sẽ thấy các món mới.",
+                                    "Đã gửi bổ sung", MsgBox.MessageBoxType.Success);
+                    else
+                        MsgBox.Show(owner, $"Không cập nhật được đơn: {msg}", "Lỗi", MsgBox.MessageBoxType.Error);
+                }
+                UpdateTableLabels();
+            }
+            finally { btnSendKitchen.Enabled = true; }
+        }
+
         private async void BtnPay_Click(object? sender, EventArgs e)
         {
             if (_orderItems.Count == 0)
@@ -391,50 +683,52 @@ namespace GUI
             bool paid = PaymentDialog.Pay(MsgBox.OwnerWindow(this), total, _currentTable, customer, out string method);
             if (!paid) return;
 
-            // Lưu đơn hàng + phiếu thanh toán lên Firebase (qua backend)
-            string? savedId = await PersistOrderAndPayment(subtotal, discount, total, method);
+            // Lưu đơn hàng + phiếu thanh toán lên Firebase (qua backend), trả bàn về Trống
+            btnPay.Enabled = false;
+            string? savedId;
+            try { savedId = await PersistOrderAndPayment(subtotal, discount, total, method); }
+            finally { btnPay.Enabled = true; }
+
+            if (savedId == null)
+                MsgBox.Show(MsgBox.OwnerWindow(this),
+                    "Không lưu được đơn lên server (kiểm tra kết nối) — hóa đơn chỉ hiển thị cục bộ.",
+                    "Cảnh báo", MsgBox.MessageBoxType.Error);
+
             string orderId = savedId ?? $"HD{DateTime.Now:yyyyMMddHHmm}{_orderItems.Count:00}";
-
             ShowReceipt(orderId, total, method);
-
-            _orderItems.Clear();
-            RefreshOrderGrid();
-            txtDiscount.Clear();
-            lblTotalAmount.Text = "0 đ";
+            ResetAfterPayment();
         }
 
         // Lưu đơn + thanh toán; trả về mã đơn nếu thành công (null nếu offline/lỗi).
+        //  · Đơn đã gửi pha chế: chỉ đồng bộ món lần cuối, KHÔNG đụng trạng thái (bếp quản lý).
+        //  · Chưa gửi (bán nhanh/mang đi): tạo đơn "pending" để pha chế vẫn nhận được món.
         private async Task<string?> PersistOrderAndPayment(long subtotal, long discount, long total, string methodDisplay)
         {
             try
             {
-                var items = new Dictionary<string, OrderItemDTO>();
-                int i = 1;
-                foreach (var (name, (qty, price)) in _orderItems)
-                {
-                    _foodByName.TryGetValue(name, out var f);
-                    items[$"ctd_{i:000}"] = new OrderItemDTO
-                    {
-                        FoodId = f?.Id,
-                        Quantity = qty,
-                        UnitPrice = price,
-                        Note = "",
-                        CookingStatus = "hoan_thanh"
-                    };
-                    i++;
-                }
+                var items = BuildItemsDict();
+                string? orderId = _currentOrderId;
 
-                var order = new OrderDTO
+                if (orderId == null)
                 {
-                    TableId = _currentTableId,
-                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
-                    CreatedAt = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                    Status = "hoan_thanh",
-                    Note = "",
-                    Items = items
-                };
-                var (ok, _, orderId) = await OrderBUS.Add(order);
-                if (!ok || orderId == null) return null;
+                    var order = new OrderDTO
+                    {
+                        TableId    = _currentTableId,
+                        EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                        CreatedAt  = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                        Status     = "pending",
+                        Note       = "",
+                        Source     = "pos",
+                        Items      = items
+                    };
+                    var (ok, _, newId) = await OrderBUS.Add(order);
+                    if (!ok || newId == null) return null;
+                    orderId = newId;
+                }
+                else
+                {
+                    await OrderBUS.Update(orderId, new { chi_tiet_don = items });
+                }
 
                 var payment = new PaymentDTO
                 {
@@ -446,15 +740,30 @@ namespace GUI
                     Discount = discount,
                     ActualReceived = total
                 };
-                await PaymentBUS.Add(payment);
+                var (pok, _, _) = await PaymentBUS.Add(payment);
+                if (!pok) return null;
 
-                // Bàn được giải phóng sau khi thanh toán
+                // Bàn được giải phóng sau khi thanh toán → mọi sơ đồ bàn (POS/QL) thấy Trống
                 if (!string.IsNullOrEmpty(_currentTableId))
                     await TableBUS.Update(_currentTableId, new { trang_thai = "trong" });
 
                 return orderId;
             }
             catch { return null; }
+        }
+
+        private void ResetAfterPayment()
+        {
+            _orderItems.Clear();
+            RefreshOrderGrid();
+            txtDiscount.Clear();
+            lblTotalAmount.Text = "0 đ";
+            _currentOrderId = null;
+            _currentTableId = null;
+            _currentTable = "Mang đi";
+            _tableClaimed = false;
+            _tableMapSig = "";
+            UpdateTableLabels();
         }
 
         private static string MapMethod(string display) => display switch
@@ -465,144 +774,238 @@ namespace GUI
             _ => "tien_mat"
         };
 
-        private void BtnVoidOrder_Click(object? sender, EventArgs e)
+        // Hủy đơn: nếu đã gửi pha chế thì chuyển đơn sang "huy" (KDS tự bỏ), và hỏi trả bàn về Trống.
+        private async void BtnVoidOrder_Click(object? sender, EventArgs e)
         {
-            if (_orderItems.Count == 0)
+            var owner = MsgBox.OwnerWindow(this);
+            if (_orderItems.Count == 0 && _currentOrderId == null)
             {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Không có đơn nào để hủy.", "Thông báo", MsgBox.MessageBoxType.Info);
+                MsgBox.Show(owner, "Không có đơn nào để hủy.", "Thông báo", MsgBox.MessageBoxType.Info);
                 return;
             }
 
-            string? reason = InputDialog.Show(MsgBox.OwnerWindow(this), "Hủy đơn hàng", "Lý do hủy (bắt buộc)", "VD: Khách đổi ý...");
+            string? reason = InputDialog.Show(owner, "Hủy đơn hàng", "Lý do hủy (bắt buộc)", "VD: Khách đổi ý...");
             if (string.IsNullOrEmpty(reason)) return;
+
+            if (_currentOrderId != null)
+            {
+                var (ok, msg) = await OrderBUS.Update(_currentOrderId, new { trang_thai = "huy", ghi_chu = $"Hủy: {reason}" });
+                if (!ok)
+                {
+                    MsgBox.Show(owner, $"Không hủy được đơn trên server: {msg}", "Lỗi", MsgBox.MessageBoxType.Error);
+                    return;
+                }
+            }
+
+            if (_currentTableId != null &&
+                MsgBox.Show(owner, $"Trả {_currentTable} về trạng thái Trống?", "Trả bàn", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
+            {
+                try { await TableBUS.Update(_currentTableId, new { trang_thai = "trong" }); } catch { }
+            }
 
             _orderItems.Clear();
             RefreshOrderGrid();
             txtDiscount.Clear();
             lblTotalAmount.Text = "0 đ";
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã hủy đơn. Lý do: {reason}", "Hủy đơn thành công", MsgBox.MessageBoxType.Info);
+            _currentOrderId = null;
+            _currentTableId = null;
+            _currentTable = "Mang đi";
+            _tableClaimed = false;
+            _tableMapSig = "";
+            UpdateTableLabels();
+            MsgBox.Show(owner, $"Đã hủy đơn. Lý do: {reason}", "Hủy đơn thành công", MsgBox.MessageBoxType.Info);
         }
+
+        // =========================================================================
+        //  CÁC TAB
+        // =========================================================================
 
         private void ShowOrderTab()
         {
             SetActiveTab(btnTabOrder);
-            pnlMainTabContainer.Controls.Clear();
-            pnlMainTabContainer.Controls.Add(pnlCenterMenu);
+            SwapTabContent(pnlCenterMenu);
         }
 
-        private void SetActiveTab(Control activeBtn)
+        // Gỡ nội dung tab cũ và dispose (Controls.Clear KHÔNG dispose → rò handle);
+        // riêng pnlCenterMenu (tab Order) được dùng lại nên không dispose.
+        private void SwapTabContent(Control content)
         {
-            btnTabOrder.ForeColor   = Color.White;
-            btnTabTables.ForeColor  = Color.White;
-            btnTabHistory.ForeColor = Color.White;
-            activeBtn.ForeColor = Color.MediumSeaGreen;
+            for (int i = pnlMainTabContainer.Controls.Count - 1; i >= 0; i--)
+            {
+                var c = pnlMainTabContainer.Controls[i];
+                pnlMainTabContainer.Controls.RemoveAt(i);
+                if (c != pnlCenterMenu && c != content) c.Dispose();
+            }
+            pnlMainTabContainer.Controls.Add(content);
         }
 
+        private void SetActiveTab(Guna2Button activeBtn)
+        {
+            // Đổi CẢ nền: tab đang mở = nền teal, tab khác = nền tối. Trước đây chỉ đổi
+            // ForeColor nên nền tĩnh của Designer (Order luôn teal) làm tab active nhìn
+            // "không cập nhật" khi bấm sang tab khác.
+            var teal = Color.FromArgb(31, 138, 154);
+            var dark = Color.FromArgb(31, 31, 34);
+            foreach (var b in new[] { btnTabOrder, btnTabTables, btnTabHistory })
+            {
+                bool active = b == activeBtn;
+                b.FillColor = active ? teal : dark;
+                b.ForeColor = Color.White;
+                b.HoverState.FillColor = active ? teal : Color.FromArgb(45, 45, 48);
+            }
+        }
+
+        // ----- Tab SƠ ĐỒ BÀN: layout dock (giãn hết không gian khi phóng to) + tự làm mới -----
         private async void btnTabTables_Click(object sender, EventArgs e)
         {
             SetActiveTab(btnTabTables);
 
             var host = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent, Padding = new Padding(12) };
 
-            // Thanh thao tác bàn
-            var actionBar = new Guna2Panel { FillColor = Theme.Surface, BorderRadius = 10, Location = new Point(12, 12), Size = new Size(540, 44) };
+            // Sơ đồ bàn chiếm toàn bộ phần còn lại (thẻ tự reflow theo bề rộng thật).
+            var flp = new FlowLayoutPanel { Dock = DockStyle.Fill, BackColor = Color.Transparent, AutoScroll = true };
+            host.Controls.Add(flp);
+
+            // Thanh thao tác bàn (trên cùng)
+            var topWrap = new Panel { Dock = DockStyle.Top, Height = 56, BackColor = Color.Transparent, Padding = new Padding(0, 0, 0, 12) };
+            var actionBar = new Guna2Panel { Dock = DockStyle.Fill, FillColor = Theme.Surface, BorderRadius = 10 };
             actionBar.Controls.Add(new Label { Text = "Thao tác nâng cao:", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(8, 13), BackColor = Color.Transparent });
 
-            var btnMerge     = MakeActionBtn("🔗 Gộp bàn",   Theme.Blue,   120);
-            var btnSplit     = MakeActionBtn("✂ Tách bàn",   Theme.Amber,  220);
-            var btnTransfer  = MakeActionBtn("↔ Chuyển bàn", Theme.Purple, 320);
-            var btnSplitBill = MakeActionBtn("🧾 Tách HĐ",   Theme.Green,  418);
-            btnMerge.Click    += (s2, e2) => AdvancedTableAction("Gộp bàn");
-            btnSplit.Click    += (s2, e2) => AdvancedTableAction("Tách bàn");
-            btnTransfer.Click += (s2, e2) => AdvancedTableAction("Chuyển bàn");
+            var btnMerge     = MakeActionBtn("Gộp bàn",    Theme.Blue,   120);
+            var btnSplit     = MakeActionBtn("Tách bàn",   Theme.Amber,  220);
+            var btnTransfer  = MakeActionBtn("Chuyển bàn", Theme.Purple, 320);
+            var btnSplitBill = MakeActionBtn("Tách HĐ",    Theme.Green,  420);
+            btnMerge.Click     += async (s2, e2) => await MergeTableAsync();
+            btnSplit.Click     += async (s2, e2) => await SplitTableAsync();
+            btnTransfer.Click  += async (s2, e2) => await TransferTableAsync();
             btnSplitBill.Click += (s2, e2) => ShowSplitBillDialog();
             actionBar.Controls.Add(btnMerge);
             actionBar.Controls.Add(btnSplit);
             actionBar.Controls.Add(btnTransfer);
             actionBar.Controls.Add(btnSplitBill);
-            host.Controls.Add(actionBar);
+            topWrap.Controls.Add(actionBar);
+            host.Controls.Add(topWrap);
 
-            // Sơ đồ bàn (tải thật từ Firebase qua backend)
-            var flp = new FlowLayoutPanel { Location = new Point(12, 66), Size = new Size(450, 360), BackColor = Color.Transparent, AutoScroll = true };
-            host.Controls.Add(flp);
-
-            var legend = new Label { Text = "🔴 Có khách   🟡 Đặt trước   ⬛ Trống   — Click để chọn bàn", AutoSize = true, Font = Theme.F(8.5F), ForeColor = Theme.TextMuted, Location = new Point(12, 434), BackColor = Color.Transparent };
+            var legend = new Label
+            {
+                Dock = DockStyle.Bottom,
+                Height = 26,
+                Text = "🔴 Có khách   🟡 Đặt trước   ⬛ Trống   — Click để chọn bàn (viền teal = bàn đang order)",
+                Font = Theme.F(8.5F),
+                ForeColor = Theme.TextMuted,
+                BackColor = Color.Transparent,
+                TextAlign = ContentAlignment.MiddleLeft,
+            };
             host.Controls.Add(legend);
 
-            pnlMainTabContainer.Controls.Clear();
-            pnlMainTabContainer.Controls.Add(host);
+            _tableMapFlp = flp;
+            SwapTabContent(host);
+            // Sơ đồ bàn (flp AutoScroll) tạo động SAU khi UC đã AttachAll lúc mở màn →
+            // phải theme lại thanh cuộn cho nó (ẩn thanh trắng, thay bằng thanh teal fade).
+            AutoFadeScroll.AttachAll(pnlMainTabContainer);
 
-            Dictionary<string, TableDTO> tables;
-            try { tables = await TableBUS.GetAll(); }
-            catch { tables = new(); }
+            await ReloadTableMap(flp, force: true);
+        }
 
-            if (tables.Count == 0)
+        // Nạp sơ đồ bàn từ Firebase; chữ ký trạng thái tránh vẽ lại khi không đổi
+        // (poll 7s không gây giật/mất hover). force = true: luôn vẽ lại.
+        private async Task ReloadTableMap(FlowLayoutPanel flp, bool force)
+        {
+            if (_mapLoading) return;
+            _mapLoading = true;
+            try
             {
-                flp.Controls.Add(new Label { Text = "Chưa có dữ liệu bàn.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted });
-                return;
-            }
+                Dictionary<string, TableDTO> tables;
+                try { tables = await TableBUS.GetAll(); }
+                catch { tables = new(); }
+                if (flp.IsDisposed) return;
 
-            foreach (var kv in tables.OrderBy(t => t.Key))
+                string sig = string.Join("|", tables.OrderBy(t => t.Key).Select(t => $"{t.Key}:{t.Value.Status}"))
+                           + "#" + _currentTableId;
+                if (!force && sig == _tableMapSig) return;
+                _tableMapSig = sig;
+
+                flp.SuspendLayout();
+                for (int i = flp.Controls.Count - 1; i >= 0; i--)
+                {
+                    var c = flp.Controls[i];
+                    flp.Controls.RemoveAt(i);
+                    c.Dispose();
+                }
+
+                if (tables.Count == 0)
+                {
+                    flp.Controls.Add(new Label { Text = "Chưa có dữ liệu bàn.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted });
+                }
+                else
+                {
+                    foreach (var kv in tables.OrderBy(t => t.Key))
+                        flp.Controls.Add(CreateTableCard(kv.Key, kv.Value));
+                }
+                flp.ResumeLayout();
+            }
+            finally { _mapLoading = false; }
+        }
+
+        private Guna2Panel CreateTableCard(string tid, TableDTO table)
+        {
+            string status = table.Status ?? "trong";
+            (Color accent, string label) = status switch
             {
-                var table = kv.Value;
-                string status = table.Status ?? "trong";
-                (Color accent, string label) = status switch
-                {
-                    "co_khach"  => (Theme.Red, "Có khách"),
-                    "dat_truoc" => (Theme.Amber, "Đặt trước"),
-                    _            => (Theme.Green, "Trống"),
-                };
-                bool free = status == "trong";
+                "co_khach"  => (Theme.Red, "Có khách"),
+                "dat_truoc" => (Theme.Amber, "Đặt trước"),
+                _           => (Theme.Green, "Trống"),
+            };
+            bool free = status == "trong";
+            bool isCurrent = tid == _currentTableId;
 
-                var card = new Guna2Panel
-                {
-                    FillColor    = free ? Theme.Surface : Theme.Fade(accent, 60),
-                    BorderRadius = 10,
-                    Size         = new Size(98, 82),
-                    Margin       = new Padding(4),
-                    Cursor       = Cursors.Hand,
-                    BorderColor  = accent,
-                    BorderThickness = 1,
-                };
-                card.Controls.Add(new Label
-                {
-                    Text      = table.Name ?? kv.Key,
-                    Font      = Theme.F(10F, FontStyle.Bold),
-                    ForeColor = free ? Theme.TextHi : accent,
-                    BackColor = Color.Transparent,
-                    Location  = new Point(8, 12),
-                    AutoSize  = true,
-                });
-                card.Controls.Add(new Label
-                {
-                    Text      = label,
-                    Font      = Theme.F(8F),
-                    ForeColor = accent,
-                    BackColor = Color.Transparent,
-                    Location  = new Point(8, 38),
-                    AutoSize  = true,
-                });
-                card.Controls.Add(new Label
-                {
-                    Text      = $"{table.Capacity} chỗ · {table.Location}",
-                    Font      = Theme.F(7F),
-                    ForeColor = Theme.TextMuted,
-                    BackColor = Color.Transparent,
-                    Location  = new Point(8, 58),
-                    AutoSize  = true,
-                });
+            var card = new Guna2Panel
+            {
+                FillColor       = free ? Theme.Surface : Theme.Fade(accent, 60),
+                BorderRadius    = 10,
+                Size            = new Size(104, 86),
+                Margin          = new Padding(5),
+                Cursor          = Cursors.Hand,
+                BorderColor     = isCurrent ? Theme.Teal : accent,
+                BorderThickness = isCurrent ? 2 : 1,
+            };
+            card.Controls.Add(new Label
+            {
+                Text      = table.Name ?? tid,
+                Font      = Theme.F(10F, FontStyle.Bold),
+                ForeColor = isCurrent ? Theme.Teal : (free ? Theme.TextHi : accent),
+                BackColor = Color.Transparent,
+                Location  = new Point(8, 12),
+                AutoSize  = true,
+            });
+            card.Controls.Add(new Label
+            {
+                Text      = isCurrent ? "Đang order" : label,
+                Font      = Theme.F(8F),
+                ForeColor = isCurrent ? Theme.Teal : accent,
+                BackColor = Color.Transparent,
+                Location  = new Point(8, 40),
+                AutoSize  = true,
+            });
+            card.Controls.Add(new Label
+            {
+                Text      = $"{table.Capacity} chỗ · {table.Location}",
+                Font      = Theme.F(7F),
+                ForeColor = Theme.TextMuted,
+                BackColor = Color.Transparent,
+                Location  = new Point(8, 62),
+                AutoSize  = true,
+            });
 
-                string tid = kv.Key;
-                string tname = table.Name ?? kv.Key;
-                card.Click += (s2, e2) =>
-                {
-                    _currentTable = tname;
-                    _currentTableId = tid;
-                    lblCurrentStaff.Text = $"Nhân viên: {GlobalSession.CurrentUser?.FullName ?? "Staff"}  ·  {_currentTable}";
-                    ShowOrderTab();
-                };
-                flp.Controls.Add(card);
+            string tname = table.Name ?? tid;
+            async void OnClick(object? s2, EventArgs e2)
+            {
+                try { await SelectTableAsync(tid, tname, status); }
+                catch { }
             }
+            card.Click += OnClick;
+            foreach (Control child in card.Controls) child.Click += OnClick;   // label phủ gần hết thẻ
+            return card;
         }
 
         private static Guna2Button MakeActionBtn(string text, Color color, int x)
@@ -622,13 +1025,240 @@ namespace GUI
             return b;
         }
 
-        private void AdvancedTableAction(string action)
+        // =========================================================================
+        //  THAO TÁC NÂNG CAO TRÊN BÀN (làm thật trên node tables/orders)
+        // =========================================================================
+
+        // Dialog chọn 1 bàn theo điều kiện (bàn trống để chuyển/tách, bàn có khách để gộp...).
+        private async Task<(string tid, string tname)?> PickTableAsync(string title, Func<TableDTO, bool> filter, string? excludeId = null)
         {
-            string? detail = InputDialog.Show(MsgBox.OwnerWindow(this), action, $"{action}: Nhập số bàn đích", "VD: Bàn 03");
-            if (string.IsNullOrEmpty(detail)) return;
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã thực hiện {action}: {_currentTable} → {detail}", "Thành công", MsgBox.MessageBoxType.Success);
+            var owner = MsgBox.OwnerWindow(this);
+            Dictionary<string, TableDTO> tables;
+            try { tables = await TableBUS.GetAll(); }
+            catch { tables = new(); }
+
+            var choices = tables.Where(kv => kv.Key != excludeId && filter(kv.Value))
+                                .OrderBy(kv => kv.Key)
+                                .ToList();
+            if (choices.Count == 0)
+            {
+                MsgBox.Show(owner, "Không có bàn phù hợp.", "Thông báo", MsgBox.MessageBoxType.Info);
+                return null;
+            }
+
+            var frm = WindowChrome.CreateDialog(title, new Size(480, 400), out var content, owner);
+            var flp = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = Color.Transparent, Padding = new Padding(12) };
+            content.Controls.Add(flp);
+            AutoFadeScroll.AttachAll(content);
+
+            (string, string)? result = null;
+            foreach (var kv in choices)
+            {
+                string tname = kv.Value.Name ?? kv.Key;
+                bool free = (kv.Value.Status ?? "trong") == "trong";
+                var accent = free ? Theme.Green : Theme.Red;
+                var b = new Guna2Button
+                {
+                    Text         = $"{tname}\n{kv.Value.Capacity} chỗ · {kv.Value.Location}",
+                    Font         = Theme.F(9F, FontStyle.Bold),
+                    FillColor    = Theme.Fade(accent, 40),
+                    ForeColor    = Theme.Lighten(accent, 30),
+                    BorderRadius = 10,
+                    Size         = new Size(136, 62),
+                    Margin       = new Padding(5),
+                    Cursor       = Cursors.Hand,
+                };
+                b.HoverState.FillColor = Theme.Fade(accent, 80);
+                string tid = kv.Key;
+                b.Click += (s, e) => { result = (tid, tname); frm.DialogResult = DialogResult.OK; frm.Close(); };
+                flp.Controls.Add(b);
+            }
+            frm.ShowDialog(owner);
+            return result;
         }
 
+        // CHUYỂN BÀN: dời đơn/khách của bàn hiện tại sang một bàn trống.
+        private async Task TransferTableAsync()
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            if (_currentTableId == null)
+            {
+                MsgBox.Show(owner, "Chưa chọn bàn hiện tại — bấm vào một bàn trên sơ đồ trước.", "Chuyển bàn", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            var target = await PickTableAsync("Chuyển bàn — chọn bàn đích (trống)", t => (t.Status ?? "trong") == "trong");
+            if (target == null) return;
+
+            string oldName = _currentTable, oldId = _currentTableId;
+            try
+            {
+                if (_currentOrderId != null)
+                    await OrderBUS.Update(_currentOrderId, new { ban_id = target.Value.tid });
+                await TableBUS.Update(target.Value.tid, new { trang_thai = "co_khach" });
+                await TableBUS.Update(oldId, new { trang_thai = "trong" });
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không chuyển được bàn (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+
+            _currentTableId = target.Value.tid;
+            _currentTable = target.Value.tname;
+            _tableClaimed = true;
+            _tableMapSig = "";
+            UpdateTableLabels();
+            if (_tableMapFlp is { IsDisposed: false } flp) await ReloadTableMap(flp, force: true);
+            MsgBox.Show(owner, $"Đã chuyển {oldName} → {target.Value.tname}.", "Chuyển bàn", MsgBox.MessageBoxType.Success);
+        }
+
+        // GỘP BÀN: dồn đơn chưa thanh toán của một bàn khác vào bàn hiện tại; bàn nguồn về Trống.
+        private async Task MergeTableAsync()
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            if (_currentTableId == null)
+            {
+                MsgBox.Show(owner, "Chưa chọn bàn hiện tại (bàn sẽ nhận đơn gộp) — bấm vào một bàn trước.", "Gộp bàn", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            var src = await PickTableAsync("Gộp bàn — chọn bàn nguồn (có khách)", t => t.Status == "co_khach", excludeId: _currentTableId);
+            if (src == null) return;
+
+            var open = await FindOpenOrderAsync(src.Value.tid);
+            if (open == null)
+            {
+                MsgBox.Show(owner, $"{src.Value.tname} không có đơn chưa thanh toán để gộp.", "Gộp bàn", MsgBox.MessageBoxType.Info);
+                return;
+            }
+
+            // Cộng món của bàn nguồn vào giỏ hiện tại
+            foreach (var it in open.Value.dto.Items?.Values ?? Enumerable.Empty<OrderItemDTO>())
+            {
+                string name = (it.FoodId != null && _foodById.TryGetValue(it.FoodId, out var f))
+                    ? (f.Name ?? it.FoodId) : (it.FoodId ?? "Món");
+                long price = (long)it.UnitPrice;
+                if (_orderItems.TryGetValue(name, out var cur)) _orderItems[name] = (cur.qty + it.Quantity, price);
+                else _orderItems[name] = (it.Quantity, price);
+            }
+            RefreshOrderGrid();
+
+            try
+            {
+                if (_currentOrderId == null)
+                {
+                    // Nhận luôn đơn của bàn nguồn làm đơn của bàn này (kèm món đang có trong giỏ)
+                    await OrderBUS.Update(open.Value.id, new { ban_id = _currentTableId, chi_tiet_don = BuildItemsDict() });
+                    _currentOrderId = open.Value.id;
+                }
+                else
+                {
+                    await OrderBUS.Update(_currentOrderId, new { chi_tiet_don = BuildItemsDict(), trang_thai = "pending" });
+                    await OrderBUS.Update(open.Value.id, new { trang_thai = "huy", ghi_chu = $"Gộp vào {_currentTable}" });
+                }
+                await TableBUS.Update(src.Value.tid, new { trang_thai = "trong" });
+                await TableBUS.Update(_currentTableId, new { trang_thai = "co_khach" });
+                _tableClaimed = true;
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không gộp được bàn (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+
+            _tableMapSig = "";
+            UpdateTableLabels();
+            if (_tableMapFlp is { IsDisposed: false } flp) await ReloadTableMap(flp, force: true);
+            MsgBox.Show(owner, $"Đã gộp {src.Value.tname} vào {_currentTable}.", "Gộp bàn", MsgBox.MessageBoxType.Success);
+        }
+
+        // TÁCH BÀN: chuyển một phần món của bàn hiện tại sang bàn trống khác (tạo đơn mới cho bàn đó).
+        private async Task SplitTableAsync()
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            if (_orderItems.Count == 0)
+            {
+                MsgBox.Show(owner, "Giỏ hàng trống — không có món để tách bàn.", "Tách bàn", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            var target = await PickTableAsync("Tách bàn — chọn bàn đích (trống)", t => (t.Status ?? "trong") == "trong", excludeId: _currentTableId);
+            if (target == null) return;
+
+            var moved = PickItemsDialog($"Tách món sang {target.Value.tname}",
+                                        "Tick + nhập SL tách. Phần còn lại ở lại bàn hiện tại.");
+            if (moved == null || moved.Count == 0) return;
+
+            // Tạo đơn mới cho bàn đích (vào thẳng hàng chờ pha chế)
+            var items2 = new Dictionary<string, OrderItemDTO>();
+            int i = 1;
+            foreach (var (name, (qty, price)) in moved)
+            {
+                _foodByName.TryGetValue(name, out var f);
+                items2[$"ctd_{i:000}"] = new OrderItemDTO { FoodId = f?.Id, Quantity = qty, UnitPrice = price, Note = "", CookingStatus = "cho" };
+                i++;
+            }
+            var order2 = new OrderDTO
+            {
+                TableId    = target.Value.tid,
+                EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                CreatedAt  = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                Status     = "pending",
+                Note       = $"Tách từ {_currentTable}",
+                Source     = "pos",
+                Items      = items2
+            };
+
+            try
+            {
+                var (ok, msg, id2) = await OrderBUS.Add(order2);
+                if (!ok || id2 == null)
+                {
+                    MsgBox.Show(owner, $"Không tạo được đơn cho bàn đích: {msg}", "Lỗi", MsgBox.MessageBoxType.Error);
+                    return;
+                }
+                await TableBUS.Update(target.Value.tid, new { trang_thai = "co_khach" });
+
+                // Trừ món đã tách khỏi giỏ hiện tại
+                foreach (var (name, (qty, _)) in moved)
+                {
+                    if (!_orderItems.TryGetValue(name, out var cur)) continue;
+                    if (qty >= cur.qty) _orderItems.Remove(name);
+                    else _orderItems[name] = (cur.qty - qty, cur.price);
+                }
+
+                if (_orderItems.Count == 0)
+                {
+                    // Tách hết → bàn cũ trống, chuyển sang theo dõi bàn đích
+                    if (_currentOrderId != null)
+                        await OrderBUS.Update(_currentOrderId, new { trang_thai = "huy", ghi_chu = $"Tách toàn bộ sang {target.Value.tname}" });
+                    if (_currentTableId != null)
+                        try { await TableBUS.Update(_currentTableId, new { trang_thai = "trong" }); } catch { }
+                    _currentOrderId = id2;
+                    _currentTableId = target.Value.tid;
+                    _currentTable = target.Value.tname;
+                    _tableClaimed = true;
+                    foreach (var (name, v) in moved) _orderItems[name] = v;
+                }
+                else if (_currentOrderId != null)
+                {
+                    await OrderBUS.Update(_currentOrderId, new { chi_tiet_don = BuildItemsDict() });
+                }
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không tách được bàn (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+
+            RefreshOrderGrid();
+            _tableMapSig = "";
+            UpdateTableLabels();
+            if (_tableMapFlp is { IsDisposed: false } flp) await ReloadTableMap(flp, force: true);
+            long movedTotal = moved.Sum(kv => kv.Value.qty * kv.Value.price);
+            MsgBox.Show(owner, $"Đã tách {moved.Sum(kv => kv.Value.qty)} món sang {target.Value.tname} ({Theme.Vnd(movedTotal)}).",
+                        "Tách bàn", MsgBox.MessageBoxType.Success);
+        }
+
+        // ----- Tab LỊCH SỬ -----
         private async void btnTabHistory_Click(object sender, EventArgs e)
         {
             SetActiveTab(btnTabHistory);
@@ -651,8 +1281,9 @@ namespace GUI
             dgv.Columns["Tổng tiền"].DefaultCellStyle.Format    = "N0";
             dgv.Columns["Tổng tiền"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            pnlMainTabContainer.Controls.Clear();
-            pnlMainTabContainer.Controls.Add(dgv);
+            SwapTabContent(dgv);
+            // Lưới lịch sử tạo động → theme lại thanh cuộn (ẩn thanh trắng, thay teal fade).
+            AutoFadeScroll.AttachAll(pnlMainTabContainer);
 
             try
             {
@@ -665,7 +1296,7 @@ namespace GUI
                 foreach (var p in payments.Values.OrderByDescending(x => x.Timestamp))
                 {
                     orders.TryGetValue(p.OrderId ?? "", out var ord);
-                    string tableName = "";
+                    string tableName = "Mang đi";
                     if (ord?.TableId != null && tables.TryGetValue(ord.TableId, out var tb))
                         tableName = tb.Name ?? ord.TableId;
                     int itemCount = ord?.Items?.Values.Sum(it => it.Quantity) ?? 0;
@@ -694,20 +1325,39 @@ namespace GUI
             _ => code ?? ""
         };
 
-        private void BtnReport_Click(object? sender, EventArgs e)
+        // BÁO CÁO: số liệu bán hàng THẬT trong ngày từ node payments/orders.
+        private async void BtnReport_Click(object? sender, EventArgs e)
         {
-            long total = _orderItems.Sum(kv => kv.Value.qty * kv.Value.price);
-            string report =
-                $"BÁO CÁO BÁN HÀNG\n" +
-                $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
-                "──────────────────\n" +
-                $"• Tổng tiền hiện tại: {Theme.Vnd(total)}\n" +
-                $"• Số món: {_orderItems.Sum(kv => kv.Value.qty)}\n" +
-                "──────────────────\n" +
-                "Gửi báo cáo cho quản lý?";
+            var owner = MsgBox.OwnerWindow(this);
+            try
+            {
+                var payments = await PaymentBUS.GetAll();
+                var orders   = await OrderBUS.GetAll();
+                var today = DateTime.Today;
 
-            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo POS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                var todays = payments.Values
+                    .Where(p => p.Timestamp > 0 &&
+                                DateTimeOffset.FromUnixTimeMilliseconds(p.Timestamp).LocalDateTime.Date == today)
+                    .ToList();
+                long revenue = todays.Sum(p => (long)p.ActualReceived);
+                var byMethod = todays.GroupBy(p => MethodDisplay(p.Method))
+                                     .Select(g => $"    – {g.Key}: {Theme.Vnd(g.Sum(x => (long)x.ActualReceived))} ({g.Count()} HĐ)");
+                int active = orders.Values.Count(o => o.Status == "pending" || o.Status == "dang_phuc_vu");
+
+                string report =
+                    $"BÁO CÁO BÁN HÀNG — {today:dd/MM/yyyy}\n" +
+                    "──────────────────\n" +
+                    $"• Hóa đơn hôm nay: {todays.Count}\n" +
+                    $"• Doanh thu: {Theme.Vnd(revenue)}\n" +
+                    (todays.Count > 0 ? string.Join("\n", byMethod) + "\n" : "") +
+                    $"• Đơn đang chờ / đang pha chế: {active}";
+
+                MsgBox.Show(owner, report, "Báo cáo POS", MsgBox.MessageBoxType.Info);
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không tải được dữ liệu báo cáo (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+            }
         }
 
         // Hiển thị hóa đơn sau khi thanh toán + mã QR feedback độc nhất theo orderId
@@ -787,23 +1437,21 @@ namespace GUI
             g.FillRectangle(b, (ox + 2) * cell, (oy + 2) * cell, 3 * cell, 3 * cell);
         }
 
-        // Dialog tách hóa đơn: chọn món → tách sang HĐ2, phần còn lại ở HĐ1
-        private void ShowSplitBillDialog()
+        // Dialog chọn món + SL từ giỏ hiện tại (dùng cho Tách HĐ và Tách bàn).
+        // Trả về null nếu hủy; dict rỗng nếu không chọn gì hợp lệ.
+        private Dictionary<string, (int qty, long price)>? PickItemsDialog(string title, string hint)
         {
-            if (_orderItems.Count == 0)
-            {
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đơn hàng trống, không thể tách hóa đơn.", "Thông báo", MsgBox.MessageBoxType.Warning);
-                return;
-            }
+            var owner = MsgBox.OwnerWindow(this);
+            var frm = WindowChrome.CreateDialog(title, new Size(500, 420), out var content, owner);
 
-            var frm = WindowChrome.CreateDialog("Tách hóa đơn", new Size(500, 420),
-                                                out var content, MsgBox.OwnerWindow(this));
-
-            content.Controls.Add(new Label { Text = "Chọn món cần tách sang Hóa đơn 2:", AutoSize = true, Font = Theme.F(10F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
-            content.Controls.Add(new Label { Text = "Tick + nhập SL tách. Phần còn lại ở lại Hóa đơn 1.", AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 40), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = title, AutoSize = true, Font = Theme.F(10F, FontStyle.Bold), ForeColor = Theme.TextHi, Location = new Point(20, 16), BackColor = Color.Transparent });
+            content.Controls.Add(new Label { Text = hint, AutoSize = true, Font = Theme.F(9F), ForeColor = Theme.TextMuted, Location = new Point(20, 40), BackColor = Color.Transparent });
 
             var dgv = new Guna2DataGridView { Location = new Point(16, 70), Size = new Size(460, 240) };
             Theme.StyleGrid(dgv);
+            // StyleGrid đặt ReadOnly=true → phải mở lại, nếu không sẽ KHÔNG tick/nhập SL được
+            dgv.ReadOnly = false;
+            dgv.EditMode = DataGridViewEditMode.EditOnEnter;
             dgv.BindingContext = new BindingContext();   // sinh cột ngay khi bind (frm chưa hiển thị)
             content.Controls.Add(dgv);
 
@@ -815,49 +1463,48 @@ namespace GUI
             dt.Columns.Add("Đơn giá", typeof(long));
 
             foreach (var (name, (qty, price)) in _orderItems)
-                dt.Rows.Add(false, name, qty, 0, price);
+                dt.Rows.Add(false, name, qty, qty, price);
 
             dgv.AutoGenerateColumns = true;   // StyleGrid tắt auto-gen; lưới tạo trong code cần bật lại để sinh cột từ DataTable
             dgv.DataSource = dt;
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgv.Columns["Tách"].FillWeight    = 8;
-            dgv.Columns["Món"].FillWeight     = 36;
+            dgv.Columns["Tách"].FillWeight    = 10;
+            dgv.Columns["Món"].FillWeight     = 34;
             dgv.Columns["SL hiện"].FillWeight = 14;
             dgv.Columns["SL tách"].FillWeight = 14;
             dgv.Columns["Đơn giá"].FillWeight = 18;
+            dgv.Columns["Món"].ReadOnly     = true;
+            dgv.Columns["SL hiện"].ReadOnly = true;
+            dgv.Columns["Đơn giá"].ReadOnly = true;
             dgv.Columns["Đơn giá"].DefaultCellStyle.Format    = "N0";
             dgv.Columns["Đơn giá"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            var btnConfirm = Theme.PrimaryButton("✂  Xác nhận tách");
-            btnConfirm.Size     = new Size(160, 36);
-            btnConfirm.Location = new Point(200, 330);
+            Dictionary<string, (int qty, long price)>? result = null;
+
+            var btnConfirm = Theme.PrimaryButton("Xác nhận");
+            btnConfirm.Size     = new Size(150, 36);
+            btnConfirm.Location = new Point(210, 330);
             btnConfirm.Click   += (s2, e2) =>
             {
-                var bill2 = new Dictionary<string, (int qty, long price)>();
+                dgv.EndEdit();
+                var picked = new Dictionary<string, (int qty, long price)>();
                 foreach (DataRow row in dt.Rows)
                 {
-                    if (!(bool)row["Tách"]) continue;
-                    int splitQty = (int)row["SL tách"];
+                    if (row["Tách"] is not bool ticked || !ticked) continue;
+                    int splitQty = row["SL tách"] is int v ? v : 0;
                     if (splitQty <= 0) continue;
                     string itemName = row["Món"].ToString()!;
-                    if (!_orderItems.ContainsKey(itemName)) continue;
-                    var (origQty, origPrice) = _orderItems[itemName];
-                    if (splitQty >= origQty)
-                        _orderItems.Remove(itemName);
-                    else
-                        _orderItems[itemName] = (origQty - splitQty, origPrice);
-                    bill2[itemName] = (splitQty, origPrice);
+                    if (!_orderItems.TryGetValue(itemName, out var orig)) continue;
+                    picked[itemName] = (Math.Min(splitQty, orig.qty), orig.price);
                 }
-                if (bill2.Count == 0)
+                if (picked.Count == 0)
                 {
-                    MsgBox.Show(frm, "Chưa chọn món nào hoặc SL tách = 0!", "Thông báo", MsgBox.MessageBoxType.Warning);
+                    MsgBox.Show(frm, "Chưa tick món nào hoặc SL tách = 0!", "Thông báo", MsgBox.MessageBoxType.Warning);
                     return;
                 }
-                RefreshOrderGrid();
+                result = picked;
+                frm.DialogResult = DialogResult.OK;
                 frm.Close();
-                long bill2Total = bill2.Sum(kv => kv.Value.qty * kv.Value.price);
-                string items2   = string.Join("\n", bill2.Select(kv => $"  • {kv.Key} × {kv.Value.qty}   {Theme.Vnd(kv.Value.qty * kv.Value.price)}"));
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Tách thành công!\n\nHÓA ĐƠN 2:\n{items2}\n\nTổng HĐ2: {Theme.Vnd(bill2Total)}", "Tách hóa đơn", MsgBox.MessageBoxType.Success);
             };
             content.Controls.Add(btnConfirm);
 
@@ -867,7 +1514,109 @@ namespace GUI
             btnCancel.Click   += (s2, e2) => frm.Close();
             content.Controls.Add(btnCancel);
 
-            frm.ShowDialog(MsgBox.OwnerWindow(this));
+            frm.ShowDialog(owner);
+            return result;
+        }
+
+        // TÁCH HÓA ĐƠN: chọn món → THANH TOÁN RIÊNG phần tách ngay (tạo đơn + phiếu thu riêng),
+        // phần còn lại ở lại hóa đơn của bàn.
+        private async void ShowSplitBillDialog()
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            if (_orderItems.Count == 0)
+            {
+                MsgBox.Show(owner, "Đơn hàng trống, không thể tách hóa đơn.", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+
+            var bill2 = PickItemsDialog("Tách hóa đơn — thanh toán riêng phần tách",
+                                        "Tick + nhập SL tách. Phần tách sẽ thanh toán ngay, phần còn lại ở lại đơn.");
+            if (bill2 == null || bill2.Count == 0) return;
+
+            long bill2Total = bill2.Sum(kv => kv.Value.qty * kv.Value.price);
+            bool paid = PaymentDialog.Pay(owner, bill2Total, _currentTable, "Khách lẻ (tách HĐ)", out string method);
+            if (!paid) return;
+
+            // Đơn riêng cho phần tách: món coi như đã phục vụ (không đưa lại hàng chờ pha chế)
+            var items2 = new Dictionary<string, OrderItemDTO>();
+            int i = 1;
+            foreach (var (name, (qty, price)) in bill2)
+            {
+                _foodByName.TryGetValue(name, out var f);
+                items2[$"ctd_{i:000}"] = new OrderItemDTO { FoodId = f?.Id, Quantity = qty, UnitPrice = price, Note = "", CookingStatus = "hoan_thanh" };
+                i++;
+            }
+
+            string orderId2;
+            try
+            {
+                var order2 = new OrderDTO
+                {
+                    TableId    = _currentTableId,
+                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                    CreatedAt  = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    Status     = "hoan_thanh",
+                    Note       = $"Tách hóa đơn từ {_currentTable}",
+                    Source     = "pos",
+                    Items      = items2
+                };
+                var (ok, msg, id2) = await OrderBUS.Add(order2);
+                if (!ok || id2 == null)
+                {
+                    MsgBox.Show(owner, $"Không lưu được hóa đơn tách: {msg}", "Lỗi", MsgBox.MessageBoxType.Error);
+                    return;
+                }
+                orderId2 = id2;
+
+                await PaymentBUS.Add(new PaymentDTO
+                {
+                    OrderId = orderId2,
+                    EmployeeId = GlobalSession.CurrentUser?.EmployeeId,
+                    Method = MapMethod(method),
+                    Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    TotalAmount = bill2Total,
+                    Discount = 0,
+                    ActualReceived = bill2Total
+                });
+            }
+            catch
+            {
+                MsgBox.Show(owner, "Không lưu được hóa đơn tách (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+
+            // Trừ phần đã tách khỏi giỏ; đồng bộ lại đơn gốc nếu đã gửi bếp
+            foreach (var (name, (qty, _)) in bill2)
+            {
+                if (!_orderItems.TryGetValue(name, out var cur)) continue;
+                if (qty >= cur.qty) _orderItems.Remove(name);
+                else _orderItems[name] = (cur.qty - qty, cur.price);
+            }
+            RefreshOrderGrid();
+            if (_currentOrderId != null)
+            {
+                try
+                {
+                    if (_orderItems.Count == 0)
+                    {
+                        // tách hết & đã thanh toán → đơn gốc đóng, trả bàn
+                        await OrderBUS.Update(_currentOrderId, new { trang_thai = "huy", ghi_chu = "Đã tách toàn bộ sang hóa đơn riêng" });
+                        if (_currentTableId != null)
+                            await TableBUS.Update(_currentTableId, new { trang_thai = "trong" });
+                        ResetAfterPayment();
+                    }
+                    else
+                    {
+                        await OrderBUS.Update(_currentOrderId, new { chi_tiet_don = BuildItemsDict() });
+                    }
+                }
+                catch { }
+            }
+
+            string items2Text = string.Join("\n", bill2.Select(kv => $"  • {kv.Key} × {kv.Value.qty}   {Theme.Vnd(kv.Value.qty * kv.Value.price)}"));
+            MsgBox.Show(owner,
+                $"Đã tách & thanh toán riêng!\n\nHÓA ĐƠN TÁCH ({MethodDisplay(MapMethod(method))}):\n{items2Text}\n\nTổng: {Theme.Vnd(bill2Total)}\nMã HĐ: {orderId2}",
+                "Tách hóa đơn", MsgBox.MessageBoxType.Success);
         }
     }
 }

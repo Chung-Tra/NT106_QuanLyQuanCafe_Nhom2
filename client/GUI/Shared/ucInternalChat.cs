@@ -16,12 +16,18 @@ namespace GUI
         // 1. Gọi ông quản lý chat lên
         private readonly ChatManager _chatManager;
 
+        // Danh bạ (đúng thứ tự item trong combo, lệch 1 vì item[0] là "Gửi cho tất cả")
+        private readonly List<EmployeeDTO> _contacts = new();
+        // Những người đang có tin nhắn riêng CHƯA đọc (để hiện dấu ● trong combo)
+        private readonly HashSet<string> _unreadFrom = new();
+
         public ucInternalChat()
         {
             InitializeComponent();
 
             // 2. Giao phó listbox cho ông manager
             _chatManager = new ChatManager(this, lstChatHistory);
+            _chatManager.BackgroundPrivateMessage += OnBackgroundPrivateMessage;
 
             this.Load += async (s, e) =>
             {
@@ -34,6 +40,8 @@ namespace GUI
                     await LoadStaffData();
                     // Kết nối SignalR ở luồng nền — mọi cập nhật UI trong ChatManager đều qua Invoke
                     await Task.Run(_chatManager.ConnectToChatServer);
+                    // Vào sẵn mọi phòng riêng để nhận tin nhắn riêng kể cả khi đang mở thread khác
+                    await _chatManager.JoinAllPrivateRoomsAsync(_contacts.Select(c => c.EmployeeId ?? ""));
                     cmbChatTarget.SelectedIndexChanged += OnChatTargetChanged;
 
                     // Sau khi kết nối xong mới JoinRoom và tải lịch sử
@@ -75,13 +83,15 @@ namespace GUI
                 List<EmployeeDTO> allEmployees = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
 
                 cmbChatTarget.Items.Clear();
+                _contacts.Clear();
                 cmbChatTarget.Items.Add("--- Gửi cho tất cả (Chat nhóm) ---");
 
                 if (allEmployees != null)
                 {
                     foreach (var emp in allEmployees.Where(x => x.Status == "active" && x.EmployeeId != GlobalSession.CurrentUser?.EmployeeId))
                     {
-                        cmbChatTarget.Items.Add($"[{emp.EmployeeId}] {emp.FullName} ({emp.Role})");
+                        _contacts.Add(emp);
+                        cmbChatTarget.Items.Add(FormatContact(emp));
                     }
                 }
 
@@ -121,8 +131,8 @@ namespace GUI
                 return em;
             }
 
-            // Lấy nội dung item an toàn
-            string? selectedItem = cmbChatTarget.SelectedItem?.ToString();
+            // Lấy nội dung item an toàn (bỏ dấu "● " chưa đọc nếu có)
+            string? selectedItem = cmbChatTarget.SelectedItem?.ToString()?.TrimStart('●', ' ');
             if (string.IsNullOrEmpty(selectedItem) || !selectedItem.Contains(']'))
             {
                 em.EmployeeId = "";
@@ -133,6 +143,33 @@ namespace GUI
             em.EmployeeId = selectedItem.Split(']')[0].Trim('[') ?? "nv_000";
             em.FullName = selectedItem.Split(']')[1].Trim().Split('(')[0].Trim() ?? "Unknown";
             return em;
+        }
+
+        // Định dạng 1 dòng liên hệ trong combo; thêm "● " nếu còn tin chưa đọc từ người đó.
+        private string FormatContact(EmployeeDTO emp)
+        {
+            string mark = _unreadFrom.Contains(emp.EmployeeId ?? "") ? "● " : "";
+            return $"{mark}[{emp.EmployeeId}] {emp.FullName} ({emp.Role})";
+        }
+
+        // Có tin riêng đến khi đang mở thread khác → đánh dấu "● " cho người gửi trong combo.
+        // Chạy trên UI thread (ChatManager đã Invoke) nên thao tác combo an toàn.
+        private void OnBackgroundPrivateMessage(string senderId, string senderName)
+        {
+            if (string.IsNullOrEmpty(senderId)) return;
+            if (senderId == _chatManager.CurrentTargetId) return; // đang mở đúng thread thì thôi
+            if (_unreadFrom.Add(senderId))
+                RefreshContactMarker(senderId);
+        }
+
+        // Vẽ lại đúng 1 item trong combo (không đụng SelectedIndex).
+        private void RefreshContactMarker(string empId)
+        {
+            int idx = _contacts.FindIndex(c => c.EmployeeId == empId);
+            if (idx < 0) return;
+            int itemIndex = idx + 1; // +1 vì item[0] là "--- Gửi cho tất cả ---"
+            if (itemIndex < cmbChatTarget.Items.Count)
+                cmbChatTarget.Items[itemIndex] = FormatContact(_contacts[idx]);
         }
 
         private async void BtnBroadcast_Click(object? sender, EventArgs e)
@@ -174,6 +211,9 @@ namespace GUI
         private async void OnChatTargetChanged(object? sender, EventArgs e)
         {
             var emp = GetEmployeeFromCombo();
+            // Mở thread của ai thì xóa dấu "● chưa đọc" của người đó
+            if (!string.IsNullOrEmpty(emp.EmployeeId) && _unreadFrom.Remove(emp.EmployeeId))
+                RefreshContactMarker(emp.EmployeeId);
             await _chatManager.SwitchChatRoom(emp.EmployeeId ?? "", emp.FullName ?? "Chat nhóm");
             UpdateChatHeader();
         }
@@ -187,7 +227,7 @@ namespace GUI
             }
             else
             {
-                string raw = cmbChatTarget.SelectedItem?.ToString() ?? "";
+                string raw = (cmbChatTarget.SelectedItem?.ToString() ?? "").TrimStart('●', ' ');
                 string name = raw.Contains(']') ? raw.Split(']')[1].Trim().Split('(')[0].Trim() : raw;
                 lblCurrentChat.Text = name;
                 lblCurrentChat.ForeColor = Color.FromArgb(31, 138, 154);

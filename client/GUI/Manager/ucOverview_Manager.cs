@@ -19,6 +19,12 @@ namespace GUI
         {
             InitializeComponent();
             _feed = new NotificationFeed(lstNotifications, lblNotifTitle);
+            // Click đánh dấu đã đọc trong feed -> lưu xuống Firebase để không mất khi làm mới
+            _feed.ItemMarkedRead += it =>
+            {
+                if (!string.IsNullOrEmpty(it.Id))
+                    _ = NotificationBUS.Update(it.Id, new { da_doc = true });
+            };
             btnRefreshFeed.Click += (s, e) => _ = RefreshAll();
             this.Load += (s, e) => _ = RefreshAll();
         }
@@ -51,6 +57,7 @@ namespace GUI
             "don_moi" => "🛎️",
             "cham_cong" => "🕐",
             "sua_nguyen_lieu" => "📦",
+            "tin_nhan" => "💬",
             _ => "🔔"
         };
 
@@ -91,13 +98,15 @@ namespace GUI
             try
             {
                 var notifs = await NotificationBUS.GetAll();
-                foreach (var n in notifs.Values
-                    .Where(x => x.ReceiverId == myId)
-                    .OrderByDescending(x => x.Timestamp)
+                foreach (var kv in notifs
+                    .Where(x => x.Value.ReceiverId == myId)
+                    .OrderByDescending(x => x.Value.Timestamp)
                     .Take(30))
                 {
+                    var n = kv.Value;
                     items.Add(new NotificationFeed.Item
                     {
+                        Id = kv.Key,
                         Icon = IconFor(n.Type),
                         Time = n.Timestamp > 0 ? DateTimeOffset.FromUnixTimeMilliseconds(n.Timestamp).LocalDateTime.ToString("HH:mm") : "",
                         Text = n.Content ?? "",
@@ -108,7 +117,7 @@ namespace GUI
             catch { /* offline */ }
 
             if (items.Count == 0)
-                items.Add(new NotificationFeed.Item { Icon = "🔔", Time = "", Text = "Chưa có thông báo mới." });
+                items.Add(new NotificationFeed.Item { Icon = "🔔", Time = "", Text = "Chưa có thông báo mới.", IsRead = true });
 
             _feed.SetItems(items);
         }

@@ -94,6 +94,15 @@ if ($WithClient -and -not $BackendOnly) {
     Start-Sleep -Seconds 5
 
     $clientPath = Join-Path $root 'client\GUI'
+    $exePath = Join-Path $clientPath 'bin\Debug\net8.0-windows7.0\GUI.exe'
+
+    # Giết GUI.exe cũ còn chạy ngầm để giải phóng file-lock trước khi build.
+    . (Join-Path $PSScriptRoot 'stop-client.ps1')
+    $stopped = Stop-GuiClients -ExePath $exePath
+    if ($stopped -gt 0) {
+        Write-Host "  Đã dừng $stopped GUI.exe đang chạy ngầm." -ForegroundColor DarkYellow
+    }
+
     Push-Location $clientPath
 
     Write-Host "  Building..." -ForegroundColor Gray
@@ -104,7 +113,6 @@ if ($WithClient -and -not $BackendOnly) {
         exit 1
     }
 
-    $exePath = Join-Path $clientPath 'bin\Debug\net8.0-windows7.0\GUI.exe'
     if (Test-Path $exePath) {
         Start-Process -FilePath $exePath
         Write-Host "  Đã khởi chạy GUI.exe" -ForegroundColor Magenta

@@ -63,22 +63,23 @@ Chạy trong PowerShell tại thư mục gốc repo — lệnh này copy chuỗi
    | `ChatApi__BaseUrl` | `https://qlcafe-backend.onrender.com/api/` (URL backend + `/api/`, **có `/` cuối**) |
    | `ChatApi__ServerSecret` | đúng bằng `APP_SECRET_KEY` ở trên |
 
-   > Tên miền là `<tên-service>.onrender.com`. Nếu tên `qlcafe-backend` đã có người dùng,
-   > Render sẽ thêm hậu tố (vd `qlcafe-backend-x7ab`) — sau khi tạo xong, xem URL thật
-   > ở đầu trang service rồi sửa lại `ChatApi__BaseUrl` cho khớp (Environment → Edit).
+   > ⚠️ **URL trong tài liệu này chỉ là ví dụ.** Tên `qlcafe-backend.onrender.com` **đã có người khác dùng**
+   > (curl vào sẽ gặp 403 của app lạ) — Render sẽ tự thêm hậu tố cho bạn, vd `qlcafe-backend-x7ab.onrender.com`.
+   > **URL thật** xem tại: Dashboard → bấm vào service → dòng link ngay dưới tên service.
+   > Lấy URL thật đó để: điền `ChatApi__BaseUrl` (Environment → Edit), điền `App.config`, và test `/health`.
 
 3. **Apply** → Render tự build + deploy cả hai (backend ~2 phút, chat server build Docker ~5 phút).
 
 ### Kiểm tra sau deploy
 
-```bash
-# Backend sống?
-curl https://qlcafe-backend.onrender.com/health
-# → {"status":"ok"}
+Mở bằng trình duyệt (hoặc curl):
 
-# Chat server sống? (xem tab Logs của qlcafe-chat, phải thấy dòng:)
-# [CLOUD] QLCafe Chat Server (SignalR) — listening on 0.0.0.0:10000, hub: /chathub
-```
+- `https://qlcafe-backend-vg5g.onrender.com/health` → `{"status":"ok"}`
+- `https://qlcafe-chat.onrender.com/` → dòng chữ **"QLCafe Chat Server (SignalR) — OK. Hub endpoint: /chathub"**
+  (đừng mở `/chathub` trực tiếp — đó là endpoint SignalR, trình duyệt sẽ chỉ thấy "Connection ID required")
+
+> ✅ **URL thật của nhóm (đã deploy 07/2026):** backend = `https://qlcafe-backend-vg5g.onrender.com`
+> (tên `qlcafe-backend` bị chiếm nên Render thêm hậu tố `-vg5g`), chat = `https://qlcafe-chat.onrender.com`.
 
 Muốn chắc chắn chat lưu được tin nhắn: gửi 1 tin trong app rồi xem node `/tin_nhan` trên Firebase Console.
 
@@ -90,8 +91,8 @@ Sửa [`client/GUI/App.config`](../client/GUI/App.config):
 
 ```xml
 <appSettings>
-    <!-- Backend REST -->
-    <add key="ApiBaseUrl" value="https://qlcafe-backend.onrender.com/api/"/>
+    <!-- Backend REST (URL thật của nhóm — chú ý hậu tố -vg5g) -->
+    <add key="ApiBaseUrl" value="https://qlcafe-backend-vg5g.onrender.com/api/"/>
     <!-- Chat: điền URL ĐẦY ĐỦ kèm /chathub (client tự nhận dạng giá trị bắt đầu bằng http) -->
     <add key="ChatServerIP" value="https://qlcafe-chat.onrender.com/chathub"/>
 </appSettings>
@@ -139,8 +140,11 @@ docker run --rm -p 8080:8080 -e PORT=8080 `
 ```
 
 - Log phải hiện: `[CLOUD] QLCafe Chat Server (SignalR) — listening on 0.0.0.0:8080, hub: /chathub`
+- **Kiểm tra nhanh nhất:** mở `http://localhost:8080/` bằng trình duyệt → thấy chữ
+  *"QLCafe Chat Server (SignalR) — OK"*. (`/health` → `{"status":"ok"}`.)
+  Đừng mở `/chathub` — trình duyệt sẽ chỉ thấy "Connection ID required" (bình thường, đó là endpoint SignalR).
+- Test sâu hơn: `curl -X POST "http://localhost:8080/chathub/negotiate?negotiateVersion=1"` → nhận JSON `connectionId` (HTTP 200).
 - `host.docker.internal` = localhost của máy thật (để container gọi được backend đang chạy ngoài Docker).
-- Test nhanh hub sống: `curl -X POST "http://localhost:8080/chathub/negotiate?negotiateVersion=1"` → nhận JSON `connectionId` (HTTP 200).
 - Client trỏ vào: `ChatServerIP` = `http://localhost:8080/chathub`. Dừng: `Ctrl+C`.
 
 ---

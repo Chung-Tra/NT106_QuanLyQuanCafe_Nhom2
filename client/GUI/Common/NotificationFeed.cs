@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -12,6 +13,7 @@ namespace GUI
     {
         public sealed class Item
         {
+            public string Id = "";   // khoá node /thong_bao/{id} để lưu "đã đọc"; rỗng = tin ảo (placeholder)
             public string Icon = "🔔";
             public string Time = "";
             public string Text = "";
@@ -56,6 +58,14 @@ namespace GUI
 
         public int UnreadCount => _items.Count(i => !i.IsRead);
 
+        // Phát mỗi khi số tin chưa đọc thay đổi (nạp lại / click đánh dấu đã đọc)
+        // để màn chủ đồng bộ các label/card đếm riêng ngoài feed.
+        public event Action<int>? UnreadChanged;
+
+        // Phát khi người dùng click 1 tin để chuyển sang đã đọc,
+        // để màn chủ lưu trạng thái xuống Firebase (không mất khi làm mới).
+        public event Action<Item>? ItemMarkedRead;
+
         // Chưa đọc trước, đã đọc sau; trong mỗi nhóm giữ nguyên thứ tự nguồn (OrderBy ổn định)
         private void Render()
         {
@@ -68,6 +78,7 @@ namespace GUI
             int unread = UnreadCount;
             _title.Text = unread > 0 ? $"{_baseTitle}  —  {unread} chưa đọc"
                                      : $"{_baseTitle}  —  đã đọc hết ✓";
+            UnreadChanged?.Invoke(unread);
         }
 
         private void OnMouseDown(object? sender, MouseEventArgs e)
@@ -78,6 +89,7 @@ namespace GUI
             {
                 it.IsRead = true;
                 Render();
+                ItemMarkedRead?.Invoke(it);
             }
         }
 

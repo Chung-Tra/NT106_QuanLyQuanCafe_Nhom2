@@ -15,12 +15,14 @@ namespace GUI
         private static readonly ConditionalWeakTable<ScrollableControl, object> _attachedPanels = new();
 
         // Quét đệ quy mọi DataGridView + Panel AutoScroll trong 1 container và attach.
+        // Chốt danh sách (ToList) TRƯỚC khi attach: Attach/AttachPanel thêm overlay vào
+        // chính cây control đang duyệt — sửa collection giữa lúc enumerate là mầm lỗi.
         public static void AttachAll(Control container)
         {
             if (container == null) return;
-            foreach (var dgv in FindAllDgvs(container))
+            foreach (var dgv in System.Linq.Enumerable.ToList(FindAllDgvs(container)))
                 Attach(dgv);
-            foreach (var panel in FindAllScrollPanels(container))
+            foreach (var panel in System.Linq.Enumerable.ToList(FindAllScrollPanels(container)))
                 AttachPanel(panel);
         }
 
@@ -43,6 +45,21 @@ namespace GUI
                 foreach (var nested in FindAllScrollPanels(c)) yield return nested;
             }
         }
+
+        // Overlay (cover/thanh teal) KHÔNG được thêm vào TableLayoutPanel: TLP ép mọi
+        // control con vào ô lưới → sinh "hàng ma" chiếm chỗ (cột kanban KDS lùn nửa màn)
+        // và Bounds tự đặt bị TLP ghi đè (vạch teal kẹt đáy). Leo lên tổ tiên gần nhất
+        // không phải TLP rồi quy đổi toạ độ qua BoundsIn.
+        private static Control OverlayHost(Control c)
+        {
+            Control host = c.Parent!;
+            while (host is TableLayoutPanel && host.Parent != null) host = host.Parent;
+            return host;
+        }
+
+        // Bounds của control quy về toạ độ client của host (đi xuyên các container ở giữa).
+        private static Rectangle BoundsIn(Control host, Control c) =>
+            host.RectangleToClient(c.Parent!.RectangleToScreen(c.Bounds));
 
         // DataGridView: scroll wheel di chuyển selection row + hiện thanh teal fade
         public static void Attach(DataGridView dgv)
@@ -87,23 +104,31 @@ namespace GUI
             }
             EnsureTailGutter();
 
-            // Che thanh scrollbar gốc
+            // Che thanh scrollbar gốc (host = tổ tiên gần nhất không phải TLP)
+            var host = OverlayHost(dgv);
             var cover = new Panel { BackColor = dgv.BackgroundColor, Width = rail, Visible = true };
-            dgv.Parent.Controls.Add(cover);
-            cover.Location = new Point(dgv.Right - 18, dgv.Top);
-            cover.Height = dgv.Height;
+            host.Controls.Add(cover);
+
+            void PlaceCover()
+            {
+                if (host.IsDisposed || dgv.IsDisposed || !dgv.IsHandleCreated) return;
+                var r = BoundsIn(host, dgv);
+                cover.Location = new Point(r.Right - 18, r.Top);
+                cover.Height = r.Height;
+            }
+            PlaceCover();
             cover.BringToFront();
 
             dgv.SizeChanged += (s, e) =>
             {
-                cover.Location = new Point(dgv.Right - 18, dgv.Top);
-                cover.Height = dgv.Height;
+                PlaceCover();
                 EnsureTailGutter();
             };
+            dgv.LocationChanged += (s, e) => PlaceCover();
 
             // Thanh teal indicator
             var indicator = new Panel { BackColor = Color.FromArgb(31, 138, 154), Width = 4, Visible = false };
-            dgv.Parent.Controls.Add(indicator);
+            host.Controls.Add(indicator);
             indicator.BringToFront();
 
             var fadeTimer = new System.Windows.Forms.Timer { Interval = 900 };
@@ -123,7 +148,8 @@ namespace GUI
                 int thumbH = Math.Max(20, trackH * displayed / Math.Max(1, dgv.RowCount));
                 int thumbY = (int)((trackH - thumbH) * Math.Clamp(ratio, 0f, 1f));
 
-                indicator.Bounds = new Rectangle(dgv.Right - 8, dgv.Top + 4 + thumbY, 4, thumbH);
+                var r = BoundsIn(host, dgv);
+                indicator.Bounds = new Rectangle(r.Right - 8, r.Top + 4 + thumbY, 4, thumbH);
                 indicator.Visible = true;
                 fadeTimer.Stop();
                 fadeTimer.Start();
@@ -213,9 +239,22 @@ namespace GUI
             sc.HandleDestroyed += (s, e) => stripper.ReleaseHandle();
             Hook();
 
-            // Thanh teal indicator (nằm đè mép phải panel, tự mờ sau khi ngừng cuộn)
+            // Bảo hiểm: khi panel bị container (vd. TableLayoutPanel) resize dồn dập,
+            // scrollbar trắng có thể được vẽ lại giữa hai NCCALCSIZE → nếu style còn
+            // WS_VSCROLL thì ép tính lại khung để stripper gỡ ngay.
+            sc.Resize += (s, e) =>
+            {
+                if (!sc.IsHandleCreated || sc.IsDisposed) return;
+                if ((GetWindowLong(sc.Handle, GWL_STYLE) & WS_VSCROLL) != 0)
+                    SetWindowPos(sc.Handle, IntPtr.Zero, 0, 0, 0, 0, SWP_FRAMECHANGED_FLAGS);
+            };
+
+            // Thanh teal indicator (nằm đè mép phải panel, tự mờ sau khi ngừng cuộn).
+            // Host phải là tổ tiên KHÔNG phải TLP — thêm thẳng vào TableLayoutPanel sẽ
+            // sinh hàng ma phá bố cục (KDS: 3 cột kanban bị lùn nửa màn).
+            var host = OverlayHost(sc);
             var indicator = new Panel { BackColor = Color.FromArgb(31, 138, 154), Width = 4, Visible = false };
-            sc.Parent.Controls.Add(indicator);
+            host.Controls.Add(indicator);
             indicator.BringToFront();
 
             var fadeTimer = new System.Windows.Forms.Timer { Interval = 900 };
@@ -237,7 +276,8 @@ namespace GUI
                 int thumbH = Math.Max(20, (int)((long)trackH * vs.LargeChange / Math.Max(1, vs.Maximum + 1)));
                 int thumbY = (int)((trackH - thumbH) * ratio);
 
-                indicator.Bounds = new Rectangle(sc.Right - 8, sc.Top + 4 + thumbY, 4, thumbH);
+                var r = BoundsIn(host, sc);
+                indicator.Bounds = new Rectangle(r.Right - 8, r.Top + 4 + thumbY, 4, thumbH);
                 indicator.Visible = true;
                 indicator.BringToFront();
                 fadeTimer.Stop();

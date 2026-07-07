@@ -32,6 +32,7 @@ namespace GUI
             "sua_nguyen_lieu" => "Sửa nguyên liệu",
             "don_moi" => "Đơn mới",
             "sos" => "SOS",
+            "tin_nhan" => "Tin nhắn",
             _ => t ?? "Khác"
         };
 
@@ -215,6 +216,7 @@ namespace GUI
                     "attendance" => "Chấm công",
                     "order" => "Đơn hàng",
                     "security" => "An ninh",
+                    "chat" => "Chat nội bộ",
                     _ => "Trang chủ"
                 };
                 MsgBox.Show(MsgBox.OwnerWindow(this),

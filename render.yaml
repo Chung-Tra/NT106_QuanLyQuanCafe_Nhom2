@@ -8,6 +8,7 @@ services:
     name: qlcafe-backend
     runtime: node
     plan: free
+    autoDeploy: true   # tự deploy mỗi lần push GitHub (chỉ khi file trong rootDir đổi)
     rootDir: backend
     buildCommand: npm ci --omit=dev
     startCommand: node server.js
@@ -35,8 +36,10 @@ services:
     name: qlcafe-chat
     runtime: docker
     plan: free
+    autoDeploy: true   # tự deploy mỗi lần push GitHub (chỉ khi file trong rootDir đổi)
     rootDir: server/ChatServer
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
     envVars:
       - key: ChatApi__BaseUrl
         sync: false          # URL backend sau khi deploy, vd: https://qlcafe-backend.onrender.com/api/

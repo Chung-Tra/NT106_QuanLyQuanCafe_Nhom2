@@ -28,6 +28,13 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Multi-Client Launcher (x$Count)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
+# Dọn các GUI.exe cũ còn chạy ngầm: vừa giải phóng file-lock để build, vừa reset đúng $Count instance.
+. (Join-Path $PSScriptRoot 'stop-client.ps1')
+$stopped = Stop-GuiClients -ExePath $exePath
+if ($stopped -gt 0) {
+    Write-Host "[CLEAN] Đã dừng $stopped GUI.exe đang chạy ngầm." -ForegroundColor DarkYellow
+}
+
 # Build nếu chưa có exe
 if (-not (Test-Path $exePath)) {
     Write-Host "[BUILD] Chưa có GUI.exe — đang build..." -ForegroundColor Yellow

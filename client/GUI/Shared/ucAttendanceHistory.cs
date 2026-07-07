@@ -14,6 +14,8 @@ namespace GUI
     {
         private bool _filterReady;
         private Dictionary<string, string> _empNames = new();
+        // Id nhân viên mà người xem KHÔNG được thấy (manager không xem data admin). Rỗng với admin/nhân viên.
+        private HashSet<string> _hiddenEmpIds = new();
 
         public ucAttendanceHistory()
         {
@@ -45,7 +47,9 @@ namespace GUI
         private async Task InitFilterAsync()
         {
             var user = GlobalSession.CurrentUser;
-            bool isPrivileged = user?.Role?.ToLower() is "admin" or "manager";
+            string role = user?.Role?.ToLower() ?? "";
+            bool isPrivileged = role is "admin" or "manager";
+            bool excludeAdmin = role == "manager";   // manager không được xem data của admin
 
             if (isPrivileged)
             {
@@ -56,6 +60,15 @@ namespace GUI
                 try
                 {
                     var dsNhanVien = await Task.Run(InventoryImportBUS.GetEmployees);
+
+                    // Manager: ghi nhớ id admin để loại khỏi "Tất cả", rồi bỏ admin khỏi danh sách chọn.
+                    _hiddenEmpIds = excludeAdmin
+                        ? dsNhanVien.Where(nv => nv.Role?.ToLower() == "admin" && nv.EmployeeId != null)
+                                    .Select(nv => nv.EmployeeId!).ToHashSet()
+                        : new HashSet<string>();
+                    if (excludeAdmin)
+                        dsNhanVien = dsNhanVien.Where(nv => nv.Role?.ToLower() != "admin").ToList();
+
                     _empNames = dsNhanVien.Where(nv => nv.EmployeeId != null)
                                           .ToDictionary(nv => nv.EmployeeId!, nv => nv.FullName ?? nv.EmployeeId!);
 
@@ -141,7 +154,9 @@ namespace GUI
             {
                 var all = await AttendanceBUS.GetAll();
                 foreach (var cc in all.Values
-                    .Where(a => empId == "ALL" || a.EmployeeId == empId)
+                    .Where(a => empId == "ALL"
+                                    ? !_hiddenEmpIds.Contains(a.EmployeeId ?? "")   // "Tất cả" nhưng bỏ nhân sự bị ẩn (admin với manager)
+                                    : a.EmployeeId == empId)
                     .OrderByDescending(a => a.Date))
                 {
                     if (!DateTime.TryParse(cc.Date, out DateTime d)) continue;

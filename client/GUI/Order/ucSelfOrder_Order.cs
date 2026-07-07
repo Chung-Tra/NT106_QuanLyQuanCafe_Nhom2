@@ -187,6 +187,10 @@ namespace GUI
                 var (ok, msg, _) = await OrderBUS.Add(dto);
                 if (!ok) { MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error); return; }
 
+                // Khách đặt qua QR nghĩa là bàn đang có khách → sơ đồ bàn POS/quản lý thấy ngay
+                if (!string.IsNullOrEmpty(tableId))
+                    try { await TableBUS.Update(tableId, new { trang_thai = "co_khach" }); } catch { }
+
                 await LoadIncoming();
                 string tomTat = string.Join(", ", picks.Select((f, k) => $"{f.Name} × {items[$"ct{k + 1}"].Quantity}"));
                 MsgBox.Show(MsgBox.OwnerWindow(this),

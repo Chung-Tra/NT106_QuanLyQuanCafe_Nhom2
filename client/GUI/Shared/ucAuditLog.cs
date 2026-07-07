@@ -1,4 +1,5 @@
 using BUS;
+using DTO;
 using System;
 using System.Data;
 using System.Drawing;
@@ -46,12 +47,17 @@ namespace GUI
             _dtFull.Columns.Add("Lý do");
             _dtFull.Columns.Add("IP");
 
+            // Quy tắc: Manager xem data mọi role TRỪ admin. Admin xem tất cả.
+            // -> Người xem là manager thì ẩn mọi dòng nhật ký thao tác của admin.
+            bool hideAdmin = GlobalSession.CurrentUser?.Role?.ToLower() == "manager";
+
             try
             {
                 var logs = await AuditLogBUS.GetAll();
                 foreach (var kv in logs.OrderByDescending(x => x.Value.Timestamp))
                 {
                     var l = kv.Value;
+                    if (hideAdmin && l.VaiTro == "Quản trị viên") continue;
                     string time = l.Timestamp > 0
                         ? DateTimeOffset.FromUnixTimeMilliseconds(l.Timestamp).LocalDateTime.ToString("yyyy-MM-dd HH:mm")
                         : "";
