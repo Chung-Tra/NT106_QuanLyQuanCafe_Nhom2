@@ -54,7 +54,17 @@ Chạy trong PowerShell tại thư mục gốc repo — lệnh này copy chuỗi
    | `FIREBASE_STORAGE_BUCKET` | để trống (tự suy ra) hoặc `<project-id>.appspot.com` |
    | `FIREBASE_SERVICE_ACCOUNT_BASE64` | dán chuỗi base64 từ bước 1.2 |
    | `APP_SECRET_KEY` | chuỗi ngẫu nhiên mạnh — **nhớ lại để điền cho chat server** |
-   | `EMAIL_USER` / `EMAIL_PASS` | Gmail + App Password gửi OTP |
+   | `EMAIL_USER` | địa chỉ email đứng tên người gửi OTP — **phải verify trong Brevo** (xem dưới) |
+   | `BREVO_API_KEY` | API key Brevo để gửi OTP qua HTTP API — **bắt buộc trên Render free** (xem dưới) |
+   | `EMAIL_PASS` | Gmail App Password — chỉ dùng khi chạy local/LAN, **trên Render free để trống cũng được** |
+
+   > 📧 **Vì sao cần Brevo?** Từ 26/09/2025 Render **chặn outbound SMTP (port 25/465/587) trên gói free**,
+   > nên gửi OTP qua Gmail SMTP sẽ treo ~2 phút rồi lỗi 500. Backend tự chuyển sang gửi qua
+   > **Brevo HTTP API** (port 443, không bị chặn) khi có `BREVO_API_KEY`. Cách lấy key (miễn phí 300 email/ngày):
+   > 1. Đăng ký tại [brevo.com](https://www.brevo.com) (không cần thẻ).
+   > 2. **Senders & IPs** → **Senders** → **Add a sender** → điền email sẽ đứng tên gửi OTP
+   >    (dùng chính Gmail của bạn) → bấm link xác nhận trong hộp thư. Email này điền vào `EMAIL_USER`.
+   > 3. Góc phải trên → **SMTP & API** → tab **API Keys** → **Generate a new API key** → copy dán vào `BREVO_API_KEY`.
 
    **`qlcafe-chat`:**
 
@@ -180,5 +190,6 @@ docker run --rm -p 8080:8080 -e PORT=8080 `
 | Chat gửi được nhưng tin nhắn **không lưu** vào Firebase | `ChatApi__ServerSecret` ≠ `APP_SECRET_KEY` (backend trả 401), hoặc `ChatApi__BaseUrl` sai/thiếu `/api/`. Xem tab Logs của `qlcafe-chat`: có dòng `[ChatHub] Lỗi lưu tin nhắn`. |
 | Client báo "Không kết nối được server chat (quá 5 giây)" | Chat server đang ngủ (đợi ~1 phút rồi mở lại màn chat), hoặc `ChatServerIP` thiếu `/chathub` ở cuối. |
 | Login lần đầu rất chậm / timeout | Cold start backend — mở `/health` trước. |
-| OTP không gửi được email | Render chặn? Không — Gmail SMTP (587) hoạt động bình thường; kiểm tra `EMAIL_PASS` là **App Password** (không phải mật khẩu Gmail). |
+| OTP treo ~2 phút rồi báo lỗi (HTTP 500) | Render free **chặn outbound SMTP** (từ 26/09/2025) → thiếu `BREVO_API_KEY` nên backend rơi về Gmail SMTP và bị chặn. Điền `BREVO_API_KEY` (mục 2) rồi redeploy. |
+| OTP lỗi ngay: `Không gửi được email OTP: ...` | Đọc phần chi tiết trong log: `EMAIL_USER` chưa verify trong Brevo (Senders), API key sai, hoặc (khi chạy local bằng Gmail) `EMAIL_PASS` không phải **App Password**. |
 | Ảnh upload lỗi `FIREBASE_STORAGE_BUCKET chưa được cấu hình` | Đặt env `FIREBASE_STORAGE_BUCKET=<project-id>.appspot.com` (hoặc `.firebasestorage.app` nếu project mới) rồi redeploy. |

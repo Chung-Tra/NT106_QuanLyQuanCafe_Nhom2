@@ -27,9 +27,11 @@ services:
       - key: APP_SECRET_KEY
         sync: false          # PHẢI trùng với ChatApi__ServerSecret của chat server
       - key: EMAIL_USER
-        sync: false          # Gmail gửi OTP
+        sync: false          # địa chỉ gửi OTP (phải verify trong Brevo → Senders & IPs)
+      - key: BREVO_API_KEY
+        sync: false          # API key Brevo (brevo.com, free 300 email/ngày) — Render free CHẶN SMTP nên phải gửi qua HTTP API
       - key: EMAIL_PASS
-        sync: false          # Gmail App Password
+        sync: false          # Gmail App Password — chỉ dùng khi KHÔNG có BREVO_API_KEY (chạy local/LAN); trên Render free sẽ không gửi được
 
   # ---- 2. Chat Server SignalR (.NET 8, chạy qua Docker) ----
   - type: web

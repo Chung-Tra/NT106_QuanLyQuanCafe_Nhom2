@@ -200,6 +200,9 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Bản build desktop tự đóng gói (GUI.exe ~184MB — vượt giới hạn 100MB của GitHub)
+publish_app_desktop/
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml

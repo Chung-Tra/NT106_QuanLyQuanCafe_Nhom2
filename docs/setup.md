@@ -76,6 +76,8 @@ FIREBASE_STORAGE_BUCKET=
 APP_SECRET_KEY=<tự đặt chuỗi ngẫu nhiên mạnh>
 EMAIL_USER=<gmail của bạn>
 EMAIL_PASS=<gmail app password>
+# Chỉ cần khi deploy Render free (SMTP bị chặn) — xem docs/deploy.md
+BREVO_API_KEY=
 NODE_ENV=development
 ```
 
@@ -175,8 +177,9 @@ URL sau deploy: `https://asia-southeast1-<project>.cloudfunctions.net/api`
 | `FIREBASE_API_KEY`        | Có    | Web API Key cho signIn                                      |
 | `FIREBASE_STORAGE_BUCKET` | Không | Bucket lưu ảnh (`POST /api/upload`); để trống sẽ tự suy ra `<project-id>.appspot.com` |
 | `APP_SECRET_KEY`          | Có    | Secret server-to-server (`X-Server-Secret`) + pepper hash OTP |
-| `EMAIL_USER`              | Có    | Gmail gửi OTP                                               |
-| `EMAIL_PASS`              | Có    | Gmail App Password                                          |
+| `EMAIL_USER`              | Có    | Email đứng tên gửi OTP                                      |
+| `EMAIL_PASS`              | Có*   | Gmail App Password — dùng khi không có `BREVO_API_KEY` (chạy local) |
+| `BREVO_API_KEY`           | Có*   | Gửi OTP qua Brevo HTTP API — bắt buộc trên Render free vì SMTP bị chặn ([deploy.md](deploy.md)) |
 | `NODE_ENV`                | Không | `development` / `production`                                |
 
 

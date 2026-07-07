@@ -125,6 +125,8 @@ FIREBASE_STORAGE_BUCKET=
 APP_SECRET_KEY=<your-secret-key>
 EMAIL_USER=<gmail-address>
 EMAIL_PASS=<gmail-app-password>
+# Chỉ cần khi deploy Render free (SMTP bị chặn) — xem docs/deploy.md
+BREVO_API_KEY=
 NODE_ENV=development
 ```
 
