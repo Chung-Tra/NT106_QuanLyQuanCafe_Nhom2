@@ -56,7 +56,7 @@ client/ (WinForms C#)
 
 ### Nhân sự
 
-- Phân quyền RBAC: **Admin / Manager / Barista / OrderStaff / Security** — **không** còn tài khoản đăng nhập riêng “thủ kho”; tài khoản cũ `stockkeeper` được app xử lý như **Manager** để không mất menu (nên cập nhật `role` trong Firebase cho đồng bộ).
+- Phân quyền RBAC: **Admin / Manager / Barista / OrderStaff / Security** — **không** còn tài khoản đăng nhập riêng “thủ kho”; nghiệp vụ kho nằm trong màn **Sản phẩm & Thực đơn** của Manager. Tài khoản cũ nào còn `role: stockkeeper` trong Firebase cần đổi sang `manager` (role ngoài 5 vai trò trên sẽ không có menu khi đăng nhập).
 - Chấm công, xin nghỉ, tính lương
 - Chat nội bộ giữa nhân viên
 
@@ -84,6 +84,7 @@ client/ (WinForms C#)
 | [Danh mục luồng client](docs/client-flows.md) | Toàn bộ luồng của mọi màn hình + dialog, ma trận BUS → endpoint → node |
 | [Form / UserControl](docs/forms.md)        | Menu theo vai trò, dialog, quy ước UI       |
 | [Hướng dẫn cài đặt](docs/setup.md)         | Setup môi trường, Firebase, deploy chi tiết |
+| [Hướng dẫn deploy miễn phí](docs/deploy.md) | Đưa Backend + ChatServer lên Render (free, không cần thẻ) |
 
 
 ---
@@ -92,7 +93,7 @@ client/ (WinForms C#)
 
 ### Yêu cầu
 
-- Node.js >= 18
+- Node.js >= 18 (khuyến nghị 20 — theo `engines` trong `backend/package.json`)
 - .NET 8 SDK
 - Visual Studio 2022+
 - Tài khoản Firebase (Realtime Database)
@@ -117,12 +118,14 @@ cp backend/.env.example backend/.env
 
 ```env
 PORT=3000
-FIREBASE_DATABASE_URL=https://<your-project>.firebaseio.com
+FIREBASE_DATABASE_URL=https://<project-id>-default-rtdb.asia-southeast1.firebasedatabase.app
 FIREBASE_API_KEY=<your-api-key>
-FIREBASE_STORAGE_BUCKET=<your-project>.appspot.com
+# Tùy chọn — bỏ trống sẽ tự suy ra <project-id>.appspot.com
+FIREBASE_STORAGE_BUCKET=
 APP_SECRET_KEY=<your-secret-key>
 EMAIL_USER=<gmail-address>
 EMAIL_PASS=<gmail-app-password>
+NODE_ENV=development
 ```
 
 > Lấy `serviceAccountKey.json` từ Firebase Console → Project Settings → Service Accounts → Generate new private key, đặt vào `backend/` (đã gitignore).
@@ -135,11 +138,21 @@ EMAIL_PASS=<gmail-app-password>
 .\scripts\start-backend.ps1            # Chỉ Backend Express
 .\scripts\start-server.ps1             # Chỉ ChatServer SignalR
 .\scripts\start-client.ps1             # Chỉ Client WinForms (build + run)
+.\scripts\start-multi-client.ps1 -Count 3  # Mở nhiều client — test chat/đồng thời
 ```
 
 > Các script `*.ps1` dùng **UTF-8 có BOM** để **Windows PowerShell 5.1** đọc đúng chữ Việt trong comment. Nếu sửa script, lưu UTF-8 BOM hoặc chạy bằng **PowerShell 7** (`pwsh`).
 
 Client cũng có thể mở trong Visual Studio: `client/Coffee_Management.sln` → F5
+
+> Client đọc địa chỉ server từ [`client/GUI/App.config`](client/GUI/App.config):
+> `ApiBaseUrl` (backend REST) và `ChatServerIP` (IP LAN **hoặc** URL đầy đủ kèm `/chathub`).
+
+### Deploy lên internet (miễn phí)
+
+Đưa Backend + ChatServer lên **Render** (free, không cần thẻ) để client chạy từ bất kỳ đâu —
+đã có sẵn [`render.yaml`](render.yaml) + [`Dockerfile`](server/ChatServer/Dockerfile),
+làm theo **[docs/deploy.md](docs/deploy.md)** (~15 phút). Xong chỉ cần trỏ lại 2 giá trị trong `App.config`.
 
 ---
 
@@ -165,8 +178,8 @@ Base URL: `http://localhost:3000/api`
 | POST   | `/foods`                 | Thêm món               | Manager+     |
 | PUT    | `/foods/:id`             | Cập nhật món           | Manager+     |
 | DELETE | `/foods/:id`             | Xóa món                | Manager+     |
-| GET    | `/chat/messages?roomId=` | Lịch sử chat           | Bearer token |
-| POST   | `/chat/messages`         | Lưu tin nhắn           | Bearer token |
+| GET    | `/chat/messages?roomId=` | Lịch sử chat           | Bearer token / `X-Server-Secret` |
+| POST   | `/chat/messages`         | Lưu tin nhắn (ChatServer gọi) | Bearer token / `X-Server-Secret` |
 | GET    | `/ingredients`           | Danh sách nguyên liệu  | Bearer token |
 | POST   | `/ingredients`           | Thêm nguyên liệu       | Manager+     |
 | PUT    | `/ingredients/:id`       | Cập nhật nguyên liệu   | Manager+     |
@@ -190,6 +203,7 @@ NT106_QuanLyQuanCafe_Nhom2/
 │   ├── start-backend.ps1          # Chỉ Backend Express
 │   ├── start-server.ps1           # Chỉ ChatServer SignalR
 │   ├── start-client.ps1           # Chỉ Client WinForms
+│   ├── start-multi-client.ps1     # Mở nhiều client (test chat đa user)
 │   └── setup.ps1                  # Cài dependencies lần đầu
 ├── client/                        # WinForms desktop app
 │   ├── BUS/                       # Business logic layer
@@ -209,9 +223,11 @@ NT106_QuanLyQuanCafe_Nhom2/
 │       ├── Logic.Tests/           # xUnit unit tests (logic thuần: AppMath, Validation…)
 │       └── UI_Test_Checklist.md   # Checklist kiểm thử tay từng nút/màn hình
 ├── server/                        # SignalR chat server
-│   ├── Hubs/
-│   │   └── ChatHub.cs
-│   └── Program.cs
+│   ├── ChatServer/
+│   │   ├── Hubs/ChatHub.cs
+│   │   ├── Program.cs
+│   │   └── Dockerfile             # Deploy lên Render/Docker (docs/deploy.md)
+│   └── Server.sln
 ├── backend/                       # Express REST API
 │   ├── src/
 │   │   ├── config/
@@ -224,9 +240,11 @@ NT106_QuanLyQuanCafe_Nhom2/
 │   ├── tests/                     # Jest unit tests
 │   ├── logs/                      # Auto-generated (gitignored)
 │   ├── .env.example
-│   └── server.js
+│   ├── server.js                  # Entry chạy local / Render
+│   └── index.js                   # Entry deploy Firebase Cloud Functions
 ├── .gitignore
 ├── firebase.json
+├── render.yaml                    # Blueprint deploy Render (docs/deploy.md)
 └── README.md
 ```
 
@@ -234,10 +252,10 @@ NT106_QuanLyQuanCafe_Nhom2/
 
 ## Chạy Tests
 
-**157 unit test** (106 xUnit client + 51 Jest backend), tất cả chạy offline — không cần Firebase thật.
+**160 unit test** (106 xUnit client + 54 Jest backend), tất cả chạy offline — không cần Firebase thật.
 
 ```bash
-# Backend (Jest) — 51 test / 7 suite
+# Backend (Jest) — 54 test / 8 suite
 cd backend
 npm test
 
@@ -269,6 +287,7 @@ dotnet test Coffee_Management.sln
 | `controllers/auth.controller.test.js` | Login, check-email, luồng OTP (không lộ mã ra response) |
 | `controllers/employees.controller.test.js` | CRUD nhân viên + sinh id `nv_xxx` |
 | `controllers/foods.controller.test.js` | CRUD món + sinh id max+1 (không vỡ khi có lỗ khóa) |
+| `controllers/inventory.controller.test.js` | Tạo phiếu nhập kho: sinh id `nk_xxx`, server **tính lại** `thanh_tien`, cộng `ton_kho` qua transaction |
 | `controllers/resources.controller.test.js` | Factory CRUD chung đứng sau **23 endpoint** generic (`/tables`, `/orders`, `/payments`…): sinh id theo prefix, bỏ qua id không thuần số, loại field `Id` khỏi update, đẩy lỗi qua error middleware |
 | `controllers/chat.controller.test.js` | Lưu/đọc lịch sử chat theo room |
 | `middlewares/auth.middleware.test.js` | Bearer token, phân quyền Manager/Admin, `X-Server-Secret` |
@@ -294,6 +313,7 @@ Backend sử dụng Winston. Log được ghi tại:
 ## Lưu ý bảo mật
 
 - Không commit `backend/.env` hay `serviceAccountKey.json` vào repo (đã gitignore)
+- `FIREBASE_SERVICE_ACCOUNT_BASE64` (dùng khi deploy — xem [docs/deploy.md](docs/deploy.md)) chứa private key: chỉ dán vào ô env var của hosting, không commit/chia sẻ
 - `APP_SECRET_KEY` dùng cho xác thực server-to-server (`X-Server-Secret` từ ChatServer) và làm *pepper* băm mã OTP — đặt giá trị mạnh, không chia sẻ
 - Firebase Security Rules cần được cấu hình riêng trên Firebase Console
 

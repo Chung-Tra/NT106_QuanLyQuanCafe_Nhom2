@@ -1,0 +1,44 @@
+# Render Blueprint — deploy Backend Express + ChatServer SignalR (gói FREE)
+# Hướng dẫn chi tiết: docs/deploy.md
+# Dùng: Render Dashboard → New → Blueprint → chọn repo này → điền env vars được hỏi.
+
+services:
+  # ---- 1. Backend Express (REST API) ----
+  - type: web
+    name: qlcafe-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FIREBASE_DATABASE_URL
+        sync: false          # điền tay: https://<project-id>-default-rtdb.<region>.firebasedatabase.app
+      - key: FIREBASE_API_KEY
+        sync: false          # Web API Key (Firebase Console → Project Settings)
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false          # có thể để trống — tự suy ra <project-id>.appspot.com
+      - key: FIREBASE_SERVICE_ACCOUNT_BASE64
+        sync: false          # base64 của serviceAccountKey.json — xem docs/deploy.md
+      - key: APP_SECRET_KEY
+        sync: false          # PHẢI trùng với ChatApi__ServerSecret của chat server
+      - key: EMAIL_USER
+        sync: false          # Gmail gửi OTP
+      - key: EMAIL_PASS
+        sync: false          # Gmail App Password
+
+  # ---- 2. Chat Server SignalR (.NET 8, chạy qua Docker) ----
+  - type: web
+    name: qlcafe-chat
+    runtime: docker
+    plan: free
+    rootDir: server/ChatServer
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ChatApi__BaseUrl
+        sync: false          # URL backend sau khi deploy, vd: https://qlcafe-backend.onrender.com/api/
+      - key: ChatApi__ServerSecret
+        sync: false          # trùng APP_SECRET_KEY của backend

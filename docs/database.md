@@ -302,7 +302,7 @@ Room ID format: `chat_nv_{id1}_nv_{id2}` (sorted), hoặc `room_global`.
 }
 ```
 
-### `/danh_sach_chat` — Danh sách hội thoại (index)
+### `/danh_sach_chat` — Danh sách hội thoại (index, dự phòng)
 ```json
 "nv_001": {
   "chat_nv001_nv002": {
@@ -313,6 +313,21 @@ Room ID format: `chat_nv_{id1}_nv_{id2}` (sorted), hoặc `room_global`.
   }
 }
 ```
+> **Dự phòng** — hiện chưa có màn hình nào đọc/ghi node này: danh sách người chat trong
+> `ucInternalChat` dựng trực tiếp từ `/nhan_vien`, lịch sử đọc từ `/tin_nhan`.
+
+### `/password_reset` — Node kỹ thuật (OTP quên mật khẩu)
+```json
+"<sha256(email)>": {
+  "codeHash": "a3f8…",                  // sha256(mã OTP + pepper APP_SECRET_KEY)
+  "expiresAt": 1751700060000,           // mã hết hạn sau 60 giây
+  "attempts": 0,                        // hủy mã sau 5 lần nhập sai
+  "resetTokenHash": "9c1d…",            // token dùng 1 lần sau khi verify OTP
+  "resetTokenExpiresAt": 1751700120000  // token sống 1 phút
+}
+```
+> Do `backend/src/services/otp.service.js` tự tạo/xóa trong luồng quên mật khẩu —
+> **không** tính vào 29 node nghiệp vụ, không có endpoint CRUD.
 
 ---
 

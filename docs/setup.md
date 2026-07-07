@@ -69,8 +69,10 @@ Mở `backend/.env` và điền:
 
 ```env
 PORT=3000
-FIREBASE_DATABASE_URL=https://<project-id>-default-rtdb.firebaseio.com
+FIREBASE_DATABASE_URL=https://<project-id>-default-rtdb.asia-southeast1.firebasedatabase.app
 FIREBASE_API_KEY=<web-api-key>
+# Bucket lưu ảnh — có thể để trống (tự suy ra <project-id>.appspot.com từ serviceAccountKey)
+FIREBASE_STORAGE_BUCKET=
 APP_SECRET_KEY=<tự đặt chuỗi ngẫu nhiên mạnh>
 EMAIL_USER=<gmail của bạn>
 EMAIL_PASS=<gmail app password>
@@ -138,16 +140,22 @@ curl -X POST http://localhost:3000/api/auth/login \
 
 ---
 
-## Deploy lên Firebase
+## Deploy
 
-### Cài Firebase CLI
+> 🚀 **Deploy miễn phí (không cần thẻ)** — đưa cả Backend lẫn ChatServer lên **Render**:
+> xem hướng dẫn đầy đủ tại **[docs/deploy.md](deploy.md)** (đã có sẵn `render.yaml` + `Dockerfile`).
+> Phần dưới đây là phương án thay thế: deploy backend lên Firebase Cloud Functions (cần gói Blaze).
+
+### Deploy backend lên Firebase Cloud Functions
+
+#### Cài Firebase CLI
 
 ```bash
 npm install -g firebase-tools
 firebase login
 ```
 
-### Deploy
+#### Deploy
 
 ```bash
 firebase deploy --only functions
@@ -165,7 +173,7 @@ URL sau deploy: `https://asia-southeast1-<project>.cloudfunctions.net/api`
 | `PORT`                    | Không | Port local (default: 3000)                                  |
 | `FIREBASE_DATABASE_URL`   | Có    | URL Realtime Database                                       |
 | `FIREBASE_API_KEY`        | Có    | Web API Key cho signIn                                      |
-| `FIREBASE_STORAGE_BUCKET` | Có    | Bucket lưu ảnh (dùng cho `POST /api/upload`)                |
+| `FIREBASE_STORAGE_BUCKET` | Không | Bucket lưu ảnh (`POST /api/upload`); để trống sẽ tự suy ra `<project-id>.appspot.com` |
 | `APP_SECRET_KEY`          | Có    | Secret server-to-server (`X-Server-Secret`) + pepper hash OTP |
 | `EMAIL_USER`              | Có    | Gmail gửi OTP                                               |
 | `EMAIL_PASS`              | Có    | Gmail App Password                                          |

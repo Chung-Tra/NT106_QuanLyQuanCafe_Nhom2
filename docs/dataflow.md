@@ -183,7 +183,7 @@ ChatManager.SendMessageAsync
     │
     ▼
 SignalR HubConnection
-    │  InvokeAsync("SendMessageWithRoom", senderId, message, roomId)
+    │  InvokeAsync("SendMessageWithRoom", senderId, senderName, message, roomId)
     ▼
 ChatServer (ChatHub.SendMessageWithRoom)
     │
@@ -196,7 +196,8 @@ ChatServer (ChatHub.SendMessageWithRoom)
     └──▶ SaveMessageAsync (fire-and-forget, không block broadcast)
              │  POST http://localhost:3000/api/chat/messages
              │  Header: X-Server-Secret: <APP_SECRET_KEY>
-             │  Body: { roomId, chatData: { senderId, message, timestamp } }
+             │  Body: { roomId, chatData: { nguoi_gui_id, ten_nguoi_gui,
+             │                              noi_dung, thoi_gian, loai_tin_nhan } }
              ▼
          Backend (chat.controller.saveMessage)
              │  db.ref('tin_nhan/{roomId}').push(chatData)
@@ -234,7 +235,7 @@ GUI → Render từng dòng vào ListBox theo thứ tự thời gian
 Quy tắc tạo `roomId` (trong `ChatBUS.GetRoomId`):
 
 - Chat toàn công ty: `room_global`
-- Chat riêng 2 người: `room_{minId}_{maxId}` (sắp xếp ID để đảm bảo duy nhất)
+- Chat riêng 2 người: `chat_{minId}_{maxId}` (sắp xếp ID để đảm bảo duy nhất — vd `chat_nv_001_nv_002`)
 
 ---
 

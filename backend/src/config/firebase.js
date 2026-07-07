@@ -3,7 +3,21 @@ const admin = require('firebase-admin');
 let storageBucketName = process.env.FIREBASE_STORAGE_BUCKET;
 
 if (admin.apps.length === 0) {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+        // Render / Railway / VPS: service account đưa qua env var
+        // (base64 của serviceAccountKey.json — hosting ngoài GCP không có default credentials)
+        const serviceAccount = JSON.parse(
+            Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf8')
+        );
+        if (!storageBucketName && serviceAccount.project_id) {
+            storageBucketName = `${serviceAccount.project_id}.appspot.com`;
+        }
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL,
+            storageBucket: storageBucketName
+        });
+    } else if (process.env.NODE_ENV === 'production') {
         // Cloud Run / Firebase Functions: dùng default credentials của GCP
         admin.initializeApp({
             databaseURL: process.env.FIREBASE_DATABASE_URL,

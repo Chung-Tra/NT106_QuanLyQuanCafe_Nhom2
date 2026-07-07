@@ -1,7 +1,7 @@
 # Checklist kiểm thử giao diện — NT106 Quản Lý Quán Cafe
 
 Tài liệu này gồm 3 phần:
-1. **Cách chạy unit test tự động** (157 test: 106 xUnit client + 51 Jest backend).
+1. **Cách chạy unit test tự động** (160 test: 106 xUnit client + 54 Jest backend).
 2. **Regression** — kiểm lại 12 lỗi vừa được sửa (làm trước, nhanh).
 3. **Checklist đầy đủ theo màn hình** — từng nút + thanh tìm kiếm/lọc.
 
@@ -16,7 +16,7 @@ Quy ước: ✅ = kết quả mong đợi khi PASS. Mọi thao tác "lưu/duyệ
 cd client/Tests/Logic.Tests
 dotnet test
 
-# Backend (Jest) — 51 test
+# Backend (Jest) — 54 test
 cd backend
 npm test
 ```
@@ -28,6 +28,7 @@ Client phủ 4 khối logic thuần (không cần server, không cần đóng ap
 - `EmployeeText` — mapping vai trò/trạng thái mà các bộ lọc nhân sự phụ thuộc.
 
 Backend (Firebase được mock) phủ: auth controller (login/OTP), employees, foods,
+inventory (nhập kho: tính lại thành tiền + cộng tồn kho),
 **generic CRUD 23 endpoint** (`resources.controller`), chat, auth middleware,
 và `otp.service` (hash+pepper, hết hạn, chặn brute-force, token dùng 1 lần).
 

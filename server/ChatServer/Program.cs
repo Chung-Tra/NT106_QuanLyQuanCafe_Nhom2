@@ -45,7 +45,17 @@ namespace QLCafe.ChatServer
             app.UseCors();
             app.MapHub<ChatHub>("/chathub");
 
-            // Lấy IP máy trong mạng LAN để client khác kết nối được
+            // Cloud (Render/Railway/Docker): hosting cấp PORT qua env var → bind 0.0.0.0
+            string? cloudPort = Environment.GetEnvironmentVariable("PORT");
+            if (!string.IsNullOrEmpty(cloudPort))
+            {
+                app.Urls.Add($"http://0.0.0.0:{cloudPort}");
+                Console.WriteLine($"[CLOUD] QLCafe Chat Server (SignalR) — listening on 0.0.0.0:{cloudPort}, hub: /chathub");
+                app.Run();
+                return;
+            }
+
+            // Local/LAN: lấy IP máy trong mạng LAN để client khác kết nối được
             string serverIp = GetLocalIpAddress();
             int port = 8080;
             string serverUrl = $"http://{serverIp}:{port}";
