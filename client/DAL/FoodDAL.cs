@@ -9,6 +9,7 @@ namespace DAL
 {
     public static class FoodDAL
     {
+        // --- HÀM 1: LẤY DANH SÁCH MÓN ĂN ---
         public static async Task<Dictionary<string, FoodDTO>> GetAllAsync()
         {
             var response = await DalHelper.Client.SendAsync(
@@ -18,7 +19,7 @@ namespace DAL
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Dictionary<string, FoodDTO>>(json) ?? [];
         }
-
+        // --- HÀM 2: THÊM MÓN ĂN MỚI ---
         public static async Task<(bool Success, string Message)> AddAsync(FoodDTO food)
         {
             try
@@ -30,7 +31,7 @@ namespace DAL
                     ? (true, "Thêm món thành công!")
                     : (false, DalHelper.ParseErrorMessage(body));
             }
-            catch (Exception ex) { return (false, "Lỗi kết nối: " + ex.Message); }
+            catch (Exception ex) { return (false, "Lỗi kết nối: " + ex.Message); 
         }
 
         public static async Task<(bool Success, string Message)> UpdateAsync(string foodId, FoodDTO food)
