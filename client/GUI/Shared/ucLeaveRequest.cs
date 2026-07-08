@@ -140,24 +140,22 @@ namespace GUI
             else MsgBox.Show(owner, msg, "Lỗi gửi đơn", MsgBox.MessageBoxType.Error);
         }
 
-        private void BtnReport_Click(object? sender, EventArgs e)
+        private async void BtnReport_Click(object? sender, EventArgs e)
         {
+            var me = GlobalSession.CurrentUser;
             string report =
                 "BÁO CÁO NGHỈ PHÉP\n" +
+                $"Nhân viên: {me?.FullName ?? me?.EmployeeId}\n" +
                 "──────────────────\n" +
                 $"• Ngày phép còn lại: {lblRemainingValue.Text}\n" +
-                $"• Đang chờ duyệt: {lblPendingValue.Text}\n" +
-                "──────────────────\n" +
-                "Gửi báo cáo cho quản lý qua Chat?";
+                $"• Đang chờ duyệt: {lblPendingValue.Text}";
 
-            var result = MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo nghỉ phép", MsgBox.MessageBoxType.Warning);
-            if (result == DialogResult.Yes)
-            {
-                MsgBox.Show(
-                    MsgBox.OwnerWindow(this),
-                    "Đã gửi báo cáo cho quản lý!\nQuản lý sẽ duyệt qua Chat nội bộ.",
-                    "Thành công", MsgBox.MessageBoxType.Success);
-            }
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report + "\n──────────────────\nGửi báo cáo cho quản lý?",
+                            "Báo cáo nghỉ phép", MsgBox.MessageBoxType.Warning) != DialogResult.Yes) return;
+
+            var (ok, msg) = await ManagerReport.SendAsync(report, "xin_nghi", "leave");
+            MsgBox.Show(MsgBox.OwnerWindow(this), msg, ok ? "Thành công" : "Lỗi",
+                        ok ? MsgBox.MessageBoxType.Success : MsgBox.MessageBoxType.Error);
         }
 
         private void BtnManager_Click(object sender, EventArgs e)

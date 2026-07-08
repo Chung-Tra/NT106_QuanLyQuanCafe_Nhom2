@@ -51,8 +51,8 @@ namespace GUI
             {
                 var row = dgvPayroll.CurrentRow;
                 decimal D(string c) => decimal.TryParse(row.Cells[c].Value?.ToString(), out var v) ? v : 0;
-                decimal total = AppMath.PayrollTotal(D("Lương CB"), D("Phụ cấp"), D("Thưởng FB"), D("Thưởng lễ"), D("Trừ lương"));
                 int.TryParse(row.Cells["Ngày công"].Value?.ToString(), out int days);
+                decimal total = AppMath.PayrollTotal(D("Lương CB"), days, D("Phụ cấp"), D("Thưởng FB"), D("Thưởng lễ"), D("Trừ lương"));
 
                 var payload = new
                 {
@@ -164,6 +164,116 @@ namespace GUI
 
         private void cmbMonth_SelectedIndexChanged(object sender, EventArgs e) => _ = LoadRealPayroll();
 
+        // "Chốt công": NGÀY CÔNG lấy từ CHẤM CÔNG THẬT (node cham_cong) thay vì nhập tay —
+        // đây là mắt xích để "ai làm ca thì người đó có công, có lương" (đổi ca đã duyệt →
+        // lịch tuần đổi tên → người làm thay chấm công → chốt công ở đây → ra lương).
+        // Quy tắc: đủ giờ / đi muộn = 1 công, nửa ca = 0.5, nghỉ phép = 0; mỗi ngày tính 1 lần.
+        private async void BtnLockDays_Click(object? sender, EventArgs e)
+        {
+            int month = SelectedMonth();
+            int year = DateTime.Now.Year;
+            var owner = MsgBox.OwnerWindow(this);
+
+            btnLockDays.Enabled = false;
+            try
+            {
+                var attendance = await Task.Run(AttendanceBUS.GetAll);
+                var salaries = await Task.Run(SalaryBUS.GetAll);
+                var emps = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
+
+                // credit theo (nhân viên, ngày) — trùng ngày lấy mức cao nhất
+                var credits = new Dictionary<string, Dictionary<string, double>>();
+                foreach (var a in attendance.Values)
+                {
+                    if (a.EmployeeId == null || !TryParseAttendanceDate(a.Date, out var d)
+                        || d.Month != month || d.Year != year) continue;
+                    double credit = a.Status switch { "nghi_phep" => 0, "nua_ca" => 0.5, _ => 1 };
+                    if (!credits.TryGetValue(a.EmployeeId, out var byDay))
+                        credits[a.EmployeeId] = byDay = new Dictionary<string, double>();
+                    string key = d.ToString("yyyy-MM-dd");
+                    if (!byDay.TryGetValue(key, out var cur) || credit > cur) byDay[key] = credit;
+                }
+
+                if (credits.Count == 0)
+                {
+                    MsgBox.Show(owner, $"Tháng {month}/{year} chưa có dữ liệu chấm công nào.", "Chốt công", MsgBox.MessageBoxType.Info);
+                    return;
+                }
+
+                if (MsgBox.Show(owner,
+                        $"Chốt ngày công tháng {month}/{year} từ chấm công cho {credits.Count} nhân viên?\n" +
+                        "Ngày công + tổng lương trong bảng lương sẽ được ghi đè theo dữ liệu chấm công.",
+                        "Chốt công", MsgBox.MessageBoxType.Warning) != DialogResult.Yes)
+                    return;
+
+                var empById = emps.Where(x => x.EmployeeId != null).ToDictionary(x => x.EmployeeId!, x => x);
+                int updated = 0, created = 0;
+                foreach (var (empId, byDay) in credits)
+                {
+                    int days = (int)Math.Round(byDay.Values.Sum(), MidpointRounding.AwayFromZero);
+
+                    var rec = salaries.FirstOrDefault(s => s.Value.EmployeeId == empId && s.Value.Month == month);
+                    if (rec.Key != null)
+                    {
+                        var s = rec.Value;
+                        decimal total = AppMath.PayrollTotal(s.BaseSalary, days, s.Allowance, s.FeedbackBonus, s.HolidayBonus, s.Deduction);
+                        await SalaryBUS.Update(rec.Key, new
+                        {
+                            ngay_cong = days,
+                            tong_luong = total,
+                            ngay_tinh = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                        });
+                        updated++;
+                    }
+                    else
+                    {
+                        // Chưa có bản ghi lương tháng này → tạo mới, lương CB mặc định theo bộ phận
+                        empById.TryGetValue(empId, out var emp);
+                        decimal baseSalary = BaseSalaryByRole.TryGetValue(EmployeeText.RoleVi(emp?.Role), out var b) ? b : 6000000m;
+                        await SalaryBUS.Add(new SalaryDTO
+                        {
+                            EmployeeId = empId,
+                            Month = month,
+                            Year = year,
+                            WorkDays = days,
+                            BaseSalary = baseSalary,
+                            Allowance = 0,
+                            FeedbackBonus = 0,
+                            HolidayBonus = 0,
+                            Deduction = 0,
+                            DeductionReason = "",
+                            TotalSalary = AppMath.PayrollTotal(baseSalary, days, 0, 0, 0, 0),
+                            Status = "chua_duyet",
+                            CalculatedAt = DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                        });
+                        created++;
+                    }
+                }
+
+                await LoadRealPayroll();
+                MsgBox.Show(owner,
+                    $"Đã chốt công tháng {month}/{year}: cập nhật {updated} bảng lương, tạo mới {created}.\n" +
+                    $"Tổng lương đã tính lại theo công thức (Lương CB ÷ {AppMath.StandardWorkDays} × Ngày công).",
+                    "Chốt công", MsgBox.MessageBoxType.Success);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(owner, "Lỗi chốt công: " + ex.Message, "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { btnLockDays.Enabled = true; }
+        }
+
+        // Ngày chấm công lưu chuỗi nhiều định dạng ("2024-03-31" hoặc "31/03/2024").
+        private static bool TryParseAttendanceDate(string? s, out DateTime d)
+        {
+            d = default;
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            return DateTime.TryParseExact(s.Trim(),
+                new[] { "yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy" },
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out d);
+        }
+
         // Tính lại tổng lương cho tất cả bản ghi của tháng đang chọn rồi lưu.
         private async void btnApplyBP_Click(object sender, EventArgs e)
         {
@@ -175,10 +285,10 @@ namespace GUI
                 foreach (var kv in salaries.Where(s => s.Value.Month == month))
                 {
                     var s = kv.Value;
-                    decimal total = AppMath.PayrollTotal(s.BaseSalary, s.Allowance, s.FeedbackBonus, s.HolidayBonus, s.Deduction);
+                    decimal total = AppMath.PayrollTotal(s.BaseSalary, s.WorkDays, s.Allowance, s.FeedbackBonus, s.HolidayBonus, s.Deduction);
                     if (total != s.TotalSalary)
                     {
-                        await SalaryBUS.Update(kv.Key, new { tong_luong = total });
+                        await SalaryBUS.Update(kv.Key, new { tong_luong = total, ngay_tinh = DateTimeOffset.Now.ToUnixTimeMilliseconds() });
                         updated++;
                     }
                 }
@@ -190,7 +300,9 @@ namespace GUI
             }
 
             MsgBox.Show(MsgBox.OwnerWindow(this),
-                $"Đã tính lại tổng lương cho tháng {month}.\nCập nhật {updated} bản ghi.\n\nTổng lương = Lương CB + Phụ cấp + Thưởng FB + Thưởng lễ − Trừ lương.",
+                $"Đã tính lại tổng lương cho tháng {month}.\nCập nhật {updated} bản ghi.\n\n" +
+                $"Tổng lương = (Lương CB ÷ {AppMath.StandardWorkDays} × Ngày công) + Phụ cấp + Thưởng FB + Thưởng lễ − Trừ lương.\n" +
+                "Mẹo: bấm \"Chốt công\" trước để ngày công lấy từ chấm công thật.",
                 "Tính lương", MsgBox.MessageBoxType.Success);
             await LoadRealPayroll();
         }

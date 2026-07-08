@@ -61,18 +61,41 @@ namespace Logic.Tests
         public void ChangeDue_MayBeNegative(long received, long total, long expected)
             => Assert.Equal(expected, AppMath.ChangeDue(received, total));
 
-        // ---------- PayrollTotal (khoản trừ LUÔN bị trừ) ----------
+        // ---------- ProratedBase (lương CB quy theo ngày công, chuẩn 26 ngày) ----------
+        [Theory]
+        [InlineData(2600000, 26, 2600000)]  // đủ công → nhận đủ lương CB
+        [InlineData(2600000, 13, 1300000)]  // nửa tháng → nửa lương CB
+        [InlineData(2600000, 0, 0)]         // không đi làm → không có lương CB
+        [InlineData(2600000, -3, 0)]        // ngày công âm coi như 0
+        [InlineData(2600000, 28, 2800000)]  // vượt chuẩn → trả thêm cùng đơn giá
+        public void ProratedBase_ScalesByWorkDays(decimal baseMonthly, decimal days, decimal expected)
+            => Assert.Equal(expected, AppMath.ProratedBase(baseMonthly, days));
+
+        [Fact]
+        public void ProratedBase_RoundsToDong()
+            => Assert.Equal(230769m, AppMath.ProratedBase(6000000m, 1)); // 6tr/26 = 230769.23 → 230769
+
+        // ---------- PayrollTotal (LCB theo ngày công; khoản trừ LUÔN bị trừ) ----------
         [Fact]
         public void PayrollTotal_SubtractsDeduction_WhenPositive()
-            => Assert.Equal(6300000m, AppMath.PayrollTotal(6000000m, 500000m, 0m, 0m, 200000m));
+            => Assert.Equal(6300000m, AppMath.PayrollTotal(6000000m, 26, 500000m, 0m, 0m, 200000m));
 
         [Fact]
         public void PayrollTotal_SubtractsDeduction_WhenNegative_SameResult()
-            => Assert.Equal(6300000m, AppMath.PayrollTotal(6000000m, 500000m, 0m, 0m, -200000m));
+            => Assert.Equal(6300000m, AppMath.PayrollTotal(6000000m, 26, 500000m, 0m, 0m, -200000m));
 
         [Fact]
         public void PayrollTotal_NoDeduction()
-            => Assert.Equal(6500000m, AppMath.PayrollTotal(6000000m, 500000m, 0m, 0m, 0m));
+            => Assert.Equal(6500000m, AppMath.PayrollTotal(6000000m, 26, 500000m, 0m, 0m, 0m));
+
+        [Fact]
+        public void PayrollTotal_HalfWorkDays_HalvesBaseOnly()
+            // LCB 5.2tr/26 ngày × 13 ngày = 2.6tr; phụ cấp/thưởng giữ nguyên, trừ 100k
+            => Assert.Equal(2900000m, AppMath.PayrollTotal(5200000m, 13, 300000m, 100000m, 0m, 100000m));
+
+        [Fact]
+        public void PayrollTotal_ZeroWorkDays_OnlyAllowancesMinusDeduction()
+            => Assert.Equal(400000m, AppMath.PayrollTotal(6000000m, 0, 500000m, 0m, 0m, 100000m));
 
         // ---------- LoyaltyPoints (1 điểm / 3.000đ) ----------
         [Theory]

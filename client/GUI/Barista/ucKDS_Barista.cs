@@ -180,7 +180,7 @@ namespace GUI
         private string FoodName(string? id)
             => (id != null && _foodNames.TryGetValue(id, out var n)) ? n : (id ?? "Món");
 
-        private void BtnReport_Click(object? sender, EventArgs e)
+        private async void BtnReport_Click(object? sender, EventArgs e)
         {
             string report =
                 "BÁO CÁO KDS\n" +
@@ -188,12 +188,14 @@ namespace GUI
                 "──────────────────\n" +
                 $"• {lblPending.Text}\n" +
                 $"• {lblInProgress.Text}\n" +
-                $"• {lblDone.Text}\n" +
-                "──────────────────\n" +
-                "Gửi báo cáo cho quản lý?";
+                $"• {lblDone.Text}";
 
-            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo KDS", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo KDS cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report + "\n──────────────────\nGửi báo cáo cho quản lý?",
+                            "Báo cáo KDS", MsgBox.MessageBoxType.Warning) != DialogResult.Yes) return;
+
+            var (ok, msg) = await ManagerReport.SendAsync(report, "bao_cao", "kds");
+            MsgBox.Show(MsgBox.OwnerWindow(this), msg, ok ? "Thành công" : "Lỗi",
+                        ok ? MsgBox.MessageBoxType.Success : MsgBox.MessageBoxType.Error);
         }
 
         private void AddOrderCard(FlowLayoutPanel panel, string orderId, string table, string[] items, string time, Color accentColor, string? nextStatus)

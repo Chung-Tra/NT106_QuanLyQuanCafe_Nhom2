@@ -116,13 +116,108 @@ namespace GUI
             string ca = dgvMine.CurrentRow.Cells["Ca"].Value?.ToString() ?? "";
             string gio = dgvMine.CurrentRow.Cells["Giờ"].Value?.ToString() ?? "";
 
-            string? colleague = InputDialog.Show(MsgBox.OwnerWindow(this), "Xin đổi ca", $"Đổi ca {ca} ({ngay}) cho đồng nghiệp nào?", "Nhập tên đồng nghiệp…");
-            if (string.IsNullOrWhiteSpace(colleague)) return;
+            // Chọn đồng nghiệp từ danh sách nhân viên THẬT (kèm mã NV) — trước đây gõ tay
+            // tự do nên khi duyệt không biết đổi cho ai, lịch tuần/lương không cập nhật được.
+            var (targetId, targetName) = await PickColleagueAsync(ca, ngay);
+            if (targetId == null || targetName == null) return;
 
-            await ShiftBUS.Add(new ShiftDTO { Loai = "swap", Ngay = ngay, Ca = ca, Gio = gio, EmployeeId = MyId, DoiCho = colleague, TrangThai = "Chờ duyệt" });
+            var (ok, msg, _) = await ShiftBUS.Add(new ShiftDTO
+            {
+                Loai = "swap", Ngay = ngay, Ca = ca, Gio = gio,
+                EmployeeId = MyId, DoiCho = targetName, DoiChoId = targetId, TrangThai = "Chờ duyệt"
+            });
+            if (!ok)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), msg, "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
             if (!string.IsNullOrEmpty(mineId)) await ShiftBUS.Update(mineId, new { trang_thai = "Chờ đổi" });
+
+            // Báo cho người nhận ca + các quản lý (best-effort, hiện ở feed Thông báo)
+            var me = GlobalSession.CurrentUser;
+            string noiDung = $"{me?.FullName ?? MyId} xin đổi {ca} ngày {ngay} ({gio}) cho {targetName}. Chờ quản lý duyệt.";
+            try
+            {
+                await NotificationBUS.Add(new NotificationDTO
+                {
+                    Type = "doi_ca", Content = noiDung, ReceiverId = targetId, SenderId = MyId,
+                    Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(), IsRead = false, RelatedPage = "schedule"
+                });
+                await ManagerReport.SendAsync(noiDung, "doi_ca", "schedule");
+            }
+            catch { }
+
             await LoadAll();
-            MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi yêu cầu đổi ca cho {colleague}.", "Thành công", MsgBox.MessageBoxType.Success);
+            MsgBox.Show(MsgBox.OwnerWindow(this),
+                $"Đã gửi yêu cầu đổi ca cho {targetName}.\nQuản lý duyệt xong, lịch tuần sẽ tự đổi tên người làm.",
+                "Thành công", MsgBox.MessageBoxType.Success);
+        }
+
+        // Hộp chọn đồng nghiệp (active, không phải admin, khác mình) — trả về (mã NV, tên).
+        private async Task<(string? id, string? name)> PickColleagueAsync(string ca, string ngay)
+        {
+            System.Collections.Generic.List<EmployeeDTO> emps;
+            try
+            {
+                emps = (await Task.Run(EmployeeBUS.GetAllEmployeesAsync))
+                    .Where(x => x.EmployeeId != null && x.EmployeeId != MyId
+                             && (x.Role ?? "").ToLower() != "admin" && x.Status == "active")
+                    .OrderBy(x => x.FullName).ToList();
+            }
+            catch { emps = new(); }
+            if (emps.Count == 0)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Không tải được danh sách đồng nghiệp (kiểm tra server).", "Lỗi", MsgBox.MessageBoxType.Error);
+                return (null, null);
+            }
+
+            var owner = MsgBox.OwnerWindow(this);
+            using var form = WindowChrome.CreateDialog($"Đổi {ca} ({ngay}) cho ai?", new Size(400, 430), out var content, owner);
+
+            var lst = new ListBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.FromArgb(31, 31, 34),
+                ForeColor = Color.White,
+                Font = Theme.F(10.5F),
+                ItemHeight = 24,
+            };
+            foreach (var emp in emps)
+                lst.Items.Add($"{emp.FullName}  —  {EmployeeText.RoleVi(emp.Role)}");
+
+            var btnOk = new Guna.UI2.WinForms.Guna2Button
+            {
+                Text = "Chọn",
+                Size = new Size(120, 38),
+                BorderRadius = 8,
+                FillColor = Theme.Teal,
+                ForeColor = Color.White,
+                Font = Theme.F(9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+            };
+            btnOk.HoverState.FillColor = Theme.TealHover;
+            var pnlBtn = new Panel { Dock = DockStyle.Bottom, Height = 56, BackColor = Color.Transparent };
+            pnlBtn.Controls.Add(btnOk);
+            content.Controls.Add(lst);
+            content.Controls.Add(pnlBtn);
+            form.Shown += (s, ev) => btnOk.Location = new Point(pnlBtn.ClientSize.Width - btnOk.Width - 16, 9);
+
+            btnOk.Click += (s, ev) =>
+            {
+                if (lst.SelectedIndex < 0)
+                {
+                    MsgBox.Show(form, "Chọn một đồng nghiệp trong danh sách.", "Thông báo", MsgBox.MessageBoxType.Warning);
+                    return;
+                }
+                form.DialogResult = DialogResult.OK;
+                form.Close();
+            };
+            lst.DoubleClick += (s, ev) => { if (lst.SelectedIndex >= 0) { form.DialogResult = DialogResult.OK; form.Close(); } };
+
+            if (form.ShowDialog(owner) != DialogResult.OK || lst.SelectedIndex < 0) return (null, null);
+            var picked = emps[lst.SelectedIndex];
+            return (picked.EmployeeId, picked.FullName ?? picked.EmployeeId);
         }
 
         private void RecolorStatuses()

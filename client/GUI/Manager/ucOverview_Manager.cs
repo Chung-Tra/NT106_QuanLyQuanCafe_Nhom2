@@ -31,22 +31,8 @@ namespace GUI
 
         private async Task RefreshAll()
         {
-            // #region agent log
-            var sw = Stopwatch.StartNew();
-            AgentDebugLog.Write("B", "ucOverview_Manager.RefreshAll", "start", null);
-            // #endregion
             await LoadStats();
             await LoadFeed();
-            // #region agent log
-            sw.Stop();
-            AgentDebugLog.Write("B", "ucOverview_Manager.RefreshAll", "done", new
-            {
-                ms = sw.ElapsedMilliseconds,
-                lblDailyRev = lblDailyRevValue.Text,
-                lblMonthlyRev = lblMonthlyRevValue.Text,
-                lblDailyFeed = lblDailyFeedValue.Text
-            });
-            // #endregion
         }
 
         private static string IconFor(string? type) => type switch

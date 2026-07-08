@@ -36,10 +36,6 @@ namespace GUI
         // --- Đổ dữ liệu THẬT từ Firebase vào 2 bảng tổng hợp ---
         private async Task LoadRealAsync()
         {
-            // #region agent log
-            var sw = Stopwatch.StartNew();
-            AgentDebugLog.Write("C", "ucDashboard_Admin.LoadRealAsync", "start", null);
-            // #endregion
             decimal sales = 0, parkingFee = 0, expenses = 0;
             long lossTotal = 0;
             int good = 0, bad = 0, totalFb = 0;
@@ -87,16 +83,6 @@ namespace GUI
             dgvFeedback.Rows[rB].Cells[0].Style.ForeColor = Theme.Red;
             int rT = dgvFeedback.Rows.Add("Tổng", totalFb.ToString());
             dgvFeedback.Rows[rT].DefaultCellStyle.Font = Theme.F(9.5F, FontStyle.Bold);
-
-            // #region agent log
-            sw.Stop();
-            AgentDebugLog.Write("C", "ucDashboard_Admin.LoadRealAsync", "done", new
-            {
-                ms = sw.ElapsedMilliseconds,
-                lblRevenue = lblRevenueValue.Text,
-                dgvRevenueRows = dgvRevenue.Rows.Count
-            });
-            // #endregion
         }
 
         // --- "Chi tiết →" cạnh tiêu đề bảng → biểu đồ cột 12 tháng gần nhất (dữ liệu THẬT) ---

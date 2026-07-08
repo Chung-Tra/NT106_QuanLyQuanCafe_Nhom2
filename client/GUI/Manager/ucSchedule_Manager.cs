@@ -71,10 +71,6 @@ namespace GUI
         // Nạp lịch THẬT của tuần đang xem từ node schedules, gộp NV theo (ca, ngày).
         private async Task ReloadWeekAsync()
         {
-            // #region agent log
-            var sw = Stopwatch.StartNew();
-            AgentDebugLog.Write("D", "ucSchedule_Manager.ReloadWeekAsync", "start", null);
-            // #endregion
             string weekKey = _weekStart.ToString("dd/MM/yyyy");
             var names   = new string[_shifts.Length][];
             for (int s = 0; s < _shifts.Length; s++) names[s] = new string[_days.Length];
@@ -119,22 +115,10 @@ namespace GUI
                 UpdateStatCards(buckets, staffIds);
                 RenderGrid();
             }
-            // #region agent log
-            sw.Stop();
-            AgentDebugLog.Write("D", "ucSchedule_Manager.ReloadWeekAsync", "done", new
-            {
-                ms = sw.ElapsedMilliseconds,
-                lblStaff = lblCardStaffVal.Text,
-                lblShortage = lblCardShortageVal.Text
-            });
-            // #endregion
         }
 
         private async void UpdateStatCards(List<string>[,] buckets, HashSet<string> staffIds)
         {
-            // #region agent log
-            AgentDebugLog.Write("A", "ucSchedule_Manager.UpdateStatCards", "start_extra_fetch", null);
-            // #endregion
             int shortage = 0;
             for (int s = 0; s < _shifts.Length; s++)
                 for (int d = 0; d < _days.Length; d++)

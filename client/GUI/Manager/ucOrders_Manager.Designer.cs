@@ -48,6 +48,7 @@ namespace GUI
             lstSoldOut = new ListBox();
             pnlKitchenWarning = new Guna2Panel();
             lblKitchenWarningTitle = new Label();
+            btnCleanStale = new Guna2Button();
             lstKitchenWarning = new ListBox();
             tblStats.SuspendLayout();
             tblMain.SuspendLayout();
@@ -179,7 +180,7 @@ namespace GUI
             btnStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnStatus.Location = new Point(438, 12);
             btnStatus.Size = new Size(106, 30);
-            btnStatus.Text = "Sửa";
+            btnStatus.Text = "Chi tiết";
             btnStatus.Click += BtnEditTable_Click;
 
             // dgvTableStatus
@@ -282,6 +283,7 @@ namespace GUI
             pnlKitchenWarning.BackColor = Color.FromArgb(31, 31, 34);
             pnlKitchenWarning.BorderRadius = 14;
             pnlKitchenWarning.Controls.Add(lblKitchenWarningTitle);
+            pnlKitchenWarning.Controls.Add(btnCleanStale);
             pnlKitchenWarning.Controls.Add(lstKitchenWarning);
             pnlKitchenWarning.Dock = DockStyle.Fill;
             pnlKitchenWarning.Margin = new Padding(0, 7, 0, 0);
@@ -291,6 +293,19 @@ namespace GUI
             lblKitchenWarningTitle.ForeColor = Color.FromArgb(245, 158, 11);
             lblKitchenWarningTitle.Location = new Point(18, 16);
             lblKitchenWarningTitle.Text = "Cảnh báo Món chờ quá lâu";
+
+            // btnCleanStale — huỷ đơn treo quá hạn + trả bàn (logic ở BtnCleanStale_Click)
+            btnCleanStale.BorderRadius = 6;
+            btnCleanStale.FillColor = Color.FromArgb(63, 63, 70);
+            btnCleanStale.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            btnCleanStale.ForeColor = Color.White;
+            btnCleanStale.HoverState.FillColor = Color.FromArgb(31, 138, 154);
+            btnCleanStale.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCleanStale.Location = new Point(255, 12);
+            btnCleanStale.Size = new Size(112, 28);
+            btnCleanStale.Text = "Dọn đơn treo";
+            btnCleanStale.Cursor = Cursors.Hand;
+            btnCleanStale.Click += BtnCleanStale_Click;
 
             // lstKitchenWarning
             lstKitchenWarning.AccessibleRole = AccessibleRole.Sound;
@@ -395,6 +410,7 @@ namespace GUI
         private Guna2Button btnUpdateSoldOut;
         private Guna2Panel pnlKitchenWarning;
         private Label lblKitchenWarningTitle;
+        private Guna2Button btnCleanStale;
         private ListBox lstKitchenWarning;
         private Guna2ComboBox cboTableStatus;
         private Guna2Button btnFilterTable;

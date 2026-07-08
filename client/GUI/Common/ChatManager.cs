@@ -14,9 +14,47 @@ namespace GUI
     public class ChatManager(Control uiControl, ListBox lstChatHistory)
     {
         private HubConnection? _connection;
+        // Mọi phòng đã vào (chung + riêng) — SignalR mất hết Groups khi rớt kết nối,
+        // reconnect xong phải vào lại TẤT CẢ, không chỉ phòng đang mở.
+        private readonly HashSet<string> _joinedRooms = new() { "room_global" };
         public string CurrentRoomId { get; private set; } = "room_global";
         public string CurrentTargetId { get; private set; } = "";
         public string CurrentTargetName { get; private set; } = "";
+
+        // Render free ngủ sau ~15' vắng người, thức dậy mất 30–60s. Chuỗi retry mặc định
+        // (4 lần/~17s) bỏ cuộc đúng lúc server sắp dậy → phải kiên nhẫn thử mãi.
+        private sealed class ForeverRetryPolicy : IRetryPolicy
+        {
+            public TimeSpan? NextRetryDelay(RetryContext ctx) => ctx.PreviousRetryCount switch
+            {
+                0 => TimeSpan.Zero,
+                1 => TimeSpan.FromSeconds(2),
+                2 => TimeSpan.FromSeconds(5),
+                3 => TimeSpan.FromSeconds(10),
+                _ => TimeSpan.FromSeconds(15),
+            };
+        }
+
+        // Thêm dòng hệ thống vào khung chat (an toàn từ mọi thread)
+        private void SystemLine(string text)
+        {
+            if (uiControl.IsDisposed || !uiControl.IsHandleCreated) return;
+            uiControl.Invoke(() =>
+            {
+                lstChatHistory.Items.Add(text);
+                lstChatHistory.TopIndex = lstChatHistory.Items.Count - 1;
+            });
+        }
+
+        private async Task RejoinRoomsAsync()
+        {
+            if (_connection == null || _connection.State != HubConnectionState.Connected) return;
+            foreach (var room in _joinedRooms)
+            {
+                try { await _connection.InvokeAsync("JoinRoom", room); }
+                catch { /* phòng nào lỗi thì bỏ qua */ }
+            }
+        }
 
         /// <summary>
         /// Bắn khi có tin nhắn RIÊNG đến từ một phòng KHÁC phòng đang mở
@@ -33,12 +71,7 @@ namespace GUI
 
                 _connection = new HubConnectionBuilder()
                     .WithUrl(serverUrl)
-                    .WithAutomaticReconnect([
-                        TimeSpan.Zero,
-                        TimeSpan.FromSeconds(2),
-                        TimeSpan.FromSeconds(5),
-                        TimeSpan.FromSeconds(10)
-                    ])
+                    .WithAutomaticReconnect(new ForeverRetryPolicy())
                     .Build();
 
                 // Nhận 4 tham số: senderId, senderName, message, roomId
@@ -69,43 +102,45 @@ namespace GUI
                     }));
                 });
 
-                // Fix: sau khi mạng bị ngắt rồi reconnect, client phải JoinRoom lại
-                // Vì SignalR Groups không được giữ sau khi mất kết nối
+                // Sau reconnect, SignalR mất hết Groups → vào lại TẤT CẢ phòng đã tham gia
+                // (phòng chung + mọi phòng riêng), không chỉ phòng đang mở — nếu không,
+                // tin nhắn riêng nền sẽ không tới nữa sau lần rớt mạng đầu tiên.
                 _connection.Reconnected += async _ =>
                 {
-                    try
-                    {
-                        await _connection.InvokeAsync("JoinRoom", CurrentRoomId);
-                        if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
-                            uiControl.Invoke(() => lstChatHistory.Items.Add("[Hệ thống]: Đã kết nối lại."));
-                    }
-                    catch { /* bỏ qua nếu JoinRoom lỗi khi reconnect */ }
+                    await RejoinRoomsAsync();
+                    SystemLine("[Hệ thống]: Đã kết nối lại.");
                 };
 
                 _connection.Closed += _ =>
                 {
-                    if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
-                        uiControl.Invoke(() => lstChatHistory.Items.Add("[Hệ thống]: Mất kết nối. Đang thử lại..."));
+                    SystemLine("[Hệ thống]: Mất kết nối. Đang thử lại...");
                     return Task.CompletedTask;
                 };
 
-                // Giới hạn 5s: nếu IP chat server sai hoặc server không bật, TCP mặc định
-                // chờ tới ~21s mới báo lỗi — cắt sớm để màn hình Chat không treo.
-                using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
-                await _connection.StartAsync(timeout.Token);
+                // Thử nhanh 8s trước (IP LAN sai thì báo sớm, không treo màn hình);
+                // nếu quá hạn — khả năng cao server cloud gói free đang ngủ (thức dậy
+                // 30–60s) → báo người dùng rồi kiên nhẫn chờ thêm tối đa 90s.
+                try
+                {
+                    using var quick = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(8));
+                    await _connection.StartAsync(quick.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    SystemLine("[Hệ thống]: Server chat đang khởi động (gói miễn phí tự ngủ khi vắng người) — chờ tối đa 90 giây...");
+                    using var patient = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(90));
+                    await _connection.StartAsync(patient.Token);
+                }
 
-                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
-                    uiControl.Invoke(() => lstChatHistory.Items.Add($"[Hệ thống]: Đã kết nối tới máy chủ ({savedIP})."));
+                SystemLine($"[Hệ thống]: Đã kết nối tới máy chủ ({savedIP}).");
             }
             catch (OperationCanceledException)
             {
-                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
-                    uiControl.Invoke(() => lstChatHistory.Items.Add("[Lỗi]: Không kết nối được server chat (quá 5 giây). Kiểm tra ChatServerIP trong App.config."));
+                SystemLine("[Lỗi]: Không kết nối được server chat. Kiểm tra mạng hoặc ChatServerIP trong App.config.");
             }
             catch (Exception ex)
             {
-                if (!uiControl.IsDisposed && uiControl.IsHandleCreated)
-                    uiControl.Invoke(() => lstChatHistory.Items.Add($"[Lỗi]: Mất kết nối server chat - {ex.Message}"));
+                SystemLine($"[Lỗi]: Mất kết nối server chat - {ex.Message}");
             }
         }
 
@@ -123,7 +158,9 @@ namespace GUI
             foreach (var otherId in otherEmployeeIds)
             {
                 if (string.IsNullOrEmpty(otherId) || otherId == myId) continue;
-                try { await _connection.InvokeAsync("JoinRoom", ChatBUS.GetRoomId(myId, otherId)); }
+                string room = ChatBUS.GetRoomId(myId, otherId);
+                _joinedRooms.Add(room); // nhớ lại để reconnect vào lại đủ phòng
+                try { await _connection.InvokeAsync("JoinRoom", room); }
                 catch { /* bỏ qua 1 phòng lỗi, tiếp tục các phòng còn lại */ }
             }
         }

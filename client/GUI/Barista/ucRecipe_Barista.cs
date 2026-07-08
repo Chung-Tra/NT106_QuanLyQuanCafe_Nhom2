@@ -28,7 +28,7 @@ namespace GUI
                 RecordDetail.FromRow(dgvIngredients.Rows[e.RowIndex], "Chi tiết nguyên liệu")
                             .ShowDialog(MsgBox.OwnerWindow(this));
             };
-            btnReport.Click += (s, e) =>
+            btnReport.Click += async (s, e) =>
             {
                 string currentRecipe = lblRecipeName.Text;
                 string report =
@@ -36,12 +36,14 @@ namespace GUI
                     $"Thời gian: {DateTime.Now:HH:mm dd/MM/yyyy}\n" +
                     "──────────────────\n" +
                     $"• Tổng công thức: {lstRecipes.Items.Count}\n" +
-                    $"• Đang xem: {currentRecipe}\n" +
-                    "──────────────────\n" +
-                    "Gửi báo cáo cho quản lý?";
+                    $"• Đang xem: {currentRecipe}";
 
-                if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo công thức", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                    MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+                if (MsgBox.Show(MsgBox.OwnerWindow(this), report + "\n──────────────────\nGửi báo cáo cho quản lý?",
+                                "Báo cáo công thức", MsgBox.MessageBoxType.Warning) != DialogResult.Yes) return;
+
+                var (ok, msg) = await ManagerReport.SendAsync(report, "bao_cao", "recipe");
+                MsgBox.Show(MsgBox.OwnerWindow(this), msg, ok ? "Thành công" : "Lỗi",
+                            ok ? MsgBox.MessageBoxType.Success : MsgBox.MessageBoxType.Error);
             };
         }
 

@@ -19,7 +19,7 @@ namespace GUI
         {
             InitializeComponent();
 
-            // Populate table combo (dynamic loop) + initial selection
+            // Danh sách dự phòng khi offline — sẽ được thay bằng tên bàn THẬT từ DB ở Load.
             for (int i = 1; i <= 15; i++)
                 _cmbTable.Items.Add($"Bàn {i:00}");
             _cmbTable.SelectedIndex = 0;
@@ -43,14 +43,74 @@ namespace GUI
                 lblQRTable.Text = $"Bàn: {_cmbTable.SelectedItem}";
             };
 
-            // Print button (uses runtime selection + owner window)
-            btnPrint.Click += (s, e) =>
-                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã in QR cho {_cmbTable.SelectedItem}!", "In thành công", MsgBox.MessageBoxType.Success);
+            // In QR thật qua máy in (trước đây chỉ MsgBox "Đã in!" mà không in gì)
+            btnPrint.Click += (s, e) => PrintQr();
 
             // Runtime grid styling (declared in Designer, styled here so appearance is identical)
             Theme.StyleGrid(_dgvIncoming);
 
-            Load += (s, e) => _ = LoadIncoming();
+            Load += (s, e) => { _ = LoadIncoming(); _ = LoadTablesIntoCombo(); };
+        }
+
+        // Nạp tên bàn THẬT từ node tables (danh sách 1..15 chỉ là dự phòng khi offline).
+        private async Task LoadTablesIntoCombo()
+        {
+            try
+            {
+                var tables = await TableBUS.GetAll();
+                // Sắp theo số tự nhiên: "Bàn 2" trước "Bàn 10" (pad các cụm chữ số)
+                var names = tables.Values.Select(t => t.Name)
+                    .Where(n => !string.IsNullOrWhiteSpace(n))
+                    .OrderBy(n => System.Text.RegularExpressions.Regex.Replace(n!, @"\d+", m => m.Value.PadLeft(4, '0')))
+                    .Cast<object>().ToArray();
+                if (names.Length == 0) return;
+
+                _cmbTable.Items.Clear();
+                _cmbTable.Items.AddRange(names);
+                _cmbTable.SelectedIndex = 0; // trigger SelectedIndexChanged → QR + nhãn tự cập nhật
+            }
+            catch { /* offline — giữ danh sách dự phòng */ }
+        }
+
+        // In tem QR cho bàn: tiêu đề + mã QR, qua hộp thoại chọn máy in chuẩn Windows.
+        private void PrintQr()
+        {
+            if (_pnlQR.BackgroundImage == null)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), "Chưa có mã QR để in.", "Thông báo", MsgBox.MessageBoxType.Warning);
+                return;
+            }
+            string table = _cmbTable.SelectedItem?.ToString() ?? "Bàn";
+
+            var doc = new System.Drawing.Printing.PrintDocument { DocumentName = $"QR tự đặt món - {table}" };
+            doc.PrintPage += (s, ev) =>
+            {
+                if (ev.Graphics == null) return;
+                var b = ev.MarginBounds;
+                using var fTitle = new Font("Segoe UI", 18F, FontStyle.Bold);
+                using var fSub = new Font("Segoe UI", 11F);
+                var center = new StringFormat { Alignment = StringAlignment.Center };
+
+                ev.Graphics.DrawString($"QUÉT ĐỂ GỌI MÓN — {table.ToUpper()}", fTitle, Brushes.Black,
+                                       b.Left + b.Width / 2f, b.Top, center);
+                int size = Math.Min(b.Width, 430);
+                ev.Graphics.DrawImage(_pnlQR.BackgroundImage, b.Left + (b.Width - size) / 2, b.Top + 60, size, size);
+                ev.Graphics.DrawString("Mở camera điện thoại, quét mã và chọn món ngay tại bàn.",
+                                       fSub, Brushes.Black, b.Left + b.Width / 2f, b.Top + 60 + size + 20, center);
+            };
+
+            using var dlg = new PrintDialog { Document = doc, UseEXDialog = true };
+            if (dlg.ShowDialog(FindForm()) != DialogResult.OK) return;
+            try
+            {
+                doc.Print();
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Đã gửi lệnh in QR cho {table} tới máy in.", "In QR", MsgBox.MessageBoxType.Success);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(MsgBox.OwnerWindow(this), $"Không in được: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+            }
+            finally { doc.Dispose(); }
         }
 
         // QR tự đặt món THẬT: mã hoá URL trang đặt món kèm mã bàn (khách quét mở menu online).
@@ -160,7 +220,10 @@ namespace GUI
                 }
 
                 var tables = await TableBUS.GetAll();
-                var tableEntry = tables.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+                // Khách thật quét QR ở bàn TRỐNG — ưu tiên bàn trống, hết mới rơi về bàn bất kỳ
+                var pool = tables.Where(t => t.Value.Status == "trong").ToList();
+                if (pool.Count == 0) pool = tables.ToList();
+                var tableEntry = pool.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
                 string? tableId = tableEntry.Key;
                 string tableName = tableEntry.Value?.Name ?? _cmbTable.SelectedItem?.ToString() ?? "Bàn";
 

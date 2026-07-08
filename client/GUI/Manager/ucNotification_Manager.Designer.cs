@@ -31,6 +31,7 @@ namespace GUI
             btnApprove = new Guna2Button();
             btnReject = new Guna2Button();
             btnChatStaff = new Guna2Button();
+            btnShiftRequests = new Guna2Button();
             btnEditLeave = new Guna2Button();
             pnlSchedule = new Guna2Panel();
             lblScheduleTitle = new Label();
@@ -71,6 +72,7 @@ namespace GUI
             pnlPendingRequests.Controls.Add(btnApprove);
             pnlPendingRequests.Controls.Add(btnReject);
             pnlPendingRequests.Controls.Add(btnChatStaff);
+            pnlPendingRequests.Controls.Add(btnShiftRequests);
             pnlPendingRequests.Controls.Add(btnEditLeave);
             pnlPendingRequests.Dock = DockStyle.Fill;
             pnlPendingRequests.Margin = new Padding(0, 0, 0, 5);
@@ -151,6 +153,19 @@ namespace GUI
             btnChatStaff.Size = new Size(184, 44);
             btnChatStaff.Text = "Chat";
             btnChatStaff.Click += btnChatStaff_Click;
+
+            // btnShiftRequests — duyệt nhận ca / đổi ca (node dang_ky_ca); duyệt xong tự sửa lịch tuần
+            btnShiftRequests.BorderRadius = 10;
+            btnShiftRequests.Cursor = Cursors.Hand;
+            btnShiftRequests.FillColor = Color.FromArgb(245, 158, 11);
+            btnShiftRequests.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnShiftRequests.ForeColor = Color.White;
+            btnShiftRequests.HoverState.FillColor = Color.FromArgb(255, 178, 40);
+            btnShiftRequests.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnShiftRequests.Location = new Point(758, 10);
+            btnShiftRequests.Size = new Size(184, 36);
+            btnShiftRequests.Text = "Duyệt ca";
+            btnShiftRequests.Click += BtnShiftRequests_Click;
 
             // btnEditLeave
             btnEditLeave.BorderColor = Color.FromArgb(80, 80, 90);
@@ -293,6 +308,7 @@ namespace GUI
         private Guna2Button btnApprove;
         private Guna2Button btnReject;
         private Guna2Button btnChatStaff;
+        private Guna2Button btnShiftRequests;
         private Guna2Button btnEditLeave;
         private Guna2Panel pnlSchedule;
         private Label lblScheduleTitle;

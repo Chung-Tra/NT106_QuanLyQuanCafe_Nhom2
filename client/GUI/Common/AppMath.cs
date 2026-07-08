@@ -42,12 +42,20 @@ namespace GUI
         // Tiền thối cho khách (dương = thối lại, âm = còn thiếu).
         public static long ChangeDue(long received, long total) => received - total;
 
-        // Tổng lương = Lương CB + Phụ cấp + Thưởng FB + Thưởng lễ − |Trừ lương|.
-        // Khoản trừ LUÔN bị trừ dù người dùng nhập số dương hay âm (trước đây bị CỘNG,
-        // chỉ đúng khi dữ liệu tình cờ lưu số âm).
-        public static decimal PayrollTotal(decimal baseSalary, decimal allowance,
+        // Ngày công chuẩn của 1 tháng — quy đổi lương cơ bản tháng thành đơn giá ngày.
+        public const int StandardWorkDays = 26;
+
+        // Lương cơ bản THỰC theo ngày công: (LCB tháng ÷ 26) × ngày công, làm tròn đồng.
+        // Ngày công âm coi như 0; trên 26 ngày trả thêm theo cùng đơn giá (làm vượt chuẩn).
+        public static decimal ProratedBase(decimal baseMonthly, decimal workDays)
+            => Math.Round(baseMonthly / StandardWorkDays * Math.Max(0, workDays), 0, MidpointRounding.AwayFromZero);
+
+        // Tổng lương = LCB quy theo ngày công + Phụ cấp + Thưởng FB + Thưởng lễ − |Trừ lương|.
+        // Khoản trừ LUÔN bị trừ dù người dùng nhập số dương hay âm. Trước 2026-07-08 lương CB
+        // là số cố định tháng (ngày công chỉ hiển thị) — làm bao nhiêu ca lương cũng như nhau.
+        public static decimal PayrollTotal(decimal baseSalary, decimal workDays, decimal allowance,
                                            decimal feedbackBonus, decimal holidayBonus, decimal deduction)
-            => baseSalary + allowance + feedbackBonus + holidayBonus - Math.Abs(deduction);
+            => ProratedBase(baseSalary, workDays) + allowance + feedbackBonus + holidayBonus - Math.Abs(deduction);
 
         // Điểm tích lũy: 1 điểm cho mỗi 3.000đ trên hóa đơn (làm tròn xuống).
         public static int LoyaltyPoints(long invoiceAmount)

@@ -91,7 +91,7 @@ namespace GUI
             lblSlotsValue.ForeColor = _currentSlots <= 5 ? Color.IndianRed : Color.MediumSeaGreen;
         }
 
-        private void btnReport_Click(object? sender, EventArgs e)
+        private async void btnReport_Click(object? sender, EventArgs e)
         {
             int parked = 0, exited = 0;
             if (dgvParkingLog.DataSource is DataTable dt)
@@ -104,12 +104,14 @@ namespace GUI
                 "──────────────────\n" +
                 $"• Chỗ trống: {lblSlotsValue.Text}\n" +
                 $"• Xe đang gửi: {parked}\n" +
-                $"• Xe đã ra: {exited}\n" +
-                "──────────────────\n" +
-                "Gửi báo cáo cho quản lý qua Chat?";
+                $"• Xe đã ra: {exited}";
 
-            if (MsgBox.Show(MsgBox.OwnerWindow(this), report, "Báo cáo bãi xe", MsgBox.MessageBoxType.Warning) == DialogResult.Yes)
-                MsgBox.Show(MsgBox.OwnerWindow(this), "Đã gửi báo cáo cho quản lý!", "Thành công", MsgBox.MessageBoxType.Success);
+            if (MsgBox.Show(MsgBox.OwnerWindow(this), report + "\n──────────────────\nGửi báo cáo cho quản lý?",
+                            "Báo cáo bãi xe", MsgBox.MessageBoxType.Warning) != DialogResult.Yes) return;
+
+            var (ok, msg) = await ManagerReport.SendAsync(report, "bao_cao", "parking");
+            MsgBox.Show(MsgBox.OwnerWindow(this), msg, ok ? "Thành công" : "Lỗi",
+                        ok ? MsgBox.MessageBoxType.Success : MsgBox.MessageBoxType.Error);
         }
 
         private async void btnVehicleIn_Click(object sender, EventArgs e)

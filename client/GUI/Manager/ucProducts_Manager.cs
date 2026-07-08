@@ -25,23 +25,9 @@ namespace GUI
             DgvRefresh.Attach(dgvInventory, () => _ = LoadInventory());
             this.Load += async (s, e) =>
             {
-                // #region agent log
-                var sw = Stopwatch.StartNew();
-                AgentDebugLog.Write("B", "ucProducts_Manager.Load", "start", null);
-                // #endregion
                 await LoadRealData();
                 await LoadInventory();
                 await LoadSummaryStats();
-                // #region agent log
-                sw.Stop();
-                AgentDebugLog.Write("B", "ucProducts_Manager.Load", "done", new
-                {
-                    ms = sw.ElapsedMilliseconds,
-                    lblExpense = lblExpenseValue.Text,
-                    lblIncome = lblIncomeValue.Text,
-                    menuRows = dgvMenu.Rows.Count
-                });
-                // #endregion
             };
         }
 

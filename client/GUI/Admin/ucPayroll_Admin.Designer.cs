@@ -24,6 +24,7 @@ namespace GUI
             lblMonth = new Label();
             cmbMonth = new Guna2ComboBox();
             btnApplyBP = new Guna2Button();
+            btnLockDays = new Guna2Button();
             btnEditPayroll = new Guna2Button();
             pnlSummary = new Guna2Panel();
             tblSummary = new TableLayoutPanel();
@@ -62,6 +63,7 @@ namespace GUI
             pnlHeader.Controls.Add(lblMonth);
             pnlHeader.Controls.Add(cmbMonth);
             pnlHeader.Controls.Add(btnApplyBP);
+            pnlHeader.Controls.Add(btnLockDays);
             pnlHeader.Controls.Add(btnEditPayroll);
             pnlHeader.Location = new Point(20, 20);
             pnlHeader.Size = new Size(960, 70);
@@ -104,10 +106,22 @@ namespace GUI
             btnApplyBP.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnApplyBP.ForeColor = Color.White;
             btnApplyBP.HoverState.FillColor = Color.FromArgb(45, 158, 174);
-            btnApplyBP.Location = new Point(690, 18);
-            btnApplyBP.Size = new Size(210, 34);
-            btnApplyBP.Text = "Tính lương tự động";
+            btnApplyBP.Location = new Point(818, 18);
+            btnApplyBP.Size = new Size(130, 34);
+            btnApplyBP.Text = "Tính lương";
             btnApplyBP.Click += btnApplyBP_Click;
+
+            // btnLockDays — đếm ngày công từ chấm công (node cham_cong) rồi ghi vào bảng lương
+            btnLockDays.BorderRadius = 10;
+            btnLockDays.Cursor = Cursors.Hand;
+            btnLockDays.FillColor = Color.FromArgb(245, 158, 11);
+            btnLockDays.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+            btnLockDays.ForeColor = Color.White;
+            btnLockDays.HoverState.FillColor = Color.FromArgb(255, 178, 40);
+            btnLockDays.Location = new Point(668, 18);
+            btnLockDays.Size = new Size(140, 34);
+            btnLockDays.Text = "Chốt công";
+            btnLockDays.Click += BtnLockDays_Click;
 
             btnEditPayroll.BorderColor = Color.FromArgb(80, 80, 90);
             btnEditPayroll.BorderRadius = 10;
@@ -281,6 +295,7 @@ namespace GUI
         private Guna2ComboBox cmbMonth;
         private Label lblMonth;
         private Guna2Button btnApplyBP;
+        private Guna2Button btnLockDays;
         private Guna2Button btnEditPayroll;
         private Guna2Panel pnlSummary;
         private TableLayoutPanel tblSummary;

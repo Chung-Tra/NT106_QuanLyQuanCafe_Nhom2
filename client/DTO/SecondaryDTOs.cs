@@ -133,6 +133,9 @@ namespace DTO
         [JsonProperty("gio")] public string? Gio { get; set; }
         [JsonProperty("nhanvien_id")] public string? EmployeeId { get; set; }
         [JsonProperty("doi_cho")] public string? DoiCho { get; set; }
+        // Mã NV người nhận ca đổi — bắt buộc để khi duyệt ghi được vào lịch tuần
+        // (doi_cho chỉ là tên hiển thị; yêu cầu cũ nhập tay có thể thiếu trường này).
+        [JsonProperty("doi_cho_id")] public string? DoiChoId { get; set; }
         [JsonProperty("trang_thai")] public string? TrangThai { get; set; }
     }
 

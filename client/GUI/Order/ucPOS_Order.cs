@@ -73,7 +73,7 @@ namespace GUI
                 List<FoodDTO> menu = await Task.Run(FoodBUS.GetListFoods);
                 if (menu == null || menu.Count == 0)
                 {
-                    LoadMockProducts();
+                    ShowMenuError("Thực đơn đang trống.\nThêm món ở màn \"Sản phẩm & Thực đơn\" rồi bấm Thử lại.");
                     return;
                 }
 
@@ -95,32 +95,44 @@ namespace GUI
             }
             catch
             {
-                LoadMockProducts();
+                ShowMenuError("Không tải được thực đơn từ server.\nKiểm tra kết nối rồi bấm Thử lại.");
             }
         }
 
-        private void LoadMockProducts()
+        // Trước đây khi tải thực đơn lỗi sẽ hiện menu MOCK ("món ma" giá bịa) — thu ngân có
+        // thể bán món không tồn tại. Kinh doanh thật thì phải chặn bán và cho thử lại.
+        private void ShowMenuError(string reason)
         {
-            var mocks = new[]
-            {
-                ("Cà phê đen",       25000L, "Cà phê"),
-                ("Cà phê sữa",       30000L, "Cà phê"),
-                ("Latte",            45000L, "Cà phê"),
-                ("Cappuccino",       45000L, "Cà phê"),
-                ("Americano",        35000L, "Cà phê"),
-                ("Trà đào cam sả",   45000L, "Trà"),
-                ("Trà sữa trân châu",40000L, "Trà sữa"),
-                ("Matcha latte",     50000L, "Đặc biệt"),
-                ("Sinh tố xoài",     45000L, "Sinh tố"),
-                ("Nước cam tươi",    35000L, "Nước trái cây"),
-                ("Bánh croissant",   25000L, "Bánh"),
-                ("Bánh flan",        20000L, "Bánh"),
-            };
-
             flpProducts.Controls.Clear();
             _cardQtyBadges.Clear();
-            foreach (var (name, price, cat) in mocks)
-                flpProducts.Controls.Add(CreateProductCard(name, price, cat));
+
+            var pnl = new Panel { Size = new Size(Math.Max(320, flpProducts.ClientSize.Width - 24), 150), BackColor = Color.Transparent };
+            var lbl = new Label
+            {
+                Text = "⚠ " + reason,
+                ForeColor = Theme.Amber,
+                Font = Theme.F(10.5F),
+                AutoSize = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Top,
+                Height = 84,
+            };
+            var btnRetry = new Guna2Button
+            {
+                Text = "Thử lại",
+                Size = new Size(140, 38),
+                BorderRadius = 8,
+                FillColor = Theme.Teal,
+                ForeColor = Color.White,
+                Font = Theme.F(9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand,
+            };
+            btnRetry.HoverState.FillColor = Theme.TealHover;
+            btnRetry.Click += async (s, e) => await InitPOS();
+            btnRetry.Location = new Point((pnl.Width - btnRetry.Width) / 2, 92);
+            pnl.Controls.Add(lbl);
+            pnl.Controls.Add(btnRetry);
+            flpProducts.Controls.Add(pnl);
 
             SetupOrderGrid();
         }

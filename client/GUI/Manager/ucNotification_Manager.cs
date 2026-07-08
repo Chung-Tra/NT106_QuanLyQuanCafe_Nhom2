@@ -1,6 +1,7 @@
 using BUS;
 using DTO;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -243,5 +244,193 @@ namespace GUI
         private void dgvPendingLeave_SelectionChanged(object sender, EventArgs e) { }
 
         private void dgvSchedule_CellValueChanged(object sender, DataGridViewCellEventArgs e) { }
+
+        // ================== DUYỆT NHẬN CA / ĐỔI CA ==================
+        // Duyệt = cập nhật dang_ky_ca VÀ ghi vào lịch tuần (lich_lam_viec). Lịch tuần là căn
+        // cứ đi làm → chấm công → chốt ngày công → lương, nên đây là mắt xích nối "đổi ca"
+        // vào tính lương. Trước đây yêu cầu ca tạo ra rồi treo "Chờ duyệt" mãi, không ai xử lý.
+        private async void BtnShiftRequests_Click(object? sender, EventArgs e)
+        {
+            var owner = MsgBox.OwnerWindow(this);
+            Dictionary<string, ShiftDTO> all;
+            List<EmployeeDTO> emps;
+            try
+            {
+                all = await Task.Run(ShiftBUS.GetAll);
+                emps = await Task.Run(EmployeeBUS.GetAllEmployeesAsync);
+            }
+            catch (Exception ex)
+            {
+                MsgBox.Show(owner, $"Không tải được yêu cầu ca: {ex.Message}", "Lỗi", MsgBox.MessageBoxType.Error);
+                return;
+            }
+            var empName = emps.Where(x => x.EmployeeId != null)
+                              .ToDictionary(x => x.EmployeeId!, x => x.FullName ?? x.EmployeeId!);
+            string NameOf(string? id) => (id != null && empName.TryGetValue(id, out var n)) ? n : (id ?? "?");
+
+            var pending = all.Where(x => (x.Value.Loai == "mine" && x.Value.TrangThai == "Chờ xác nhận")
+                                      || (x.Value.Loai == "swap" && x.Value.TrangThai == "Chờ duyệt"))
+                             .OrderBy(x => x.Value.Ngay).ToList();
+            if (pending.Count == 0)
+            {
+                MsgBox.Show(owner, "Không có yêu cầu nhận ca / đổi ca nào chờ duyệt.", "Duyệt ca", MsgBox.MessageBoxType.Info);
+                return;
+            }
+
+            using var form = WindowChrome.CreateDialog($"Duyệt ca — {pending.Count} yêu cầu chờ", new Size(760, 480), out var content, owner);
+
+            var dt = new DataTable();
+            foreach (var c in new[] { "Mã", "Loại", "Ngày", "Ca", "Người yêu cầu", "Đổi cho" }) dt.Columns.Add(c);
+            foreach (var kv in pending)
+                dt.Rows.Add(kv.Key, kv.Value.Loai == "swap" ? "Đổi ca" : "Nhận ca",
+                            kv.Value.Ngay, kv.Value.Ca, NameOf(kv.Value.EmployeeId),
+                            kv.Value.Loai == "swap" ? (kv.Value.DoiCho ?? "") : "—");
+
+            var dgv = new Guna.UI2.WinForms.Guna2DataGridView { Dock = DockStyle.Fill, DataSource = dt, ReadOnly = true, AllowUserToAddRows = false };
+            Theme.StyleGrid(dgv);
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            var btnOk = new Guna.UI2.WinForms.Guna2Button
+            {
+                Text = "Duyệt", Size = new Size(130, 38), BorderRadius = 8,
+                FillColor = Color.FromArgb(34, 197, 94), ForeColor = Color.White,
+                Font = Theme.F(9.5F, FontStyle.Bold), Cursor = Cursors.Hand,
+            };
+            var btnNo = new Guna.UI2.WinForms.Guna2Button
+            {
+                Text = "Từ chối", Size = new Size(130, 38), BorderRadius = 8,
+                FillColor = Color.FromArgb(63, 63, 70), ForeColor = Color.FromArgb(220, 80, 80),
+                Font = Theme.F(9.5F, FontStyle.Bold), Cursor = Cursors.Hand,
+            };
+            var pnlBtn = new Panel { Dock = DockStyle.Bottom, Height = 56, BackColor = Color.Transparent };
+            pnlBtn.Controls.Add(btnOk);
+            pnlBtn.Controls.Add(btnNo);
+            content.Controls.Add(dgv);
+            content.Controls.Add(pnlBtn);
+            form.Shown += (s, ev) =>
+            {
+                btnOk.Location = new Point(pnlBtn.ClientSize.Width - btnOk.Width - 16, 9);
+                btnNo.Location = new Point(btnOk.Left - btnNo.Width - 10, 9);
+                if (dgv.Columns.Contains("Mã")) dgv.Columns["Mã"].Visible = false;
+            };
+
+            ShiftDTO? Selected(out string id)
+            {
+                id = "";
+                if (dgv.CurrentRow == null) return null;
+                id = dgv.CurrentRow.Cells["Mã"].Value?.ToString() ?? "";
+                return all.TryGetValue(id, out var req) ? req : null;
+            }
+            void RemoveCurrentRow()
+            {
+                if (dgv.CurrentRow?.DataBoundItem is DataRowView drv) drv.Row.Delete();
+                if (dt.Rows.Count == 0) { form.DialogResult = DialogResult.OK; form.Close(); }
+            }
+
+            btnOk.Click += async (s, ev) =>
+            {
+                if (Selected(out string id) is not ShiftDTO req) return;
+                btnOk.Enabled = btnNo.Enabled = false;
+                var (ok, msg) = await ApproveShiftAsync(id, req, all, emps, NameOf);
+                btnOk.Enabled = btnNo.Enabled = true;
+                if (!ok) { MsgBox.Show(form, msg, "Không duyệt được", MsgBox.MessageBoxType.Error); return; }
+                RemoveCurrentRow();
+            };
+            btnNo.Click += async (s, ev) =>
+            {
+                if (Selected(out string id) is not ShiftDTO req) return;
+                btnOk.Enabled = btnNo.Enabled = false;
+                await RejectShiftAsync(id, req, all);
+                btnOk.Enabled = btnNo.Enabled = true;
+                RemoveCurrentRow();
+            };
+
+            form.ShowDialog(owner);
+            await LoadScheduleAsync(); // lịch tuần trên màn này có thể vừa đổi
+        }
+
+        private async Task<(bool ok, string msg)> ApproveShiftAsync(
+            string id, ShiftDTO req, Dictionary<string, ShiftDTO> all,
+            List<EmployeeDTO> emps, Func<string?, string> nameOf)
+        {
+            bool hasDate = ShiftScheduleSync.TryParseDate(req.Ngay, out var date);
+            string? code = ShiftScheduleSync.ShiftCode(req.Ca);
+
+            if (req.Loai == "mine")
+            {
+                var (ok, msg) = await ShiftBUS.Update(id, new { trang_thai = "Đã xác nhận" });
+                if (!ok) return (false, msg);
+                if (hasDate && code != null && req.EmployeeId != null)
+                    await ShiftScheduleSync.AssignAsync(req.EmployeeId, nameOf(req.EmployeeId), date, code);
+                await NotifyShiftAsync(req.EmployeeId, $"Yêu cầu nhận {req.Ca} ngày {req.Ngay} đã được duyệt — lịch tuần đã cập nhật.");
+                return (true, "");
+            }
+
+            // swap: cần mã NV người nhận để sửa lịch — yêu cầu cũ gõ tay có thể chỉ có tên
+            string? targetId = req.DoiChoId
+                ?? emps.FirstOrDefault(x => x.FullName == req.DoiCho)?.EmployeeId;
+            if (string.IsNullOrEmpty(targetId))
+                return (false, $"Yêu cầu này không có mã NV của \"{req.DoiCho}\" (bản cũ nhập tay).\nHãy Từ chối và nhờ nhân viên gửi lại từ màn Đăng ký ca.");
+            string targetName = nameOf(targetId);
+
+            var (ok2, msg2) = await ShiftBUS.Update(id, new { trang_thai = "Đã duyệt" });
+            if (!ok2) return (false, msg2);
+
+            // Dòng ca gốc của người xin đổi → chuyển sang tên người nhận
+            var mine = all.FirstOrDefault(x => x.Value.Loai == "mine" && x.Value.EmployeeId == req.EmployeeId
+                                            && x.Value.Ngay == req.Ngay && x.Value.Ca == req.Ca);
+            if (mine.Key != null)
+                await ShiftBUS.Update(mine.Key, new { nhanvien_id = targetId, trang_thai = "Đã xác nhận" });
+
+            // LỊCH TUẦN: bỏ ca người xin, gán ca người nhận — từ đây chấm công/ngày công/lương theo người mới
+            if (hasDate && code != null && req.EmployeeId != null)
+            {
+                await ShiftScheduleSync.ClearAsync(req.EmployeeId, date, code);
+                await ShiftScheduleSync.AssignAsync(targetId, targetName, date, code);
+            }
+
+            await NotifyShiftAsync(req.EmployeeId, $"Đổi {req.Ca} ngày {req.Ngay} cho {targetName}: ĐÃ DUYỆT — lịch tuần đã cập nhật.");
+            await NotifyShiftAsync(targetId, $"Bạn nhận {req.Ca} ngày {req.Ngay} từ {nameOf(req.EmployeeId)} (đổi ca đã duyệt).");
+            return (true, "");
+        }
+
+        private async Task RejectShiftAsync(string id, ShiftDTO req, Dictionary<string, ShiftDTO> all)
+        {
+            if (req.Loai == "mine")
+            {
+                // trả ca về pool ca trống cho người khác nhận
+                await ShiftBUS.Update(id, new { loai = "open", nhanvien_id = "", trang_thai = "" });
+                await NotifyShiftAsync(req.EmployeeId, $"Yêu cầu nhận {req.Ca} ngày {req.Ngay} bị TỪ CHỐI.");
+                return;
+            }
+            await ShiftBUS.Update(id, new { trang_thai = "Từ chối" });
+            // ca gốc đang "Chờ đổi" → trả lại trạng thái đã xếp cho người xin
+            var mine = all.FirstOrDefault(x => x.Value.Loai == "mine" && x.Value.EmployeeId == req.EmployeeId
+                                            && x.Value.Ngay == req.Ngay && x.Value.Ca == req.Ca
+                                            && x.Value.TrangThai == "Chờ đổi");
+            if (mine.Key != null)
+                await ShiftBUS.Update(mine.Key, new { trang_thai = "Đã xác nhận" });
+            await NotifyShiftAsync(req.EmployeeId, $"Đổi {req.Ca} ngày {req.Ngay} cho {req.DoiCho}: bị TỪ CHỐI — bạn vẫn làm ca này.");
+        }
+
+        private static async Task NotifyShiftAsync(string? receiverId, string content)
+        {
+            if (string.IsNullOrEmpty(receiverId)) return;
+            try
+            {
+                await NotificationBUS.Add(new NotificationDTO
+                {
+                    Type = "doi_ca",
+                    Content = content,
+                    ReceiverId = receiverId,
+                    SenderId = GlobalSession.CurrentUser?.EmployeeId,
+                    Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                    IsRead = false,
+                    RelatedPage = "schedule"
+                });
+            }
+            catch { /* best-effort */ }
+        }
     }
 }

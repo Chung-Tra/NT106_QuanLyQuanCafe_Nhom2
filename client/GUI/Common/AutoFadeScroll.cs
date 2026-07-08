@@ -13,6 +13,7 @@ namespace GUI
         // hook ở WindowChrome có thể trùng nhau). Gắn 2 lần sẽ nhân đôi cover + cuộn chuột.
         private static readonly ConditionalWeakTable<DataGridView, object> _attached = new();
         private static readonly ConditionalWeakTable<ScrollableControl, object> _attachedPanels = new();
+        private static readonly ConditionalWeakTable<ListBox, object> _attachedListBoxes = new();
 
         // Quét đệ quy mọi DataGridView + Panel AutoScroll trong 1 container và attach.
         // Chốt danh sách (ToList) TRƯỚC khi attach: Attach/AttachPanel thêm overlay vào
@@ -24,6 +25,8 @@ namespace GUI
                 Attach(dgv);
             foreach (var panel in System.Linq.Enumerable.ToList(FindAllScrollPanels(container)))
                 AttachPanel(panel);
+            foreach (var lb in System.Linq.Enumerable.ToList(FindAllListBoxes(container)))
+                AttachListBox(lb);
         }
 
         private static IEnumerable<DataGridView> FindAllDgvs(Control parent)
@@ -32,6 +35,15 @@ namespace GUI
             {
                 if (c is DataGridView dgv) yield return dgv;
                 foreach (var nested in FindAllDgvs(c)) yield return nested;
+            }
+        }
+
+        private static IEnumerable<ListBox> FindAllListBoxes(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (c is ListBox lb) yield return lb; // CheckedListBox kế thừa ListBox → cùng nhánh
+                foreach (var nested in FindAllListBoxes(c)) yield return nested;
             }
         }
 
@@ -206,6 +218,7 @@ namespace GUI
         private sealed class VScrollStripper : NativeWindow
         {
             private const int WM_NCCALCSIZE = 0x0083;
+            private const int WM_PAINT = 0x000F;
 
             protected override void WndProc(ref Message m)
             {
@@ -215,8 +228,97 @@ namespace GUI
                     if ((style & WS_VSCROLL) != 0)
                         SetWindowLong(Handle, GWL_STYLE, style & ~WS_VSCROLL);
                 }
+                // ListBox bật lại WS_VSCROLL qua SetScrollInfo khi thêm/bind item — không đi
+                // qua NCCALCSIZE. Bắt ở WM_PAINT: thấy style lọt lưới thì ép tính lại khung
+                // (SetWindowPos FRAMECHANGED → NCCALCSIZE ở trên gỡ ngay, không đệ quy vì
+                // lần vẽ sau style đã sạch).
+                else if (m.Msg == WM_PAINT)
+                {
+                    if ((GetWindowLong(Handle, GWL_STYLE) & WS_VSCROLL) != 0)
+                        SetWindowPos(Handle, IntPtr.Zero, 0, 0, 0, 0, SWP_FRAMECHANGED_FLAGS);
+                }
                 base.WndProc(ref m);
             }
+        }
+
+        // ------------------------------------------------------------------
+        // ListBox/CheckedListBox: scrollbar trắng gốc bị strip, cuộn bằng lăn
+        // chuột (TopIndex) + thanh teal fade — đồng bộ với DGV/Panel ở trên.
+        // ------------------------------------------------------------------
+        public static void AttachListBox(ListBox lb)
+        {
+            if (lb == null || lb.Parent == null || lb.IsDisposed) return;
+            if (_attachedListBoxes.TryGetValue(lb, out _)) return;
+            _attachedListBoxes.Add(lb, new object());
+
+            var stripper = new VScrollStripper();
+            void Hook()
+            {
+                if (!lb.IsHandleCreated || lb.IsDisposed) return;
+                stripper.AssignHandle(lb.Handle);
+                SetWindowPos(lb.Handle, IntPtr.Zero, 0, 0, 0, 0, SWP_FRAMECHANGED_FLAGS);
+            }
+            lb.HandleCreated   += (s, e) => Hook();
+            lb.HandleDestroyed += (s, e) => stripper.ReleaseHandle();
+            Hook();
+
+            var host = OverlayHost(lb);
+            var indicator = new Panel { BackColor = Color.FromArgb(31, 138, 154), Width = 4, Visible = false };
+            host.Controls.Add(indicator);
+            indicator.BringToFront();
+
+            var fadeTimer = new System.Windows.Forms.Timer { Interval = 900 };
+            fadeTimer.Tick += (s, e) => { fadeTimer.Stop(); indicator.Visible = false; };
+
+            int PerPage() => Math.Max(1, lb.ClientSize.Height / Math.Max(1, lb.ItemHeight));
+
+            void UpdateIndicator()
+            {
+                int count = lb.Items.Count, per = PerPage();
+                if (count <= per) { indicator.Visible = false; return; }
+
+                float ratio = Math.Clamp((float)lb.TopIndex / (count - per), 0f, 1f);
+                int trackH = lb.Height - 8;
+                int thumbH = Math.Max(20, trackH * per / count);
+                int thumbY = (int)((trackH - thumbH) * ratio);
+
+                var r = BoundsIn(host, lb);
+                indicator.Bounds = new Rectangle(r.Right - 8, r.Top + 4 + thumbY, 4, thumbH);
+                indicator.Visible = true;
+                indicator.BringToFront();
+                fadeTimer.Stop();
+                fadeTimer.Start();
+            }
+
+            // Cuộn chủ động qua TopIndex: native ListBox có thể bỏ cuộn wheel khi mất
+            // WS_VSCROLL, nên tự xử lý và chặn xử lý gốc để không cuộn đúp.
+            lb.MouseWheel += (s, e) =>
+            {
+                if (e is HandledMouseEventArgs h) h.Handled = true;
+                int max = Math.Max(0, lb.Items.Count - PerPage());
+                if (max == 0) return;
+                int step = e.Delta > 0 ? -3 : 3;
+                lb.TopIndex = Math.Clamp(lb.TopIndex + step, 0, max);
+                UpdateIndicator();
+            };
+            // Hover-để-cuộn cần focus (WM_MOUSEWHEEL đi tới control đang focus), nhưng
+            // KHÔNG cướp focus khi người dùng đang gõ (vd. ô nhập chat cạnh lstChatHistory).
+            lb.MouseEnter += (s, e) =>
+            {
+                Control? a = lb.FindForm()?.ActiveControl;
+                while (a is ContainerControl cc && cc.ActiveControl != null) a = cc.ActiveControl;
+                if (a is not TextBoxBase) lb.Focus();
+            };
+            lb.SelectedIndexChanged += (s, e) => UpdateIndicator(); // điều hướng phím cũng cuộn
+
+            lb.Disposed += (s, e) =>
+            {
+                _attachedListBoxes.Remove(lb);
+                stripper.ReleaseHandle();
+                fadeTimer.Stop();
+                fadeTimer.Dispose();
+                indicator.Dispose();
+            };
         }
 
         public static void AttachPanel(ScrollableControl sc)

@@ -254,14 +254,14 @@ NT106_QuanLyQuanCafe_Nhom2/
 
 ## Chạy Tests
 
-**160 unit test** (106 xUnit client + 54 Jest backend), tất cả chạy offline — không cần Firebase thật.
+**168 unit test** (114 xUnit client + 54 Jest backend), tất cả chạy offline — không cần Firebase thật.
 
 ```bash
 # Backend (Jest) — 54 test / 8 suite
 cd backend
 npm test
 
-# Client (xUnit) — 106 test; chạy trong Visual Studio Test Explorer, hoặc:
+# Client (xUnit) — 114 test; chạy trong Visual Studio Test Explorer, hoặc:
 cd client
 dotnet test Coffee_Management.sln
 # (Logic.Tests đã nằm trong solution; có thể chạy riêng:
