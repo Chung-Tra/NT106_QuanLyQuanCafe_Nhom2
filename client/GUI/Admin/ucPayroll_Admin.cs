@@ -128,17 +128,25 @@ namespace GUI
             dgvPayroll.RowHeadersVisible = false;
             if (dgvPayroll.Columns.Contains("Mã lương")) dgvPayroll.Columns["Mã lương"].Visible = false;
 
-            dgvPayroll.Columns["Mã NV"].FillWeight = 7;
-            dgvPayroll.Columns["Họ tên"].FillWeight = 16;
-            dgvPayroll.Columns["Bộ phận"].FillWeight = 10;
-            dgvPayroll.Columns["Ngày công"].FillWeight = 7;
-            dgvPayroll.Columns["Lương CB"].FillWeight = 10;
-            dgvPayroll.Columns["Phụ cấp"].FillWeight = 8;
-            dgvPayroll.Columns["Thưởng FB"].FillWeight = 8;
-            dgvPayroll.Columns["Thưởng lễ"].FillWeight = 8;
-            dgvPayroll.Columns["Trừ lương"].FillWeight = 8;
-            dgvPayroll.Columns["Lý do trừ"].FillWeight = 14;
-            dgvPayroll.Columns["Tổng lương"].FillWeight = 12;
+            // "Lý do trừ" ẩn khỏi bảng (vẫn xem được ở chi tiết double-click và tiêu đề khi chọn dòng)
+            dgvPayroll.Columns["Lý do trừ"].Visible = false;
+
+            dgvPayroll.Columns["Mã NV"].FillWeight = 8;
+            dgvPayroll.Columns["Họ tên"].FillWeight = 17;
+            dgvPayroll.Columns["Bộ phận"].FillWeight = 11;
+            dgvPayroll.Columns["Ngày công"].FillWeight = 8;
+            dgvPayroll.Columns["Lương CB"].FillWeight = 11;
+            dgvPayroll.Columns["Phụ cấp"].FillWeight = 9;
+            dgvPayroll.Columns["Thưởng FB"].FillWeight = 10;
+            dgvPayroll.Columns["Thưởng lễ"].FillWeight = 10;
+            dgvPayroll.Columns["Trừ lương"].FillWeight = 10;
+            dgvPayroll.Columns["Tổng lương"].FillWeight = 13;
+
+            // Không để cột hẹp hơn chữ trên header — hết cảnh "Thưởng lễ" bị cắt còn "Thư…"
+            var headerFont = dgvPayroll.ColumnHeadersDefaultCellStyle.Font ?? dgvPayroll.Font;
+            foreach (DataGridViewColumn col in dgvPayroll.Columns)
+                if (col.Visible)
+                    col.MinimumWidth = TextRenderer.MeasureText(col.HeaderText, headerFont).Width + 24;
 
             foreach (string col in new[] { "Lương CB", "Phụ cấp", "Thưởng FB", "Thưởng lễ", "Trừ lương", "Tổng lương" })
             {

@@ -132,16 +132,56 @@ namespace GUI
                     await _connection.StartAsync(patient.Token);
                 }
 
+                // Vào lại mọi phòng đã ghi sổ — cần khi kết nối thành công ở lần thử lại nền
+                // (các phòng đã được ghi sổ từ trước dù lúc đó chưa Connected).
+                await RejoinRoomsAsync();
                 SystemLine($"[Hệ thống]: Đã kết nối tới máy chủ ({savedIP}).");
             }
             catch (OperationCanceledException)
             {
-                SystemLine("[Lỗi]: Không kết nối được server chat. Kiểm tra mạng hoặc ChatServerIP trong App.config.");
+                SystemLine("[Lỗi]: Chưa kết nối được server chat — sẽ tự thử lại nền. Nếu chờ lâu, kiểm tra mạng hoặc ChatServerIP trong App.config.");
+                StartInitialRetryLoop();
             }
             catch (Exception ex)
             {
-                SystemLine($"[Lỗi]: Mất kết nối server chat - {ex.Message}");
+                SystemLine($"[Lỗi]: Mất kết nối server chat - {ex.Message} — sẽ tự thử lại nền.");
+                StartInitialRetryLoop();
             }
+        }
+
+        private bool _initialRetryRunning;
+
+        /// <summary>
+        /// WithAutomaticReconnect CHỈ hoạt động sau khi đã kết nối được ít nhất một lần —
+        /// nếu StartAsync đầu tiên thất bại (Render free ngủ sâu hơn ~98s) thì chat chết hẳn.
+        /// Vòng lặp nền này thử StartAsync lại mỗi 15s cho tới khi vào được (hoặc UC bị đóng),
+        /// xong thì vào lại toàn bộ phòng đã ghi sổ.
+        /// </summary>
+        private void StartInitialRetryLoop()
+        {
+            if (_initialRetryRunning || _connection == null) return;
+            _initialRetryRunning = true;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    while (!uiControl.IsDisposed)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(15));
+                        if (_connection.State == HubConnectionState.Connected) return;
+                        try
+                        {
+                            await _connection.StartAsync();
+                            await RejoinRoomsAsync();
+                            SystemLine("[Hệ thống]: Đã kết nối tới máy chủ.");
+                            return;
+                        }
+                        catch { /* server chưa dậy — thử tiếp vòng sau */ }
+                    }
+                }
+                finally { _initialRetryRunning = false; }
+            });
         }
 
         /// <summary>
@@ -151,15 +191,23 @@ namespace GUI
         /// </summary>
         public async Task JoinAllPrivateRoomsAsync(IEnumerable<string> otherEmployeeIds)
         {
-            if (_connection == null || _connection.State != HubConnectionState.Connected) return;
             string myId = GlobalSession.CurrentUser?.EmployeeId ?? "";
             if (string.IsNullOrEmpty(myId)) return;
 
+            // Ghi sổ TRƯỚC, join sau: nếu lúc này chưa Connected (Render đang thức dậy)
+            // thì Reconnected/vòng thử lại nền sẽ dựa vào sổ này để vào lại đủ phòng.
+            var rooms = new List<string>();
             foreach (var otherId in otherEmployeeIds)
             {
                 if (string.IsNullOrEmpty(otherId) || otherId == myId) continue;
                 string room = ChatBUS.GetRoomId(myId, otherId);
-                _joinedRooms.Add(room); // nhớ lại để reconnect vào lại đủ phòng
+                _joinedRooms.Add(room);
+                rooms.Add(room);
+            }
+
+            if (_connection == null || _connection.State != HubConnectionState.Connected) return;
+            foreach (var room in rooms)
+            {
                 try { await _connection.InvokeAsync("JoinRoom", room); }
                 catch { /* bỏ qua 1 phòng lỗi, tiếp tục các phòng còn lại */ }
             }
@@ -178,6 +226,7 @@ namespace GUI
             // KHÔNG rời phòng cũ nữa: ta chủ động ở lại mọi phòng riêng (đã JoinAll lúc kết nối)
             // để luôn nhận được tin nhắn riêng. Chỉ cần đảm bảo đã ở trong phòng mới —
             // Groups.AddToGroup idempotent nên gọi lại không sao.
+            _joinedRooms.Add(newRoomId); // ghi sổ để sau rớt kết nối còn được vào lại phòng này
             if (_connection != null && _connection.State == HubConnectionState.Connected && CurrentRoomId != newRoomId)
             {
                 try { await _connection.InvokeAsync("JoinRoom", newRoomId); } catch { }

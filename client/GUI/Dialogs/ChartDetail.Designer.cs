@@ -173,7 +173,9 @@ namespace GUI
             chartArea.Controls.Add(chart);
             chartArea.Location = new Point(22, 104);
             chartArea.Name = "chartArea";
-            chartArea.Size = new Size(1516, 856);
+            // Kích thước phải nằm GỌN trong ClientSize 880x560 của form — trước đây bị lưu
+            // 1516x856 (Designer mở ở form to) làm chart tràn khỏi mép dưới, cột thấp "biến mất".
+            chartArea.Size = new Size(836, 396);
             chartArea.TabIndex = 6;
             // 
             // chart
@@ -182,9 +184,12 @@ namespace GUI
             chartFont1.FontName = "Arial";
             chart.Legend.LabelFont = chartFont1;
             chart.Legend.LabelForeColor = Color.FromArgb(220, 220, 225);
+            // Dock=Fill như chartLoss (ucLoss_Manager) — KHÔNG tự SetBounds/FitChart:
+            // canvas GunaChart tự khớp control khi dock, tự bố trí lại lúc form resize.
+            chart.Dock = DockStyle.Fill;
             chart.Location = new Point(0, 0);
             chart.Name = "chart";
-            chart.Size = new Size(858, 456);
+            chart.Size = new Size(836, 396);
             chart.TabIndex = 0;
             chartFont2.FontName = "Arial";
             chartFont2.Size = 12;
@@ -225,7 +230,7 @@ namespace GUI
             btnClose.FillColor = Color.FromArgb(31, 138, 154);
             btnClose.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             btnClose.ForeColor = Color.White;
-            btnClose.Location = new Point(1428, 972);
+            btnClose.Location = new Point(748, 502);
             btnClose.Name = "btnClose";
             btnClose.ShadowDecoration.CustomizableEdges = customizableEdges8;
             btnClose.Size = new Size(110, 36);

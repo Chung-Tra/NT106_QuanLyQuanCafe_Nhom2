@@ -34,6 +34,10 @@ namespace GUI
             InitializeComponent();
             FormCorners.Round(this);
 
+            // Trục Y luôn bắt đầu từ 0 — nếu để auto, tháng nào cũng có giá trị lớn thì
+            // trục bắt đầu lửng lơ giữa chừng và cột nhỏ gần như không nhìn thấy.
+            chart.YAxes.Ticks.BeginAtZero = true;
+
             // Dynamic: set accent-colour bar + title (depend on constructor args)
             accentBar.FillColor = accent;
             lblTitle.Text       = title;
@@ -52,22 +56,9 @@ namespace GUI
             cboFrom.SelectedIndexChanged += (s, e) => Redraw();
             cboTo.SelectedIndexChanged   += (s, e) => Redraw();
 
-            chartArea.Resize += (s, e) => FitChart();
-            Load += (s, e) => { FitChart(); Redraw(); };
+            Load += (s, e) => Redraw();
 
             WindowChrome.Apply(this, host: card, dragHandle: card);
-        }
-
-        // Ép chart vào ô 2:1 canh giữa → không bị che/cắt
-        private void FitChart()
-        {
-            int pw = chartArea.ClientSize.Width, ph = chartArea.ClientSize.Height;
-            if (pw <= 8 || ph <= 8) return;
-            int w, h;
-            if (pw <= ph * 2) { w = pw; h = pw / 2; }
-            else              { h = ph; w = ph * 2; }
-            chart.SetBounds((pw - w) / 2, (ph - h) / 2, w, h);
-            chart.Update();
         }
 
         private void Redraw()
